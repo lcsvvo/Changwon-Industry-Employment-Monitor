@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets*.json
+
+# Editors and operating systems
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Raw data and local scratch files
+data/raw/*
+!data/raw/.gitkeep
+tmp/
+*.tmp
+*.log
+
+# Archives
+*.zip
+*.7z
+*.tar
+*.tar.gz
