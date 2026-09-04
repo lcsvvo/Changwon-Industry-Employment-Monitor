@@ -39,3 +39,15 @@ tmp/
 *.7z
 *.tar
 *.tar.gz
+
+# KICOX 원자료·연간보정본·대조용 마스터 (용량/배포제한, 로컬 보관)
+data/annual_revision/*
+!data/annual_revision/.gitkeep
+data/existing/*
+!data/existing/.gitkeep
+
+# 빌드 로그 (산출 CSV/JSON 은 커밋)
+logs/*.log
+
+# 로컬 전용 조사메모
+private/
