@@ -247,6 +247,17 @@ Changwon-Industry-Employment-Monitor/
 
 `quadrant_sensitivity.csv`와 `production_share.csv`는 분석 결과처럼 보이지만 지금은 전처리가 올바른지 확인하기 위한 검증 산출물이므로 `logs/`에 둔다. 보고서용 버전이 확정되면 그때 `results/tables/`로 옮긴다.
 
+### 팀원 최초 clone
+
+GitHub Collaborator 초대를 수락한 뒤 기본 브랜치인 `main`을 clone한다.
+
+```bash
+git clone https://github.com/lcsvvo/Changwon-Industry-Employment-Monitor.git
+cd Changwon-Industry-Employment-Monitor
+```
+
+Git에 포함되지 않는 KICOX 원자료는 팀 공유 저장소에서 별도로 받아 `data/raw/`와 `data/annual_revision/`에 배치한다. 원자료 없이도 커밋된 `data/processed/`와 QA 기록은 확인할 수 있지만, 파이프라인을 완전히 재실행하려면 원자료가 필요하다. 상세 목록과 배치 방법은 [`data/README.md`](data/README.md)를 확인한다.
+
 ## 14. 실행방법
 
 ### 환경 구성
