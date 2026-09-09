@@ -1,0 +1,375 @@
+{
+  "additivity": {
+    "production_max_abs_gap": 5.0000002374872565e-05,
+    "employment_gap_latest": -4851.0,
+    "delta_identity_gap": 0.0
+  },
+  "q1_latest": {
+    "quarter": "2026Q2",
+    "n_down": 7,
+    "n_nominal_up": 5,
+    "nominal_up_industries": [
+      "전기전자",
+      "운송장비",
+      "철강",
+      "음식료",
+      "비금속"
+    ],
+    "employment_denominator": 114830.0,
+    "nominal_employment_numerator": 54794.0,
+    "nominal_employment_share_pct": 47.71749542802404
+  },
+  "q1_history": {
+    "n_down": 89,
+    "n_up_down": 43,
+    "simple_pct": 48.31460674157304,
+    "weighted_pct": 52.99519003389152
+  },
+  "q2": {
+    "quarter": "2026Q2",
+    "employment": 114830.0,
+    "net_delta": -4332.0,
+    "net_yoy_pct": -3.635387120055051,
+    "ratio": 0.9648106904231626,
+    "contrib_usable": true,
+    "largest_decrease_industries": [
+      "기계"
+    ],
+    "min_delta": -3979.0,
+    "main_industries": [
+      "기계",
+      "전기전자",
+      "운송장비",
+      "철강"
+    ],
+    "main_share_pct": 98.19733519115213,
+    "selection_share_cut": 5.0,
+    "selection_abs_cut": 300
+  },
+  "q3": {
+    "n_runs": 70,
+    "n_runs_2plus": 39,
+    "share_2plus_pct": 55.714285714285715,
+    "mean_run": 2.2285714285714286,
+    "max_run": 7,
+    "n_adjacent": 130,
+    "n_same": 88,
+    "same_pct": 67.6923076923077,
+    "current": [
+      {
+        "industry": "철강",
+        "state": "S2",
+        "length": 4
+      },
+      {
+        "industry": "비금속",
+        "state": "S2",
+        "length": 3
+      },
+      {
+        "industry": "기계",
+        "state": "S4",
+        "length": 2
+      },
+      {
+        "industry": "운송장비",
+        "state": "S2",
+        "length": 2
+      },
+      {
+        "industry": "음식료",
+        "state": "S2",
+        "length": 2
+      },
+      {
+        "industry": "목재종이",
+        "state": "S4",
+        "length": 2
+      },
+      {
+        "industry": "기타",
+        "state": "S1",
+        "length": 2
+      },
+      {
+        "industry": "전기전자",
+        "state": "S2",
+        "length": 1
+      },
+      {
+        "industry": "석유화학",
+        "state": "S3",
+        "length": 1
+      },
+      {
+        "industry": "섬유의복",
+        "state": "N",
+        "length": null
+      }
+    ]
+  },
+  "ppi": {
+    "raw_rows": 34657,
+    "raw_series": 526,
+    "raw_names": 426,
+    "month_start": "2021-01",
+    "month_end": "2026-06",
+    "n_months": 66,
+    "raw_incomplete_series": 1,
+    "raw_other_units": [
+      {
+        "C1_NM": "정제혼합용원료유",
+        "UNIT_NM": "2025.12＝100"
+      }
+    ],
+    "selected_series": 11,
+    "selected_missing_months": 0,
+    "quarter_first": "2021Q1",
+    "first_yoy_quarter": "2022Q1",
+    "n_calendar_quarters": 18,
+    "n_ppi_quarters": 18,
+    "n_comparable": 144,
+    "n_target": 144,
+    "coverage_pct": 100.0,
+    "n_industries": 9,
+    "n_quarters": 16,
+    "n_same": 125,
+    "n_opposite": 13,
+    "n_candidate_dependent": 6,
+    "n_zero_boundary": 0,
+    "n_different": 19,
+    "different_pct": 13.194444444444445,
+    "yearly": [
+      {
+        "year": "2022",
+        "관측수": 36,
+        "전체후보반전": 8,
+        "후보의존": 3,
+        "차이관측": 11,
+        "차이비율%": 30.555555555555557
+      },
+      {
+        "year": "2023",
+        "관측수": 27,
+        "전체후보반전": 1,
+        "후보의존": 1,
+        "차이관측": 2,
+        "차이비율%": 7.4074074074074066
+      },
+      {
+        "year": "2024",
+        "관측수": 27,
+        "전체후보반전": 1,
+        "후보의존": 1,
+        "차이관측": 2,
+        "차이비율%": 7.4074074074074066
+      },
+      {
+        "year": "2025",
+        "관측수": 36,
+        "전체후보반전": 1,
+        "후보의존": 1,
+        "차이관측": 2,
+        "차이비율%": 5.555555555555555
+      },
+      {
+        "year": "2026",
+        "관측수": 18,
+        "전체후보반전": 2,
+        "후보의존": 0,
+        "차이관측": 2,
+        "차이비율%": 11.11111111111111
+      }
+    ],
+    "employment_denominator": 114830.0,
+    "nominal_numerator": 54794.0,
+    "adjusted_numerator": 26180.0,
+    "nominal_share_pct": 47.71749542802404,
+    "adjusted_share_pct": 22.79892014281982,
+    "possible_adjusted_share_pct": 22.79892014281982,
+    "nominal_up_industries": [
+      "비금속",
+      "운송장비",
+      "음식료",
+      "전기전자",
+      "철강"
+    ],
+    "adjusted_up_industries": [
+      "비금속",
+      "운송장비",
+      "철강"
+    ],
+    "latest_comparable_down_count": 7,
+    "latest_uncompared_down": [],
+    "latest_rows": [
+      {
+        "industry": "기계",
+        "quarter": "2026Q2",
+        "production_yoy": -19.547350877543444,
+        "employment_yoy": -6.339722447939078,
+        "state": "S4",
+        "adjusted_lo": -20.547174711500393,
+        "adjusted_hi": -20.547174711500393,
+        "ppi_lo": 1.258386760101371,
+        "ppi_hi": 1.258386760101371,
+        "n_candidates": 1,
+        "ppi_items": "기계및장비",
+        "all_same": true,
+        "all_opposite": false,
+        "status": "모든 후보에서 유지",
+        "adjusted_state": "S4",
+        "different": false
+      },
+      {
+        "industry": "목재종이",
+        "quarter": "2026Q2",
+        "production_yoy": -12.897127553431709,
+        "employment_yoy": -10.084033613445376,
+        "state": "S4",
+        "adjusted_lo": -15.289242141734317,
+        "adjusted_hi": -15.289242141734317,
+        "ppi_lo": 2.8238616307801,
+        "ppi_hi": 2.8238616307801,
+        "n_candidates": 1,
+        "ppi_items": "목재및종이제품",
+        "all_same": true,
+        "all_opposite": false,
+        "status": "모든 후보에서 유지",
+        "adjusted_state": "S4",
+        "different": false
+      },
+      {
+        "industry": "비금속",
+        "quarter": "2026Q2",
+        "production_yoy": 45.67070435172722,
+        "employment_yoy": -1.0810810810810811,
+        "state": "S2",
+        "adjusted_lo": 40.860667555156446,
+        "adjusted_hi": 40.860667555156446,
+        "ppi_lo": 3.4147479775980205,
+        "ppi_hi": 3.4147479775980205,
+        "n_candidates": 1,
+        "ppi_items": "비금속광물제품",
+        "all_same": true,
+        "all_opposite": false,
+        "status": "모든 후보에서 유지",
+        "adjusted_state": "S2",
+        "different": false
+      },
+      {
+        "industry": "석유화학",
+        "quarter": "2026Q2",
+        "production_yoy": -6.729849384858399,
+        "employment_yoy": 9.557522123893802,
+        "state": "S3",
+        "adjusted_lo": -45.53735302037926,
+        "adjusted_hi": -21.723914266823343,
+        "ppi_lo": 19.15535855111088,
+        "ppi_hi": 71.25526537489473,
+        "n_candidates": 2,
+        "ppi_items": "석탄및석유제품; 화학제품",
+        "all_same": true,
+        "all_opposite": false,
+        "status": "모든 후보에서 유지",
+        "adjusted_state": "S3",
+        "different": false
+      },
+      {
+        "industry": "섬유의복",
+        "quarter": "2026Q2",
+        "production_yoy": -12.319670818395734,
+        "employment_yoy": 0.0,
+        "state": "N",
+        "adjusted_lo": -15.169756531083323,
+        "adjusted_hi": -15.169756531083323,
+        "ppi_lo": 3.359751895244667,
+        "ppi_hi": 3.359751895244667,
+        "n_candidates": 1,
+        "ppi_items": "섬유및의복",
+        "all_same": true,
+        "all_opposite": false,
+        "status": "모든 후보에서 유지",
+        "adjusted_state": "N",
+        "different": false
+      },
+      {
+        "industry": "운송장비",
+        "quarter": "2026Q2",
+        "production_yoy": 19.64333200865325,
+        "employment_yoy": -0.7848147472166445,
+        "state": "S2",
+        "adjusted_lo": 17.240435258924247,
+        "adjusted_hi": 17.240435258924247,
+        "ppi_lo": 2.049546084012932,
+        "ppi_hi": 2.049546084012932,
+        "n_candidates": 1,
+        "ppi_items": "운송장비",
+        "all_same": true,
+        "all_opposite": false,
+        "status": "모든 후보에서 유지",
+        "adjusted_state": "S2",
+        "different": false
+      },
+      {
+        "industry": "음식료",
+        "quarter": "2026Q2",
+        "production_yoy": 0.8734323986208103,
+        "employment_yoy": -3.787878787878785,
+        "state": "S2",
+        "adjusted_lo": -0.7793171381018205,
+        "adjusted_hi": -0.7793171381018205,
+        "ppi_lo": 1.6657308628111656,
+        "ppi_hi": 1.6657308628111656,
+        "n_candidates": 1,
+        "ppi_items": "음식료품",
+        "all_same": false,
+        "all_opposite": true,
+        "status": "모든 후보에서 반전",
+        "adjusted_state": "S4",
+        "different": true
+      },
+      {
+        "industry": "전기전자",
+        "quarter": "2026Q2",
+        "production_yoy": 2.697876409158262,
+        "employment_yoy": -0.4128848549563968,
+        "state": "S2",
+        "adjusted_lo": -15.114355637633746,
+        "adjusted_hi": -5.165173585994209,
+        "ppi_lo": 8.291310579117805,
+        "ppi_hi": 20.983797885486744,
+        "n_candidates": 2,
+        "ppi_items": "전기장비; 컴퓨터전자및광학기기",
+        "all_same": false,
+        "all_opposite": true,
+        "status": "모든 후보에서 반전",
+        "adjusted_state": "S4",
+        "different": true
+      },
+      {
+        "industry": "철강",
+        "quarter": "2026Q2",
+        "production_yoy": 32.648709569813406,
+        "employment_yoy": -1.1427405366799317,
+        "state": "S2",
+        "adjusted_lo": 25.280923333212368,
+        "adjusted_hi": 25.280923333212368,
+        "ppi_lo": 5.88101208114884,
+        "ppi_hi": 5.88101208114884,
+        "n_candidates": 1,
+        "ppi_items": "철강1차제품",
+        "all_same": true,
+        "all_opposite": false,
+        "status": "모든 후보에서 유지",
+        "adjusted_state": "S2",
+        "different": false
+      }
+    ]
+  },
+  "eis": {
+    "n_comparable": 14,
+    "n_same": 8,
+    "start": "2023Q1",
+    "end": "2026Q2"
+  }
+}
