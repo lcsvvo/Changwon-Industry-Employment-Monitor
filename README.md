@@ -154,7 +154,7 @@ data/processed/
 │  ├─ ppi_validation_panel.csv               PPI 총지수(전국) 분기 평균, 제한적 민감도용
 │  └─ ppi_industry_mapping_candidates.csv    업종별 매핑 후보 (전부 confirmed=False, 보류)
 └─ eis/
-   └─ eis_validation_panel.csv               EIS 창원시 고용보험 피보험자 (2023Q4~2026Q2)
+   └─ eis_validation_panel.csv               EIS 창원시 고용보험 피보험자 (2022Q1~2026Q2)
 ```
 
 - **industry/total master**: 생산·고용 원자료 기반 마스터. QA와 state panel 생성의 입력
@@ -226,40 +226,17 @@ KICOX core state panel에 **병합하지 않는다.** 각각 별도 검증 패�
 | 데이터 | 위치 | 역할 | 비고 |
 | --- | --- | --- | --- |
 | PPI(생산자물가지수) | `data/raw/ppi/`, `data/processed/ppi/` | 명목 생산액 가격효과 민감도 확인 | 전국 단위 KOSIS 월별 자료(지역 구분 없음). KICOX 10개 업종과 세부품목의 공식 대응표가 아직 없어 **업종별 매핑은 보류**하고 **총지수 기준의 제한적 민감도만** 수행한다. 후보 매핑표는 `data/processed/ppi/ppi_industry_mapping_candidates.csv`에 있으며 전부 `confirmed=False`다 |
-| EIS(고용행정통계) | `data/raw/eis/`, `data/processed/eis/` | KICOX 고용과 통계 정의 비교·배경자료 | 가용기간 2023Q4~2026Q2뿐이며 그 이전 결측은 정상(보간 금지). KICOX 산단 고용과 모집단이 달라 **합산·대체·비율계산 금지** |
+| EIS(고용행정통계) | `data/raw/eis/`, `data/processed/eis/` | KICOX 고용과 통계 정의 비교·배경자료 | 가용기간 2022Q1~2026Q2이며 첫 YoY는 2023Q1이다(보간 금지). KICOX 산단 고용과 모집단이 달라 **합산·대체·비율계산 금지** |
 | CCI(창원상공회의소 경제동향보고서) | `data/raw/cci_report/` | 외부 대조·최근 분기 교차확인 | 보고서 표를 수기 전사한 자료이며 **KICOX 원자료가 아니다.** core master 구축에 사용하지 않는다 |
 
 ## 13. 저장소 구조
 
-```
-Changwon-Industry-Employment-Monitor/
-├─ src/
-│  ├─ build_changwon_master.py       KICOX core+revision → industry/total master (오프라인 전용)
-│  ├─ qa_master.py                   전처리 품질 QA (읽기 전용, master 수정 안 함)
-│  ├─ build_kicox_analysis_panel.py  master → 국면(S1~S4)·run·transition·sensitivity 패널
-│  └─ build_validation_panels.py     PPI 총지수/EIS 검증 패널 생성 (KICOX core에 병합 안 함)
-├─ data/
-│  ├─ raw/                           원자료 (git 미추적, 읽기 전용)
-│  │  ├─ kicox/core/                 공공데이터포털 원자료 498개 CSV
-│  │  ├─ kicox/revision/             KICOX 연간보정본 xlsx 24개
-│  │  ├─ ppi/                        KOSIS 생산자물가지수(기본분류) 원자료
-│  │  ├─ eis/                        고용노동부 EIS 창원시 고용보험 피보험자
-│  │  ├─ cci_report/                 창원상공회의소 경제동향보고서 전사본 (KICOX 원자료 아님)
-│  │  └─ _pending_review/            이번 파이프라인 미사용
-│  └─ processed/                     최종 산출물 (§8 참고)
-├─ logs/preprocessing/               파이프라인이 자동 생성 (재실행 시 덮어씀)
-│  ├─ raw_inventory.csv, revision_inventory.csv, latest_points.json
-│  ├─ master_diff_vs_previous.csv    _previous/ 대비 값 차이 (있는 경우)
-│  ├─ qa_report.txt, total_vs_industry.csv, nonmfg_check.csv
-│  ├─ trace_examples.csv, exclusion_or_review_log.csv
-│  └─ build_*.log
-├─ notebooks/
-│  ├─ 01_data_preprocessing.ipynb    원자료 → 최종 분석 가능 데이터 (전처리)
-│  └─ 02_eda.ipynb                   01 산출물만 읽는 EDA (YoY·state·run·transition 재계산 안 함)
-├─ tests/
-│  └─ test_pipeline_rules.py         핵심 규칙 회귀 테스트 (pytest)
-└─ docs/                             공모전 공고·기획·방법론·참고자료
-```
+핵심 폴더는 `src/`(공통 코드), `notebooks/`(실행·분석 흐름), `data/raw/`(원자료),
+`data/processed/`(분석용 패널), `outputs/`(표·그림·보고서), `logs/`(QA·실행 기록),
+`docs/`(기획·방법론·근거), `tests/`(회귀 테스트)로 나뉜다.
+
+파일 배치와 Git 추적 기준은 [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md), 데이터별 상세 위치와
+공유 상태는 [`data/README.md`](data/README.md)를 따른다.
 
 ### 팀원 최초 clone
 
@@ -320,7 +297,7 @@ notebook이 호출하는 자식 프로세스에는 `PYTHONIOENCODING=utf-8`을 �
 | 본분석기간(main) | **확정** 2022Q1~2026Q2 — 10개 업종 모두 4분면 산출 가능한 첫 분기부터. 2018Q4·2020Q3 재분류, 2021년 섬유의복 YoY inf, 2023Q4 생산 X 결측을 근거로 실측 검증(§10~11) |
 | 국면(S1~S4)·run·transition | **핵심 산출물로 사용** — `changwon_state_panel.csv`. ±0.5/1/2% sensitivity는 별도 검증용 |
 | PPI(생산자물가지수) | **총지수 기준 제한적 검증만 사용**. 업종별 매핑은 후보표만 있고 미확정(보류) |
-| EIS(고용행정통계) | **검증용으로 사용**. 2023Q4~2026Q2만 가용, KICOX 고용과 합산·대체 안 함 |
+| EIS(고용행정통계) | **검증용으로 사용**. 2022Q1~2026Q2 가용, KICOX 고용과 합산·대체 안 함 |
 | 제조 AX 연결 | **정책 배경 후보** — 창원시가 제조 AX 전환 정책을 추진 중이나, 본 프로젝트를 제조 AX를 위한 프로젝트로 규정하지 않는다 |
 | 전략산업 추가 | 미확정 |
 | 고용24 채용수요 | 이번 파이프라인 제외 |
