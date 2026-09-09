@@ -4,7 +4,7 @@
 
 창원국가산단의 산업 성장과 고용 변화가 함께 움직이고 있는지를 분석하고, 업종별 차이를 바탕으로 산업·기업·인력 정책의 우선 검토 대상을 제시합니다. 핵심 산출물은 업종별 산업·고용 상황을 한눈에 살펴볼 수 있는 **창원 산업·고용 국면판**입니다.
 
-현재 단계는 **김지우가 확보한 KICOX 자료 범위에서 마스터 구축과 검증을 마친 상태**이며, 팀의 추가 데이터 확보·정제 작업과 EDA·분석은 이어서 진행할 수 있습니다.
+현재 단계는 **KICOX 마스터 구축 → 국면(S1~S4)·지속·전환 패널 생성 → PPI/EIS 검증 패널 생성 → EDA**까지 오프라인 파이프라인이 갖춰진 상태다. 처리 순서는 `notebooks/01_data_preprocessing.ipynb`(전처리)와 `notebooks/02_eda.ipynb`(EDA) 두 노트북으로 나뉘며, 실제 처리 로직은 전부 `src/*.py`에 있다.
 
 ## 1. 현재 목적
 
@@ -62,8 +62,10 @@ raw 원본은 수정하지 않고, 최종 master 생성 시점에만 우선순�
 
 확보한 연간보정 자료 2구간:
 
-- `data/annual_revision/2022_10_2025_Q1/` — 2022년 10월 ~ 2025년 1분기
-- `data/annual_revision/2026_Q1_Q2/` — 2026Q1 ~ 2026Q2
+- `data/raw/kicox/revision/2022_10_2025_Q1/xlsx/` — 2022년 10월 ~ 2025년 1분기 (22개)
+- `data/raw/kicox/revision/2026_Q1_Q2/xlsx/` — 2026Q1 ~ 2026Q2 (2개)
+
+공공데이터포털 원자료(9개 데이터셋, 총 498개 CSV)는 `data/raw/kicox/core/`에 있다.
 
 출처 구성 (34분기 기준): `data_portal_monthly` 19분기 / `data_portal_quarterly` 3분기 / `kicox_annual_revision` 12분기.
 
@@ -100,7 +102,7 @@ raw 원본은 수정하지 않고, 최종 master 생성 시점에만 우선순�
 
 즉 **단지 전체 고용에는 비제조 고용이 포함되고, 생산에는 포함되지 않는다.** industry master는 생산자료와 결합 가능한 10개 제조업만 대상으로 하므로, 두 합계의 차이는 정확히 비제조 고용이다.
 
-연간보정본 24개 시점 중 고용이 유효한 분기말 12개 시점 전부에서 **오차 0으로 검증**했다(`logs/nonmfg_check.csv`).
+연간보정본 24개 시점 중 고용이 유효한 분기말 12개 시점 전부에서 **오차 0으로 검증**했다(`logs/preprocessing/nonmfg_check.csv`).
 
 ```
 2026Q2  제조업 114,830 + 비제조 4,851 = 전체 119,681
@@ -134,18 +136,30 @@ KICOX 조사개요상 다음 시점에 표본업체 교체·일부 표본업체 
 latest_common_quarter = 2026Q2
 ```
 
-생산·고용·가동률·입주업체·가동업체 5개 지표 모두 2026Q2까지 업종별 값이 존재한다. 코드가 자동 판정하며 `logs/latest_points.json`에 기록된다.
+생산·고용·가동률·입주업체·가동업체 5개 지표 모두 2026Q2까지 업종별 값이 존재한다. 코드가 자동 판정하며 `logs/preprocessing/latest_points.json`에 기록된다.
 
 ## 8. 산출물 구조
 
 ```
 data/processed/
-├─ changwon_industry_master.csv   340행 = 34분기 × 10업종
-└─ changwon_total_master.csv       34행 = 34분기 × 창원국가산단 전체
+├─ kicox/
+│  ├─ changwon_industry_master.csv          340행 = 34분기(2018Q1~2026Q2) × 10업종
+│  ├─ changwon_total_master.csv              34행 = 34분기 × 창원국가산단 전체
+│  ├─ changwon_state_panel.csv              180행 = 18분기(본분석 2022Q1~2026Q2) × 10업종, 국면·run·transition 포함
+│  ├─ changwon_state_reference_panel.csv    340행 = 참고기간 전체(2018Q1~2026Q2) 국면 패널
+│  ├─ changwon_state_sensitivity_panel.csv  540행 = 본분석기간 × threshold(0.5/1/2)
+│  ├─ quality_report.json                    국면·run·transition 자체 검증 리포트
+│  └─ _previous/                             이전 실행 산출물 백업 (재실행 시 자동 이동, 삭제하지 않음)
+├─ ppi/
+│  ├─ ppi_validation_panel.csv               PPI 총지수(전국) 분기 평균, 제한적 민감도용
+│  └─ ppi_industry_mapping_candidates.csv    업종별 매핑 후보 (전부 confirmed=False, 보류)
+└─ eis/
+   └─ eis_validation_panel.csv               EIS 창원시 고용보험 피보험자 (2022Q1~2026Q2)
 ```
 
-- **industry master**: 생산·고용 분석, YoY, 현재 국면, sensitivity에 사용
-- **total master**: 산단 전체 장기 추이에 사용
+- **industry/total master**: 생산·고용 원자료 기반 마스터. QA와 state panel 생성의 입력
+- **state panel**: 국면(S1~S4/N/INVALID)·run(지속)·transition(전환)·recent4 카운트가 담긴 핵심 분석 패널
+- **ppi/eis validation panel**: KICOX core에 병합하지 않는 별도 검증 자료 (§12 참고)
 
 ## 9. 가동률 official / approx
 
@@ -177,75 +191,52 @@ data/processed/
 - **2023Q4**: 업종별 production 자체가 결측
 - **2024Q4**: 기준분기인 2023Q4 production이 결측
 
-## 11. Sensitivity 검증 원칙 — 완전한 8분기 window
+## 11. 국면(S1~S4)·지속(run)·전환(transition)·sensitivity
 
-기준분기를 바꿔가며 생산·고용 변화 방향이 유지되는지 확인한다. 임계값·가중치는 만들지 않고 방향 일치 여부만 센다.
+`src/build_kicox_analysis_panel.py`가 industry master로부터 국면 패널을 만든다.
 
-**계산 조건**: 기준분기의 최근 4분기와 직전 4분기, 합계 8개 분기 전체에서 10개 업종 모두 production·employment가 결측이 아니어야 한다. 하나라도 결측이면 해당 기준분기의 평균·중앙값 조합을 **모두** 제외한다.
-
-`groupby().agg('mean'/'median')`은 NaN을 자동 제외하므로, 집계 이후 값만 검사하면 3분기 vs 4분기 비교가 정상 4분기 비교처럼 처리된다. 따라서 **집계 전에** 완전성을 검사한다.
-
-결과
+**본분석 국면**: 생산·고용 YoY의 부호로 4국면을 나눈다. threshold는 **0**이며, **정확히 0인 경우는 N**(중립)으로 분류한다. YoY 자체가 결측/계산불가(예: 2023Q4·2024Q4)인 관측치는 N이 아니라 **INVALID**로 별도 구분한다 — N과 INVALID는 절대 같은 상태가 아니다.
 
 ```
-후보 기준분기 5개: 2025Q2, 2025Q3, 2025Q4, 2026Q1, 2026Q2
-제외 2개: 2025Q2, 2025Q3 (직전 4분기 window에 2023Q4 production 결측 포함)
-유효 기준분기 3개: 2025Q4, 2026Q1, 2026Q2
-총 조합: 3 × (평균, 중앙값) = 6조합
+S1 동반확대        production_yoy > 0, employment_yoy > 0
+S2 생산확대·고용감소  production_yoy > 0, employment_yoy < 0
+S3 생산감소·고용증가  production_yoy < 0, employment_yoy > 0
+S4 동반감소        production_yoy < 0, employment_yoy < 0
+N  중립            둘 중 하나 이상이 정확히 0
+INVALID           결측/계산불가/재분류 비교위험 등으로 국면 판정이 부적절
 ```
 
-## 12. 생산비중 — 전체기간 / 최근 4분기 분리
+**sensitivity(±0.5/1/2%)**: 본분석 state(threshold=0)와는 완전히 분리된 별도 패널
+(`changwon_state_sensitivity_panel.csv`)이다. 미세한 변화까지 증가·감소로 강제하지 않도록 중립구간을
+±0.5%, ±1%, ±2%로 넓혀가며 국면 분류가 얼마나 달라지는지 검사한다. **본분석 국면을 대체하지 않는다.**
 
-전체기간(2018Q1~2026Q2) 평균 비중은 최근 국면 설명에 적합하지 않으므로 두 기준을 분리해 `logs/production_share.csv`에 저장한다.
+과거 버전에는 "최근 4분기 vs 직전 4분기, mean/median 방향 일치"를 보는 별도의 sensitivity 개념도 있었으나,
+최종 기획안의 sensitivity(임계값 기반)와 개념이 겹치고 혼동을 일으켜 이번 파이프라인에서는 제거했다.
 
-| 업종 | 최근 4분기 비중 (2025Q3~2026Q2) | 전체기간 비중 |
-| --- | --- | --- |
-| 기계 | 35.1% | 37.8% |
-| 운송장비 | 29.7% | 25.3% |
-| 전기전자 | 22.2% | 23.8% |
-| 철강 | 11.6% | 11.4% |
-| 그 외 6개 업종 합계 | 1.5% | 1.7% |
+**지속(run)**: 같은 업종 내에서 동일 4상태(S1~S4)가 연속 분기에 이어질 때만 run으로 본다. INVALID를
+만나면 run이 끊기고(gap bridging 없음), N은 4상태 run에 포함하지 않는다.
 
-운송장비 + 전기전자 = 최근 4분기 생산의 **52.0%**
+**전환(transition)**: `t분기 상태 → t+1분기 상태`는 같은 업종 + 실제 연속분기일 때만 유효하다. 이 값은
+**과거에 관측된 전환 빈도/비율**이며 미래 예측 확률이 아니다.
+
+## 12. PPI·EIS·CCI — 검증·보조 데이터의 역할
+
+KICOX core state panel에 **병합하지 않는다.** 각각 별도 검증 패널로만 존재한다.
+
+| 데이터 | 위치 | 역할 | 비고 |
+| --- | --- | --- | --- |
+| PPI(생산자물가지수) | `data/raw/ppi/`, `data/processed/ppi/` | 명목 생산액 가격효과 민감도 확인 | 전국 단위 KOSIS 월별 자료(지역 구분 없음). KICOX 10개 업종과 세부품목의 공식 대응표가 아직 없어 **업종별 매핑은 보류**하고 **총지수 기준의 제한적 민감도만** 수행한다. 후보 매핑표는 `data/processed/ppi/ppi_industry_mapping_candidates.csv`에 있으며 전부 `confirmed=False`다 |
+| EIS(고용행정통계) | `data/raw/eis/`, `data/processed/eis/` | KICOX 고용과 통계 정의 비교·배경자료 | 가용기간 2022Q1~2026Q2이며 첫 YoY는 2023Q1이다(보간 금지). KICOX 산단 고용과 모집단이 달라 **합산·대체·비율계산 금지** |
+| CCI(창원상공회의소 경제동향보고서) | `data/raw/cci_report/` | 외부 대조·최근 분기 교차확인 | 보고서 표를 수기 전사한 자료이며 **KICOX 원자료가 아니다.** core master 구축에 사용하지 않는다 |
 
 ## 13. 저장소 구조
 
-```
-Changwon-Industry-Employment-Monitor/
-├─ src/
-│  ├─ build_changwon_master.py     마스터 구축·검증 파이프라인
-│  └─ qa_master.py                 전처리 품질 QA (읽기 전용, master 수정 안 함)
-├─ data/
-│  ├─ raw/                          공공데이터포털 원자료 (git 미추적)
-│  ├─ annual_revision/              KICOX 연간보정본 xlsx (git 미추적)
-│  ├─ existing/                     이전 버전 마스터 (대조용, git 미추적)
-│  ├─ external/                     외부 보조자료
-│  └─ processed/                    최종 master 2종
-├─ logs/                            파이프라인이 자동 생성 (재실행 시 덮어씀)
-│  ├─ raw_inventory.csv             원자료 구조 점검
-│  ├─ revision_inventory.csv        보정 전후 값 비교
-│  ├─ master_diff.csv               이전 마스터와의 차이
-│  ├─ quadrant_sensitivity.csv      민감도 60행 (3기준분기 × 2집계 × 10업종)
-│  ├─ production_share.csv          전체기간/최근4분기 생산비중
-│  ├─ qa_report.txt                 QA 검사 결과 (A~H)
-│  ├─ total_vs_industry.csv         업종합계 vs 단지전체 대조
-│  ├─ nonmfg_check.csv              비제조 고용 대조 (연간보정본 기준)
-│  ├─ latest_points.json            지표별 최신 시점, YoY 유효분기, 비교창
-│  └─ build_*.log                   실행 로그 (git 미추적)
-├─ notebooks/
-│  └─ 01_data_build.ipynb          파이프라인 실행·검증 (실행 완료)
-├─ results/                         보고서에 들어갈 분석 산출물 (EDA 이후, 현재 비어 있음)
-│  ├─ figures/
-│  └─ tables/
-└─ docs/                            공모전 공고·기획·참고자료
-```
+핵심 폴더는 `src/`(공통 코드), `notebooks/`(실행·분석 흐름), `data/raw/`(원자료),
+`data/processed/`(분석용 패널), `outputs/`(표·그림·보고서), `logs/`(QA·실행 기록),
+`docs/`(기획·방법론·근거), `tests/`(회귀 테스트)로 나뉜다.
 
-**`logs/` 와 `results/` 의 차이**
-
-- `logs/` — 파이프라인이 매 실행마다 자동으로 만드는 **빌드·검증 기록**. 사람이 손으로 고치지 않고, 재실행하면 덮어쓴다. 데이터가 어떻게 만들어졌는지 추적하는 용도다.
-- `results/` — EDA 이후 **보고서에 넣을 분석 산출물**(그림, 표). 현재는 비어 있다.
-
-`quadrant_sensitivity.csv`와 `production_share.csv`는 분석 결과처럼 보이지만 지금은 전처리가 올바른지 확인하기 위한 검증 산출물이므로 `logs/`에 둔다. 보고서용 버전이 확정되면 그때 `results/tables/`로 옮긴다.
+파일 배치와 Git 추적 기준은 [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md), 데이터별 상세 위치와
+공유 상태는 [`data/README.md`](data/README.md)를 따른다.
 
 ### 팀원 최초 clone
 
@@ -256,7 +247,7 @@ git clone https://github.com/lcsvvo/Changwon-Industry-Employment-Monitor.git
 cd Changwon-Industry-Employment-Monitor
 ```
 
-Git에 포함되지 않는 KICOX 원자료는 팀 공유 저장소에서 별도로 받아 `data/raw/`와 `data/annual_revision/`에 배치한다. 원자료 없이도 커밋된 `data/processed/`와 QA 기록은 확인할 수 있지만, 파이프라인을 완전히 재실행하려면 원자료가 필요하다. 상세 목록과 배치 방법은 [`data/README.md`](data/README.md)를 확인한다.
+Git에 포함되지 않는 원자료는 팀 공유 저장소에서 별도로 받아 `data/raw/` 아래 위 구조대로 배치한다. 상세 목록과 배치 방법은 [`data/README.md`](data/README.md)를 확인한다.
 
 ## 14. 실행방법
 
@@ -267,63 +258,56 @@ python -m venv .venv
 .venv\Scripts\activate          # Windows
 source .venv/bin/activate        # macOS / Linux
 pip install -r requirements.txt
+python -m ipykernel install --user --name changwon-venv   # 이 프로젝트 전용 Jupyter 커널 등록(권장)
 ```
 
-`requirements.txt`: pandas, openpyxl, ipykernel, jupyterlab
+`requirements.txt`: pandas, numpy, openpyxl, ipykernel, jupyterlab, nbconvert, pytest, matplotlib
 
-### 파이프라인 실행
+> 이 저장소는 `.venv/`에 프로젝트 전용 가상환경을 두고 있다. Jupyter의 `python3` 커널이 다른
+> 프로젝트의 가상환경을 가리키고 있으면(전역 커널 등록 충돌) 노트북 실행 시 패키지 오류가
+> 날 수 있으니, 반드시 이 프로젝트의 `.venv`로 커널을 등록해 사용한다.
+
+### 파이프라인 실행 (오프라인 전용 — 네트워크 접근 코드 없음)
 
 ```bash
-# data/raw 와 data/annual_revision 만 사용 (권장)
-python src/build_changwon_master.py --offline
-
-# 공공데이터포털에서 원자료를 새로 내려받으며 실행
-python src/build_changwon_master.py
-
-# 이전 마스터 대조 생략
-python src/build_changwon_master.py --offline --no-compare
+python src/build_changwon_master.py                # KICOX master 구축 (+ _previous/ 대비 diff)
+python src/qa_master.py                            # 품질 QA, exit code 0 = FAIL 없음
+python src/build_kicox_analysis_panel.py           # 국면·run·transition·sensitivity 패널
+python src/build_validation_panels.py              # PPI 총지수/EIS 검증 패널
+python -m pytest tests/test_pipeline_rules.py -v   # 핵심 규칙 회귀 테스트
 ```
-
-### 품질 QA
-
-```bash
-python src/qa_master.py            # exit code 0 = 전 항목 통과
-```
-
-master를 수정하지 않는 읽기 전용 검사다. 구조·타입·중복·결측·값범위·단위·업종합계 대조·비제조 고용 대조·출처 추적·YoY 독립 재계산을 확인하고 `logs/qa_report.txt`에 기록한다.
 
 ### 노트북 실행
 
 ```bash
-jupyter lab                        # notebooks/01_data_build.ipynb 열기
+jupyter lab   # notebooks/01_data_preprocessing.ipynb 를 먼저 Run All, 그다음 02_eda.ipynb
 ```
 
-노트북은 파이프라인과 QA를 subprocess로 호출한다. Windows에서 콘솔 기본 인코딩이 cp949라 한글 출력이 깨지는 문제가 있어, 자식 프로세스에 `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`을 넘기고 부모에서 `encoding='utf-8', errors='replace'`로 받는다.
+두 노트북 모두 커널을 재시작한 뒤 Run All로 끝까지 실행되는 것을 기준으로 검증했다(오프라인,
+`data/raw/` 변경 없음). Windows 콘솔 기본 인코딩이 cp949라 한글 출력이 깨지는 문제가 있어,
+notebook이 호출하는 자식 프로세스에는 `PYTHONIOENCODING=utf-8`을 넘긴다.
 
-`data/raw/`와 `data/annual_revision/`은 저장소에 커밋하지 않는다.
+`data/raw/`는 저장소에 커밋하지 않으며, 파이프라인 어디에서도 쓰기 작업을 하지 않는다.
 
-### 노트북
-
-`notebooks/01_data_build.ipynb` — 파이프라인 실행, 마스터 로드, 결측·YoY·sensitivity·생산비중 독립 재검증. 실행 완료 상태로 저장되어 있다.
-
-EDA 이후 노트북은 아직 만들지 않는다. 새 환경에서는 원자료를 먼저 배치한 뒤 `--offline`으로 실행한다.
-
-## 15. 아직 확정하지 않은 사항
-
-아래는 **EDA 이후에 판단**한다. 현 시점에서 확정된 것처럼 서술하지 않는다.
+## 15. 확정된 사항 / 아직 확정하지 않은 사항
 
 | 항목 | 현재 상태 |
 | --- | --- |
-| 최종 핵심 분석기간 | **후보** — 장기 배경 2021Q1~2026Q2 / 핵심 분석 2023Q1~2026Q2. EDA에서 시계열 변화·구조단절·이상치·최근 산업구조를 본 뒤 결정 |
-| 4분면을 최종 핵심 산출물로 쓸지 | **미확정** — 기준분기를 2026Q1에서 2026Q2로 한 분기 옮기는 것만으로 기계·철강의 유형이 뒤집힌 사례가 있다. 현재는 특정 기준기간의 국면을 보여주는 도구, sensitivity는 그 방향의 안정성을 확인하는 보완 검증으로만 사용 |
+| 참고기간(reference) | **확정** 2018Q1~2026Q2 (산단 전체 장기 흐름) |
+| 본분석기간(main) | **확정** 2022Q1~2026Q2 — 10개 업종 모두 4분면 산출 가능한 첫 분기부터. 2018Q4·2020Q3 재분류, 2021년 섬유의복 YoY inf, 2023Q4 생산 X 결측을 근거로 실측 검증(§10~11) |
+| 국면(S1~S4)·run·transition | **핵심 산출물로 사용** — `changwon_state_panel.csv`. ±0.5/1/2% sensitivity는 별도 검증용 |
+| PPI(생산자물가지수) | **총지수 기준 제한적 검증만 사용**. 업종별 매핑은 후보표만 있고 미확정(보류) |
+| EIS(고용행정통계) | **검증용으로 사용**. 2022Q1~2026Q2 가용, KICOX 고용과 합산·대체 안 함 |
 | 제조 AX 연결 | **정책 배경 후보** — 창원시가 제조 AX 전환 정책을 추진 중이나, 본 프로젝트를 제조 AX를 위한 프로젝트로 규정하지 않는다 |
 | 전략산업 추가 | 미확정 |
-| PPI(생산자물가지수) | 이번 파이프라인 제외. 철강 등의 생산액 증가에 가격효과가 섞였는지 보조 확인할 때 검토 |
-| 고용24 채용수요 | 이번 파이프라인 제외. KICOX core 데이터 구축에 불필요 |
+| 고용24 채용수요 | 이번 파이프라인 제외 |
 
 ## 16. 해석 주의사항
 
 - 생산과 고용의 관계는 **상관이며 인과가 아니다.**
-- sensitivity에서 방향이 혼재하는 업종(기계, 철강)을 특정 유형으로 단정하지 않는다.
+- 전환(transition) 빈도/비율은 과거 관측치이며 미래 예측 확률이 아니다.
+- ±0.5/1/2% sensitivity에서 국면이 바뀌는 업종을 특정 유형으로 단정하지 않는다.
 - 업종 재분류 시점(2018Q4, 2020Q3)을 가로지르는 장기 비교는 구조 변화로 해석하지 않는다.
-- 생산액은 명목금액(억원)이며 가격효과를 포함한다.
+- 생산액은 명목금액(억원)이며 가격효과를 포함한다 — PPI는 총지수 기준의 제한적 검증만 제공한다.
+- EIS는 KICOX와 모집단·통계 정의가 달라 비율/점유율을 계산하지 않는다.
+- 2023Q4·2024Q4의 production YoY/국면 결측은 데이터 오류가 아니라 정상적인 구조적 결측(INVALID)이다.

@@ -1,0 +1,5 @@
+﻿파일,존재,이번수정본_처리
+outputs\tables\vintage_수정폭_실측.csv,True,기존 결과 미채택; 원자료 재검증 범위에서 제외
+outputs\tables\창원상의_교차검증.csv,True,기존 결과 미채택; 원자료 재검증 범위에서 제외
+outputs\tables\결측보완_2023Q4_2024Q4_국면.csv,True,기존 결과 미채택; 원자료 재검증 범위에서 제외
+data\processed\kicox\changwon_state_gapfill_panel.csv,True,기존 결과 미채택; 원자료 재검증 범위에서 제외

@@ -1,16 +1,22 @@
-# Python
+# Python bytecode and caches
 __pycache__/
 *.py[cod]
 *$py.class
-.ipynb_checkpoints/
-.pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
 
 # Virtual environments
 .venv/
 venv/
 env/
+
+# Tests and coverage
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Secrets and local configuration
 .env
@@ -21,15 +27,16 @@ env/
 credentials*.json
 secrets*.json
 
-# Editors and operating systems
+# Editors and local tools
 .vscode/
 .idea/
+.claude/
+
+# Operating systems
 Thumbs.db
 .DS_Store
 
-# Raw data and local scratch files
-data/raw/*
-!data/raw/.gitkeep
+# Local scratch files
 tmp/
 *.tmp
 *.log
@@ -40,14 +47,25 @@ tmp/
 *.tar
 *.tar.gz
 
-# KICOX 원자료·연간보정본·대조용 마스터 (용량/배포제한, 로컬 보관)
-data/annual_revision/*
-!data/annual_revision/.gitkeep
-data/existing/*
-!data/existing/.gitkeep
+# 원자료 (용량/배포제한, 로컬 보관)
+data/raw/**
+
+# 재실행 시 자동 보관되는 이전 가공본
+data/processed/kicox/_previous/**
+
+# 보관 자료
+archive/**
+!archive/*/.gitkeep
 
 # 빌드 로그 (산출 CSV/JSON 은 커밋)
-logs/*.log
+logs/**/*.log
+
+# EDA에서 재생성하는 그림
+outputs/figures/*.png
+
+# 보고서 HTML은 기본 로컬. 검토 완료된 공유 미리보기만 예외
+outputs/report/*.html
+!outputs/report/eda_preview.html
 
 # 로컬 전용 조사메모
 private/

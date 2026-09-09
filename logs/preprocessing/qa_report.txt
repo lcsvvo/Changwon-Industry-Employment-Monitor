@@ -1,0 +1,105 @@
+QA 실행 2026-09-08 11:34:53 | base=Changwon-Industry-Employment-Monitor
+
+==============================================================================
+A. 구조
+==============================================================================
+  [PASS] industry master 행수 = quarter수(34) x industry수(10) = 340 (실제 340)
+  [PASS] industry 10개 (실제 10)
+  [PASS] total master 행수 = quarter수 (실제 34 vs quarter 34)
+  [PASS] (quarter, industry) 중복 0건 (실제 0)
+  [PASS] total quarter 중복 0건 (실제 0)
+  [PASS] 업종명 집합 정확히 일치 (차이: 없음)
+  [PASS] 전체 분기에서 업종 수 = 10 (위반 분기: 없음)
+  [PASS] quarter 형식 YYYYQ[1-4] 전부 일치 (위반: 없음)
+  범위 : 2018Q1 ~ 2026Q2 (연속 기대 34개, 실제 34개)
+  [PASS] 2018Q1~2026Q2 연속, 빠진 분기 없음 (누락: 없음)
+
+==============================================================================
+B. 데이터 타입
+==============================================================================
+  [PASS] industry.production numeric dtype (실제 float64)
+  [PASS] industry.employment numeric dtype (실제 float64)
+  [PASS] industry.op_rate_official numeric dtype (실제 float64)
+  [PASS] industry.op_rate_approx numeric dtype (실제 float64)
+  [PASS] industry.firms_in numeric dtype (실제 float64)
+  [PASS] industry.firms_op numeric dtype (실제 float64)
+  [PASS] total.production_total numeric dtype (실제 float64)
+  [PASS] total.employment_total numeric dtype (실제 float64)
+  [PASS] total.firms_in_total numeric dtype (실제 float64)
+  [PASS] total.op_rate_total numeric dtype (실제 float64)
+  [PASS] 숫자 컬럼에 문자열 잔재('X','-','null','nan') 없음 (발견: 없음)
+
+==============================================================================
+C. 결측
+==============================================================================
+  production 결측 분기: ['2023Q4'] (알려진 정상 결측: ['2023Q4'])
+  [정보] 2023Q4 업종별 생산 결측은 원자료 비공개(X) 때문이며 정상이다 — FAIL 대상 아님
+  [PASS] production 결측 분기가 알려진 정상 결측(['2023Q4'])의 부분집합 (예상 외 결측: 없음)
+  [PASS] employment 결측 0 (실제 0)
+  [PASS] firms_in 결측 0 (실제 0)
+  [PASS] firms_op 결측 0 (실제 0)
+  op_rate_official 결측 분기 (25개): ['2018Q1', '2018Q2', '2018Q3', '2018Q4', '2019Q1', '2019Q2', '2019Q3', '2019Q4', '2020Q1', '2020Q2', '2020Q3', '2020Q4']...
+  op_rate_approx  결측 분기 (20개): ['2018Q1', '2018Q2', '2018Q3', '2018Q4', '2019Q1', '2019Q2', '2019Q3', '2019Q4', '2020Q1', '2020Q2', '2020Q3', '2024Q2']...
+  [PASS] op_rate_official/approx 동시 채워진 행 0건 (실제 0)
+  [PASS] total master 4개 지표 결측 0 (실제 {'production_total': 0, 'employment_total': 0, 'firms_in_total': 0, 'op_rate_total': 0})
+  [PASS] _masked==1 셀은 모두 NaN, X->0 치환 없음 (역방향 불일치: 없음)
+  [PASS] production 2023Q4 10행 모두 production_masked==1 (실제 10/10)
+  [정보] masked==0 인데 값이 NaN인 셀(비-마스킹 결측, 실패 아님): {'op_rate(both)': ['2018Q1', '2018Q2', '2018Q3', '2018Q4', '2019Q1', '2019Q2', '2019Q3', '2019Q4', '2020Q1', '2020Q2', '2020Q3']}
+
+==============================================================================
+D. 값 범위 · 단위 일관성
+==============================================================================
+  [정보] production == 0 인 셀 12건 (음수는 아님): ['2018Q1', '2018Q2', '2018Q3', '2018Q4', '2019Q1', '2019Q2', '2019Q3', '2019Q4', '2020Q1', '2020Q2', '2020Q3', '2020Q4'] / 업종 ['섬유의복']
+  [PASS] production 음수 0건 (실제 음수 0건)
+  [PASS] employment >= 0 (위반 0건)
+  [PASS] op_rate 값이 0~100 (industry 위반 0건, total 위반 0건)
+  [PASS] firms_in >= firms_op (위반 0건)
+
+  단위 급변 탐지 (분기별 합계, 인접 분기 대비 >=5x 또는 <=1/5) — 경고용, 값 수정 없음
+    없음 (전업종 결측 분기는 합계가 0/NaN이 되어 비교에서 제외됨)
+  [PASS] 단위 급변 후보 0건 발견 (검토용, 제거하지 않음)
+
+==============================================================================
+E. 업종별 합계 vs 단지 전체
+==============================================================================
+  저장 -> logs\preprocessing\total_vs_industry.csv
+  production 상대오차 (알려진 결측분기 제외) max=0.003205% median=0.000000%
+  [PASS] 업종합계 vs production_total 상대오차 <=1% (실제 max 0.0032%)
+  employment 상대오차 분포: min=0.46% median=1.27% max=4.05%
+  [정보] 업종합 employment != 단지 전체 employment 는 정상 특성이다 (비제조업 포함 등 통계 정의 차이). FAIL 처리하지 않는다.
+  참고범위(과거 확인): 0.46%~4.05%, 중앙값 1.27%
+  [PASS] employment 상대오차가 비정상적으로 크지 않음(<=10%, 참고용 경고 기준) (위반 0건)
+
+==============================================================================
+F. 연간보정본 비제조 고용 대조
+==============================================================================
+  저장 -> logs\preprocessing\nonmfg_check.csv
+  전체 revision 시점: 24개
+  분기말(stock 유효) 시점: 12개
+  일치: 12 / 불일치: 0
+  최대 오차: 0.0
+  [PASS] 분기말 12개 대조 대상 중 12개 일치 / 최대오차 0.0
+
+==============================================================================
+G. 출처 추적
+==============================================================================
+  [PASS] _source 컬럼 결측 없음 (실제 {'production_source': 0, 'employment_source': 0, 'op_rate_source': 0, 'firms_in_source': 0, 'firms_op_source': 0})
+  [PASS] source 값이 허용 집합 안에 있음 (위반: 없음)
+  _invalid_source==1 행 수: {'production_invalid_source': 0, 'employment_invalid_source': 0, 'op_rate_invalid_source': 0, 'firms_in_invalid_source': 0, 'firms_op_invalid_source': 0}
+  [PASS] _invalid_source==1 행 존재 여부 확인 완료 (정보성, 실패 아님)
+
+==============================================================================
+H. YoY 재검증
+==============================================================================
+  독립 재계산(업종별 groupby 내부 lag4) vs 저장값 최대 절대오차: 4.263256414560601e-14 (비교 가능한 셀 558개)
+  [PASS] YoY 독립 재계산 최대 절대오차 ~0, 업종 경계 미침범 확인 (실제 4.263256414560601e-14)
+  2023Q4 production_yoy 유효 업종 수 = 0/10 (기대 0, 2023Q4 X로 인한 정상 결측)
+  [PASS] 2023Q4 production_yoy 전 업종 NaN (실제 유효 0/10)
+  2024Q4 production_yoy 유효 업종 수 = 0/10 (기대 0, 기준분기 2023Q4가 결측이라 lag4 연쇄 결측)
+  [PASS] 2024Q4 production_yoy 전 업종 NaN (실제 유효 0/10)
+  [PASS] inf 잔존 0건 (실제 0)
+
+==============================================================================
+요약
+==============================================================================
+총 43개 검사 중 PASS 43 / WARN 0 / FAIL 0
