@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
 """
 build_changwon_master.py
-창원국가산업단지 KICOX 산업동향 마스터데이터 구축·검증 파이프라인
+창원국가산업단지 KICOX 산업동향 마스터데이터 구축·검증 파이프라인 (오프라인 전용)
 
 데이터 우선순위
-    1순위  KICOX 연간보정본        data/annual_revision/{구간}/YYYY[M|Q]n.xlsx
-    2순위  KICOX 수정·재공시본      같은 폴더 규칙으로 추가하면 자동 인식
-    3순위  공공데이터포털 과거 원자료  data/raw/{datasetId}_{YYYYMMDD}.csv
+    1순위  KICOX 연간보정본        data/raw/kicox/revision/{구간}/xlsx/YYYY[M|Q]n.xlsx
+    2순위  공공데이터포털 원자료    data/raw/kicox/core/{datasetId}_{YYYYMMDD}.csv
 
 산출물
-    data/processed/changwon_industry_master.csv   분기 x 10개 업종
-    data/processed/changwon_total_master.csv      분기 x 창원국가산단 전체
-    logs/raw_inventory.csv        원자료 구조 점검
-    logs/revision_inventory.csv   보정 전후 값 비교
-    logs/master_diff.csv          기존 마스터와의 차이
-    logs/latest_points.json       지표별 최신 시점
+    data/processed/kicox/changwon_industry_master.csv   분기 x 10개 업종
+    data/processed/kicox/changwon_total_master.csv      분기 x 창원국가산단 전체
+    logs/preprocessing/raw_inventory.csv        원자료 구조 점검
+    logs/preprocessing/revision_inventory.csv   보정 전후 값 비교
+    logs/preprocessing/master_diff_vs_previous.csv   이전 산출물과의 차이 (있는 경우)
+    logs/preprocessing/latest_points.json       지표별 최신 시점
+
+이 스크립트는 항상 로컬 원자료(data/raw/)만 읽으며, 네트워크에 접근하지 않고
+data/raw/ 아래 어떤 파일도 쓰거나 수정하지 않는다.
 
 실행
     pip install -r requirements.txt
-    python src/build_changwon_master.py            # 포털 원자료 자동 다운로드 포함
-    python src/build_changwon_master.py --offline  # data/raw 만 사용
+    python src/build_changwon_master.py
+    python src/build_changwon_master.py --no-compare   # 이전 산출물과의 비교 생략
 """
 
 from __future__ import annotations
@@ -32,9 +34,6 @@ import json
 import os
 import re
 import sys
-import time
-import urllib.parse
-import urllib.request
 from datetime import datetime
 
 import pandas as pd
@@ -55,13 +54,11 @@ for _stream in (sys.stdout, sys.stderr):
 # ----------------------------------------------------------------------------
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DIR_RAW = os.path.join(BASE, "data", "raw")
-DIR_REV = os.path.join(BASE, "data", "annual_revision")
-DIR_PROC = os.path.join(BASE, "data", "processed")
-DIR_EXIST = os.path.join(BASE, "data", "existing")
-DIR_LOG = os.path.join(BASE, "logs")
-
-PORTAL = "https://www.data.go.kr"
+DIR_RAW = os.path.join(BASE, "data", "raw", "kicox", "core")
+DIR_REV = os.path.join(BASE, "data", "raw", "kicox", "revision")
+DIR_PROC = os.path.join(BASE, "data", "processed", "kicox")
+DIR_PREV = os.path.join(DIR_PROC, "_previous")
+DIR_LOG = os.path.join(BASE, "logs", "preprocessing")
 
 DATASETS = {                       # 업종별 (분기 x 업종)
     "production": "15085898",
@@ -95,9 +92,7 @@ KIND = {"production": "flow", "employment": "stock", "firms_in": "stock",
 QUARTERLY_FROM = "2024Q2"                     # 공표주기 월별 -> 분기별 전환
 CLASSIFICATION_BREAKS = ["2018Q4", "2020Q3"]  # 조사개요 명시 표본교체·업종재분류
 XCHECK_REVIEW, XCHECK_INVALID = 0.001, 0.01
-SENS_CANDIDATE_ENDS = 5   # 유형 분류 민감도 검증에 쓰는 기준분기 후보 개수(최근 N개, 완전성 검사 전)
 
-UA = {"User-Agent": "Mozilla/5.0"}
 LOG_LINES: list[str] = []
 
 
@@ -107,8 +102,26 @@ def log(msg: str = "") -> None:
 
 
 def ensure_dirs() -> None:
-    for d in (DIR_RAW, DIR_REV, DIR_PROC, DIR_EXIST, DIR_LOG):
-        os.makedirs(d, exist_ok=True)
+    os.makedirs(DIR_PROC, exist_ok=True)
+    os.makedirs(DIR_LOG, exist_ok=True)
+
+
+def assert_raw_untouched(before: dict[str, float]) -> None:
+    """data/raw/ 트리의 mtime이 실행 전후 동일한지 확인한다 (쓰기 금지 가드)."""
+    after = _raw_mtimes()
+    changed = {p: (before.get(p), after.get(p)) for p in set(before) | set(after)
+               if before.get(p) != after.get(p)}
+    if changed:
+        raise RuntimeError(f"data/raw/ 아래 파일이 실행 중 변경되었습니다(금지): {list(changed)[:5]}")
+
+
+def _raw_mtimes() -> dict[str, float]:
+    out = {}
+    for root, _d, fs in os.walk(os.path.join(BASE, "data", "raw")):
+        for f in fs:
+            p = os.path.join(root, f)
+            out[p] = os.path.getmtime(p)
+    return out
 
 
 # ----------------------------------------------------------------------------
@@ -170,75 +183,14 @@ def _read_rows(path: str) -> tuple[list[list[str]], str]:
 
 
 # ----------------------------------------------------------------------------
-# 1. 원자료 확보 / 로딩
+# 1. 원자료 로딩 (data/raw/kicox/core 만 읽는다. 오프라인 전용, 쓰기 없음)
 # ----------------------------------------------------------------------------
 
-def _post(url: str, data: dict, referer: str) -> bytes:
-    h = dict(UA)
-    h["X-Requested-With"] = "XMLHttpRequest"
-    h["Referer"] = referer
-    return urllib.request.urlopen(
-        urllib.request.Request(url, data=urllib.parse.urlencode(data).encode(), headers=h),
-        timeout=90).read()
-
-
-def _get(url: str, referer: str) -> bytes:
-    h = dict(UA)
-    h["Referer"] = referer
-    return urllib.request.urlopen(urllib.request.Request(url, headers=h), timeout=90).read()
-
-
-def list_versions(pk: str) -> dict:
-    ref = f"{PORTAL}/data/{pk}/fileData.do"
-    page = _get(ref, ref).decode("utf-8", "replace")
-    dpk = re.search(r'id="publicDataDetailPk"[^>]*value="(uddi:[0-9a-f\-]+)"', page).group(1)
-    cur = re.search(r"파일데이터명[\s\S]{0,400}?_(\d{8})", page)
-    hist = _post(f"{PORTAL}/tcs/dss/selectHistAndCsvData.do",
-                 {"publicDataPk": pk, "publicDataDetailPk": dpk}, ref).decode("utf-8", "replace")
-    out = {d: u for u, _n, d in
-           re.findall(r'data-public-pk="(uddi:[0-9a-f\-]+)"[^>]*>\s*([^<]*?)(\d{8})\s*</a>', hist)}
-    if cur:
-        out[cur.group(1)] = dpk
-    return out
-
-
-def download_one(pk: str, date: str, detail_pk: str) -> str | None:
-    fp = os.path.join(DIR_RAW, f"{pk}_{date}.csv")
-    if os.path.exists(fp):
-        return fp                       # 원본은 덮어쓰지 않는다
-    ref = f"{PORTAL}/data/{pk}/fileData.do"
-    for attempt in range(3):
-        try:
-            meta = json.loads(_post(f"{PORTAL}/tcs/dss/selectFileDataDownload.do",
-                                    {"publicDataPk": pk, "publicDataDetailPk": detail_pk,
-                                     "publicDataTyCode": "PR0051"}, ref).decode("utf-8"))
-            if not meta.get("status"):
-                raise RuntimeError(meta.get("error", "status=false"))
-            body = _get(f"{PORTAL}/cmm/cmm/fileDownload.do?atchFileId={meta['atchFileId']}"
-                        f"&fileDetailSn={meta['fileDetailSn']}&dataNm=x", ref)
-            with open(fp, "wb") as f:
-                f.write(body)
-            return fp
-        except Exception as exc:  # noqa: BLE001
-            if attempt == 2:
-                log(f"  [다운로드 실패] pk={pk} date={date} :: {exc}")
-                return None
-            time.sleep(2)
-    return None
-
-
-def download_or_load_raw(offline: bool = False) -> dict:
-    ensure_dirs()
+def load_raw() -> dict:
+    if not os.path.isdir(DIR_RAW):
+        raise FileNotFoundError(f"원자료 폴더가 없습니다: {DIR_RAW}")
     files: dict[str, dict[str, str]] = {}
     for name, pk in list(DATASETS.items()) + list(DATASETS_TOTAL.items()):
-        if not offline:
-            try:
-                vers = list_versions(pk)
-                log(f"[download] {name}({pk}) 포털 {len(vers)}건")
-                for d, u in sorted(vers.items()):
-                    download_one(pk, d, u)
-            except Exception as exc:  # noqa: BLE001
-                log(f"[경고] {name}({pk}) 목록 조회 실패 :: {exc}")
         got = {fn.split("_")[1][:8]: os.path.join(DIR_RAW, fn)
                for fn in sorted(os.listdir(DIR_RAW))
                if fn.startswith(pk + "_") and fn.endswith(".csv")}
@@ -262,7 +214,7 @@ def load_revision() -> dict:
             if f.endswith(".xlsx") and re.match(r"^\d{4}[MQ]\d{1,2}\.xlsx$", f):
                 paths.append(os.path.join(root, f))
     if not paths:
-        log("[정보] 보정본 없음 (data/annual_revision/{구간}/YYYY[M|Q]n.xlsx)")
+        log("[정보] 보정본 없음 (data/raw/kicox/revision/{구간}/xlsx/YYYY[M|Q]n.xlsx)")
         return out
     log(f"\n[revision] 보정본 {len(paths)}건 로딩")
 
@@ -744,7 +696,6 @@ def validate_master(ind: pd.DataFrame, tot: pd.DataFrame) -> pd.DataFrame:
     for c in ("production", "employment"):
         # fill_method=None 명시: pandas 2.x 기본값(pad)은 결측을 앞 값으로 채워
         # 2023Q4·2024Q4 같은 전업종 결측 기준분기에서도 YoY를 만들어낸다.
-        # 3.0.2에서는 기본값이 None이라 우연히 정상이었을 뿐이므로 명시 고정한다.
         ind[f"{c}_yoy"] = ind.groupby("industry")[c].pct_change(4, fill_method=None) * 100
         ind[f"{c}_yoy"] = ind[f"{c}_yoy"].replace([float("inf"), float("-inf")], pd.NA)
         # 방어 로직: 당분기 또는 기준(4분기 전) 값이 결측이면 무조건 YoY도 결측 처리
@@ -758,170 +709,56 @@ def validate_master(ind: pd.DataFrame, tot: pd.DataFrame) -> pd.DataFrame:
     log(f"  가능: {latest['yoy_valid_quarters']}")
     log(f"  불가: {sorted(vq[~vq].index)}")
 
-    # 4분기 평균 비교구간 자동 설정
+    # 4분기 평균 비교구간 자동 설정 (참고용, 본분석 국면과는 무관)
     common = latest["latest_common_quarter"]
     allq = sorted(ind.quarter.unique())
     i = allq.index(common)
     recent, prev = allq[i - 3:i + 1], allq[i - 7:i - 3]
     latest["window_recent"], latest["window_previous"] = recent, prev
-    log(f"\n[4분기 평균 비교구간] 최근 {recent} vs 직전 {prev}")
-    usable = ind[ind.quarter.isin(recent + prev)]
-    for c in ("production", "employment"):
-        miss = sorted(usable[usable[c].isna()].quarter.unique())
-        log(f"  {c} 결측 분기: {miss or '없음'}")
+    log(f"\n[4분기 평균 비교구간(참고용)] 최근 {recent} vs 직전 {prev}")
+
     json.dump(latest, open(os.path.join(DIR_LOG, "latest_points.json"), "w"), ensure_ascii=False)
 
     ind["review_required"] = ((ind.production_yoy.abs() > 40) |
                               (ind.employment_yoy.abs() > 15)).fillna(False)
-    log(f"\n[review_required] {int(ind.review_required.sum())}행 (삭제하지 않음)")
+    log(f"\n[review_required] {int(ind.review_required.sum())}행 (삭제하지 않음, 경고용)")
     log(f"[classification_break] 플래그 분기 {CLASSIFICATION_BREAKS} "
         f"(조사개요: '18.10월분, '20.9월분 표본교체·업종재분류)")
     return ind
 
 
-def compare_existing_master(new: pd.DataFrame, path: str) -> None:
+def compare_previous_master(new_ind: pd.DataFrame, new_tot: pd.DataFrame) -> None:
+    """data/processed/kicox/_previous/ 에 이전 산출물이 있으면 값 차이를 요약한다.
+    QA 실패 판정이 아니라 정보성 diff이며, 실패 처리하지 않는다."""
     log("\n" + "=" * 70)
-    log("기존 마스터 vs 재구축 마스터")
+    log("이전 산출물(_previous) vs 재구축 마스터")
     log("=" * 70)
-    if not os.path.exists(path):
-        log(f"  기존 파일 없음: {path}")
+    p_ind = os.path.join(DIR_PREV, "changwon_industry_master.csv")
+    if not os.path.exists(p_ind):
+        log(f"  이전 산출물 없음: {p_ind} (최초 실행이거나 백업 생략)")
         return
-    old = pd.read_csv(path)
-    log(f"  행수 {len(old)} -> {len(new)} / 분기 {old.quarter.nunique()} -> {new.quarter.nunique()}")
-    m = old.merge(new, on=["quarter", "industry"], suffixes=("_old", "_new"), how="outer")
+    old = pd.read_csv(p_ind)
+    log(f"  industry master 행수 {len(old)} -> {len(new_ind)} / "
+        f"분기 {old.quarter.nunique()} -> {new_ind.quarter.nunique()}")
+    m = old.merge(new_ind, on=["quarter", "industry"], suffixes=("_old", "_new"), how="outer")
     diffs = []
-    for c in ["production", "employment", "firms_in", "firms_op"]:
+    for c in ["production", "employment", "firms_in", "firms_op",
+              "op_rate_official", "op_rate_approx"]:
         a, b = m.get(f"{c}_old"), m.get(f"{c}_new")
         if a is None or b is None:
             continue
         neq = ~((a.isna() & b.isna()) | ((a - b).abs() < 1e-6))
         for _, r in m[neq].iterrows():
             diffs.append(dict(quarter=r.quarter, industry=r.industry, var=c,
-                              old=r[f"{c}_old"], new=r[f"{c}_new"],
-                              source=r.get(f"{c}_source")))
+                              old=r[f"{c}_old"], new=r[f"{c}_new"]))
     d = pd.DataFrame(diffs)
     if d.empty:
         log("  값 차이 없음")
     else:
         log(f"  값이 다른 셀 {len(d)}개")
-        log("  변수별 분기수: " + str(d.groupby('var').quarter.nunique().to_dict()))
+        log("  변수별 분기수: " + str(d.groupby("var").quarter.nunique().to_dict()))
         log(f"  차이 분기: {sorted(d.quarter.unique())}")
-        d.to_csv(os.path.join(DIR_LOG, "master_diff.csv"), index=False, encoding="utf-8-sig")
-
-
-# ----------------------------------------------------------------------------
-# 11. 유형 분류 민감도 검증 (임의 가중치 없음)
-# ----------------------------------------------------------------------------
-
-def sensitivity_check(ind: pd.DataFrame, latest: dict) -> pd.DataFrame:
-    """기준분기와 집계방식을 바꿔가며 생산·고용 변화 방향을 재계산한다.
-    모든 조합에서 방향이 같을 때만 '확정', 아니면 '유보'로 본다.
-    임계값이나 가중치를 만들지 않고, 방향 일치 여부만 센다."""
-    allq = sorted(ind.quarter.unique())
-    cands = [q for q in allq if allq.index(q) >= 7][-SENS_CANDIDATE_ENDS:]
-
-    # 집계 전에 완전성부터 검사한다: rec_w(최근 4분기) + prev_w(직전 4분기) = 8개 분기 전체에서
-    # 10개 업종 모두 production·employment가 결측이 아니어야 그 기준분기를 유효로 채택한다.
-    # groupby().agg('mean'/'median')는 NaN을 자동 제외하므로 집계 이후 값만 보면
-    # 결측이 섞인 비교창도 정상 4분기 비교처럼 보인다 -> 반드시 집계 전에 걸러야 한다.
-    valid_ends = []
-    excluded = []
-    windows = {}
-    for end in cands:
-        i = allq.index(end)
-        rec_w, prev_w = allq[i - 3:i + 1], allq[i - 7:i - 3]
-        windows[end] = (rec_w, prev_w)
-        reasons = []
-        for w_name, w in (("rec_w", rec_w), ("prev_w", prev_w)):
-            for q in w:
-                sub = ind[ind.quarter == q]
-                for col in ("production", "employment"):
-                    n_missing = int(sub[col].isna().sum())
-                    if n_missing > 0:
-                        reasons.append(f"{w_name}:{q}:{col} 결측 {n_missing}개 업종")
-        if reasons:
-            excluded.append((end, reasons))
-            log(f"[민감도 제외] 기준분기 {end}: " + "; ".join(reasons))
-        else:
-            valid_ends.append(end)
-
-    recs = []
-    for end in valid_ends:
-        rec_w, prev_w = windows[end]
-        for agg in ("mean", "median"):
-            a = ind[ind.quarter.isin(rec_w)].groupby("industry")[["production", "employment"]].agg(agg)
-            b = ind[ind.quarter.isin(prev_w)].groupby("industry")[["production", "employment"]].agg(agg)
-            for t in a.index:
-                if pd.isna(a.production[t]) or pd.isna(b.production[t]) \
-                        or pd.isna(a.employment[t]) or pd.isna(b.employment[t]):
-                    log(f"[경고] 사전 완전성 검사를 통과했으나 집계 후 결측 발견: "
-                        f"end={end} agg={agg} industry={t} -> 이중 안전장치로 제외")
-                    continue
-                dp = (a.production[t] / b.production[t] - 1) * 100
-                de = (a.employment[t] / b.employment[t] - 1) * 100
-                recs.append(dict(end_quarter=end, agg=agg, industry=t,
-                                 production_change_pct=round(dp, 2),
-                                 employment_change_pct=round(de, 2),
-                                 production_dir="up" if dp > 0 else "down",
-                                 employment_dir="up" if de > 0 else "down"))
-    df = pd.DataFrame(recs)
-
-    log("\n" + "=" * 70)
-    log(f"유형 분류 민감도 (후보 기준분기 {len(cands)}개 → 유효 {len(valid_ends)}개 "
-        f"x 집계 2종 = {len(valid_ends) * 2}조합)")
-    log("=" * 70)
-    log(f"  후보 기준분기: {cands}")
-    log(f"  유효 기준분기: {valid_ends}")
-    if excluded:
-        log(f"  제외 기준분기: {[e for e, _ in excluded]}")
-
-    if df.empty:
-        log("  유효 조합 없음 -> quadrant_sensitivity.csv 미생성")
-        return df
-    df.to_csv(os.path.join(DIR_LOG, "quadrant_sensitivity.csv"),
-              index=False, encoding="utf-8-sig")
-
-    # 생산비중: 전체기간 평균 vs 최근 4분기(window_recent) 평균, 둘 다 산출해 병기한다.
-    full_period_mean = ind.groupby("industry").production.mean()
-    full_period_share = full_period_mean / full_period_mean.sum() * 100
-
-    window_recent = latest.get("window_recent") or []
-    rec_df = ind[ind.quarter.isin(window_recent)]
-    recent_4q_mean = rec_df.groupby("industry").production.mean()
-    recent_4q_share = recent_4q_mean / recent_4q_mean.sum() * 100
-
-    share_df = pd.DataFrame({
-        "industry": full_period_mean.index,
-        "recent_4q_mean_production": recent_4q_mean.reindex(full_period_mean.index),
-        "recent_4q_production_share": recent_4q_share.reindex(full_period_mean.index),
-        "full_period_mean_production": full_period_mean,
-        "full_period_production_share": full_period_share,
-    }).sort_values("recent_4q_production_share", ascending=False)
-    share_df.to_csv(os.path.join(DIR_LOG, "production_share.csv"),
-                     index=False, encoding="utf-8-sig")
-
-    order = share_df.industry.tolist()
-    log(f"{'업종':<8}{'최근4Q비중':>10}{'전체기간비중':>12}{'생산방향':>16}{'고용방향':>16}  판정")
-    for t in order:
-        g = df[df.industry == t]
-        if g.empty:
-            continue
-        pu, eu = (g.production_dir == "up").mean(), (g.employment_dir == "up").mean()
-        r_share = share_df.loc[share_df.industry == t, "recent_4q_production_share"].iloc[0]
-        f_share = share_df.loc[share_df.industry == t, "full_period_production_share"].iloc[0]
-        pl = "증가" if pu == 1 else "감소" if pu == 0 else f"혼재({pu:.0%} 증가)"
-        el = "증가" if eu == 1 else "감소" if eu == 0 else f"혼재({eu:.0%} 증가)"
-        verdict = "확정" if pu in (0, 1) and eu in (0, 1) else \
-                  "부분확정" if pu in (0, 1) or eu in (0, 1) else "유보"
-        log(f"{t:<8}{r_share:>9.1f}%{f_share:>11.1f}%{pl:>16}{el:>16}  {verdict}")
-
-    combo_share = share_df[share_df.industry.isin(["운송장비", "전기전자"])] \
-        .recent_4q_production_share.sum()
-    log(f"  운송장비+전기전자 최근4분기 생산비중 합계: {combo_share:.1f}%")
-    log("  -> logs/quadrant_sensitivity.csv")
-    log("  -> logs/production_share.csv")
-    log("  주의: '유보'인 업종을 특정 유형으로 단정하면 안 된다.")
-    return df
+        d.to_csv(os.path.join(DIR_LOG, "master_diff_vs_previous.csv"), index=False, encoding="utf-8-sig")
 
 
 # ----------------------------------------------------------------------------
@@ -930,14 +767,15 @@ def sensitivity_check(ind: pd.DataFrame, latest: dict) -> pd.DataFrame:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--offline", action="store_true")
-    ap.add_argument("--no-compare", action="store_true")
+    ap.add_argument("--no-compare", action="store_true",
+                     help="_previous/ 산출물과의 비교를 생략한다")
     args = ap.parse_args()
 
     ensure_dirs()
-    log(f"실행 {datetime.now():%Y-%m-%d %H:%M:%S} | base={os.path.basename(BASE)}")
+    raw_before = _raw_mtimes()
+    log(f"실행 {datetime.now():%Y-%m-%d %H:%M:%S} | base={os.path.basename(BASE)} | offline-only")
 
-    files = download_or_load_raw(offline=args.offline)
+    files = load_raw()
     inspect_raw_files(files)
     revision = load_revision()
 
@@ -965,7 +803,6 @@ def main() -> None:
 
     ind, tot = build_master(files, revision, invalid)
     ind = validate_master(ind, tot)
-    sensitivity_check(ind, json.load(open(os.path.join(DIR_LOG, "latest_points.json"))))
 
     cols = (["quarter", "quarter_end", "complex_nm", "complex_type", "industry",
              "production", "employment", "op_rate_official", "op_rate_approx",
@@ -975,16 +812,21 @@ def main() -> None:
             + [f"{k}_source" for k in DATASETS] + [f"{k}_is_revised" for k in DATASETS]
             + [f"{k}_masked" for k in DATASETS] + [f"{k}_invalid_source" for k in DATASETS]
             + [f"{k}_note" for k in DATASETS])
-    p1 = os.path.join(DIR_PROC, "changwon_industry_master.csv")
-    ind[[c for c in cols if c in ind.columns]].sort_values(["quarter", "industry"]) \
-        .to_csv(p1, index=False, encoding="utf-8-sig")
-    p2 = os.path.join(DIR_PROC, "changwon_total_master.csv")
-    tot.sort_values("quarter").to_csv(p2, index=False, encoding="utf-8-sig")
-    log(f"\n저장 -> {os.path.relpath(p1, BASE)} ({len(ind)}행)")
-    log(f"저장 -> {os.path.relpath(p2, BASE)} ({len(tot)}행)")
+    ind_out = ind[[c for c in cols if c in ind.columns]].sort_values(["quarter", "industry"])
+    tot_out = tot.sort_values("quarter")
 
     if not args.no_compare:
-        compare_existing_master(ind, os.path.join(DIR_EXIST, "changwon_master_2018Q1_2026Q2.csv"))
+        compare_previous_master(ind_out, tot_out)
+
+    p1 = os.path.join(DIR_PROC, "changwon_industry_master.csv")
+    ind_out.to_csv(p1, index=False, encoding="utf-8-sig")
+    p2 = os.path.join(DIR_PROC, "changwon_total_master.csv")
+    tot_out.to_csv(p2, index=False, encoding="utf-8-sig")
+    log(f"\n저장 -> {os.path.relpath(p1, BASE)} ({len(ind_out)}행)")
+    log(f"저장 -> {os.path.relpath(p2, BASE)} ({len(tot_out)}행)")
+
+    assert_raw_untouched(raw_before)
+    log("\n[가드] data/raw/ 트리 변경 없음 확인")
 
     with open(os.path.join(DIR_LOG, f"build_{datetime.now():%Y%m%d_%H%M%S}.log"),
               "w", encoding="utf-8") as f:
