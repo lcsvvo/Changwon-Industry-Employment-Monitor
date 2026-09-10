@@ -4,6 +4,19 @@
     "employment_gap_latest": -4851.0,
     "delta_identity_gap": 0.0
   },
+  "eda": {
+    "n_valid_pairs": 160,
+    "n_same_direction": 100,
+    "n_opposite_direction": 56,
+    "n_zero_involved": 4,
+    "opposite_pct_all": 35.0,
+    "opposite_pct_excl_zero": 35.8974358974359,
+    "n_invalid_excluded": 20,
+    "total_quarters_compared": 18,
+    "total_quarters_direction_differs": 8,
+    "latest_top_abs_employment_yoy_industry": "기타",
+    "latest_largest_employment_industry": "기계"
+  },
   "q1_latest": {
     "quarter": "2026Q2",
     "n_down": 7,
