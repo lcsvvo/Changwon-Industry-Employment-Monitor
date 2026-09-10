@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q2 규모 분석 — 행정 근거 보강판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0EC; --paper:#FFFFFF; --ink:#1A2220; --ink-soft:#4B564F; --line:#D7DBD3;
+    --steel:#2E5266; --steel-deep:#1D3A48; --steel-light:#5A8DA3;
+    --brass:#9C6B1F; --brick:#8C3F2C; --brick-bg:#F5E9E4; --steel-bg:#E7EDF0; --brass-bg:#F5EFE0;
+    --green:#4C6E4A; --green-bg:#EBF0E7; --violet:#5B4B79; --violet-bg:#EFEBF3;
+    --mono:'Noto Sans KR',-apple-system,sans-serif; --serif:'Source Serif 4',Georgia,serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--mono); line-height:1.7; font-size:16px;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 24px;}
+
+  header.hero{background:linear-gradient(180deg, var(--steel-deep) 0%, var(--steel) 100%); color:#F3F6F5; padding:52px 0 0;}
+  header.hero .eyebrow{font-size:13.5px; color:#AFC4CC; margin-bottom:12px;}
+  header.hero h1{font-family:var(--serif); font-weight:700; font-size:33px; line-height:1.28; margin:0 0 14px; max-width:680px;}
+  header.hero p.lead{font-size:15.5px; color:#D6E1E3; max-width:620px; margin:0 0 22px;}
+  .scope-box{background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.22); border-radius:5px; padding:16px 20px; margin:0 0 28px; font-size:13.8px; color:#DCE7E8; line-height:1.75;}
+  .scope-box b{color:#fff;}
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(255,255,255,0.14); border-top:1px solid rgba(255,255,255,0.18);}
+  .stat{background:var(--steel-deep); padding:15px 12px;}
+  .stat .num{font-family:var(--serif); font-size:19px; font-weight:600; color:#fff;}
+  .stat .lbl{font-size:11.3px; color:#AFC4CC; margin-top:4px; line-height:1.4;}
+
+  nav.toc{background:var(--paper); border-bottom:1px solid var(--line); padding:13px 0;}
+  nav.toc ol{display:flex; flex-wrap:wrap; gap:4px 15px; list-style:none; padding:0; margin:0; font-size:12.6px;}
+  nav.toc a{color:var(--steel-deep); text-decoration:none; border-bottom:1px dotted var(--line); padding-bottom:1px;}
+
+  main{padding:44px 0 90px;}
+  section{margin-bottom:56px; scroll-margin-top:22px;}
+  section .tag{display:inline-block; font-size:12px; color:var(--steel); background:var(--steel-bg); padding:3px 10px; border-radius:3px; margin-bottom:11px;}
+  section .tag.admin{color:var(--brass); background:var(--brass-bg);}
+  section .tag.idea{color:var(--violet); background:var(--violet-bg);}
+  h2{font-family:var(--serif); font-size:24px; font-weight:600; margin:0 0 8px; border-bottom:2px solid var(--ink); padding-bottom:9px;}
+  h2 span.num{color:var(--steel); margin-right:9px;}
+  h3{font-family:var(--serif); font-size:18px; font-weight:600; margin:24px 0 9px;}
+  h4.sub{font-size:14px; font-weight:700; color:var(--steel-deep); margin:18px 0 7px;}
+  p{margin:0 0 13px; color:var(--ink-soft);}
+  p strong{color:var(--ink); font-weight:600;}
+  .section-intro{font-size:14.6px; color:var(--ink-soft); max-width:720px;}
+
+  .callout{border:1px solid var(--line); background:var(--paper); border-left:4px solid var(--steel); padding:14px 18px; margin:15px 0; border-radius:2px;}
+  .callout h4{margin:0 0 6px; font-size:13.6px; color:var(--steel-deep);}
+  .callout p{margin:0; font-size:13.6px;}
+  .callout.brick{border-left-color:var(--brick); background:var(--brick-bg);}
+  .callout.brick h4{color:var(--brick);}
+  .callout.brass{border-left-color:var(--brass); background:var(--brass-bg);}
+  .callout.brass h4{color:var(--brass);}
+  .callout.green{border-left-color:var(--green); background:var(--green-bg);}
+  .callout.green h4{color:var(--green);}
+  .callout.violet{border-left-color:var(--violet); background:var(--violet-bg);}
+  .callout.violet h4{color:var(--violet);}
+
+  .recap{background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:16px 19px; margin:14px 0;}
+  .recap .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:10px;}
+  .recap .item{background:var(--steel-bg); border-radius:3px; padding:9px 10px;}
+  .recap .item .n{font-family:var(--serif); font-weight:700; color:var(--steel-deep); font-size:16px;}
+  .recap .item .l{font-size:11.3px; color:var(--ink-soft); margin-top:2px;}
+
+  table.criteria-table{width:100%; border-collapse:collapse; background:var(--paper); font-size:13.6px; margin:13px 0 6px;}
+  table.criteria-table th, table.criteria-table td{text-align:left; padding:9px 12px; border:1px solid var(--line); vertical-align:top;}
+  table.criteria-table th{background:var(--steel-bg); color:var(--steel-deep); font-weight:600; width:170px;}
+
+  .q-list{list-style:none; padding:0; margin:16px 0;}
+  .q-list li{background:var(--paper); border:1px solid var(--line); border-radius:3px; padding:13px 16px; margin-bottom:9px;}
+  .q-list .qid{font-family:var(--serif); font-weight:700; color:var(--steel); font-size:13px; margin-right:7px;}
+  .q-list .qtitle{font-weight:600; color:var(--ink); font-size:14.3px;}
+  .q-list .qdesc{font-size:13.4px; color:var(--ink-soft); margin-top:5px;}
+
+  .admin-card{background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:17px 20px; margin:16px 0;}
+  .admin-card .src{font-size:12px; color:var(--brass); font-weight:700; text-transform:uppercase; letter-spacing:.01em; margin-bottom:6px;}
+  .admin-card h4{font-family:var(--serif); font-size:16.5px; margin:0 0 8px; font-weight:600;}
+  .admin-card p{font-size:14px;}
+  .admin-card .req{background:var(--brass-bg); border-radius:3px; padding:10px 13px; font-size:13.2px; margin-top:8px;}
+  .admin-card .req b{color:var(--brass);}
+
+  table.data{width:100%; border-collapse:collapse; font-size:13.2px; margin:13px 0;}
+  table.data th, table.data td{padding:8px 9px; border:1px solid var(--line); text-align:right;}
+  table.data th{background:var(--steel-bg); color:var(--steel-deep); font-weight:600;}
+  table.data td:first-child, table.data th:first-child{text-align:left; font-weight:600;}
+  table.data tr.total td{background:#F7F5EF; font-weight:700;}
+  table.data td.neg{color:var(--brick);} table.data td.pos{color:var(--steel);}
+  .scrollx{overflow-x:auto;}
+
+  .map-table{width:100%; border-collapse:collapse; font-size:13.2px; margin:14px 0;}
+  .map-table th, .map-table td{padding:10px 11px; border:1px solid var(--line); text-align:left; vertical-align:top;}
+  .map-table th{background:var(--steel-bg); color:var(--steel-deep);}
+  .status-pill{display:inline-block; font-size:11.3px; font-weight:700; padding:2px 8px; border-radius:10px;}
+  .status-pill.no{background:var(--brick-bg); color:var(--brick);}
+  .status-pill.maybe{background:var(--brass-bg); color:var(--brass);}
+  .status-pill.yes{background:var(--green-bg); color:var(--green);}
+
+  .idea-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  .idea-col{background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:15px 18px;}
+  .idea-col h4{font-family:var(--serif); font-size:15.5px; margin:0 0 10px; color:var(--steel-deep); border-bottom:1px solid var(--line); padding-bottom:8px;}
+  .idea-col ul{margin:0; padding-left:18px;}
+  .idea-col li{font-size:13.4px; color:var(--ink-soft); margin-bottom:9px; line-height:1.55;}
+  .idea-col li b{color:var(--ink);}
+
+  .rule-list{padding-left:0; list-style:none; margin:13px 0;}
+  .rule-list li{padding:8px 0 8px 22px; border-bottom:1px solid var(--line); font-size:13.6px; color:var(--ink-soft); position:relative;}
+  .rule-list li:last-child{border-bottom:none;}
+  .rule-list li::before{content:'—'; position:absolute; left:0; color:var(--steel);}
+
+  .refs{font-size:12.6px; color:var(--ink-soft);}
+  .refs ol{padding-left:19px;}
+  .refs li{margin-bottom:8px;}
+  .refs h4{font-size:12.6px; color:var(--steel-deep); margin:16px 0 6px;}
+
+  footer{background:var(--steel-deep); color:#AFC4CC; padding:28px 0; font-size:12px;}
+  footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+
+  @media (max-width:640px){
+    header.hero h1{font-size:25px;}
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .idea-grid{grid-template-columns:1fr;}
+    .recap .grid{grid-template-columns:repeat(2,1fr);}
+    table.criteria-table th{width:100px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">창원국가산단 업종별 산업·고용 전환진단 · Q2(규모) 파트 · 행정 근거 보강판</div>
+    <h1>Q2 규모 분석 — 행정 근거 보강판</h1>
+    <p class="lead">EDA(02_eda) 결과와 Q1 상태 심화분석을 프로젝트의 핵심으로 두고, 실무에서 바로 쓸 수 있는 행정적 근거(정부 지정제도·지원사업)를 더해 Q2를 상세화했다. 마지막 장에서는 심사 질의를 가정해 현재 분석의 방어 가능 범위와 한계를 재검증했다.</p>
+    <div class="scope-box">
+      <b>프로젝트 진행 원칙 (합의된 범위)</b><br>
+      "EDA 완료. 핵심 분석은 상태(Q1) → 규모(Q2) → 시간(Q3)으로 진행합니다. 가동률·업체수, PPI·EIS는 핵심 국면을 대체하지 않는 보조분석으로 분리하고, Q1·Q2 결과를 연결해 Q3와 업종별 진단카드로 이어갑니다."
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="num">91.85%</div><div class="lbl">기계의 2026Q2 고용 순감소 기여율(EDA 확정치)</div></div>
+    <div class="stat"><div class="num">3/4 미충족</div><div class="lbl">고용위기지역 정량요건(2026 개정) 중 확인 가능한 항목</div></div>
+    <div class="stat"><div class="num">−50.9%</div><div class="lbl">기계 수출 YoY, 2025Q4(CCI, 고용감소보다 선행)</div></div>
+    <div class="stat"><div class="num">216억원</div><div class="lbl">2026년 창원 스마트그린산단 AI전환 선정사업비</div></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <ol>
+      <li><a href="#recap">00 EDA 핵심 요약</a></li>
+      <li><a href="#criteria">01 공통 분석 기준</a></li>
+      <li><a href="#rq">02 연구질문</a></li>
+      <li><a href="#admin">03 행정적 근거</a></li>
+      <li><a href="#mapping">04 실무 정책 매핑</a></li>
+      <li><a href="#ideas">05 심사 방어 근거 재검증</a></li>
+      <li><a href="#conclusion">06 결론·문장 규칙</a></li>
+      <li><a href="#refs">참고·출처</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section id="recap">
+    <span class="tag">SECTION 00 · 프로젝트 핵심</span>
+    <h2><span class="num">00</span>EDA 핵심 요약 (이 프로젝트의 기준점)</h2>
+    <p class="section-intro">아래 수치는 eda_preview.html(02_eda 노트북)에서 이미 확정된 것으로, 이번 행정 근거 보강판을 포함한 모든 Q2 분석의 출발점이다.</p>
+    <div class="recap">
+      <p style="margin:0;"><b>분석 대상</b>: 2022Q1~2026Q2(18분기) × 10개 제조업종 = 180행. 최신 분기 2026Q2 기준 국면 판정.</p>
+      <div class="grid">
+        <div class="item"><div class="n">−4,332명</div><div class="l">2026Q2 제조업 고용 순감소</div></div>
+        <div class="item"><div class="n">91.85%</div><div class="l">기계 업종 기여율</div></div>
+        <div class="item"><div class="n">98.2%</div><div class="l">고용 상위 4개 업종 비중 합</div></div>
+        <div class="item"><div class="n">S4</div><div class="l">기계 업종 2026Q2 국면(생산↓·고용↓)</div></div>
+      </div>
+    </div>
+    <p>가동률·업체수, PPI(전국 생산자물가), EIS(고용보험 피보험자)는 국면(S1~S4) 판정을 대체하지 않는 <b>보조분석</b>으로 분리한다는 것이 팀의 합의된 원칙이다. 이번 문서에서는 이 원칙을 지키면서도, EIS·CCI(창원상공회의소) 자료를 "국면 판정용"이 아니라 <b>"행정적 근거·정책 자격요건 판단용"</b>으로 활용한다 — 이는 원칙 위반이 아니라 보조자료의 용도를 다르게 쓰는 것이다.</p>
+  </section>
+
+  <section id="criteria">
+    <span class="tag">SECTION 01 · 필수 준수</span>
+    <h2><span class="num">01</span>공통 분석 기준</h2>
+    <table class="criteria-table">
+      <tr><th>분석 기간 / 패널</th><td>2022Q1–2026Q2(18분기) × 10개 업종 = 180행. 최신 분기 2026Q2.</td></tr>
+      <tr><th>지표 정의</th><td>생산=명목 생산액, 고용=고용 인원. 변화율은 모두 YoY.</td></tr>
+      <tr><th>N/INVALID 규칙</th><td>정확히 0%면 N, 값 자체가 없으면 INVALID. ±0.5·1·2%p는 민감도 확인용 별도 패널.</td></tr>
+      <tr><th>계산 불가 분기</th><td>2023Q4(당분기 생산 결측), 2024Q4(전년동기 생산 결측).</td></tr>
+      <tr><th>가산성 주의</th><td>2026Q2 고용은 업종 합계-산단 총계 차이 존재 → 기여율은 업종 합계 내부 분해로만 정의.</td></tr>
+      <tr><th>기여율 표시 규칙</th><td>R=│업종 합계 순증감│÷ 업종별 증감 절대합 ≥0.30인 분기에만 표시. 통계적 유의성 아님.</td></tr>
+      <tr><th>상세 추적 기준</th><td>고용비중 5%+ / 최근4분기 YoY 절대합 300명+ 동시 충족 업종만 추적.</td></tr>
+      <tr><th>보조분석 분리 원칙</th><td>가동률·업체수·PPI·EIS는 국면(S1~S4) 판정에 사용하지 않는다. 본 문서의 행정 근거 섹션은 이 원칙을 지키되, EIS·CCI를 <b>정책 자격요건 판단용</b>으로 별도 활용한다.</td></tr>
+    </table>
+  </section>
+
+  <section id="rq">
+    <span class="tag">SECTION 02</span>
+    <h2><span class="num">02</span>연구질문 (Q2, 요약)</h2>
+    <p class="section-intro">이전 개정판에서 Q2를 네 개로 분해했다. 이번 문서는 여기에 <b>Q2-5(행정 자격요건)</b>를 추가해, Q2 결과를 실무 정책과 직접 연결한다.</p>
+    <ul class="q-list">
+      <li><span class="qid">Q2-1</span><span class="qtitle">기여도</span><div class="qdesc">고용 순증감이 업종 간에 얼마나 불균등하게 배분되는가.</div></li>
+      <li><span class="qid">Q2-2</span><span class="qtitle">구조</span><div class="qdesc">제조업 고용이 몇 개 업종에 구조적으로 집중되어 있는가.</div></li>
+      <li><span class="qid">Q2-3</span><span class="qtitle">반전</span><div class="qdesc">최대 기여 업종의 기여 방향이 시간이 지나도 유지되는가.</div></li>
+      <li><span class="qid">Q2-4</span><span class="qtitle">공통충격 여부</span><div class="qdesc">편중이 기계 고유의 충격인가, 산단 전체의 공통 국면인가.</div></li>
+      <li style="border-left:3px solid var(--brass);"><span class="qid">Q2-5</span><span class="qtitle">행정 자격요건 — 신규</span><div class="qdesc">Q2-1~4에서 확인된 규모가 실제 정부 지원제도의 지정·신청 요건에 얼마나 근접해 있는가? 어떤 추가 자료가 있으면 요건 충족 여부를 확정할 수 있는가?</div></li>
+    </ul>
+  </section>
+
+  <section id="admin">
+    <span class="tag tag admin">SECTION 03 · 행정적 근거</span>
+    <h2><span class="num">03</span>행정적 근거</h2>
+    <p class="section-intro">Q2 발견을 실제 정부 고시·지원사업 요건과 대조한다. 모두 2026년 기준 최신 자료로 확인했다.</p>
+
+    <h3>(1) 창원상공회의소 자료로 본 선행지표 — 수출 감소가 고용 감소보다 먼저 왔다</h3>
+    <div class="scrollx">
+    <table class="data">
+      <tr><th>기계 업종</th><th>2025Q2</th><th>2025Q3</th><th>2025Q4</th><th>2026Q1</th></tr>
+      <tr><td>수출 YoY(CCI)</td><td class="neg">−0.7%</td><td class="neg">−26.0%</td><td class="neg">−50.9%</td><td class="neg">−11.1%</td></tr>
+      <tr><td>고용 YoY(CCI)</td><td class="pos">+10.8%</td><td class="pos">+3.4%</td><td class="pos">+6.1%</td><td class="neg">−2.6%</td></tr>
+    </table>
+    </div>
+    <p>창원상공회의소 경제동향조사(원표: 창원국가산업단지 업종별 현황)를 보면, 기계 업종 <b>수출은 2025Q3부터 이미 두 자릿수로 급감</b>했지만 고용은 2025Q4까지도 플러스를 유지했다. 고용이 마이너스로 돌아선 것은 2026Q1부터다. 즉 <b>수출 충격이 먼저 오고, 고용 반응은 1~2개 분기 늦게 따라온 것</b>으로 읽을 수 있다. 이는 Q2-4("공통충격인가")에 대해 "산단 내부 요인"보다 "대외 수요 충격"에 무게를 싣는 근거이며, 06장의 정책 매핑에서 신규수요창출·수출지원 트랙과 연결된다.</p>
+
+    <h3>(2) 고용위기지역 지정요건 — 2026년 4월 개정판 vs 창원 실측치</h3>
+    <div class="admin-card">
+      <div class="src">고용노동부 고시 · 2026.05.04 시행</div>
+      <h4>고용위기지역·특별고용지원업종 지정 요건 개편</h4>
+      <p>직전 <b>6개월</b> 기준(기존 12개월에서 단축)으로 아래 4개 정량지표 중 <b>3개 이상</b> 충족 시 지정 검토 대상이 된다. 1~2개만 충족해도 정성요건을 종합 고려해 지정할 수 있고, 급격한 고용감소가 확실시되면 예외적 지정도 가능하다.</p>
+      <div class="req">
+        <b>① </b>고용보험 피보험자 증감률이 전국 평균 대비 5%p 이상 낮음<br>
+        <b>② </b>피보험자 수 5% 이상 감소<br>
+        <b>③ </b>고용보험 사업장 수 5% 이상 감소<br>
+        <b>④ </b>구직급여 신청자 20% 이상 증가
+      </div>
+    </div>
+    <div class="scrollx">
+    <table class="data">
+      <tr><th>요건</th><th>필요 데이터</th><th>창원 관련 실측치</th><th>판정</th></tr>
+      <tr><td style="text-align:left">① 전국 대비 5%p 저조</td><td style="text-align:left">전국 고용보험 피보험자 증감률</td><td style="text-align:left">보유 데이터 없음</td><td style="text-align:left"><span class="status-pill maybe">확인불가</span></td></tr>
+      <tr><td style="text-align:left">② 피보험자 5%+ 감소</td><td style="text-align:left">EIS 창원시 제조업/기계·장비</td><td style="text-align:left">기계·장비 29,159→29,386명(2025Q2→26Q1, <b>오히려 증가</b>)</td><td style="text-align:left"><span class="status-pill no">미충족</span></td></tr>
+      <tr><td style="text-align:left">③ 사업장 5%+ 감소</td><td style="text-align:left">EIS 사업장 수</td><td style="text-align:left">보유 데이터 없음(CCI 입주업체수는 오히려 소폭 증가: 1,535→1,559개)</td><td style="text-align:left"><span class="status-pill maybe">확인불가</span></td></tr>
+      <tr><td style="text-align:left">④ 구직급여 신청 20%+ 증가</td><td style="text-align:left">고용보험 실업급여 DB</td><td style="text-align:left">보유 데이터 없음</td><td style="text-align:left"><span class="status-pill maybe">확인불가</span></td></tr>
+    </table>
+    </div>
+    <div class="callout brick">
+      <h4>행정적 결론 — 현재로선 지정 요건과 거리가 있다</h4>
+      <p>확인 가능한 유일한 정량지표(②, EIS 기계·장비 피보험자)는 오히려 <b>증가</b>하고 있어 명백히 미충족이다. 2018년 진해구 사례처럼 정량요건 없이 "선제적 사전대응"으로 지정된 전례가 있긴 하지만, 그 경우도 STX조선해양이라는 <b>특정 대기업의 구조조정 발표</b>라는 뚜렷한 정성적 트리거가 있었다. 현재 창원 기계 업종 데이터에는 그런 트리거(대기업 폐쇄·구조조정 발표)가 확인되지 않으므로, Q2 데이터만으로 고용위기지역 지정을 주장하는 것은 <b>과잉해석</b>이다.</p>
+    </div>
+
+    <h3>(3) 고용위기 선제대응지역 — 2026년 2월 신설, 더 낮은 문턱</h3>
+    <div class="admin-card">
+      <div class="src">고용노동부 · 2026.02.05 발표</div>
+      <h4>고용위기 선제대응지역 제도</h4>
+      <p>국내외 경제상황 변화로 고용사정이 급격히 악화되거나 <b>악화될 우려가 있는</b> 지역을 사전 지정해 7개 지원사업(고용유지지원금, 직업훈련, 생활안정자금 등)에서 우대 혜택을 주는 제도다. 정량요건이 고용위기지역보다 느슨해, "악화될 우려"라는 예측적 근거만으로도 신청 논의가 가능하다.</p>
+      <div class="req"><b>Q2 데이터와의 연결: </b>기계 수출 2개 분기 연속 두 자릿수 급감(2025Q3 −26.0%, Q4 −50.9%) → 2026Q1부터 고용 반전이라는 <b>선행지표→후행지표 패턴</b>은, "이미 위기"가 아니라 "악화될 우려"를 논증하는 데 적합한 근거 유형이다.</div>
+    </div>
+
+    <h3>(4) 산업위기대응특별지역 — 기존 제도, 6대 지원분야</h3>
+    <p>산업통상자원부가 운영하는 이 제도는 조선업 위기 당시 거제·통영·군산·창원 진해구에 적용된 바 있다(①금융·세제 ②신규수요창출 ③고용지원 ④사업재편·지역특화발전 ⑤지역혁신역량구축 ⑥지역상권활성화). 고용위기지역과 별도 트랙이며, 지역경제 전반 회복에 초점을 둔다. 창원 기계 업종의 수출 충격이 이어질 경우 ②신규수요창출(수출기업 지원)·④사업재편(업종전환 보조금) 트랙이 우선 검토 대상이 된다.</p>
+
+    <h3>(5) 스마트그린산업단지 지원사업 — 2026년 창원 선정, 자동화 가설과의 시간적 연결</h3>
+    <div class="admin-card">
+      <div class="src">산업통상자원부 · 2026.08.05 보도</div>
+      <h4>창원, 제조AX(AI전환) 산학혁신파크 + 5G 특화망 구축사업 동시 선정</h4>
+      <p>창원시는 2026년 스마트그린산업단지 지원사업 공모에서 '제조AX 산학혁신파크 구축사업'과 '산업단지 5G 특화망 인프라 구축사업'에 선정돼 총사업비 216억원(국비 165억원)을 확보했다. 창원국가산업단지를 AI 자율제조 실증거점으로 육성하며, AI 기반 품질검사·설비 예지보전 등을 통해 <b>중소·중견기업의 AI 도입 부담을 줄이는 것</b>이 목표다.</p>
+      <div class="req"><b>Q2 데이터와의 연결: </b>기계 업종은 firms_in·firms_op(업체수)가 거의 줄지 않은 채 업체당 평균 고용만 줄어드는 패턴을 보였다(v2 분석). 이 사업이 진행 중인 시점과 겹친다는 점에서, "자동화가 원인"이라는 가설을 <b>검증할 수는 없지만 배제할 수도 없는 근거</b>가 하나 늘었다. 정책적으로는 원인 규명과 무관하게, 이미 진행 중인 AI전환 사업에 <b>재직자 전환배치·재훈련 지원 트랙</b>을 연계할 필요성을 시사한다.</p>
+    </div>
+  </section>
+
+  <section id="mapping">
+    <span class="tag tag admin">SECTION 04</span>
+    <h2><span class="num">04</span>실무 정책 매핑 — Q2 발견 → 행정 프로그램</h2>
+    <table class="map-table">
+      <tr><th>Q2 발견</th><th>연결 가능한 행정 프로그램</th><th>현재 상태</th></tr>
+      <tr>
+        <td>기계 고용 −3,979명, 기여율 91.85%(2026Q2)</td>
+        <td>고용위기지역(고용노동부)</td>
+        <td><span class="status-pill no">정량요건 미충족</span> EIS 기계·장비는 오히려 증가</td>
+      </tr>
+      <tr>
+        <td>기계 2개 분기 연속 S4, 수출 선행 급감</td>
+        <td>고용위기 선제대응지역(고용노동부, 2026.2 신설)</td>
+        <td><span class="status-pill maybe">신청 논의 가능</span> "악화될 우려" 근거로 활용 가능</td>
+      </tr>
+      <tr>
+        <td>수출 2개 분기 두 자릿수 급감(CCI)</td>
+        <td>산업위기대응특별지역 ②신규수요창출(산업통상부)</td>
+        <td><span class="status-pill maybe">검토 대상</span> 대기업 구조조정 발표 등 정성 트리거 필요</td>
+      </tr>
+      <tr>
+        <td>업체수 안정 + 업체당 고용만 감소</td>
+        <td>스마트그린산단 제조AX 사업(창원 2026 선정)</td>
+        <td><span class="status-pill yes">이미 진행 중</span> 재훈련·전환배치 트랙 연계 제안 가능</td>
+      </tr>
+      <tr>
+        <td>EIS-KICOX 불일치(산단 특유 현상 가능성)</td>
+        <td>없음 — 신규 조사 필요</td>
+        <td><span class="status-pill maybe">추가 자료 필요</span> 05장 아이디어 참고</td>
+      </tr>
+    </table>
+  </section>
+
+  <section id="ideas">
+    <span class="tag tag idea">SECTION 05 · 심사 방어</span>
+    <h2><span class="num">05</span>심사 방어 근거 재검증</h2>
+    <p class="section-intro">"규모가 커서 그런 것 아닌가", "공통충격이 맞는가", "기준이 자의적이지 않은가" 같은 예상 질의에 대해, 위 EDA·행정 근거 외에 추가로 직접 계산한 결과다. 기존 결론을 강화하는 부분과 <b>수정이 필요한 부분</b>을 함께 밝힌다.</p>
+
+    <h3>(1) 규모효과 보정 — "기계가 커서 감소분도 큰 것 아닌가?"</h3>
+    <p>2026Q2 전체 고용 YoY는 −3.64%다. 기계가 이 평균 속도로만 줄었다면 기대되는 감소분(비례 기대치)과 실제 감소분을 비교했다.</p>
+    <div class="scrollx">
+    <table class="data">
+      <tr><th>업종</th><th>2025Q2 기준 고용</th><th>실제 증감</th><th>비례 기대 증감</th><th>초과 증감</th></tr>
+      <tr><td>기계</td><td>62,763명</td><td class="neg">−3,979명</td><td>−2,282명</td><td class="neg">−1,697명 (기대치의 1.75배)</td></tr>
+      <tr><td>전기전자</td><td>28,095명</td><td class="neg">−116명</td><td>−1,021명</td><td class="pos">+905명(기대보다 덜 감소)</td></tr>
+      <tr><td>운송장비</td><td>16,437명</td><td class="neg">−129명</td><td>−598명</td><td class="pos">+469명</td></tr>
+      <tr><td>철강</td><td>9,801명</td><td class="neg">−112명</td><td>−356명</td><td class="pos">+244명</td></tr>
+    </table>
+    </div>
+    <p>규모만큼만 줄었다면 −2,282명이어야 했는데 실제로는 −3,979명, 즉 <b>비례 기대치보다 1,697명(약 75%) 더 감소</b>했다. 반대로 전기전자·운송장비·철강은 비례 기대치보다 오히려 덜 줄었다. 변화율(YoY%)로 봐도 기계 −6.34%는 고용비중 1% 이상인 업종 중 가장 크다. <b>규모 효과로는 설명되지 않는 초과 감소</b>라는 뜻이다.</p>
+
+    <h3>(2) "기계만의 문제인가, 산단 전체 공통충격인가" — 재검증 결과 결론 일부 수정</h3>
+    <div class="scrollx">
+    <table class="data">
+      <tr><th>지표</th><th>값</th></tr>
+      <tr><td>기계 제외 나머지 9개 업종 2026Q2 순증감</td><td class="neg">−353명 (기계 없이도 순감소)</td></tr>
+      <tr><td>기계 Δ vs 나머지9개 합 Δ, 18분기 상관계수</td><td class="neg">−0.686 (강한 음의 상관)</td></tr>
+      <tr><td>18분기 중 "기계·나머지 동시 순감소" 발생 횟수</td><td>3회 (2022Q4, 2026Q1, 2026Q2)</td></tr>
+      <tr><td>"6개 이상 업종 동시 순감소" 지속 기간</td><td>2025Q1부터 6분기 연속(7·7·7·6·8·7)</td></tr>
+    </table>
+    </div>
+    <div class="callout brick">
+      <h4>수정된 해석</h4>
+      <p>기계 제외해도 나머지 업종 합계가 순감소(−353명)라는 점은 "제조업 전반이 완전히 건강한데 기계만 문제"라는 반박을 방어한다. 다만 18분기 전체로 보면 기계와 나머지 업종은 역사적으로 <b>음의 상관(−0.686)</b>, 즉 서로 상쇄하는 관계가 지배적이었다. 둘이 동시에 마이너스였던 것은 18분기 중 3번뿐이고 그중 2번이 최근 2개 분기다 — <b>흔한 공통충격이 아니라 드문 사건이 최근 연속 발생한 것</b>이다. 또한 "여러 업종 동시감소"(6개 이상) 자체는 2025Q1부터 이어진 추세이며, 2026년에 새로 생긴 게 아니라 <b>기계가 뒤늦게 그 흐름에 합류한 것</b>이다. → "산단 전체가 공통 국면으로 동시 위축"이라는 표현은 과장이며, "업종 간 증감은 평소 상쇄되는 경향이 있으나 최근 2개 분기는 예외적으로 동조화됐다"로 고쳐 쓴다.</p>
+    </div>
+
+    <h3>(3) 상세 추적 기준(5%·300명)의 민감도</h3>
+    <div class="scrollx">
+    <table class="data">
+      <tr><th>기준 조합</th><th>선정 업종</th></tr>
+      <tr><td style="text-align:left">비중≥5% + 절대합≥300명(현행)</td><td style="text-align:left">기계·전기전자·운송장비·<b>철강</b></td></tr>
+      <tr><td style="text-align:left">비중≥5% + 절대합≥500명</td><td style="text-align:left">기계·전기전자·운송장비</td></tr>
+      <tr><td style="text-align:left">비중≥10% + 절대합≥300명</td><td style="text-align:left">기계·전기전자·운송장비</td></tr>
+      <tr><td style="text-align:left">비중≥3% + 절대합≥200명</td><td style="text-align:left">기계·전기전자·운송장비·<b>철강</b></td></tr>
+    </table>
+    </div>
+    <p>기계·전기전자·운송장비 3개는 모든 조합에서 선정되는 <b>로버스트한 핵심</b>이다. 철강만 절대합 임계값(300 vs 500)에 따라 포함 여부가 갈리는 경계선 사례다. 기준을 다소 바꿔도 "기계가 압도적"이라는 핵심 결론은 유지된다.</p>
+
+    <h3>(4) 수출→고용 선행관계의 한계 — 인과관계로 말할 수 없음</h3>
+    <p>업종별 수출 데이터는 2025Q2~2026Q1, <b>n=4분기뿐</b>이라 시차상관을 계산해도 통계적으로 무의미하다. 다만 산단 <b>총수출</b>(2022Q2~2026Q1 장기시계열)은 오히려 안정적이었다(4,715→4,081→4,346→4,374백만불). 기계 수출이 −50.9%(2025Q4) 급감했는데도 총계가 버틴 건 운송장비 수출 +21.7% 등이 상쇄했기 때문이다. 이는 이번 수출 충격이 <b>산단 전체 대외충격이 아니라 기계 업종에 국한된 충격</b>이라는 (2)의 수정된 해석과 일치한다. "수출감소가 고용감소의 원인"이라고 주장하지 않으며, "관찰된 하나의 선행 사례이자 조기경보 가설"이라는 수준으로만 제시한다.</p>
+
+    <h3>(5) 자동화(AX) 해석의 타당성 — 지지 가능한 것과 아닌 것</h3>
+    <div class="scrollx">
+    <table class="map-table">
+      <tr><th>가설</th><th>현재 데이터 판정</th></tr>
+      <tr><td>업체 수 감소(이탈)</td><td><span class="status-pill no">배제 가능</span> firms_in·firms_op 거의 불변(1,453~1,469개)</td></tr>
+      <tr><td>업체당 고용 감소</td><td><span class="status-pill yes">직접 확인됨</span> 43.2명→40.3명(2025Q2→2026Q2)</td></tr>
+      <tr><td>자동화</td><td><span class="status-pill maybe">확인 불가</span> 설비투자 데이터 없음, AX 정책 시행과 시기만 겹침</td></tr>
+      <tr><td>외주화</td><td><span class="status-pill maybe">확인 불가</span> 외주비 데이터 없음</td></tr>
+      <tr><td>수요감소(수출↓)</td><td><span class="status-pill maybe">정황상 유력</span> (4)의 선행 관찰과 일치</td></tr>
+      <tr><td>구조조정/채용축소</td><td><span class="status-pill maybe">확인 불가</span> 기업별 고용 데이터 없음</td></tr>
+    </table>
+    </div>
+    <p>업체수 유지+업체당 고용감소라는 <b>패턴</b>은 확인되지만, 이 패턴은 자동화·외주화·수요감소·채용동결 모두와 양립한다. 이 데이터만으로는 원인을 특정할 수 없다고 명시한다. 필요한 추가 데이터(우선순위): ① 기업별(사업체 단위) 고용 마이크로데이터 ② 수주잔고 ③ 설비·자동화 투자액 ④ 외주비 비중 ⑤ 초과근로시간.</p>
+
+    <h3>(6) Q1 심화분석과의 정합성</h3>
+    <p>Q1 심화분석에서는 S4(동반감소) 이탈 시 S2(생산 먼저 회복)로 가는 경우가 7건으로, S1로 바로 회복하는 경우(1건)보다 압도적으로 많다고 확인했다. 기계의 18분기 이력도 같은 패턴을 보인다 — 2022Q4~2023Q1 첫 번째 2분기 연속 S4 이후 S2를 거쳐 2024Q2에야 S1로 안착했다(약 3분기 소요). 즉 <b>2026Q1~Q2의 2분기 연속 S4는 기계에게 처음 있는 일이 아니라 두 번째 사례</b>이며, Q1의 전환경로 패턴과 일치하는 만큼 "생산이 먼저 돌아서고 고용은 몇 분기 늦게 따라올 가능성"을 회복 경로의 참고 패턴으로 제시할 수 있다(예측은 아니다).</p>
+
+    <h3>데이터가 보여주는 것 / 보여주지 못하는 것 / 추가 데이터가 있으면 보여줄 것</h3>
+    <div class="idea-grid" style="grid-template-columns:1fr 1fr 1fr;">
+      <div class="idea-col">
+        <h4>직접 보여주는 것</h4>
+        <ul>
+          <li>기계 기여율 91.85%, 규모보정 후에도 초과감소 1,697명</li>
+          <li>기계 제외해도 나머지 순감소(−353명)</li>
+          <li>기계-나머지 상관관계는 평소 음(−), 최근 2개 분기만 예외적 동조</li>
+          <li>기계 2분기 연속 S4는 18분기 중 2번째 사례</li>
+          <li>업체수 불변, 업체당 고용만 감소</li>
+          <li>기계 수출이 고용보다 먼저 꺾임(n=4, 사례 수준)</li>
+        </ul>
+      </div>
+      <div class="idea-col">
+        <h4>확인할 수 없는 것</h4>
+        <ul>
+          <li>자동화가 실제 원인인지</li>
+          <li>수출감소가 고용감소의 인과적 원인인지</li>
+          <li>행정 지정요건 4개 중 3개(데이터 미보유)</li>
+          <li>기업 내부 구조조정·외주화 여부</li>
+          <li>"통계적 유의성" — 전수 데이터라 검정 대상 아님</li>
+        </ul>
+      </div>
+      <div class="idea-col">
+        <h4>추가 데이터가 있으면</h4>
+        <ul>
+          <li>기업별 고용 마이크로데이터</li>
+          <li>설비투자·자동화투자액, 외주비</li>
+          <li>전국 대비 피보험자 증감률, 구직급여 신청자 수</li>
+          <li>업종별 수출 장기시계열(현재 4분기뿐)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="conclusion">
+    <span class="tag">SECTION 06</span>
+    <h2><span class="num">06</span>결론 및 보고서 문장 규칙</h2>
+    <p>2026Q2 기계 업종의 91.85% 기여율은 규모 효과만으로 설명되지 않는다 — 비례 기대치보다 1,697명 더 감소했고, 변화율(YoY%) 기준으로도 유효 비중 업종 중 최대다. 다만 "산단 전체 공통충격"이라는 표현은 과장이다 — 기계와 나머지 업종은 역사적으로 상쇄 관계(상관계수 −0.686)였고, 동시 순감소는 18분기 중 3번뿐인 드문 사건이 최근 연속된 것이다. 행정 지정요건은 확인 가능한 유일한 정량지표(EIS 기계·장비 피보험자)가 오히려 증가해 아직 미충족이며, 자동화 여부는 이 데이터만으로 확정할 수 없다. 그럼에도 수출 선행 관찰, 안정적 업체수, 진행 중인 제조AX 정책은 재훈련·전환배치 지원을 실무적으로 검토할 근거가 된다.</p>
+    <ul class="rule-list">
+      <li>국면(S1~S4)은 업종의 좋고 나쁨이 아니라 상태 분류라고 명시한다.</li>
+      <li>가동률·업체수·PPI·EIS는 국면 판정에 쓰지 않으며, 이 문서의 EIS·CCI 활용은 "정책 자격요건 판단용"이라는 별도 목적임을 밝힌다.</li>
+      <li>"공통충격"·"동시 위축" 표현은 상관관계 수치와 함께가 아니면 쓰지 않는다.</li>
+      <li>"통계적으로 유의하다"는 표현은 쓰지 않는다 — 전수 데이터 분석이며 유의성 검정 대상이 아니다.</li>
+      <li>행정 지정요건 충족 여부는 확인 가능한 지표에 한해서만 판정하고, 확인 불가 항목은 "확인불가"로 명시한다.</li>
+      <li>수출→고용 관계는 인과관계가 아니라 n=4의 관찰된 사례·조기경보 가설로만 서술한다.</li>
+      <li>자동화·외주화 등 원인 주장은 이 데이터만으로 확정할 수 없다고 명시한다.</li>
+    </ul>
+  </section>
+
+  <section id="refs">
+    <span class="tag">참고 · 출처</span>
+    <h2 style="border-bottom:none; margin-bottom:10px;">참고문헌 및 데이터 출처</h2>
+    <div class="refs">
+      <h4>행정 자료 (신규)</h4>
+      <ol>
+        <li>고용노동부, 「고용위기지역 및 특별고용지원업종 지정 요건 개선」, 2026.05.04 시행.</li>
+        <li>고용노동부, 「고용위기 선제대응지역 선제 대응 강화」, 2026.02.05 발표.</li>
+        <li>고용노동부·산업통상자원부, 군산·거제·통영·고성·창원 진해구·울산 동구 고용위기지역 지정 사례(2018.4.5), KDI 경제정보센터.</li>
+        <li>산업통상자원부, 「산업위기대응특별지역」 제도 설명, 국가정보포털(NABIS).</li>
+        <li>산업통상자원부, 「2026년 스마트그린산업단지 지원사업 통합공고」 및 창원시 선정 보도자료(2026.08.05).</li>
+      </ol>
+      <h4>데이터 (본 개정판에서 직접 확인)</h4>
+      <ol>
+        <li>창원상공회의소, 「창원지역 경제동향 조사」 2025Q2~2026Q1 — <code>data/raw/cci_report/</code>(업종별 현황: 입주·가동업체수, 생산, 수출, 고용).</li>
+        <li>고용노동부 EIS, 창원시 업종별(기계·장비/전기장비/자동차·부품) 고용보험 피보험자 동향 — <code>data/raw/cci_report/창원시_업종별_고용보험피보험자_동향.csv</code>.</li>
+        <li>한국산업단지공단(KICOX), 창원국가산단 업종별 생산·고용 — <code>data/processed/kicox/changwon_state_panel.csv</code>.</li>
+      </ol>
+      <h4>선행연구 (이전 개정판과 동일)</h4>
+      <ol>
+        <li>오호영 외(2021), 「제조업 위기와 지역 일자리 창출 방안」, 한국직업능력연구원.</li>
+        <li>이희선·강동우·최충(2020), 「조선업 위기가 지역상권 고용에 미친 영향: 거제시와 통영시 사례를 중심으로」, 경제학연구 68(2).</li>
+      </ol>
+      <h4>프로젝트 내부 문서</h4>
+      <ol>
+        <li>Q1 상태 심화분석 — 창원국가산단 업종별 산업·고용 국면 진단(같은 공통기준·패널 사용, S4→S2 전환경로 분석 포함).</li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>창원국가산단 업종별 산업·고용 전환진단 · Q2 규모 분석 행정 근거 보강판</span>
+    <span>기반: EDA(02_eda) + 고용노동부·산업통상자원부 2026년 고시·공고 + CCI/EIS 교차검증</span>
+  </div>
+</footer>
+
+</body>
+</html>
