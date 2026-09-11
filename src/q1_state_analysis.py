@@ -120,7 +120,8 @@ def reference_period_context(ref: pd.DataFrame) -> pd.Series:
 # ---------------------------------------------------------------------------
 # 차트 1 — 업종x분기 국면 히트맵
 # ---------------------------------------------------------------------------
-def plot_heatmap(df: pd.DataFrame, save_path: Path = FIG_DIR / "heatmap_q1.png"):
+def plot_heatmap(df: pd.DataFrame, save_path: Path | None = None):
+    save_path = save_path or FIG_DIR / "heatmap_q1.png"
     quarters = sorted(df["quarter"].unique())
     piv = df.pivot(index="industry", columns="quarter", values="state")
     piv = piv.reindex(INDUSTRY_ORDER)[quarters]
@@ -191,7 +192,8 @@ def plot_heatmap(df: pd.DataFrame, save_path: Path = FIG_DIR / "heatmap_q1.png")
 # 차트 2 — 최신분기 생산·고용 산점도
 # ---------------------------------------------------------------------------
 def plot_scatter_latest(df: pd.DataFrame, quarter: str,
-                         save_path: Path = FIG_DIR / "scatter_latest.png"):
+                         save_path: Path | None = None):
+    save_path = save_path or FIG_DIR / "scatter_latest.png"
     latest = df[df["quarter"] == quarter].copy()
     xmin, xmax = -25, 62
     ymin, ymax = -13, 21
@@ -233,7 +235,8 @@ def plot_scatter_latest(df: pd.DataFrame, quarter: str,
 # 차트 3 — 민감도(threshold) 비교 바차트
 # ---------------------------------------------------------------------------
 def plot_sensitivity(quality_report_path: Path,
-                      save_path: Path = FIG_DIR / "sensitivity_chart.png"):
+                      save_path: Path | None = None):
+    save_path = save_path or FIG_DIR / "sensitivity_chart.png"
     with open(quality_report_path, encoding="utf-8") as f:
         qr = json.load(f)
 
