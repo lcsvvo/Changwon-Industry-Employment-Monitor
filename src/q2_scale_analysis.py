@@ -1,194 +1,249 @@
 """
-Changwon National Industrial Complex: Employment Scale & Contribution Analysis
-Module: Core calculations for employment decomposition, scale adjustment, and external validation.
+Q2. 산업·고용 규모 및 집중도 분석 모듈 (src/q2_scale_analysis.py)
+====================================================================
+창원국가산단 패널 데이터를 바탕으로 고용 증감의 규모효과, 
+업종별 기여율, 집중도(HHI), 그리고 주력 업종의 동조화 현상을 분석합니다.
+
+주요 분석 항목:
+  - 분기별 순증감 기여율 및 표시 게이트(R), HHI 지수 산출
+  - 비례 기대치 대비 규모효과 보정(초과 증감 분석)
+  - 기계 업종과 잔여 업종 간 상관성 및 공통 충격(동조화) 검증
+  - 상세 추적 대상 업종 임계값(Threshold) 민감도 분석
+  - 국면 전이 및 지속기간(Run-length) 분석
+  - 사업체 수 및 업체당 평균 고용(규모 분해) 분석
+  - 고용보험(EIS) 통계 교차 검증 (자격요건 평가용)
+  - 창원상의(CCI) 수출-고용 시계열 추이 분석
 """
 
-from pathlib import Path
 import re
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# 출력 옵션 설정
-pd.set_option("display.width", 160)
-pd.set_option("display.max_columns", 20)
+pd.set_option("display.width", 200)
+pd.set_option("display.max_columns", 40)
 pd.set_option("display.float_format", lambda x: f"{x:,.2f}")
 
-# 경로 동적 설정 (레포지토리 루트 기준)
-ROOT_DIR = Path(__file__).resolve().parents[1] if Path(__file__).resolve().parent.name == "src" else Path(__file__).resolve().parent
+# ---------------------------------------------------------------------------
+# 경로 설정: src/ 내부 또는 루트 어디서 실행해도 프로젝트 루트를 잡도록 설정
+# ---------------------------------------------------------------------------
+CURRENT_FILE = Path(__file__).resolve()
+ROOT_DIR = CURRENT_FILE.parents[1] if CURRENT_FILE.parent.name == "src" else CURRENT_FILE.parent
 DATA_DIR = ROOT_DIR / "data"
 
-KICOX_PATH = DATA_DIR / "processed" / "kicox" / "changwon_state_panel.csv"
-EIS_PATH = DATA_DIR / "processed" / "eis" / "eis_validation_panel.csv"
+KICOX_PANEL = DATA_DIR / "processed" / "kicox" / "changwon_state_panel.csv"
+EIS_PANEL = DATA_DIR / "processed" / "eis" / "eis_validation_panel.csv"
 CCI_DIR = DATA_DIR / "raw" / "cci_report"
 
-TARGET_QUARTER = "2026Q2"
+LATEST_Q = "2026Q2"
+BASE_Q = "2025Q2"  # LATEST_Q의 전년동기
 
 
-def load_and_preprocess_panel(filepath: Path) -> pd.DataFrame:
-    """KICOX 패널 데이터를 로드하고 기본 고용 차분 지표를 계산합니다."""
-    if not filepath.exists():
-        raise FileNotFoundError(f"패널 데이터가 존재하지 않습니다: {filepath}")
-    
-    df = pd.read_csv(filepath)
+def hr(title):
+    print("\n" + "=" * 78)
+    print(title)
+    print("=" * 78)
+
+
+# ---------------------------------------------------------------------------
+# 0. 데이터 로드
+# ---------------------------------------------------------------------------
+def load_panel():
+    if not KICOX_PANEL.exists():
+        raise FileNotFoundError(f"[오류] 데이터 파일이 존재하지 않습니다: {KICOX_PANEL}")
+    df = pd.read_csv(KICOX_PANEL)
     df["emp_delta"] = df["employment"] - df["employment_lag4"]
     return df.sort_values(["industry", "quarter"]).reset_index(drop=True)
 
 
-def calculate_quarterly_decomposition(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    분기별 고용 순증감 분해, 최대 기여 업종 산출, 
-    기여율 표시 게이트(R) 및 고용 집중도(HHI)를 집계합니다.
-    """
-    results = []
-    for quarter, group in df.groupby("quarter"):
-        valid = group[group["employment_yoy_computable"] == True]
-        if valid.empty:
+# ---------------------------------------------------------------------------
+# 1. 분기별 기여율 / 표시게이트 R / HHI 지수 산출
+# ---------------------------------------------------------------------------
+def calculate_quarterly_decomposition(df):
+    hr("1. 분기별 기여율 / 표시게이트 R / HHI 산출")
+    rows = []
+    for q, g in df.groupby("quarter"):
+        gv = g[g["employment_yoy_computable"] == True]
+        if len(gv) == 0:
             continue
-            
-        net_change = valid["emp_delta"].sum()
-        abs_sum_change = valid["emp_delta"].abs().sum()
-        
-        # 기여율 신뢰성 비율 R (R >= 0.30 필터)
-        r_ratio = abs(net_change) / abs_sum_change if abs_sum_change > 0 else np.nan
-        
-        # 절대 변화량 기준 최대 기여 업종
-        dominant = valid.loc[valid["emp_delta"].abs().idxmax()]
-        dominant_contrib = (dominant["emp_delta"] / net_change * 100) if net_change != 0 else np.nan
-        
-        # 고용 점유율 기반 HHI
-        hhi = (valid["employment_share"] * 100).pow(2).sum()
-        
-        results.append({
-            "quarter": quarter,
-            "net_emp_change": net_change,
-            "r_ratio": r_ratio,
-            "gate_passed": r_ratio >= 0.30,
-            "top_industry": dominant["industry"],
-            "top_contribution_pct": dominant_contrib,
-            "hhi": hhi
-        })
-        
-    return pd.DataFrame(results)
+        net = gv["emp_delta"].sum()
+        abssum = gv["emp_delta"].abs().sum()
+        R = abs(net) / abssum if abssum else np.nan
+        top = gv.loc[gv["emp_delta"].abs().idxmax()]
+        contrib = top["emp_delta"] / net if net != 0 else np.nan
+        hhi = (gv["employment_share"] * 100).pow(2).sum()
+        rows.append(
+            dict(
+                quarter=q,
+                net_emp_change=net,
+                R=R,
+                display_ok=R >= 0.30,          # 공통기준: 기여율 표시 규칙 (R >= 0.30)
+                top_industry=top["industry"],
+                top_contrib_pct=contrib * 100 if pd.notna(contrib) else np.nan,
+                HHI=hhi,
+            )
+        )
+    res = pd.DataFrame(rows)
+    print(res.to_string(index=False))
+    return res
 
 
-def analyze_scale_effect(df: pd.DataFrame, quarter: str = TARGET_QUARTER) -> pd.DataFrame:
-    """
-    기준 시점 고용 규모를 통제하여, 단순 규모에 의한 감소분과 
-    산업 고유의 초과 감소분(Excess Shock)을 분리합니다.
-    """
-    subset = df[(df["quarter"] == quarter) & (df["employment_yoy_computable"] == True)].copy()
-    total_delta = subset["emp_delta"].sum()
-    base_employment = subset["employment_lag4"].sum()
-    benchmark_growth_rate = total_delta / base_employment
+# ---------------------------------------------------------------------------
+# 2. 규모효과 보정 분석 (비례 기대치 대비 초과 증감 검증)
+# ---------------------------------------------------------------------------
+def analyze_scale_effect(df, quarter=LATEST_Q):
+    hr(f"2. 규모효과 보정 분석 ({quarter})")
+    g = df[(df["quarter"] == quarter) & (df["employment_yoy_computable"] == True)].copy()
+    total_delta = g["emp_delta"].sum()
+    base_total = g["employment_lag4"].sum()
+    overall_rate = total_delta / base_total
 
-    subset["base_share"] = subset["employment_lag4"] / base_employment
-    subset["expected_delta"] = subset["base_share"] * total_delta
-    subset["excess_delta"] = subset["emp_delta"] - subset["expected_delta"]
+    g["share_base"] = g["employment_lag4"] / base_total
+    g["expected_delta"] = g["share_base"] * total_delta      # 비례배분 기대 증감
+    g["excess_delta"] = g["emp_delta"] - g["expected_delta"]  # 초과 편차분
 
-    cols = ["industry", "employment_lag4", "emp_delta", "expected_delta", "excess_delta", "employment_yoy"]
-    return subset[cols].sort_values("emp_delta")
+    print(f"전체 고용 YoY(규모 무관 기준선): {overall_rate*100:.2f}%")
+    out = g[["industry", "employment_lag4", "emp_delta", "expected_delta", "excess_delta", "employment_yoy"]]
+    out = out.sort_values("emp_delta")
+    print(out.to_string(index=False))
 
-
-def evaluate_industry_comovement(df: pd.DataFrame, key_industry: str = "기계") -> tuple:
-    """
-    주요 업종과 잔여 산업군 간의 상관계수 및 동시 위축 빈도를 분석하여
-    공통 대외 충격인지 특정 업종 고유의 충격인지를 판별합니다.
-    """
-    # 1. 특정 분기 잔여 업종 순증감
-    latest_subset = df[(df["quarter"] == TARGET_QUARTER) & (df["employment_yoy_computable"] == True)]
-    residual_change = latest_subset[latest_subset["industry"] != key_industry]["emp_delta"].sum()
-
-    # 2. 전 시계열 기준 교차상관
-    key_series = df[df["industry"] == key_industry].set_index("quarter")["emp_delta"]
-    residual_series = df[df["industry"] != key_industry].groupby("quarter")["emp_delta"].sum()
-    
-    panel = pd.concat([key_series.rename(key_industry), residual_series.rename("잔여업종합계")], axis=1).dropna()
-    correlation = panel[key_industry].corr(panel["잔여업종합계"])
-    co_downturn_count = len(panel[(panel[key_industry] < 0) & (panel["잔여업종합계"] < 0)])
-
-    return residual_change, correlation, co_downturn_count, len(panel)
+    print("\n-- YoY%(속도 기준) 순위 --")
+    print(g[["industry", "employment_yoy"]].sort_values("employment_yoy").to_string(index=False))
+    return g
 
 
-def test_threshold_robustness(df: pd.DataFrame, quarter: str = TARGET_QUARTER) -> pd.DataFrame:
-    """
-    집중 추적 대상 선정을 위한 고용 비중 및 변화량 절대합 임계값의 민감도를 검증합니다.
-    """
-    panel = df.sort_values(["industry", "quarter"])
-    recent_4q_abs_sum = panel.groupby("industry").tail(4).groupby("industry")["emp_delta"].apply(lambda s: s.abs().sum())
-    current_share = panel[panel["quarter"] == quarter].set_index("industry")["employment_share"] * 100
+# ---------------------------------------------------------------------------
+# 3. 주력 업종(기계) vs 잔여 업종 간 동조화 및 상관관계 분석
+# ---------------------------------------------------------------------------
+def evaluate_industry_comovement(df):
+    hr("3. 기계 vs 나머지 9개 업종 동조화 분석")
 
-    matrix = pd.concat([current_share.rename("고용비중(%)"), recent_4q_abs_sum.rename("최근4분기_변동절대합")], axis=1)
-    return matrix.sort_values("최근4분기_변동절대합", ascending=False)
+    # 3-1. 최신분기 기계 제외 순증감
+    g = df[(df["quarter"] == LATEST_Q) & (df["employment_yoy_computable"] == True)]
+    rest_latest = g[g["industry"] != "기계"]["emp_delta"].sum()
+    print(f"{LATEST_Q} 기계 제외 나머지 9개 업종 순증감: {rest_latest:,.0f}명")
+
+    # 3-2. 18분기 전체 상관관계
+    mach = df[df["industry"] == "기계"].set_index("quarter")["emp_delta"]
+    rest = df[df["industry"] != "기계"].groupby("quarter")["emp_delta"].sum()
+    comb = pd.concat([mach.rename("기계"), rest.rename("나머지9개합")], axis=1).dropna()
+    corr = comb["기계"].corr(comb["나머지9개합"])
+    print(f"\n18분기 상관계수(기계 Δ vs 나머지9개 합 Δ): {corr:.3f}")
+    print(comb)
+
+    # 3-3. 동시 순감소 분기 수
+    both_neg = comb[(comb["기계"] < 0) & (comb["나머지9개합"] < 0)]
+    print(f"\n기계·나머지 동시 순감소 분기: {len(both_neg)}개 / {len(comb)}개")
+    print(both_neg)
+
+    # 3-4. 분기별 순감소 업종 수 시계열
+    print("\n-- 분기별 순감소 업종 수 --")
+    for q, gq in df[df["employment_yoy_computable"] == True].groupby("quarter"):
+        n_neg = (gq["emp_delta"] < 0).sum()
+        print(f"{q}: {n_neg}/{len(gq)}")
+
+    return comb, corr
 
 
-def check_firm_employment_dynamics(df: pd.DataFrame, target_industry: str = "기계") -> pd.DataFrame:
-    """
-    가동 사업체 수와 사업체당 평균 고용 인원 간 동태적 변화를 추적합니다.
-    """
-    ind_df = df[df["industry"] == target_industry][["quarter", "employment", "firms_in", "firms_op"]].copy()
-    ind_df["emp_per_operating_firm"] = ind_df["employment"] / ind_df["firms_op"]
-    return ind_df.dropna()
+# ---------------------------------------------------------------------------
+# 4. 상세 추적 대상 업종 임계값(Threshold) 민감도 분석
+# ---------------------------------------------------------------------------
+def test_threshold_robustness(df, quarter=LATEST_Q):
+    hr("4. 상세추적 기준 임계값 민감도 분석")
+    d = df.sort_values(["industry", "quarter"])
+    last4_abs = d.groupby("industry").tail(4).groupby("industry")["emp_delta"].apply(
+        lambda s: s.abs().sum()
+    )
+    share_latest = d[d["quarter"] == quarter].set_index("industry")["employment_share"] * 100
+    combo = pd.concat(
+        [share_latest.rename("emp_share_pct"), last4_abs.rename("abs_sum_4q")], axis=1
+    ).sort_values("abs_sum_4q", ascending=False)
+    print(combo)
+
+    print("\n-- 기준 조합 시나리오별 상세추적 대상 --")
+    for share_th, abs_th in [(5, 300), (5, 500), (10, 300), (3, 200), (5, 200)]:
+        sel = combo[(combo["emp_share_pct"] >= share_th) & (combo["abs_sum_4q"] >= abs_th)]
+        print(f"비중>={share_th}%, 절대합>={abs_th}명 -> {list(sel.index)}")
+    return combo
 
 
+# ---------------------------------------------------------------------------
+# 5. 국면 전이확률행렬 & run_length (지속성 검증)
+# ---------------------------------------------------------------------------
+def state_transition_and_runs(df):
+    hr("5. 국면 전이확률행렬 및 run_length 지속기간")
+    tv = df[df["valid_transition"] == True]
+    trans = pd.crosstab(tv["state"], tv["next_state"])
+    trans_prob = trans.div(trans.sum(axis=1), axis=0)
+    print("-- 전이 건수 --")
+    print(trans)
+    print("\n-- 전이확률 (행 기준) --")
+    print(trans_prob.round(3))
+
+    runs = df.dropna(subset=["run_id"]).drop_duplicates(subset=["run_id"])
+    print("\n-- state별 run_total_length 분포 --")
+    print(runs.groupby("state")["run_total_length"].describe()[["count", "mean", "min", "50%", "max"]])
+
+    print("\n-- 기계 업종 18분기 국면 이력 --")
+    m = df[df["industry"] == "기계"][["quarter", "state", "production_yoy", "employment_yoy"]]
+    print(m.to_string(index=False))
+    return trans_prob, runs
+
+
+# ---------------------------------------------------------------------------
+# 6. 기계 업종 사업체 수 및 업체당 평균 고용 (규모 분해)
+# ---------------------------------------------------------------------------
+def check_firm_employment_dynamics(df, industry="기계"):
+    hr(f"6. {industry} 사업체 수 및 업체당 고용인원 동태")
+    m = df[df["industry"] == industry][["quarter", "employment", "firms_in", "firms_op"]].copy()
+    m["emp_per_firm"] = m["employment"] / m["firms_op"]
+    print(m.to_string(index=False))
+    return m
+
+
+# ---------------------------------------------------------------------------
+# 7. 외부 지표(EIS, CCI) 보조 교차검증
+# ---------------------------------------------------------------------------
 def load_external_indicators():
-    """행정 지정 요건 및 선행성 검토를 위한 외부 보조 데이터(EIS, CCI)를 확인합니다."""
-    # 고용보험 패널 점검
-    eis_summary = None
-    if EIS_PATH.exists():
-        eis_df = pd.read_csv(EIS_PATH)
-        target_cols = [c for c in ["quarter", "changwon_manufacturing", "eis_manufacturing_yoy_pct"] if c in eis_df.columns]
-        eis_summary = eis_df[target_cols].tail(6)
+    hr("7. 외부 지표(EIS, CCI) 교차검증")
+    # EIS 고용보험 패널
+    if EIS_PANEL.exists():
+        eis = pd.read_csv(EIS_PANEL)
+        cols = [c for c in ["quarter", "changwon_manufacturing", "eis_manufacturing_yoy_pct"] if c in eis.columns]
+        print("\n[EIS 피보험자 동향 최근 시점]")
+        print(eis[cols].tail(10).to_string(index=False))
 
-    # 창원상의 수출 시계열 점검
-    cci_summary = None
+    # CCI 수출 실적 데이터
     if CCI_DIR.exists():
-        records = []
-        for file in sorted(CCI_DIR.glob("*.csv")):
-            match = re.search(r"(20\d{2}Q[1-4])", file.name)
-            if not match:
+        frames = []
+        for f in sorted(CCI_DIR.glob("*.csv")):
+            m = re.search(r"(20\d{2}Q[1-4])", f.name)
+            if not m:
                 continue
-            temp = pd.read_csv(file, comment="#")
-            if "업종" in temp.columns and "수출_전년동기대비(%)" in temp.columns:
-                temp["quarter"] = match.group(1)
-                records.append(temp)
-        if records:
-            concat_cci = pd.concat(records, ignore_index=True)
-            cci_summary = concat_cci[concat_cci["업종"] == "기계"][["quarter", "수출_전년동기대비(%)", "고용_전년동기대비(%)"]]
-
-    return eis_summary, cci_summary
-
-
-def main():
-    print(">>> 1. 패널 데이터 로드 및 분기별 고용 분해 실행")
-    panel_df = load_and_preprocess_panel(KICOX_PATH)
-    decomp_df = calculate_quarterly_decomposition(panel_df)
-    print(decomp_df.tail(6).to_string(index=False))
-
-    print(f"\n>>> 2. {TARGET_QUARTER} 기준 규모효과 보정 분석")
-    scale_adj = analyze_scale_effect(panel_df)
-    print(scale_adj.to_string(index=False))
-
-    print("\n>>> 3. 주요 업종(기계) vs 잔여 산업군 동조성 분석")
-    res_change, corr, co_down, total_q = evaluate_industry_comovement(panel_df)
-    print(f"- {TARGET_QUARTER} 기계 제외 잔여 9개 업종 순증감: {res_change:,.0f}명")
-    print(f"- 장기 시계열 상관계수: {corr:.3f}")
-    print(f"- 동반 순감소 발생 빈도: {co_down} / {total_q} 분기")
-
-    print("\n>>> 4. 상세 추적 기준 민감도 점검")
-    sensitivity = test_threshold_robustness(panel_df)
-    print(sensitivity.to_string())
-
-    print("\n>>> 5. 기계 업종 사업체당 고용인원 시계열 추이")
-    firm_dynamics = check_firm_employment_dynamics(panel_df)
-    print(firm_dynamics.tail(6).to_string(index=False))
-
-    print("\n>>> 6. 외부 지표(EIS, CCI) 교차검증 상태")
-    eis, cci = load_external_indicators()
-    if eis is not None:
-        print("\n[EIS 피보험자 동향 최근 시점]\n", eis.to_string(index=False))
-    if cci is not None:
-        print("\n[CCI 기계 수출-고용 시차 관측치]\n", cci.to_string(index=False))
+            d = pd.read_csv(f, comment="#")
+            if "업종" not in d.columns or "수출_전년동기대비(%)" not in d.columns:
+                continue
+            d["quarter"] = m.group(1)
+            frames.append(d)
+        if frames:
+            cci = pd.concat(frames, ignore_index=True)
+            m = cci[cci["업종"] == "기계"][["quarter", "수출_전년동기대비(%)", "고용_전년동기대비(%)"]]
+            print("\n[CCI 기계 수출-고용 시차 관측]")
+            print(m.to_string(index=False))
 
 
+# ---------------------------------------------------------------------------
+# main
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    main()
+    df = load_panel()
+
+    calculate_quarterly_decomposition(df)
+    analyze_scale_effect(df)
+    evaluate_industry_comovement(df)
+    test_threshold_robustness(df)
+    state_transition_and_runs(df)
+    check_firm_employment_dynamics(df)
+    load_external_indicators()
+
+    hr("[완료] Q2 산업·고용 규모 및 집중도 정량 분석 파이프라인 실행 종료")
