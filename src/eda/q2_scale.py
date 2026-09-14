@@ -73,8 +73,10 @@ def scale_summary(state, q2, ctx, share_cut=config.SHARE_CUT, abs_cut=config.ABS
     recent4 = ctx.quarters[-recent_n:]
     rec_state = state[state.quarter.isin(recent4)]
     rec = rec_state.groupby('industry').emp_delta.agg(
-        최근4분기_YoY증감합='sum', 최근4분기_YoY증감절대합=lambda s: s.abs().sum())
-    # Four quarterly stock changes telescope to latest minus t-4, not the sum of YoY differences.
+        최근4분기_평균고용_전년대비증감=lambda s: s.sum(min_count=len(recent4)) / len(recent4),
+        최근4분기_YoY증감절대합=lambda s: s.abs().sum())
+    # 네 분기 YoY 증감의 합을 분기 수로 나누면 '최근 4분기 평균 고용 - 그 이전 4분기 평균 고용'과 같다.
+    # 기간 순증감(최신분기 - 4분기 전)과는 다른 값이다. 절대합은 상세표시 대상을 고르는 변화 크기 지표일 뿐이다.
     rec['최근4분기_기간순증감'] = q2.증감인원
     summary = pd.DataFrame({'고용비중%': q2['고용비중%'], f'{ctx.latest}_증감인원': q2.증감인원,
                             f'{ctx.latest}_증감률%': q2['증감률%'],
@@ -83,13 +85,30 @@ def scale_summary(state, q2, ctx, share_cut=config.SHARE_CUT, abs_cut=config.ABS
     c2 = summary['최근4분기_YoY증감절대합'] >= abs_cut
     main_ind = [i for i in ctx.ind_order_emp if c1[i] and c2[i]]
     summary['상세표시대상'] = c1 & c2
+    if '초과증감' in q2:
+        summary = summary.join(q2[['비례기대증감', '초과증감']])
     return summary, main_ind, recent4
+
+
+# ---------------------------------------------------------------- Q2-C. 비례배분 기준선
+def baseline_comparison(q2):
+    """규모를 통제한 비교 — 비례배분 기준선 대비 초과 증감 컬럼을 붙인 q2를 돌려준다.
+
+    기준선(비례기대증감) = 기준분기(전년동기) 고용비중 x 제조업 전체 순증감.
+    당분기 비중을 쓰면 결과가 분모에 다시 들어가므로 기준분기 비중을 쓴다.
+    기준선은 '모든 업종이 같은 비율로 변했다면'이라는 가정의 비교값이며 원인을 뜻하지 않는다.
+    scale_summary()보다 먼저 호출해야 요약표에 두 컬럼이 들어간다.
+    """
+    out = q2.copy()
+    out['비례기대증감'] = out.고용_전년 / out.고용_전년.sum() * out.증감인원.sum()
+    out['초과증감'] = out.증감인원 - out.비례기대증감
+    return out
 
 
 def q2_results(q2, summary, main_ind, net, ratio, usable, ctx,
                share_cut=config.SHARE_CUT, abs_cut=config.ABS_CUT):
     """results_summary['q2']에 들어가는 값."""
-    return {
+    out = {
         'quarter': ctx.latest, 'employment': float(q2.고용.sum()), 'net_delta': float(net),
         'net_yoy_pct': float(net / q2.고용_전년.sum() * 100), 'ratio': float(ratio),
         'contrib_usable': usable,
@@ -98,3 +117,9 @@ def q2_results(q2, summary, main_ind, net, ratio, usable, ctx,
         'min_delta': float(q2.증감인원.min()), 'main_industries': main_ind,
         'main_share_pct': float(summary.loc[main_ind, '고용비중%'].sum()),
         'selection_share_cut': share_cut, 'selection_abs_cut': abs_cut}
+    if '초과증감' in q2:
+        out.update({
+            'baseline_max_excess_decrease_industry': q2.초과증감.idxmin(),
+            'baseline_max_excess_decrease': float(q2.초과증감.min()),
+            'baseline_excess': {i: float(q2.loc[i, '초과증감']) for i in ctx.ind_order_emp}})
+    return out

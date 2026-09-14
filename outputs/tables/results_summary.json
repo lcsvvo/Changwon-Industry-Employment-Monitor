@@ -57,7 +57,21 @@
     ],
     "main_share_pct": 98.19733519115213,
     "selection_share_cut": 5.0,
-    "selection_abs_cut": 300
+    "selection_abs_cut": 300,
+    "baseline_max_excess_decrease_industry": "기계",
+    "baseline_max_excess_decrease": -1697.3219818398484,
+    "baseline_excess": {
+      "기계": -1697.3219818398484,
+      "전기전자": 905.3620113794666,
+      "운송장비": 468.54858092344875,
+      "철강": 244.30429163659556,
+      "음식료": -1.0064450076366604,
+      "석유화학": 74.53993722831103,
+      "목재종이": -30.695557308537957,
+      "비금속": 4.725466172101845,
+      "기타": 30.307665195280375,
+      "섬유의복": 1.2360316208187174
+    }
   },
   "q3": {
     "n_runs": 70,
@@ -68,6 +82,19 @@
     "n_adjacent": 130,
     "n_same": 88,
     "same_pct": 67.6923076923077,
+    "transition_min_row_n": 20,
+    "transition_low_n_rows": [
+      "S3",
+      "N"
+    ],
+    "valid_block_lengths": [
+      7,
+      3,
+      6
+    ],
+    "max_observable_run": 7,
+    "max_run_at_ceiling": true,
+    "n_longest_censored": 9,
     "current": [
       {
         "industry": "철강",
