@@ -462,6 +462,43 @@ def plot_q2_composition(plot_df, qs, dir_fig):
     return fig
 
 
+# ---------------------------------------------------------------- Q2-C. 비례배분 기준선
+def plot_q2_baseline(q2, main_ind, net, ctx, dir_fig):
+    """Q2C_비례기준선_비교 — 상세표시 대상 업종의 실제 증감 vs 비례배분 기준선.
+
+    q2에는 q2_scale.baseline_comparison()이 붙인 비례기대증감·초과증감 컬럼이 있어야 한다.
+    """
+    if not main_ind:
+        return None
+    bl = q2.loc[main_ind, ['증감인원', '비례기대증감', '초과증감']]
+    fig, ax = plt.subplots(figsize=(10.5, 5.2))
+    x = np.arange(len(bl))
+    w = 0.36
+    ax.bar(x - w / 2, bl.증감인원, w, label='실제 증감',
+           color=[DELTA_COLORS['down'] if v < 0 else (DELTA_COLORS['up'] if v > 0 else DELTA_COLORS['neutral'])
+                  for v in bl.증감인원])
+    ax.bar(x + w / 2, bl.비례기대증감, w, label='비례배분 기준선', color='#C9C9C9')
+    lo = min(bl.증감인원.min(), bl.비례기대증감.min(), 0)
+    hi = max(bl.증감인원.max(), bl.비례기대증감.max(), 0)
+    pad = (hi - lo) * 0.18 or 1.0
+    for xi, (ind, row) in zip(x, bl.iterrows()):
+        anchor = min(row.증감인원, row.비례기대증감, 0)
+        ax.text(xi, anchor - pad * 0.12, f'기준선 대비 {row.초과증감:+,.0f}명', ha='center', va='top',
+                fontsize=9.5, fontweight='bold', color='#333333')
+    ax.axhline(0, color='black', lw=1.0)
+    ax.set_xticks(x)
+    ax.set_xticklabels(bl.index, fontsize=10.5)
+    ax.set_ylim(lo - pad * 1.3, hi + pad * 0.9)
+    ax.set_ylabel(f'고용 증감 인원 (명, {ctx.latest} vs 전년동기 {ctx.base_q})', fontsize=10.2)
+    ax.set_title(f'{ctx.latest} 규모를 통제한 비교 — 실제 증감 vs 비례배분 기준선\n'
+                 f'(제조업 전체 {net:+,.0f}명을 전년동기 고용비중대로 배분, 상세표시 대상 업종)', fontsize=11.5)
+    ax.legend(loc='upper left', frameon=False, fontsize=9)
+    style_ax(ax)
+    plt.tight_layout()
+    save_fig(fig, 'Q2C_비례기준선_비교', dir_fig)
+    return fig
+
+
 # ---------------------------------------------------------------- Q3-A. 주요 업종 경로
 def plot_q3_paths(state, ctx, main_ind, dir_fig):
     """Q3A_주요업종_경로 — 생산·고용 YoY 경로 + 국면 리본(연속기간)."""
@@ -581,8 +618,11 @@ def plot_current_runs(cur, ctx, main_ind, dir_fig):
 
 
 # ---------------------------------------------------------------- Q3-C. 최장 지속
-def plot_longest_runs(longest, dir_fig):
-    """Q3C_업종별_최장지속 — 지속분기 → 시작분기 오름차순."""
+def plot_longest_runs(longest, dir_fig, max_observable_run=None):
+    """Q3C_업종별_최장지속 — 지속분기 → 시작분기 오름차순.
+
+    max_observable_run을 주면 제목에 연속 판정 가능한 최장 구간(관측 한계)을 함께 적는다.
+    """
     long_plot = longest.sort_values(['지속분기', '시작분기'])
     fig, ax = plt.subplots(figsize=(9.4, 5.0))
     y = np.arange(len(long_plot))
@@ -597,7 +637,10 @@ def plot_longest_runs(longest, dir_fig):
         ax.text(row.지속분기 + 0.12, yi,
                 f'{row.국면} · {int(row.지속분기)}Q · {row.시작분기}{censor}',
                 va='center', fontsize=8.9, color='#333333')
-    ax.set_title('업종별 최장 관측 국면 지속기간', fontsize=11.5)
+    title = '업종별 최장 관측 국면 지속기간'
+    if max_observable_run is not None:
+        title += f' (연속 판정 가능한 최장 구간 {max_observable_run}분기)'
+    ax.set_title(title, fontsize=11.5)
     style_ax(ax, ygrid=False, xgrid=True)
     plt.tight_layout()
     save_fig(fig, 'Q3C_업종별_최장지속', dir_fig)
@@ -605,28 +648,42 @@ def plot_longest_runs(longest, dir_fig):
 
 
 # ---------------------------------------------------------------- Q3-C. 전환행렬
-def plot_transition(mat, mat_pct, row_n, trans, ctx, dir_fig):
-    """Q3C_전환행렬 — 행 기준 비율, 대각선 = 같은 국면 유지."""
+def plot_transition(mat, mat_pct, row_n, trans, ctx, dir_fig, min_row_n=config.TRANSITION_MIN_ROW_N):
+    """Q3C_전환행렬 — 행 기준 비율, 대각선 = 같은 국면 유지.
+
+    행 관측이 min_row_n보다 적으면 1건이 비율을 크게 움직이므로 그 행은 비율 대신 건수만 표시한다.
+    """
+    low_rows = [s for s in STATES5 if row_n[s] < min_row_n]
     fig, ax = plt.subplots(figsize=(6.6, 5.9))
-    im = ax.imshow(mat_pct.values, cmap='Blues', vmin=0, vmax=100)
+    shown = mat_pct.astype(float).copy()
+    shown.loc[low_rows] = np.nan
+    cmap = plt.get_cmap('Blues').copy()
+    cmap.set_bad('#F2F2F2')
+    im = ax.imshow(np.ma.masked_invalid(shown.values), cmap=cmap, vmin=0, vmax=100)
     ax.set_xticks(range(5))
     ax.set_xticklabels(STATES5, fontsize=10.5)
     ax.set_yticks(range(5))
-    ax.set_yticklabels([f'{s} (n={row_n[s]})' for s in STATES5], fontsize=10.5)
+    ax.set_yticklabels([f'{s} (n={row_n[s]}){" *" if s in low_rows else ""}' for s in STATES5],
+                       fontsize=10.5)
     ax.set_xlabel('t+1 분기 국면', fontsize=10.5)
     ax.set_ylabel('t 분기 국면', fontsize=10.5)
     for i in range(5):
         for j in range(5):
             pct, cnt = mat_pct.values[i, j], mat.values[i, j]
-            ax.text(j, i, f'{pct:.0f}%\n({cnt}건)', ha='center', va='center', fontsize=9,
-                    color='white' if pct > 55 else '#222222')
+            if STATES5[i] in low_rows:
+                ax.text(j, i, f'{cnt}건', ha='center', va='center', fontsize=9, color='#222222')
+            else:
+                ax.text(j, i, f'{pct:.0f}%\n({cnt}건)', ha='center', va='center', fontsize=9,
+                        color='white' if pct > 55 else '#222222')
         ax.add_patch(Rectangle((i - 0.5, i - 0.5), 1, 1, fill=False, edgecolor='black', linewidth=2))
     cbar = plt.colorbar(im, ax=ax, fraction=0.046)
     cbar.set_label('행 기준 비율 (%)', fontsize=9)
     ax.set_title(f'관측된 국면 전환 빈도 ({ctx.quarters[0]}~{ctx.latest}, 전환 {len(trans)}건)\n'
                  '대각선 = 같은 국면 유지', fontsize=11.5)
     fig.text(0.5, -0.02,
-             '과거 인접 관측의 비율이다. 미래 전환확률이 아니며 행별 관측 수를 함께 읽는다.',
+             '과거 인접 관측의 비율이다. 미래 전환확률이 아니며 행별 관측 수를 함께 읽는다.'
+             + (f'\n* 관측 {min_row_n}건 미만 행은 1건이 비율을 {100 / min_row_n:.0f}%p 이상 움직여 비율 대신 건수만 표시한다.'
+                if low_rows else ''),
              ha='center', fontsize=8.8, color='#555555')
     plt.tight_layout()
     save_fig(fig, 'Q3C_전환행렬', dir_fig)

@@ -274,3 +274,24 @@ def result_table(results):
         '후보별 방향이 다른 관측': results['n_candidate_dependent'],
         '0% 경계 변화': results['n_zero_boundary'],
     }, name='값').to_frame()
+
+
+def latest_comparison(bundle, state, ctx, employment_denominator):
+    """최신분기 고용 감소 업종의 명목 기준 국면과 PPI 후보 조정 기준 국면을 나란히 비교한다.
+
+    결과는 outputs/tables/PPI_최신분기_명목조정비교_{최신분기}.csv로 저장하는 표와 같다.
+    """
+    latest_sig = bundle['latest_sig']
+    latest_all = state[state.quarter.eq(ctx.latest)].set_index('industry')
+    idx = [i for i in ctx.ind_order_emp
+           if i in latest_sig.index and latest_sig.loc[i, 'employment_yoy'] < 0]
+    return pd.DataFrame({
+        '고용비중%': latest_all.loc[idx, 'employment'] / employment_denominator * 100,
+        '명목생산YoY%': latest_sig.loc[idx, 'production_yoy'],
+        '조정생산YoY_최소%': latest_sig.loc[idx, 'adjusted_lo'],
+        '조정생산YoY_최대%': latest_sig.loc[idx, 'adjusted_hi'],
+        '명목국면': latest_sig.loc[idx, 'state'],
+        '조정기준국면': latest_sig.loc[idx, 'adjusted_state'],
+        '후보별방향': latest_sig.loc[idx, 'status'],
+        '사용후보': latest_sig.loc[idx, 'ppi_items'],
+    }, index=pd.Index(idx, name='업종'))

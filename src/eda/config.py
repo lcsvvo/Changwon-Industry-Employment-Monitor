@@ -69,6 +69,8 @@ RECENT_N = 4             # Q2 '최근 4분기' 창 길이 (RECENT4 = QUARTERS[-R
 MAIN_CAND_N = 4          # Q2-B 막대 구성에서 개별 표시하는 상위 업종 수
 EDA_TOP_SHARE_N = 4      # 1-3에서 합계 비중을 보는 고용 상위 업종 수
 SENSITIVITY_THRESHOLDS = [0.5, 1.0, 2.0]   # 중립구간 민감도(본분석 threshold=0은 유지)
+# Q3 전환행렬: 행 관측이 이보다 적으면 1건이 행 비율을 5%p 이상 움직이므로 비율 대신 건수만 표시한다.
+TRANSITION_MIN_ROW_N = 20
 
 # 1-1에서 보는 핵심 변수
 EDA_VARS = {'production': '명목 생산액(억원)', 'employment': '고용(명)',

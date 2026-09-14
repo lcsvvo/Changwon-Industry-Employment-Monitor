@@ -151,8 +151,8 @@ data/processed/
 │  ├─ quality_report.json                    국면·run·transition 자체 검증 리포트
 │  └─ _previous/                             이전 실행 산출물 백업 (재실행 시 자동 이동, 삭제하지 않음)
 ├─ ppi/
-│  ├─ ppi_validation_panel.csv               PPI 총지수(전국) 분기 평균, 제한적 민감도용
-│  └─ ppi_industry_mapping_candidates.csv    업종별 매핑 후보 (전부 confirmed=False, 보류)
+│  ├─ ppi_validation_panel.csv               PPI 총지수(전국) 분기 평균 검증 패널
+│  └─ ppi_industry_mapping_candidates.csv    전처리 단계 업종 대분류 매핑 후보 (전부 confirmed=False)
 └─ eis/
    └─ eis_validation_panel.csv               EIS 창원시 고용보험 피보험자 (2022Q1~2026Q2)
 ```
@@ -160,6 +160,7 @@ data/processed/
 - **industry/total master**: 생산·고용 원자료 기반 마스터. QA와 state panel 생성의 입력
 - **state panel**: 국면(S1~S4/N/INVALID)·run(지속)·transition(전환)·recent4 카운트가 담긴 핵심 분석 패널
 - **ppi/eis validation panel**: KICOX core에 병합하지 않는 별도 검증 자료 (§12 참고)
+- **PPI 업종별 후보 민감도**: 위 패널과 별도로 `notebooks/02_eda.ipynb` Section 6에서 수행하며 결과는 `outputs/tables/PPI_*.csv`에 저장한다 (§12 참고)
 
 ## 9. 가동률 official / approx
 
@@ -225,7 +226,7 @@ KICOX core state panel에 **병합하지 않는다.** 각각 별도 검증 패�
 
 | 데이터 | 위치 | 역할 | 비고 |
 | --- | --- | --- | --- |
-| PPI(생산자물가지수) | `data/raw/ppi/`, `data/processed/ppi/` | 명목 생산액 가격효과 민감도 확인 | 전국 단위 KOSIS 월별 자료(지역 구분 없음). KICOX 10개 업종과 세부품목의 공식 대응표가 아직 없어 **업종별 매핑은 보류**하고 **총지수 기준의 제한적 민감도만** 수행한다. 후보 매핑표는 `data/processed/ppi/ppi_industry_mapping_candidates.csv`에 있으며 전부 `confirmed=False`다 |
+| PPI(생산자물가지수) | `data/raw/ppi/`, `data/processed/ppi/`, `outputs/tables/PPI_*.csv` | 명목 생산액 가격효과 민감도 확인 | 전국 단위 KOSIS 월별 자료(지역 구분 없음). 두 단계로 나뉜다. **① 전처리**(`src/build_validation_panels.py`): 총지수 분기 평균 검증 패널과 업종 대분류 매핑 후보표(`confirmed=False`)만 만든다. **② EDA**(`notebooks/02_eda.ipynb` Section 6): 업종별 PPI **후보 계열**(기타 제외 9개 업종, 11계열)로 명목 생산 YoY를 조정해 국면 방향이 유지되는지 비교한다. 후보가 여럿이면 최솟값~최댓값 범위로 제시한다. KICOX 업종과 PPI 품목의 공식 대응표가 없으므로 조정값은 **조건부 민감도**이며 본분석(명목) 국면을 대체하지 않는다. 최신분기 명목·조정 비교는 진단카드와 Section 8 요약에 함께 싣는다 |
 | EIS(고용행정통계) | `data/raw/eis/`, `data/processed/eis/` | KICOX 고용과 통계 정의 비교·배경자료 | 가용기간 2022Q1~2026Q2이며 첫 YoY는 2023Q1이다(보간 금지). KICOX 산단 고용과 모집단이 달라 **합산·대체·비율계산 금지** |
 | CCI(창원상공회의소 경제동향보고서) | `data/raw/cci_report/` | 외부 대조·최근 분기 교차확인 | 보고서 표를 수기 전사한 자료이며 **KICOX 원자료가 아니다.** core master 구축에 사용하지 않는다 |
 
@@ -296,7 +297,7 @@ notebook이 호출하는 자식 프로세스에는 `PYTHONIOENCODING=utf-8`을 �
 | 참고기간(reference) | **확정** 2018Q1~2026Q2 (산단 전체 장기 흐름) |
 | 본분석기간(main) | **확정** 2022Q1~2026Q2 — 10개 업종 모두 4분면 산출 가능한 첫 분기부터. 2018Q4·2020Q3 재분류, 2021년 섬유의복 YoY inf, 2023Q4 생산 X 결측을 근거로 실측 검증(§10~11) |
 | 국면(S1~S4)·run·transition | **핵심 산출물로 사용** — `changwon_state_panel.csv`. ±0.5/1/2% sensitivity는 별도 검증용 |
-| PPI(생산자물가지수) | **총지수 기준 제한적 검증만 사용**. 업종별 매핑은 후보표만 있고 미확정(보류) |
+| PPI(생산자물가지수) | **민감도 분석으로 사용**. 전처리 단계는 총지수 검증 패널, EDA 단계는 업종별 후보 계열 조정 비교(조건부). 공식 업종 대응표는 미확정이며 본분석 국면은 명목 기준을 유지한다 |
 | EIS(고용행정통계) | **검증용으로 사용**. 2022Q1~2026Q2 가용, KICOX 고용과 합산·대체 안 함 |
 | 제조 AX 연결 | **정책 배경 후보** — 창원시가 제조 AX 전환 정책을 추진 중이나, 본 프로젝트를 제조 AX를 위한 프로젝트로 규정하지 않는다 |
 | 전략산업 추가 | 미확정 |
@@ -308,6 +309,6 @@ notebook이 호출하는 자식 프로세스에는 `PYTHONIOENCODING=utf-8`을 �
 - 전환(transition) 빈도/비율은 과거 관측치이며 미래 예측 확률이 아니다.
 - ±0.5/1/2% sensitivity에서 국면이 바뀌는 업종을 특정 유형으로 단정하지 않는다.
 - 업종 재분류 시점(2018Q4, 2020Q3)을 가로지르는 장기 비교는 구조 변화로 해석하지 않는다.
-- 생산액은 명목금액(억원)이며 가격효과를 포함한다 — PPI는 총지수 기준의 제한적 검증만 제공한다.
+- 생산액은 명목금액(억원)이며 가격효과를 포함한다 — PPI 조정은 업종별 후보 계열에 따른 조건부 민감도이며 실제 물량·실질생산이 아니다. 최신분기 명목 결과와 조정 결과가 다르면 두 값을 함께 제시한다.
 - EIS는 KICOX와 모집단·통계 정의가 달라 비율/점유율을 계산하지 않는다.
 - 2023Q4·2024Q4의 production YoY/국면 결측은 데이터 오류가 아니라 정상적인 구조적 결측(INVALID)이다.

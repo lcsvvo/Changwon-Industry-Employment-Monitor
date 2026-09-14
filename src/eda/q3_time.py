@@ -39,7 +39,41 @@ def longest_runs(state, ctx):
                .rename(columns={'state': '국면', 'state_start_quarter': '시작분기',
                                 'run_total_length': '지속분기',
                                 'run_left_censored': '좌절단', 'run_right_censored': '우절단'}))
+    longest['경계절단'] = longest.좌절단.eq(True) | longest.우절단.eq(True)
     return runs, longest, share2plus
+
+
+def valid_blocks(state):
+    """연속 판정이 가능한 구간(INVALID로 끊기지 않는 분기 블록)의 길이.
+
+    최장 관측값이 블록 길이와 같으면 관측 구간 경계에 막힌 것이므로 실제 길이는 확정할 수 없다.
+
+    Returns
+    -------
+    blocks : list | dict   전 업종 공통이면 블록 길이 목록, 다르면 업종별 dict
+    max_observable : int   관측할 수 있는 최장 지속(분기)
+    """
+    per_industry = {}
+    for ind, g in state.groupby('industry'):
+        lengths, run = [], 0
+        for s in g.sort_values('quarter_index').state:
+            if s == 'INVALID':
+                if run:
+                    lengths.append(run)
+                run = 0
+            else:
+                run += 1
+        if run:
+            lengths.append(run)
+        per_industry[ind] = lengths
+    unique = {tuple(v) for v in per_industry.values()}
+    blocks = list(next(iter(unique))) if len(unique) == 1 else per_industry
+    return blocks, int(max(max(v) for v in per_industry.values()))
+
+
+def low_n_rows(row_n, min_row_n=config.TRANSITION_MIN_ROW_N, states5=config.STATES5):
+    """행 관측이 min_row_n보다 적어 비율을 표시하지 않는 전환행렬 행."""
+    return [s for s in states5 if row_n[s] < min_row_n]
 
 
 # ---------------------------------------------------------------- Q3-C. 전환행렬
@@ -63,13 +97,21 @@ def transition_matrix(state, states5=config.STATES5):
     return trans, mat, mat_pct, row_n, diag
 
 
-def q3_results(runs, share2plus, trans, diag, cur):
+def q3_results(runs, share2plus, trans, diag, cur, longest=None, blocks=None,
+               max_observable=None, low_rows=None, min_row_n=config.TRANSITION_MIN_ROW_N):
     """results_summary['q3']에 들어가는 값."""
+    extra = {}
+    if max_observable is not None:
+        extra = {'transition_min_row_n': min_row_n, 'transition_low_n_rows': low_rows or [],
+                 'valid_block_lengths': blocks, 'max_observable_run': max_observable,
+                 'max_run_at_ceiling': bool(runs.run_total_length.max() == max_observable),
+                 'n_longest_censored': int(longest.경계절단.sum()) if longest is not None else None}
     return {
         'n_runs': len(runs), 'n_runs_2plus': int((runs.run_total_length >= 2).sum()),
         'share_2plus_pct': float(share2plus), 'mean_run': float(runs.run_total_length.mean()),
         'max_run': int(runs.run_total_length.max()), 'n_adjacent': len(trans), 'n_same': int(diag),
         'same_pct': float(diag / len(trans) * 100),
+        **extra,
         'current': [
             {'industry': i, 'state': r.state,
              'length': None if pd.isna(r.run_length) else int(r.run_length)}
