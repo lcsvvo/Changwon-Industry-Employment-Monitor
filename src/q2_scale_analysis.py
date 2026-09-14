@@ -15,6 +15,7 @@ Q2. 산업·고용 규모 및 집중도 분석 모듈 (src/q2_scale_analysis.py)
   - 창원상의(CCI) 수출-고용 시계열 추이 분석
 """
 
+import io
 import re
 from pathlib import Path
 import numpy as np
@@ -35,8 +36,7 @@ KICOX_PANEL = DATA_DIR / "processed" / "kicox" / "changwon_state_panel.csv"
 EIS_PANEL = DATA_DIR / "processed" / "eis" / "eis_validation_panel.csv"
 CCI_DIR = DATA_DIR / "raw" / "cci_report"
 
-LATEST_Q = "2026Q2"
-BASE_Q = "2025Q2"  # LATEST_Q의 전년동기
+# 최신분기는 하드코딩하지 않고 패널에서 계산한다(latest_quarter()).
 
 
 def hr(title):
@@ -53,7 +53,13 @@ def load_panel():
         raise FileNotFoundError(f"[오류] 데이터 파일이 존재하지 않습니다: {KICOX_PANEL}")
     df = pd.read_csv(KICOX_PANEL)
     df["emp_delta"] = df["employment"] - df["employment_lag4"]
-    return df.sort_values(["industry", "quarter"]).reset_index(drop=True)
+    # 분기 문자열이 아니라 달력 순서 키(quarter_index)로 정렬한다.
+    return df.sort_values(["industry", "quarter_index"]).reset_index(drop=True)
+
+
+def latest_quarter(df):
+    """패널의 최신분기(달력 순서 기준)."""
+    return df.loc[df["quarter_index"].idxmax(), "quarter"]
 
 
 # ---------------------------------------------------------------------------
@@ -91,7 +97,8 @@ def calculate_quarterly_decomposition(df):
 # ---------------------------------------------------------------------------
 # 2. 규모효과 보정 분석 (비례 기대치 대비 초과 증감 검증)
 # ---------------------------------------------------------------------------
-def analyze_scale_effect(df, quarter=LATEST_Q):
+def analyze_scale_effect(df, quarter=None):
+    quarter = quarter or latest_quarter(df)
     hr(f"2. 규모효과 보정 분석 ({quarter})")
     g = df[(df["quarter"] == quarter) & (df["employment_yoy_computable"] == True)].copy()
     total_delta = g["emp_delta"].sum()
@@ -119,16 +126,17 @@ def evaluate_industry_comovement(df):
     hr("3. 기계 vs 나머지 9개 업종 동조화 분석")
 
     # 3-1. 최신분기 기계 제외 순증감
-    g = df[(df["quarter"] == LATEST_Q) & (df["employment_yoy_computable"] == True)]
+    latest = latest_quarter(df)
+    g = df[(df["quarter"] == latest) & (df["employment_yoy_computable"] == True)]
     rest_latest = g[g["industry"] != "기계"]["emp_delta"].sum()
-    print(f"{LATEST_Q} 기계 제외 나머지 9개 업종 순증감: {rest_latest:,.0f}명")
+    print(f"{latest} 기계 제외 나머지 9개 업종 순증감: {rest_latest:,.0f}명")
 
     # 3-2. 18분기 전체 상관관계
     mach = df[df["industry"] == "기계"].set_index("quarter")["emp_delta"]
     rest = df[df["industry"] != "기계"].groupby("quarter")["emp_delta"].sum()
     comb = pd.concat([mach.rename("기계"), rest.rename("나머지9개합")], axis=1).dropna()
     corr = comb["기계"].corr(comb["나머지9개합"])
-    print(f"\n18분기 상관계수(기계 Δ vs 나머지9개 합 Δ): {corr:.3f}")
+    print(f"\n{len(comb)}분기 상관계수(기계 Δ vs 나머지9개 합 Δ): {corr:.3f}")
     print(comb)
 
     # 3-3. 동시 순감소 분기 수
@@ -148,9 +156,10 @@ def evaluate_industry_comovement(df):
 # ---------------------------------------------------------------------------
 # 4. 상세 추적 대상 업종 임계값(Threshold) 민감도 분석
 # ---------------------------------------------------------------------------
-def test_threshold_robustness(df, quarter=LATEST_Q):
+def test_threshold_robustness(df, quarter=None):
+    quarter = quarter or latest_quarter(df)
     hr("4. 상세추적 기준 임계값 민감도 분석")
-    d = df.sort_values(["industry", "quarter"])
+    d = df.sort_values(["industry", "quarter_index"])
     last4_abs = d.groupby("industry").tail(4).groupby("industry")["emp_delta"].apply(
         lambda s: s.abs().sum()
     )
@@ -184,7 +193,7 @@ def state_transition_and_runs(df):
     print("\n-- state별 run_total_length 분포 --")
     print(runs.groupby("state")["run_total_length"].describe()[["count", "mean", "min", "50%", "max"]])
 
-    print("\n-- 기계 업종 18분기 국면 이력 --")
+    print(f"\n-- 기계 업종 {df['quarter'].nunique()}분기 국면 이력 --")
     m = df[df["industry"] == "기계"][["quarter", "state", "production_yoy", "employment_yoy"]]
     print(m.to_string(index=False))
     return trans_prob, runs
@@ -204,6 +213,18 @@ def check_firm_employment_dynamics(df, industry="기계"):
 # ---------------------------------------------------------------------------
 # 7. 외부 지표(EIS, CCI) 보조 교차검증
 # ---------------------------------------------------------------------------
+def read_cci_csv(path):
+    """창원상의 보고서 전사본 CSV를 읽는다.
+
+    상단 출처·주석 줄이 '"# 출처: ..."'처럼 따옴표로 시작해 pd.read_csv(comment="#")가
+    주석으로 인식하지 못하고 데이터 행으로 읽는다(열 수가 맞지 않아 ParserError).
+    따옴표를 벗긴 뒤 '#'으로 시작하는 줄만 걸러내고 읽는다.
+    """
+    lines = Path(path).read_text(encoding="utf-8-sig").splitlines()
+    body = [ln for ln in lines if not ln.strip().lstrip('"').lstrip().startswith("#")]
+    return pd.read_csv(io.StringIO("\n".join(body)))
+
+
 def load_external_indicators():
     hr("7. 외부 지표(EIS, CCI) 교차검증")
     # EIS 고용보험 패널
@@ -220,7 +241,7 @@ def load_external_indicators():
             m = re.search(r"(20\d{2}Q[1-4])", f.name)
             if not m:
                 continue
-            d = pd.read_csv(f, comment="#")
+            d = read_cci_csv(f)
             if "업종" not in d.columns or "수출_전년동기대비(%)" not in d.columns:
                 continue
             d["quarter"] = m.group(1)
@@ -228,7 +249,8 @@ def load_external_indicators():
         if frames:
             cci = pd.concat(frames, ignore_index=True)
             m = cci[cci["업종"] == "기계"][["quarter", "수출_전년동기대비(%)", "고용_전년동기대비(%)"]]
-            print("\n[CCI 기계 수출-고용 시차 관측]")
+            # 4개 분기 보고서 전사본을 나열할 뿐이며 시차(선후행) 관계를 추정하지 않는다.
+            print("\n[CCI 기계 수출·고용 전년동기대비 (창원상의 보고서 전사본)]")
             print(m.to_string(index=False))
 
 

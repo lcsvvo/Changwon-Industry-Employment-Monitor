@@ -5,15 +5,19 @@ Q1 — 창원국가산단 업종별 생산·고용 국면(S1~S4) 분석 및 시�
 Q1 심화분석 리포트(outputs/report/q1_state_deep_dive.html)에 들어가는
 통계 표와 차트(PNG)를 재생성한다.
 
-입력 파일 (data/processed/ 에 위치):
-    - changwon_state_panel.csv           : 본분석 패널 (2022Q1~2026Q2, 10업종x18분기)
-    - changwon_state_reference_panel.csv : 참고기간 확장 패널 (2018Q1~2026Q2)
-    - exclusion_or_review_log.csv        : QA 검증/리뷰 플래그 로그
-    - quality_report.json                : 파이프라인 정합성 체크 결과
+입력 파일:
+    - data/processed/kicox/changwon_state_panel.csv           : 본분석 패널 (2022Q1~2026Q2, 10업종x18분기)
+    - data/processed/kicox/changwon_state_reference_panel.csv : 참고기간 확장 패널 (2018Q1~2026Q2)
+    - data/processed/kicox/quality_report.json                : 파이프라인 정합성 체크 결과
+    - logs/preprocessing/exclusion_or_review_log.csv          : QA 검증/리뷰 플래그 로그
 
 출력:
-    - outputs/figures/ 에 PNG 4종 (heatmap, scatter, shock_vs_now, sensitivity)
-    - 콘솔에 주요 통계 표 출력 (히트맵 원본 수치, 전환행렬, 업종별 국면비중 등)
+    - outputs/figures/ 에 PNG 3종 (heatmap_q1, scatter_latest, sensitivity_chart)
+    - 콘솔에 주요 통계 표 출력 (업종별 국면비중, 분기별 국면 카운트 등)
+
+주의:
+    국면 전환행렬은 Q3(src/q3_state_analysis.py)의 산출물이다. 이 스크립트는
+    전환을 계산하지 않는다 — 같은 대상을 두 정의로 이중 산출하지 않기 위함이다.
 
 사용법:
     python src/q1_state_analysis.py
@@ -21,6 +25,7 @@ Q1 심화분석 리포트(outputs/report/q1_state_deep_dive.html)에 들어가�
 
 import json
 import math
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -34,30 +39,43 @@ import pandas as pd
 # ---------------------------------------------------------------------------
 # 경로 설정 — 팀 폴더 구조(PROJECT_STRUCTURE.md) 기준
 # ---------------------------------------------------------------------------
-DATA_DIR = Path("data/processed")
-FIG_DIR = Path("outputs/figures")
+ROOT_DIR = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT_DIR / "data" / "processed" / "kicox"
+LOG_DIR = ROOT_DIR / "logs" / "preprocessing"
+FIG_DIR = ROOT_DIR / "outputs" / "figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-# 국면 색상 팔레트 — eda_preview.html에서 픽셀 단위로 추출한 팀 공통 색상
-COLOR = {
-    "S1": "#4A75A4",  # 남색 — 생산↑고용↑
-    "S2": "#72B7B2",  # 틸 — 생산↑고용↓
-    "S3": "#F2CF5B",  # 골드 — 생산↓고용↑
-    "S4": "#B279A2",  # 자주 — 생산↓고용↓
-    "N": "#BDBDBD",   # 회색 — 한 지표 이상 정확히 0%
-}
+sys.path.insert(0, str(ROOT_DIR / "src"))
+from eda import config  # noqa: E402  팀 공통 설정
 
-INDUSTRY_ORDER = ["기계", "전기전자", "운송장비", "철강", "음식료",
-                  "석유화학", "목재종이", "비금속", "기타", "섬유의복"]
+# 국면 색상 — 팀 공통 팔레트(src/eda/config.py STATE_COLORS)를 그대로 쓴다. 여기서 색을 새로 정의하지 않는다.
+COLOR = config.STATE_COLORS
 
-# 한글 폰트 (Noto Sans CJK). 환경에 폰트가 없으면 기본 폰트로 대체된다.
-_FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
-_FONT_BOLD_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
-try:
-    FP = fm.FontProperties(fname=_FONT_PATH)
-    FP_BOLD = fm.FontProperties(fname=_FONT_BOLD_PATH)
-except FileNotFoundError:
-    FP = FP_BOLD = fm.FontProperties()
+# 업종 순서는 하드코딩하지 않고 industry_order()로 최신분기 고용 내림차순을 계산한다.
+
+# 한글 폰트 — OS별로 설치 폰트가 다르므로 사용 가능한 첫 폰트를 쓴다.
+# 후보 순서는 src/eda/config.py의 FONT_CANDIDATES와 동일하게 유지한다.
+# 주의: FontProperties(fname=...)는 생성 시점에 파일 존재를 확인하지 않고
+#       그리기 시점에 FileNotFoundError를 내므로 try/except로는 막을 수 없다.
+_FONT_PATH = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc")
+_FONT_BOLD_PATH = Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc")
+FONT_CANDIDATES = ["Malgun Gothic", "AppleGothic", "NanumGothic",
+                   "Noto Sans CJK KR", "Noto Sans CJK JP", "DejaVu Sans"]
+
+if _FONT_PATH.is_file():
+    FP = fm.FontProperties(fname=str(_FONT_PATH))
+    FP_BOLD = fm.FontProperties(
+        fname=str(_FONT_BOLD_PATH if _FONT_BOLD_PATH.is_file() else _FONT_PATH))
+else:
+    _installed = {f.name for f in fm.fontManager.ttflist}
+    _family = next((c for c in FONT_CANDIDATES if c in _installed), None)
+    if _family:
+        plt.rcParams["font.family"] = [_family, "sans-serif"]
+        FP = fm.FontProperties(family=_family)
+        FP_BOLD = fm.FontProperties(family=_family, weight="bold")
+    else:
+        FP = fm.FontProperties()
+        FP_BOLD = fm.FontProperties(weight="bold")
 plt.rcParams["axes.unicode_minus"] = False
 
 
@@ -74,7 +92,13 @@ def load_reference_panel() -> pd.DataFrame:
 
 
 def load_review_log() -> pd.DataFrame:
-    return pd.read_csv(DATA_DIR / "exclusion_or_review_log.csv")
+    return pd.read_csv(LOG_DIR / "exclusion_or_review_log.csv")
+
+
+def industry_order(df: pd.DataFrame) -> list:
+    """최신분기 고용 내림차순 업종 순서(노트북 IND_ORDER_EMP와 같은 기준)."""
+    latest = sorted(df["quarter"].unique())[-1]
+    return df[df["quarter"] == latest].sort_values("employment", ascending=False)["industry"].tolist()
 
 
 # ---------------------------------------------------------------------------
@@ -89,12 +113,6 @@ def industry_state_shares(df: pd.DataFrame) -> pd.DataFrame:
     ct["n_valid"] = valid.groupby("industry").size()
     ct["unique_states"] = valid.groupby("industry")["state"].nunique()
     return ct
-
-
-def transition_matrix(df: pd.DataFrame) -> pd.DataFrame:
-    """인접분기 4국면 전환행렬 (valid_transition==True 기준)."""
-    trans = df[df["valid_transition"] == True]  # noqa: E712
-    return pd.crosstab(trans["previous_state"], trans["state"])
 
 
 def quarterly_state_counts(df: pd.DataFrame) -> pd.DataFrame:
@@ -124,14 +142,15 @@ def plot_heatmap(df: pd.DataFrame, save_path: Path | None = None):
     save_path = save_path or FIG_DIR / "heatmap_q1.png"
     quarters = sorted(df["quarter"].unique())
     piv = df.pivot(index="industry", columns="quarter", values="state")
-    piv = piv.reindex(INDUSTRY_ORDER)[quarters]
+    order = industry_order(df)
+    piv = piv.reindex(order)[quarters]
 
     n_ind, n_q = piv.shape
     fig = plt.figure(figsize=(12.2, 6.3), dpi=100)
     ax = fig.add_axes([0.09, 0.12, 0.72, 0.74])
     ax2 = fig.add_axes([0.83, 0.12, 0.14, 0.74])
 
-    for i, ind in enumerate(INDUSTRY_ORDER):
+    for i, ind in enumerate(order):
         row_y = n_ind - 1 - i
         for j, q in enumerate(quarters):
             st = piv.loc[ind, q]
@@ -153,7 +172,7 @@ def plot_heatmap(df: pd.DataFrame, save_path: Path | None = None):
     ax.set_xticks([j + 0.46 for j in range(n_q)])
     ax.set_xticklabels(quarters, rotation=45, ha="right", fontsize=8.5, fontproperties=FP)
     ax.set_yticks([n_ind - 1 - i + 0.46 for i in range(n_ind)])
-    ax.set_yticklabels(INDUSTRY_ORDER, fontsize=10, fontproperties=FP)
+    ax.set_yticklabels(order, fontsize=10, fontproperties=FP)
     ax.tick_params(length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
@@ -161,7 +180,7 @@ def plot_heatmap(df: pd.DataFrame, save_path: Path | None = None):
                   fontsize=12.5, fontproperties=FP_BOLD, y=0.985, x=0.46)
 
     valid = df[df["valid_four_state"] == True]  # noqa: E712
-    for i, ind in enumerate(INDUSTRY_ORDER):
+    for i, ind in enumerate(order):
         row_y = n_ind - 1 - i
         counts = valid[valid["industry"] == ind]["state"].value_counts()
         total = counts.sum()
@@ -191,12 +210,29 @@ def plot_heatmap(df: pd.DataFrame, save_path: Path | None = None):
 # ---------------------------------------------------------------------------
 # 차트 2 — 최신분기 생산·고용 산점도
 # ---------------------------------------------------------------------------
+def _padded_range(values: pd.Series, pad_lo: float = 0.12,
+                   pad_hi: float = 0.12) -> tuple[float, float]:
+    """관측값을 모두 담는 축 범위. 0선(사분면 경계)이 항상 포함되도록 0을 넣는다.
+
+    고정값을 쓰면 범위를 벗어난 업종이 경고 없이 그림에서 사라지므로
+    축 범위는 반드시 데이터에서 계산한다.
+    """
+    lo = min(float(values.min()), 0.0)
+    hi = max(float(values.max()), 0.0)
+    span = (hi - lo) or 1.0
+    return lo - span * pad_lo, hi + span * pad_hi
+
+
 def plot_scatter_latest(df: pd.DataFrame, quarter: str,
                          save_path: Path | None = None):
     save_path = save_path or FIG_DIR / "scatter_latest.png"
     latest = df[df["quarter"] == quarter].copy()
-    xmin, xmax = -25, 62
-    ymin, ymax = -13, 21
+    plotted = latest[latest["state"].ne("INVALID")
+                     & latest["production_yoy"].notna()
+                     & latest["employment_yoy"].notna()]
+    # x축 오른쪽 여백을 더 준다 — 업종명을 점 오른쪽에 붙이기 때문.
+    xmin, xmax = _padded_range(plotted["production_yoy"], 0.10, 0.24)
+    ymin, ymax = _padded_range(plotted["employment_yoy"])
 
     fig, ax = plt.subplots(figsize=(9.1, 6.5), dpi=100)
     ax.axvspan(xmin, 0, ymin=(0 - ymin) / (ymax - ymin), ymax=1, color="#fdf8ec", zorder=0)
@@ -209,13 +245,13 @@ def plot_scatter_latest(df: pd.DataFrame, quarter: str,
     tot_emp = latest["employment"].sum()
     for _, r in latest.iterrows():
         st = r["state"]
-        if st == "INVALID" or pd.isna(r["production_yoy_master"]):
+        if st == "INVALID" or pd.isna(r["production_yoy"]):
             continue
         share_pct = r["employment_share"] * 100
         radius = 6 + math.sqrt(max(share_pct, 0.05)) * 5.2
-        ax.scatter(r["production_yoy_master"], r["employment_yoy_master"],
+        ax.scatter(r["production_yoy"], r["employment_yoy"],
                    s=radius ** 1.62, color=COLOR.get(st, "#999"), alpha=0.88, zorder=3)
-        ax.annotate(r["industry"], (r["production_yoy_master"], r["employment_yoy_master"]),
+        ax.annotate(r["industry"], (r["production_yoy"], r["employment_yoy"]),
                     xytext=(9, -3), textcoords="offset points", fontsize=10.5, fontproperties=FP)
 
     ax.set_xlim(xmin, xmax); ax.set_ylim(ymin, ymax)
@@ -277,8 +313,6 @@ def main():
 
     print("=== 업종별 국면 비중 ===")
     print(industry_state_shares(df))
-    print("\n=== 전환행렬 ===")
-    print(transition_matrix(df))
     print("\n=== 분기별 국면 카운트 ===")
     print(quarterly_state_counts(df))
     print("\n=== 리뷰 플래그 (업종별) ===")
