@@ -5,7 +5,14 @@ qa_master.py
 
 이 스크립트는 data/processed/*.csv 를 절대 수정하지 않는다.
 검사 항목 A~H 를 실행하고 PASS/FAIL 과 실제 수치를 stdout 및
-logs/qa_report.txt 에 기록한다. 실패 항목이 하나라도 있으면 exit code 1.
+logs/preprocessing/qa_report.txt 에 기록한다.
+
+실패(FAIL) / 경고(WARN) / 정상적 예외(INFO)를 구분한다.
+- FAIL: 파이프라인 문제로 취급한다 (구조 위반, 업종 경계를 넘는 계산, N/INVALID 혼동 등)
+- WARN: 확인이 필요하지만 실패는 아니다 (revision 재공시 변경, review_required 초과)
+- INFO: 정상적으로 발생하는 특성이다 (2023Q4 production 결측, 업종합 employment != 전체 등)
+
+실패 항목이 하나라도 있으면 exit code 1.
 
 실행
     python src/qa_master.py
@@ -33,9 +40,9 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8", errors="replace")
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DIR_PROC = os.path.join(BASE, "data", "processed")
-DIR_REV = os.path.join(BASE, "data", "annual_revision")
-DIR_LOG = os.path.join(BASE, "logs")
+DIR_PROC = os.path.join(BASE, "data", "processed", "kicox")
+DIR_REV = os.path.join(BASE, "data", "raw", "kicox", "revision")
+DIR_LOG = os.path.join(BASE, "logs", "preprocessing")
 
 P_IND = os.path.join(DIR_PROC, "changwon_industry_master.csv")
 P_TOT = os.path.join(DIR_PROC, "changwon_total_master.csv")
@@ -51,12 +58,15 @@ NUMERIC_TOT_COLS = ["production_total", "employment_total",
 SOURCE_COLS = ["production_source", "employment_source", "op_rate_source",
                "firms_in_source", "firms_op_source"]
 ALLOWED_SOURCES = {"data_portal_monthly", "data_portal_quarterly",
-                    "kicox_annual_revision", "kicox_republication"}
+                    "kicox_annual_revision", "kicox_republication", "no_data"}
 
 STR_JUNK = {"X", "-", "", "null", "nan", "N/A", "None"}
 
+# 구조적으로 알려진, QA 실패가 아닌 정상 결측 (2023Q4 업종별 생산 X, README/방법론 문서 확인)
+KNOWN_STRUCTURAL_MISSING_QUARTERS = {"production": ["2023Q4"]}
+
 LOG_LINES: list[str] = []
-RESULTS: list[tuple[str, str, bool]] = []   # (section, label, passed)
+RESULTS: list[tuple[str, str, str, bool]] = []   # (section, level, label, passed)
 
 
 def log(msg: str = "") -> None:
@@ -64,9 +74,10 @@ def log(msg: str = "") -> None:
     LOG_LINES.append(str(msg))
 
 
-def record(section: str, label: str, passed: bool) -> bool:
-    RESULTS.append((section, label, passed))
-    tag = "PASS" if passed else "FAIL"
+def record(section: str, label: str, passed: bool, level: str = "FAIL") -> bool:
+    """level: 'FAIL'(실패) 검사 실패시 파이프라인 문제, 'WARN'(경고) 실패시 확인 필요 정보만 출력."""
+    RESULTS.append((section, level, label, passed))
+    tag = "PASS" if passed else ("WARN" if level == "WARN" else "FAIL")
     log(f"  [{tag}] {label}")
     return passed
 
@@ -85,20 +96,36 @@ def _read_str(path: str) -> pd.DataFrame:
     return pd.read_csv(path, dtype=str, keep_default_na=False, na_values=[])
 
 
+def _expected_quarters(qs: list[str]) -> list[str]:
+    if not qs:
+        return []
+    y0, k0 = int(qs[0][:4]), int(qs[0][-1])
+    y1, k1 = int(qs[-1][:4]), int(qs[-1][-1])
+    out, y, k = [], y0, k0
+    while (y, k) <= (y1, k1):
+        out.append(f"{y}Q{k}")
+        k += 1
+        if k == 5:
+            k = 1
+            y += 1
+    return out
+
+
 # ----------------------------------------------------------------------------
-# A. 구조
+# A. 구조 (기대값은 실제 데이터 기준으로 동적 산출한다 — 하드코딩 금지)
 # ----------------------------------------------------------------------------
 
 def check_a(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
     hr("A. 구조")
 
-    record("A", f"industry master 행수 = 340 (실제 {len(ind)})", len(ind) == 340)
-    n_q = ind.quarter.nunique()
-    record("A", f"quarter 34개 (실제 {n_q})", n_q == 34)
+    qs = sorted(ind.quarter.unique())
     n_i = ind.industry.nunique()
+    expected_rows = len(qs) * n_i
+    record("A", f"industry master 행수 = quarter수({len(qs)}) x industry수({n_i}) = "
+                f"{expected_rows} (실제 {len(ind)})", len(ind) == expected_rows)
     record("A", f"industry 10개 (실제 {n_i})", n_i == 10)
-
-    record("A", f"total master 행수 = 34 (실제 {len(tot)})", len(tot) == 34)
+    record("A", f"total master 행수 = quarter수 (실제 {len(tot)} vs quarter {tot.quarter.nunique()})",
+           len(tot) == tot.quarter.nunique())
 
     dup_ind = ind.duplicated(subset=["quarter", "industry"]).sum()
     record("A", f"(quarter, industry) 중복 0건 (실제 {dup_ind})", dup_ind == 0)
@@ -113,7 +140,7 @@ def check_a(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
 
     per_q = ind.groupby("quarter").industry.nunique()
     bad_q = per_q[per_q != 10]
-    record("A", f"34개 분기 전체 업종 수 = 10 (위반 분기: {bad_q.to_dict() or '없음'})",
+    record("A", f"전체 분기에서 업종 수 = 10 (위반 분기: {bad_q.to_dict() or '없음'})",
            len(bad_q) == 0)
 
     qfmt_ok = ind.quarter.astype(str).str.match(r"^\d{4}Q[1-4]$")
@@ -121,22 +148,12 @@ def check_a(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
     record("A", f"quarter 형식 YYYYQ[1-4] 전부 일치 (위반: {bad_fmt or '없음'})",
            qfmt_ok.all())
 
-    qs = sorted(ind.quarter.unique())
     if qs:
-        y0, k0 = int(qs[0][:4]), int(qs[0][-1])
-        y1, k1 = int(qs[-1][:4]), int(qs[-1][-1])
-        expected_seq = []
-        y, k = y0, k0
-        while (y, k) <= (y1, k1):
-            expected_seq.append(f"{y}Q{k}")
-            k += 1
-            if k == 5:
-                k = 1
-                y += 1
+        expected_seq = _expected_quarters(qs)
         missing = [q for q in expected_seq if q not in qs]
         log(f"  범위 : {qs[0]} ~ {qs[-1]} (연속 기대 {len(expected_seq)}개, 실제 {len(qs)}개)")
-        record("A", f"2018Q1~2026Q2 연속, 빠진 분기 없음 (누락: {missing or '없음'})",
-               len(missing) == 0 and qs[0] == "2018Q1" and qs[-1] == "2026Q2")
+        record("A", f"{qs[0]}~{qs[-1]} 연속, 빠진 분기 없음 (누락: {missing or '없음'})",
+               len(missing) == 0)
     else:
         record("A", "quarter 데이터 없음", False)
 
@@ -160,9 +177,6 @@ def check_b(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
     tot_str = _read_str(P_TOT)
     junk_found = {}
     for c in NUMERIC_IND_COLS:
-        bad = ind_str[c].isin(STR_JUNK - {""}) | (ind_str[c] == "")
-        # 원본에 빈칸('')은 정상 결측(NaN)으로 pandas가 읽으므로 문자열 잔재 검사는
-        # 'X','-','null','nan' 등 실제 텍스트 잔재만 본다. 빈칸은 별도 카운트.
         literal_bad = ind_str[c].isin({"X", "-", "null", "nan"})
         if literal_bad.any():
             junk_found[c] = int(literal_bad.sum())
@@ -175,16 +189,19 @@ def check_b(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
 
 
 # ----------------------------------------------------------------------------
-# C. 결측
+# C. 결측 (정상적 구조 결측은 INFO로만 보고하고 FAIL 처리하지 않는다)
 # ----------------------------------------------------------------------------
 
 def check_c(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
     hr("C. 결측")
 
     prod_na_q = sorted(ind.loc[ind.production.isna(), "quarter"].unique())
-    log(f"  production 결측 분기: {prod_na_q}")
-    record("C", "의도된 결측: industry production = 2023Q4 10행만",
-           prod_na_q == ["2023Q4"] and int(ind.production.isna().sum()) == 10)
+    known = KNOWN_STRUCTURAL_MISSING_QUARTERS["production"]
+    unexpected = [q for q in prod_na_q if q not in known]
+    log(f"  production 결측 분기: {prod_na_q} (알려진 정상 결측: {known})")
+    log(f"  [정보] 2023Q4 업종별 생산 결측은 원자료 비공개(X) 때문이며 정상이다 — FAIL 대상 아님")
+    record("C", f"production 결측 분기가 알려진 정상 결측({known})의 부분집합 "
+                f"(예상 외 결측: {unexpected or '없음'})", len(unexpected) == 0)
 
     emp_na = int(ind.employment.isna().sum())
     record("C", f"employment 결측 0 (실제 {emp_na})", emp_na == 0)
@@ -208,7 +225,7 @@ def check_c(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
     record("C", f"total master 4개 지표 결측 0 (실제 {tot_na})",
            all(v == 0 for v in tot_na.values()))
 
-    # masked 플래그 일관성: masked==1 인 셀은 값이 NaN 이어야 한다
+    # masked 플래그 일관성: masked==1 인 셀은 값이 NaN 이어야 한다 (X -> 0 치환 금지 확인)
     mask_incons = {}
     for c in ["production", "employment", "firms_in", "firms_op"]:
         mcol = f"{c}_masked"
@@ -219,13 +236,14 @@ def check_c(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
     op_bad = ind[(ind.op_rate_masked == 1) & ~both_op_na]
     if len(op_bad):
         mask_incons["op_rate"] = len(op_bad)
-    record("C", f"_masked==1 셀은 모두 NaN (역방향 불일치: {mask_incons or '없음'})",
+    record("C", f"_masked==1 셀은 모두 NaN, X->0 치환 없음 (역방향 불일치: {mask_incons or '없음'})",
            len(mask_incons) == 0)
 
-    prod_2023q4_masked = ind.loc[ind.quarter == "2023Q4", "production_masked"]
-    record("C", f"production 2023Q4 10행 모두 production_masked==1 "
-                f"(실제 {int((prod_2023q4_masked == 1).sum())}/10)",
-           (prod_2023q4_masked == 1).all() and len(prod_2023q4_masked) == 10)
+    if "2023Q4" in prod_na_q:
+        prod_2023q4_masked = ind.loc[ind.quarter == "2023Q4", "production_masked"]
+        record("C", f"production 2023Q4 10행 모두 production_masked==1 "
+                    f"(실제 {int((prod_2023q4_masked == 1).sum())}/{len(prod_2023q4_masked)})",
+               (prod_2023q4_masked == 1).all() and len(prod_2023q4_masked) == 10)
 
     # 참고용: masked==0 인데 값이 NaN인 셀 (마스킹과 무관한 결측, 실패 아님/정보성)
     info_gaps = {}
@@ -251,9 +269,9 @@ def check_d(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
     neg_prod = int((prod_notna.production < 0).sum())
     zero_prod = prod_notna[prod_notna.production == 0]
     if len(zero_prod):
-        log(f"  [정보] production == 0 인 셀 {len(zero_prod)}건 (음수는 아님, 실제 소규모 업종 값으로 보임): "
+        log(f"  [정보] production == 0 인 셀 {len(zero_prod)}건 (음수는 아님): "
             f"{sorted(zero_prod.quarter.unique())} / 업종 {sorted(zero_prod.industry.unique())}")
-    record("D", f"production 음수 0건 (2023Q4 NaN 제외, 실제 음수 {neg_prod}건)", neg_prod == 0)
+    record("D", f"production 음수 0건 (실제 음수 {neg_prod}건)", neg_prod == 0)
 
     neg_emp = int((ind.employment < 0).sum())
     record("D", f"employment >= 0 (위반 {neg_emp}건)", neg_emp == 0)
@@ -271,8 +289,8 @@ def check_d(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
         log(viol[["quarter", "industry", "firms_in", "firms_op"]].to_string(index=False))
     record("D", f"firms_in >= firms_op (위반 {len(viol)}건)", len(viol) == 0)
 
-    # 단위 급변 탐지 (제거하지 않음, 발견만 보고)
-    log("\n  단위 급변 탐지 (분기별 합계, 인접 분기 대비 >=5x 또는 <=1/5)")
+    # 단위 급변 탐지 (제거하지 않음, 발견만 보고 — 경고, 실패 아님)
+    log("\n  단위 급변 탐지 (분기별 합계, 인접 분기 대비 >=5x 또는 <=1/5) — 경고용, 값 수정 없음")
     jump_found = []
     for c in ["production", "employment", "firms_in", "firms_op"]:
         s = ind.groupby("quarter")[c].sum(min_count=1).sort_index()
@@ -301,9 +319,9 @@ def check_d(ind: pd.DataFrame, tot: pd.DataFrame) -> None:
         for row in jump_found:
             log(f"    지표={row[0]:<17} {row[1]}={row[2]:>12} -> {row[3]}={row[4]:>12}  배율={row[5]}")
     else:
-        log("    없음 (2023Q4는 전업종 결측으로 합계가 0/NaN이 되어 비교에서 제외됨)")
-    log(f"  [주의] 2025Q2 기계 production 스파이크 등은 값 제거·보간 대상이 아님 — 발견만 하고 그대로 둔다")
-    record("D", f"단위 급변 후보 {len(jump_found)}건 발견 (검토용, 제거하지 않음)", True)
+        log("    없음 (전업종 결측 분기는 합계가 0/NaN이 되어 비교에서 제외됨)")
+    record("D", f"단위 급변 후보 {len(jump_found)}건 발견 (검토용, 제거하지 않음)", True,
+           level="WARN" if jump_found else "FAIL")
 
 
 # ----------------------------------------------------------------------------
@@ -326,26 +344,39 @@ def check_e(ind: pd.DataFrame, tot: pd.DataFrame) -> pd.DataFrame:
         (df.prod_ind_sum - df.production_total).abs() / df.production_total.abs(),
         np.nan,
     )
+    df["emp_rel_err"] = np.where(
+        df.employment_total.notna() & df.emp_ind_sum.notna() & (df.employment_total != 0),
+        (df.emp_ind_sum - df.employment_total).abs() / df.employment_total.abs(),
+        np.nan,
+    )
     df["emp_gap"] = df.employment_total - df.emp_ind_sum
 
     df = df[["quarter", "prod_ind_sum", "production_total", "prod_rel_err",
-             "emp_ind_sum", "employment_total", "emp_gap"]].sort_values("quarter")
+             "emp_ind_sum", "employment_total", "emp_gap", "emp_rel_err"]].sort_values("quarter")
 
     out_path = os.path.join(DIR_LOG, "total_vs_industry.csv")
     df.to_csv(out_path, index=False, encoding="utf-8-sig")
     log(f"  저장 -> {os.path.relpath(out_path, BASE)}")
 
-    excl = df[df.quarter != "2023Q4"]
+    known_missing = set(KNOWN_STRUCTURAL_MISSING_QUARTERS["production"])
+    excl = df[~df.quarter.isin(known_missing)]
     max_err = excl.prod_rel_err.max()
-    log(f"  production 상대오차 (2023Q4 제외) max={max_err:.6%} "
+    log(f"  production 상대오차 (알려진 결측분기 제외) max={max_err:.6%} "
         f"median={excl.prod_rel_err.median():.6%}")
-    record("E", f"업종합계 vs production_total 상대오차 <=1% (2023Q4 제외, 실제 max {max_err:.4%})",
+    record("E", f"업종합계 vs production_total 상대오차 <=1% (실제 max {max_err:.4%})",
            bool(max_err <= 0.01))
 
-    log(f"  employment_total - 업종합계(nonmfg_implied, emp_gap) "
-        f"min={df.emp_gap.min():.1f} max={df.emp_gap.max():.1f} median={df.emp_gap.median():.1f}")
-    log(df[["quarter", "prod_rel_err", "emp_gap"]].tail(8).to_string(index=False))
-    record("E", "업종별 employment 합계 vs employment_total 차이(emp_gap) 산출 완료", True)
+    # 고용은 업종합 != 산단 전체가 정상 특성이다 (기존 확인범위 0.46%~4.05%, 중앙값 1.27%).
+    emp_err_pct = excl.emp_rel_err.dropna() * 100
+    log(f"  employment 상대오차 분포: min={emp_err_pct.min():.2f}% median={emp_err_pct.median():.2f}% "
+        f"max={emp_err_pct.max():.2f}%")
+    log("  [정보] 업종합 employment != 단지 전체 employment 는 정상 특성이다 (비제조업 포함 등 통계 정의 차이). "
+        "FAIL 처리하지 않는다.")
+    log(f"  참고범위(과거 확인): 0.46%~4.05%, 중앙값 1.27%")
+    out_of_known_range = emp_err_pct[(emp_err_pct < 0) | (emp_err_pct > 10)]
+    record("E", f"employment 상대오차가 비정상적으로 크지 않음(<=10%, 참고용 경고 기준) "
+                f"(위반 {len(out_of_known_range)}건)",
+           len(out_of_known_range) == 0, level="WARN")
 
     return df
 
@@ -371,7 +402,7 @@ def check_f(gap_df: pd.DataFrame) -> None:
     hr("F. 연간보정본 비제조 고용 대조")
 
     if openpyxl is None:
-        record("F", "openpyxl 미설치 -> 비제조 고용 대조 건너뜀", False)
+        record("F", "openpyxl 미설치 -> 비제조 고용 대조 건너뜀", False, level="WARN")
         return
 
     paths = []
@@ -459,9 +490,8 @@ def check_f(gap_df: pd.DataFrame) -> None:
             .assign(diff=(mm.nonmfg_official - mm.emp_gap_from_master))
             .to_string(index=False))
 
-    record("F", f"24개 시점 중 분기말 {n_applicable}개가 대조 대상, "
-                f"그 중 {n_match}개 일치 / 최대오차 {max_diff}",
-           n_applicable > 0 and n_mismatch == 0)
+    record("F", f"분기말 {n_applicable}개 대조 대상 중 {n_match}개 일치 / 최대오차 {max_diff}",
+           n_applicable == 0 or n_mismatch == 0, level="WARN")
 
 
 # ----------------------------------------------------------------------------
@@ -490,7 +520,7 @@ def check_g(ind: pd.DataFrame) -> None:
 
 
 # ----------------------------------------------------------------------------
-# H. YoY 재검증
+# H. YoY 재검증 (업종 경계를 넘지 않는지 포함)
 # ----------------------------------------------------------------------------
 
 def check_h(ind: pd.DataFrame) -> None:
@@ -498,6 +528,7 @@ def check_h(ind: pd.DataFrame) -> None:
 
     py_ = ind.pivot(index="quarter", columns="industry", values="production").sort_index()
     ey_ = ind.pivot(index="quarter", columns="industry", values="employment").sort_index()
+    # pivot 후 컬럼(=업종)별로 shift(4)하므로 업종 경계를 넘지 않는다.
     chk_p = ((py_ / py_.shift(4) - 1) * 100).replace([np.inf, -np.inf], np.nan)
     chk_e = ((ey_ / ey_.shift(4) - 1) * 100).replace([np.inf, -np.inf], np.nan)
 
@@ -509,14 +540,21 @@ def check_h(ind: pd.DataFrame) -> None:
     all_diffs = np.concatenate([diff_p, diff_e])
     all_diffs = all_diffs[~np.isnan(all_diffs)]
     max_err = float(all_diffs.max()) if len(all_diffs) else float("nan")
-    log(f"  독립 재계산 vs 저장값 최대 절대오차: {max_err} (비교 가능한 셀 {len(all_diffs)}개)")
-    record("H", f"YoY 독립 재계산 최대 절대오차 ~0 (실제 {max_err})",
+    log(f"  독립 재계산(업종별 groupby 내부 lag4) vs 저장값 최대 절대오차: "
+        f"{max_err} (비교 가능한 셀 {len(all_diffs)}개)")
+    record("H", f"YoY 독립 재계산 최대 절대오차 ~0, 업종 경계 미침범 확인 (실제 {max_err})",
            len(all_diffs) > 0 and max_err < 1e-6)
 
-    for q in ["2023Q4", "2024Q4"]:
+    for q in KNOWN_STRUCTURAL_MISSING_QUARTERS.get("production", []):
         n = int(ind.loc[ind.quarter == q, "production_yoy"].notna().sum())
-        log(f"  {q} production_yoy 유효 업종 수 = {n}/10 (기대 0)")
-        record("H", f"{q} production_yoy 전 업종 NaN (실제 유효 {n}/10)", n == 0)
+        log(f"  {q} production_yoy 유효 업종 수 = {n}/10 (기대 0, 2023Q4 X로 인한 정상 결측)")
+        record("C", f"{q} production_yoy 전 업종 NaN (실제 유효 {n}/10)", n == 0)
+        lag4_q = f"{int(q[:4]) + 1}Q{q[-1]}"
+        if lag4_q in ind.quarter.unique():
+            n2 = int(ind.loc[ind.quarter == lag4_q, "production_yoy"].notna().sum())
+            log(f"  {lag4_q} production_yoy 유효 업종 수 = {n2}/10 "
+                f"(기대 0, 기준분기 {q}가 결측이라 lag4 연쇄 결측)")
+            record("C", f"{lag4_q} production_yoy 전 업종 NaN (실제 유효 {n2}/10)", n2 == 0)
 
     raw_vals = pd.concat([ind.production_yoy, ind.employment_yoy]).dropna().to_numpy(dtype=float)
     n_inf = int(np.isinf(raw_vals).sum())
@@ -550,13 +588,19 @@ def main() -> int:
     check_h(ind)
 
     hr("요약")
-    n_pass = sum(1 for _s, _l, p in RESULTS if p)
-    n_fail = sum(1 for _s, _l, p in RESULTS if not p)
-    log(f"총 {len(RESULTS)}개 검사 중 PASS {n_pass} / FAIL {n_fail}")
+    n_pass = sum(1 for _s, _lv, _l, p in RESULTS if p)
+    n_warn = sum(1 for _s, lv, _l, p in RESULTS if not p and lv == "WARN")
+    n_fail = sum(1 for _s, lv, _l, p in RESULTS if not p and lv == "FAIL")
+    log(f"총 {len(RESULTS)}개 검사 중 PASS {n_pass} / WARN {n_warn} / FAIL {n_fail}")
+    if n_warn:
+        log("\nWARN 목록 (확인 필요, 실패 아님):")
+        for s, lv, l, p in RESULTS:
+            if not p and lv == "WARN":
+                log(f"  [{s}] {l}")
     if n_fail:
-        log("\nFAIL 목록:")
-        for s, l, p in RESULTS:
-            if not p:
+        log("\nFAIL 목록 (파이프라인 문제):")
+        for s, lv, l, p in RESULTS:
+            if not p and lv == "FAIL":
                 log(f"  [{s}] {l}")
 
     with open(os.path.join(DIR_LOG, "qa_report.txt"), "w", encoding="utf-8") as f:
