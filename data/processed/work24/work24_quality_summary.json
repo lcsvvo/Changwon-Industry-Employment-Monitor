@@ -1,0 +1,237 @@
+{
+  "generated_at": "2026-09-19T12:51:40+00:00",
+  "purpose": "고용24(work24) 공개 채용정보를 Decision Gate 후속 확인자료로 쓰기 위한 품질요약. Q1~Q3 결과를 대체·수정하지 않는다.",
+  "snapshot": {
+    "snapshot_id": "work24_5gu_20260919_2138",
+    "crawl_timestamp": "2026-09-19T12:38:57+00:00",
+    "file": "work24_5gu_20260919_2138.csv",
+    "file_sha256": "a946724aac2e2d95f050aac5af60fcba955f6aeac0c58b19236d5adaa1e4e8ff",
+    "expected_total": 2124,
+    "collected_total": 2124,
+    "collected_vs_expected_diff": 0,
+    "pages_requested": 215,
+    "pages_failed": 0,
+    "parse_failures": 0,
+    "robots_checked_at": "2026-09-19T12:38:57+00:00"
+  },
+  "historical_snapshot": {
+    "snapshot_id": "20260918_partial_3gu",
+    "crawl_timestamp": "2026-09-18",
+    "retrieval_date": "2026-09-18",
+    "source": "work24",
+    "source_name": "고용24 창원고용복지+센터 공개 채용정보 목록",
+    "source_url": "https://www.work.go.kr/changwon/infoPlace/empInfo/empInfoList.do",
+    "center": "창원고용복지+센터",
+    "region_scope": [
+      "의창구",
+      "성산구",
+      "진해구"
+    ],
+    "definition": "2026-09-18 수집 시점에 창원고용복지+센터에서 조회 가능했던 의창구·성산구·진해구의 공개 채용공고 1,504건.",
+    "is_partial": true,
+    "partial_reason": "창원시 5개 구 중 3개 구만 포함. 마산 2개 구 미포함.",
+    "row_count": 1504,
+    "region_counts": {
+      "의창구": 621,
+      "성산구": 616,
+      "진해구": 267
+    },
+    "file_sha256": "f33f36a335dfaf335095ad31ab7778b09eeb63ed0770731d41be2ee8ce8c5028",
+    "original_filename": "changwon_jobs_20260918.csv",
+    "provenance": "commit 9a69168 『고용24 창원 채용정보 크롤러 및 수집 데이터 추가』 의 changwon_jobs.csv 와 SHA256 동일.",
+    "must_not_be_interpreted_as": [
+      "창원시 전체",
+      "창원국가산단 전체",
+      "제조업 전체",
+      "KICOX 업종별 전체",
+      "모집인원",
+      "노동수요 전체",
+      "시계열 데이터"
+    ],
+    "known_defects": [
+      "education 컬럼이 전부 비어 있다. 목록의 학력은 JS 렌더 값이라 렌더 전 <p> 텍스트를 읽은 결과다.",
+      "임금 유형(시급/월급 등)이 별도 컬럼으로 분리돼 있지 않다."
+    ],
+    "superseded_by": "동일 실행시점 5개 구 canonical RAW (work24_5gu_*). 이 파일은 비교·이력 목적으로만 보존한다. 새 자료와 행을 섞거나 append 하지 않는다.",
+    "metadata_schema": "changwon-external-collection/1.0.0"
+  },
+  "collection": {
+    "raw_rows": 2124,
+    "in_scope_rows": 2045,
+    "out_of_scope_rows": 79,
+    "region_unparsed": 0,
+    "rows_by_gu": {
+      "의창구": 600,
+      "성산구": 597,
+      "마산회원구": 308,
+      "마산합포구": 283,
+      "진해구": 257,
+      "의령군": 79
+    },
+    "uiryeong_out_of_scope": 79,
+    "wanted_auth_no_unique": 2124,
+    "wanted_auth_no_duplicated": 0
+  },
+  "core_field_coverage": {
+    "wanted_auth_no": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "company_raw": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "title_raw": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "region_raw": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "reg_date": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "due_date": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "wage_raw": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "career_raw": {
+      "n": 2045,
+      "pct": 100.0
+    },
+    "education_raw": {
+      "n": 2045,
+      "pct": 100.0
+    }
+  },
+  "supplementary_field_coverage": {
+    "recruitment_count": {
+      "direct": {
+        "n": 0,
+        "pct": 0.0
+      },
+      "enriched": {
+        "n": 0,
+        "pct": 0.0
+      },
+      "status": "NOT_COLLECTED_ACCESS_POLICY",
+      "note": "목록페이지에 모집인원이 없고 상세페이지는 robots.txt 에서 수집이 허용되지 않는다. 미확보 행을 0명으로 처리하지 않는다."
+    },
+    "workplace_address": {
+      "direct": {
+        "n": 0,
+        "pct": 0.0
+      },
+      "enriched": {
+        "n": 609,
+        "pct": 29.78
+      },
+      "enriched_source": "창원시 공장등록현황(2024-12-31)",
+      "note": "기업 주소이며 공고의 실제 근무지와 동일하다고 가정하지 않는다."
+    },
+    "ksic": {
+      "direct": {
+        "n": 0,
+        "pct": 0.0
+      },
+      "enriched": {
+        "n": 679,
+        "pct": 33.2
+      },
+      "enriched_source": "창원시 공장등록현황 업종명 → 통계청 KSIC 제11차 공식 연계표(국세청 홈택스 게시본)"
+    },
+    "occupation": {
+      "direct": {
+        "n": 0,
+        "pct": 0.0
+      },
+      "status": "NOT_PROVIDED_ON_LIST"
+    }
+  },
+  "company_matching": {
+    "status_counts": {
+      "NO_MATCH": 1232,
+      "MATCH": 683,
+      "MULTI": 130
+    },
+    "match_rate_pct": 33.4,
+    "note": "정규화 키 완전일치만 인정. fuzzy match 자동확정 없음. MULTI 자동선택 없음."
+  },
+  "ksic_and_manufacturing": {
+    "resolution_counts": {
+      "UNRESOLVED": 1366,
+      "COMPANY_MASTER_EXACT": 679
+    },
+    "is_manufacturing_counts": {
+      "True": 663,
+      "False": 16,
+      "UNKNOWN": 1366
+    },
+    "note": "기업 미식별은 비제조업이 아니라 UNKNOWN 이다. 직무명으로 산업을 추정하지 않는다."
+  },
+  "industrial_complex": {
+    "status_counts": {
+      "UNKNOWN": 1437,
+      "NOT_MATCH": 437,
+      "POSSIBLE": 171
+    },
+    "method": "LEGAL_DONG_MFG_DENSITY_PROXY_UPPER_BOUND",
+    "match_status_blocked": true,
+    "note": "창원국가산단 경계 polygon 미공표로 point-in-polygon 불가. MATCH 는 어떤 행에도 부여하지 않는다. 제조업 집적 법정동은 산단 경계의 상한이므로 POSSIBLE 은 '산단 소재 확정'이 아니다."
+  },
+  "kicox_mapping": {
+    "status_counts": {
+      "UNMAPPED": 1382,
+      "MAPPED": 663
+    },
+    "industry_counts": {
+      "기계": 380,
+      "전기전자": 101,
+      "운송장비": 101,
+      "철강": 22,
+      "음식료": 17,
+      "목재종이": 15,
+      "석유화학": 13,
+      "비금속": 7,
+      "기타": 7
+    },
+    "note": "UNMAPPED 는 미분류이며 KICOX 실제 업종 '기타' 와 다르다."
+  },
+  "reposts": {
+    "duplicate_groups": 9,
+    "repost_candidates": 21,
+    "note": "후보 표시만 하며 자동 삭제하지 않는다."
+  },
+  "decision_gate_evidence": {
+    "gate_quarter": "2026Q2",
+    "target_stages": [
+      "우선점검",
+      "추가확인"
+    ],
+    "target_industries": [
+      "기계",
+      "목재종이"
+    ],
+    "postings": 395,
+    "companies_identified": 239,
+    "postings_company_identified": 395,
+    "recruitment_count_coverage_pct": 0.0,
+    "level_a_available": true,
+    "level_b_available": false,
+    "level_b_blocked_reason": "모집인원을 허용된 경로에서 확보할 수 없다. 공고 수는 모집인원이 아니므로 Level B 집계를 하지 않는다."
+  },
+  "interpretation_limits": [
+    "공고 수는 모집인원이 아니다.",
+    "공고 수는 노동수요가 아니다.",
+    "공개공고는 전체 채용시장이 아니다.",
+    "공고 수 증감으로 산업 성장·위기를 판단하지 않는다.",
+    "이 자료로 Q1~Q3 의 S1~S4 상태를 바꾸지 않는다.",
+    "현재 게시 중인 공고 위주의 단면이라 생존편향이 있다."
+  ]
+}
