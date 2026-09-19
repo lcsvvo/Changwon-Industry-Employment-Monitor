@@ -1,0 +1,3 @@
+﻿source_scheme,source_category,source_code,target_kicox_industry,mapping_type,mapping_confidence,rationale,source
+사업체노동력조사 산업분류,광업.제조업(BC),IND201701,해당없음(제조업 총계),unavailable,D,제조업이 한 덩어리라 KICOX 10업종으로 나눌 수 없다. 총계 방향 비교에만 사용,고용노동부 사업체노동력조사(지역편) DT_118N_MONA49/59 산업 대분류 (data/raw/employment_insurance/)
+사업체노동력조사 산업분류,전산업,IND201700,해당없음,unavailable,D,전산업 총계. 제조업 업종 해석에 쓰지 않는다,고용노동부 사업체노동력조사(지역편) DT_118N_MONA49/59 산업 대분류 (data/raw/employment_insurance/)

@@ -1,0 +1,69 @@
+{
+  "run_at": "2026-09-18T13:18:30+00:00",
+  "results": [
+    {
+      "pk": "15085898",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\kicox_datagokr\\kicox_industry_production_latest.csv",
+      "bytes": 3214,
+      "rows": 40,
+      "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_업종별 생산실적.csv"
+    },
+    {
+      "pk": "15085897",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\kicox_datagokr\\kicox_industry_employment_latest.csv",
+      "bytes": 2306,
+      "rows": 40,
+      "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_업종별 고용현황.csv"
+    },
+    {
+      "pk": "15085895",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\kicox_datagokr\\kicox_industry_op_rate_latest.csv",
+      "bytes": 4123,
+      "rows": 40,
+      "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_업종별 가동률.csv"
+    },
+    {
+      "pk": "15085896",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\kicox_datagokr\\kicox_industry_firms_op_latest.csv",
+      "bytes": 2025,
+      "rows": 40,
+      "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_업종별 가동업체 현황.csv"
+    },
+    {
+      "pk": "15085901",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\kicox_datagokr\\kicox_industry_firms_in_latest.csv",
+      "bytes": 2052,
+      "rows": 40,
+      "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_업종별 입주업체 현황.csv"
+    },
+    {
+      "pk": "15085889",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\kicox_datagokr\\kicox_complex_op_rate_latest.csv",
+      "bytes": 2564,
+      "rows": 40,
+      "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_단지별 가동률.csv"
+    },
+    {
+      "pk": "15085874",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\kicox_datagokr\\kicox_national_complex_status_latest.csv",
+      "bytes": 10337,
+      "rows": 95,
+      "original_filename": "(25년4분기)국가(콤마삭제).csv"
+    },
+    {
+      "pk": "3066436",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\changwon_factory_registry\\changwon_factory_registry_20241231.csv",
+      "bytes": 1090786,
+      "rows": 5636,
+      "original_filename": "경상남도 창원시_공장등록현황(24. 12. 31. 기준).csv"
+    }
+  ]
+}

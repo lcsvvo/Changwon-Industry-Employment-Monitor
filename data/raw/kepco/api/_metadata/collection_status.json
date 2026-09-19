@@ -1,0 +1,85 @@
+{
+  "status": "PARTIAL",
+  "spec_verification": "VERIFIED",
+  "dataset_status": {
+    "business_type": "PARTIAL",
+    "industry_type": "USABLE",
+    "custnum_change": "PARTIAL"
+  },
+  "checked_at": "2026-09-19T02:56:03+00:00",
+  "required_env": "KEPCO_API_KEY",
+  "key_present": true,
+  "portal_base": "https://bigdata.kepco.co.kr/openapi/v1",
+  "portal_guide": "https://bigdata.kepco.co.kr/cmsmain.do?scode=S01&pcode=000493",
+  "spec_source": "로그인한 브라우저로 포털 'OPEN API 소개' 화면을 직접 열어 확인 (2026-09-19). 로그인 우회 없음",
+  "endpoints": {
+    "business_type": "https://bigdata.kepco.co.kr/openapi/v1/powerUsage/businessType.do",
+    "industry_type": "https://bigdata.kepco.co.kr/openapi/v1/powerUsage/industryType.do",
+    "custnum_change": "https://bigdata.kepco.co.kr/openapi/v1/change/custNum/industryType.do"
+  },
+  "n_calls_this_run": 0,
+  "stopped_reason": null,
+  "request_failures": [],
+  "summary": {
+    "business_type": {
+      "rows": 8827,
+      "months_total": 66,
+      "months_complete": 53,
+      "months_source_degenerate": [
+        "2021-01",
+        "2021-02",
+        "2021-03",
+        "2021-04",
+        "2021-05",
+        "2021-06",
+        "2021-07",
+        "2021-08",
+        "2021-09",
+        "2021-10",
+        "2021-11",
+        "2021-12",
+        "2022-01"
+      ],
+      "months_no_data": [],
+      "months_request_failed": [],
+      "first_complete": "2022-02",
+      "last_complete": "2026-06"
+    },
+    "industry_type": {
+      "rows": 1386,
+      "months_total": 66,
+      "months_complete": 66,
+      "months_source_degenerate": [],
+      "months_no_data": [],
+      "months_request_failed": [],
+      "first_complete": "2021-01",
+      "last_complete": "2026-06"
+    },
+    "custnum_change": {
+      "rows": 3804,
+      "months_total": 66,
+      "months_complete": 54,
+      "months_source_degenerate": [],
+      "months_no_data": [
+        "2021-01",
+        "2021-02",
+        "2021-03",
+        "2021-05",
+        "2021-06",
+        "2021-07",
+        "2021-09",
+        "2021-11",
+        "2021-12",
+        "2022-01",
+        "2022-02",
+        "2022-03"
+      ],
+      "months_request_failed": [],
+      "first_complete": "2021-04",
+      "last_complete": "2026-06"
+    }
+  },
+  "known_source_defect": "businessType.do 는 2020-11~2022-01 에 창원 5개 구 중 2개 구만 반환한다(8~10행, 5천~4만 kWh). 정상월은 163~166행, 약 9억 kWh. 공급측 결함이며 수집 실패가 아니다",
+  "rate_limit": "공표되지 않음. 429 미관측. 일시적 401 1회 관측(재시도로 해소)",
+  "role": "CONTEXT / ACTIVITY (보조·강건성). Triage 판정변수 아님"
+}

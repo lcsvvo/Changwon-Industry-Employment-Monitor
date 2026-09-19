@@ -1,0 +1,25 @@
+{
+  "dataset_name": "한국산업단지공단_전국산업단지현황통계_국가산업단지",
+  "institution": "한국산업단지공단",
+  "source_url": "https://www.data.go.kr/data/15085874/fileData.do",
+  "api_endpoint": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003675845&fileDetailSn=1&insertDataPrcus=N",
+  "retrieved_at": "2026-09-18T13:18:27+00:00",
+  "observation_start": null,
+  "observation_end": null,
+  "geography": "전국 국가산업단지(단지별). 창원 행만 발췌해 사용",
+  "industry_classification": "해당없음(단지 단위)",
+  "frequency": "분기",
+  "unit": "개사, 천㎡, %",
+  "original_filename": "(25년4분기)국가(콤마삭제).csv",
+  "file_hash_sha256": "e8eadedc11d90e53dbc452833b5009a0999e09199e75631c7564a5970623a719",
+  "api_parameters": {
+    "dataset_pk": "15085874",
+    "method": "GET",
+    "auth": "none (public file download)"
+  },
+  "revision_vintage": "포털 제공 파일명에 표기된 공표 시점(연간보정 여부 포함)",
+  "terms_limitations": "공공데이터포털 이용약관. 파일데이터는 현재 공표본 1개만 제공되며 과거 공표본은 포털에서 재취득 불가. 로그인·CAPTCHA 우회 없이 수집.",
+  "notes": "포털 공표 제목: 한국산업단지공단_전국산업단지현황통계_국가산업단지_20251231 | 공공데이터포털. 인코딩 utf-8-sig, 행 수 95, 헤더: 유형,시도,시군,단지명,조성상태,지정면적(천제곱미터),관리면적(천제곱미터),산업시설구역_전체면적(천제곱미터),산업시설구역_분양대상(천제곱미터),산업시설구역_분양(천제곱미터),산업시설구역_미분양(천제곱미터),산업시설구역_분양률(퍼센트),입주업체(개),가동업체(개)",
+  "notes_role": "단지 단위 입주·가동업체수의 별도 공표계열. KICOX 동일계열이므로 독립검증이 아니라 공표 일관성 확인용",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

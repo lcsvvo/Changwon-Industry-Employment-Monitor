@@ -1,0 +1,8 @@
+﻿aspect,legal_dong_ksic,business_type,assessment
+업종 정의,공식 KSIC 중분류 코드,KEPCO 비공식 businessType 명칭,법정동×KSIC 개선
+KICOX 매핑 신뢰도,기존 코드 crosswalk A/B/C/D 유지; fuzzy matching 없음,업종명→KSIC→KICOX 간접 대응,법정동×KSIC 개선
+공간단위,창원 제조업 집적 법정동 proxy 18개,기존 창원시 집계,법정동×KSIC가 세밀하지만 산단 경계는 아님
+기간 coverage,2022-04~2026-03,2021-01~2026-06,서로 기간·자료계열이 다름
+비식별률,40.4717%,별도 suppression_flag 없음,신규 자료는 비식별을 명시
+결측률,0.0000%,0.0000%,정의 차이로 단순 우열 해석 금지
+10업종 coverage,10/10,10/10,신규 자료는 코드별 근거 추적 가능

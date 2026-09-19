@@ -1,0 +1,10 @@
+{
+  "source": "data\\raw\\employment_center\\changwon_jobs\\changwon_jobs_20260918.csv",
+  "sha256": "f33f36a335dfaf335095ad31ab7778b09eeb63ed0770731d41be2ee8ce8c5028",
+  "rows": 1504,
+  "unique_wanted_auth_no": 1504,
+  "registration_date_min": "26-07-20",
+  "registration_date_max": "26-09-18",
+  "role": "CONTEXT",
+  "industry_signal_usable": false
+}

@@ -1,0 +1,95 @@
+{
+  "dataset_name": "관세청_시군구별 품목별 수출입실적 (창원시, 근거 있는 류의 HS6)",
+  "institution": "관세청",
+  "source_url": "https://www.data.go.kr/data/15134343/openapi.do",
+  "api_endpoint": "https://apis.data.go.kr/1220000/sigunguperprlstperacrs/getSigunguPerPrlstPerAcrs",
+  "retrieved_at": "2026-09-19T03:26:06+00:00",
+  "observation_start": "2021.01",
+  "observation_end": "2026.06",
+  "geography": "경상남도 창원시(시군구). 창원국가산단 경계가 아니다",
+  "industry_classification": "HS 6단위. 관세청 공표 HS부호 원본에서 만든 유효 HS6 모집단 중 류 단위로 KICOX 업종 귀속 근거가 있는 것만. 등급 A(72·73·87·89류) / B(84·85류)",
+  "frequency": "월",
+  "unit": "금액: 천 달러, 신고 건수: 건 (관세청 무역통계 화면 표기)",
+  "original_filename": "(API XML 응답을 CSV 로 직렬화)",
+  "file_hash_sha256": "aa4f0b681cb4206eb9edf4024962a3e3165b29e322d66ff03d16e92d6e320ad4",
+  "api_parameters": {
+    "sidoCd": "48",
+    "strtYymm": "202101",
+    "endYymm": "202606",
+    "discovery_window": [
+      "202501",
+      "202512"
+    ],
+    "windows": [
+      [
+        "202101",
+        "202112"
+      ],
+      [
+        "202201",
+        "202212"
+      ],
+      [
+        "202301",
+        "202312"
+      ],
+      [
+        "202401",
+        "202412"
+      ],
+      [
+        "202501",
+        "202512"
+      ],
+      [
+        "202601",
+        "202606"
+      ]
+    ],
+    "hs6_universe_file": "data\\reference\\industry_crosswalk\\hs6_universe_customs.csv",
+    "HsSgn_count": 1248,
+    "HsSgn_discovered": 1029,
+    "hs6_complete": 1029,
+    "hs6_partial": 0,
+    "rate_limited": false,
+    "auth": "DATA_GO_KR_SERVICE_KEY (Encoding 형태 그대로 전달)",
+    "note": "serviceKey 재인코딩 금지"
+  },
+  "pagination": {
+    "method": "이 API 는 페이지 분할이 없다. 호출마다 totalCount 와 반환 item 수를 대조했다. 호출별 기록은 실행마다 누적 저장한다.",
+    "check_log": "data/raw/external/customs_trade/_metadata/pagination_checks.json",
+    "cumulative": {
+      "runs": 2,
+      "calls": 6394,
+      "answered": 4904,
+      "pagination_mismatch": 0,
+      "rate_limited_calls": 1490
+    },
+    "incomplete_calls": 0,
+    "note": "누적 API 기록에는 과거 HTTP 429가 남아 있다. 해당 1,489개 결손 조합은 관세청 무역통계 포털 CSV 일괄조회로 전부 보완했으며 현재 결손은 0이다."
+  },
+  "mapping_notes": "HS6 목록은 관세청 HS부호 원본(15049722) 파일다운로드로 확보했다(OpenAPI 는 이 키에 미등록이라 파일 경로를 썼다). 업종 대응은 HS 류와 관세청 공표 세번2단위품명만 근거로 했고, 신성질별 분류(소비재/원자재/자본재)는 용도 분류라 근거로 쓰지 않았다. 비철(74~81)·광학의료(90) 등 귀속 근거가 없는 류는 제외했으므로 창원 수출 총액이 아니다.",
+  "role": "CONTEXT / EXTERNAL_DEMAND",
+  "revision_vintage": "관세청 확정·잠정 구분이 응답에 없다. 최근월은 잠정치일 수 있다",
+  "terms_limitations": "2026.7.1 전후 시군구코드 체계가 다르다는 제공기관 안내가 있다. 시군구 단위이며 산업단지 내부만 분리할 수 없다.",
+  "limitations": "귀속 근거가 있는 류만 포함(mapped_chapters_only)하므로 업종 수출 총액이 아니다. 창원시 전역이며 산단 한정이 아니다. 등급 B(84·85류)는 맥락으로만 쓴다. 포털 보완행의 신고 건수는 API와 정의/개정시점이 달라 공란이다.",
+  "notes": "수집 46061행. 탐색 대상 HS6 1248개 중 1029개에서 창원시 거래 확인, 6개 연도창 전부 확보 1029개 / 일부 확보 0개. OpenAPI 429 결손은 포털 일괄조회 6회로 11803행 보완했다.",
+  "coverage_manifest": "data\\raw\\external\\customs_trade\\_metadata\\coverage_manifest.json",
+  "raw_response_file": "changwon_hs6_trade_raw_responses.json",
+  "raw_response_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "metadata_schema": "changwon-external-collection/1.0.0",
+  "collection_methods": [
+    {
+      "method": "data_go_kr_openapi",
+      "role": "초기 HS6×연도창 수집",
+      "historical_rate_limit": true
+    },
+    {
+      "method": "tradedata_portal_bulk_csv",
+      "role": "OpenAPI 429 결손 보완",
+      "queries": 6,
+      "metadata": "data\\raw\\external\\customs_trade\\portal_bulk\\_metadata.json"
+    }
+  ],
+  "portal_bulk_metadata": "data\\raw\\external\\customs_trade\\portal_bulk\\_metadata.json"
+}

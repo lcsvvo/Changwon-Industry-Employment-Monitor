@@ -1,0 +1,6 @@
+{
+  "status": "SUPERSEDED",
+  "superseded_by": "data/raw/external/ecos/",
+  "reason": "ECOS 공개 sample 키(1회 10건 한도)로 받은 전국 제조업 BSI. 2026-09-19 실제 ECOS_API_KEY 로 경남 지역별 + 전국 업종별 BSI 를 재수집해 대체됨. 원본과 metadata 는 비교를 위해 그대로 둔다.",
+  "recorded_at": "2026-09-18T18:01:09+00:00"
+}

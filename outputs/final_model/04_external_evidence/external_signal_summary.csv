@@ -1,0 +1,5 @@
+﻿signal,signal_label,n_true,n_false,n_not_determinable,industries_with_signal,quarters_with_signal
+firms_op_decline_signal,업체수 감소 신호,26,154,0,4,14
+operating_rate_decline_signal,가동 위축 신호,63,117,0,9,18
+ppi_adjusted_production_decline_signal,실질생산 위축 신호(PPI 조정),33,79,68,7,14
+production_maintained_employment_decline,생산유지·고용감소 신호,32,128,20,9,14

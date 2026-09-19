@@ -1,0 +1,30 @@
+{
+  "dataset_name": "관세청_HSK별 신성질별_성질별 분류",
+  "institution": "관세청",
+  "source_url": "https://www.data.go.kr/data/15049720/fileData.do",
+  "api_endpoint": "https://www.data.go.kr/cmm/cmm/fileDownload.do (원문파일등록)",
+  "retrieved_at": "2026-09-18T18:29:22+00:00",
+  "observation_start": "2026-01-01",
+  "observation_end": "2026-12-31",
+  "geography": "전국(품목 코드 체계 — 지역 개념 없음)",
+  "industry_classification": "관세청 성질(신성질) 분류",
+  "frequency": "연 1회 갱신(코드 개정 시)",
+  "unit": "코드",
+  "original_filename": "HSK별 신성질별_성질별 분류(2025년_2026년).xlsx",
+  "file_hash_sha256": "81323474ff803ccd2b0937079a0c258144c7e9e8b74aaf3efb37d14e81a7baa9",
+  "api_parameters": {
+    "publicDataPk": "15049720",
+    "publicDataDetailPk": "uddi:165ca6ed-88c3-4ed7-b838-8d3141d2f0f3",
+    "fileDetailSn": "1",
+    "publicDataTyCode": "PR0051",
+    "auth": "none (공개 파일데이터)"
+  },
+  "pagination": "단일 파일. 분할 없음.",
+  "mapping_notes": "이 파일 자체는 매핑을 포함하지 않는다. KICOX 업종 대응은 HS 류와 관세청 성질통합분류코드를 근거로 별도 스크립트에서 만든다.",
+  "role": "REFERENCE / CODE_UNIVERSE",
+  "revision_vintage": "2026-01-01 적용 기준본",
+  "terms_limitations": "공공데이터포털 이용약관.",
+  "limitations": "코드 체계일 뿐 거래실적이 아니다.",
+  "notes": "2,581,321 bytes. HSK 별 신성질별·성질별 분류표. 성질통합분류코드의 계층 해설",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}
