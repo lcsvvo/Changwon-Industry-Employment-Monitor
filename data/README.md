@@ -3,7 +3,8 @@
 이 문서는 프로젝트에서 사용하는 데이터의 출처, 수집 상태, 저장 위치와 Git 추적 정책을 관리한다.
 2026-09-08 기준 KICOX core+revision → master → 국면(S1~S4)·run·transition 패널까지, 그리고
 PPI(총지수 검증)·EIS(고용 검증) 패널까지 오프라인 파이프라인이 완료되었다. PPI 업종별 후보 계열 민감도는
-`logs/experiments/notebooks/02_eda.ipynb` Section 6에서 별도로 수행한다.
+EDA 단계에서 별도로 수행했고, 해당 notebook 은 `feature/model-experiments` 브랜치의
+`logs/experiments/notebooks/02_eda.ipynb` Section 6 에 보관되어 있다.
 
 ## 현재 데이터
 
@@ -20,8 +21,9 @@ PPI(총지수 검증)·EIS(고용 검증) 패널까지 오프라인 파이프라
 | 사업체노동력조사류(보류) | 고용노동부 | 2026.1/2 기준, 경상남도 단위(창원시 단위 없음) | 2026M01~M02 | `data/raw/_pending_review/` | 원자료 제외 | 보류(이번 파이프라인 미사용) |
 | 고용24 채용·훈련 | 검토 예정 | KICOX 핵심 파이프라인에는 미사용 | - | - | - | 후보 |
 
-KICOX의 상세 수집 방식, 시점 변환, 수정치 우선순위와 알려진 이슈는
-[`../docs/01_planning/methodology/data_collection_standard.md`](../docs/01_planning/methodology/data_collection_standard.md)를 따른다.
+KICOX의 상세 수집 방식, 시점 변환, 수정치 우선순위와 알려진 이슈는 `feature/model-experiments`
+브랜치에 보관된 `logs/experiments/documentation/01_planning/methodology/data_collection_standard.md`
+를 따른다.
 
 ## 폴더와 공유 정책
 
