@@ -1,0 +1,23 @@
+{
+  "rows": 180,
+  "complete": 160,
+  "discriminating": 89,
+  "latest_quarter": "2026Q2",
+  "replicates": 100,
+  "parameter_seed": 2026,
+  "revision_seed": 99,
+  "gate_blocked_rows": 75,
+  "gate_blocked_rows_ror_allows_check": 6,
+  "rows_changed_by_preference": 60,
+  "rows_changed_by_form_same_preference": 85,
+  "pareto_undetermined_but_mrsort_box_singleton": 18,
+  "pareto_undetermined_but_mrsort_rc_vrc_singleton": 71,
+  "point_rule_v1_vs_count2_disagreements": 2,
+  "box_samples": 40000,
+  "compatible_samples_box_only": 40000,
+  "compatible_samples_rc": 5931,
+  "compatible_samples_rc_vrc_no4": 5931,
+  "compatible_samples_rc_vrc": 1477,
+  "changepoints_significant": 0,
+  "elapsed_seconds": 510.0
+}

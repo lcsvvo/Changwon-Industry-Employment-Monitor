@@ -1,0 +1,5 @@
+﻿scope,model,horizon,cutoff,origins,prediction_valid,prediction_pending,production_missing,core_missing,outcome_valid,paired_primary,paired_secondary,observed_positives,selected_positives,pending_positives,capture_all_observed_positives
+operational_all_origins,electre_fixed,2,1,160,140,20,20,0,160,140,120,67,24,9,0.3582089552238806
+operational_all_origins,electre_fixed,2,2,160,140,20,20,0,160,140,120,67,11,9,0.16417910447761194
+operational_all_origins,triage_final,2,1,160,160,0,20,0,160,140,120,67,16,0,0.23880597014925373
+operational_all_origins,triage_final,2,2,160,160,0,20,0,160,140,120,67,6,0,0.08955223880597014

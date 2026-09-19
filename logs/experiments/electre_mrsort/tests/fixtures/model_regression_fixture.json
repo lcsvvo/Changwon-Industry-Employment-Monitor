@@ -1,0 +1,194 @@
+{
+  "fixture_metadata": {
+    "input_sha256": "58499908a6af50344a1362c55c840a58cfd80d4373c7098c4c97a9e0271a573b",
+    "input_path": "data/processed/kicox/changwon_state_panel.csv",
+    "hash_method": "sha256_lf_normalized",
+    "preprocess_config_sha256": "976278392ff1dc25329157d29e4e3a34b7afafe2374c7ccc76af316d1d75fb88",
+    "preprocess_config_files": [
+      "src/build_changwon_master.py",
+      "src/build_kicox_analysis_panel.py"
+    ],
+    "parameter_file_sha256": null,
+    "parameter_file_note": "config/electre_tri_b_params.yaml 없음(파라미터 미제공). 기대값은 파라미터와 무관한 파생지표·품질 플래그만 포함",
+    "briefing_doc_sha256": "6eb8a47ae3e63d70ad597ffdd32798df48d6856b0b021b69606fc83bdd27b1e7",
+    "model_spec_version": "changwon-transition-diagnosis-model/1.0.0",
+    "code_commit_sha": "812b4dcf89a1ca786d33edab4e8e3ef40a5a915c",
+    "code_commit_note": "fixture 작성 시점 HEAD. 모형 코드는 아직 커밋되지 않은 작업트리 상태",
+    "fixture_generated_at": "2026-09-15T05:50:55.202984+00:00",
+    "expected_value_sources": [
+      "사용자 확정 수정사항 §3(패널·상태·결측), §8(threshold 플래그), §12(생산만 감소 16행), §9(2026Q2 PPI 교차검산)",
+      "구현명세 §2.2 골든 체크값, §9.2 기준 범위·g4 최신값",
+      "03_q1_q2_q3_integrated_analysis.ipynb 셀 12 출력(비례기대증감·초과증감, 소수 2자리)",
+      "aux_analysis_report.html·PPI_sensitivity.csv의 전 기간 PPI 방향 건수(125/13/6)",
+      "구현명세 §2.3 기준 중복성 사전점검(Spearman 0.819/0.789/0.853, 고용감소 89행 g1-g2 0.042)"
+    ],
+    "status_rule": "입력 해시 동일 + 기대값 불일치 → IMPLEMENTATION_REGRESSION / 입력 해시 다름 → FIXTURE_REFRESH_REQUIRED",
+    "fixture_metadata_refreshed_at": "2026-09-15T06:39:34.121890+00:00",
+    "fixture_metadata_refresh_note": "브리핑 문서에 확정 모형 명칭·승인 시각 규칙을 추가해 briefing_doc_sha256만 갱신. 입력 해시와 기존 기대값은 변경하지 않음. criteria_redundancy 기대값 추가(구현명세 §2.3)."
+  },
+  "tolerances": {
+    "default": 1e-09,
+    "golden_rows": 5e-05,
+    "q2_baseline_latest": 0.005001,
+    "criteria_redundancy": 0.0005
+  },
+  "expected": {
+    "panel": {
+      "rows": 180,
+      "duplicate_keys": 0,
+      "industries": 10,
+      "quarters": 18,
+      "first_quarter": "2022Q1",
+      "latest_quarter": "2026Q2"
+    },
+    "state_counts": {
+      "S1": 54,
+      "S2": 43,
+      "S3": 13,
+      "S4": 46,
+      "N": 4,
+      "INVALID": 20
+    },
+    "production_yoy": {
+      "computable": 160,
+      "missing": 20,
+      "missing_by_quarter": {
+        "2023Q4": 10,
+        "2024Q4": 10
+      },
+      "source_missing_by_quarter": {
+        "2023Q4": 10
+      },
+      "propagated_missing_by_quarter": {
+        "2024Q4": 10
+      }
+    },
+    "employment_core_computable": 180,
+    "threshold_flag_counts": {
+      "STABLE_2_0": 113,
+      "SENSITIVE_0_5": 7,
+      "SENSITIVE_1_0": 12,
+      "SENSITIVE_2_0": 24,
+      "EXACT_ZERO": 4,
+      "INVALID": 20
+    },
+    "threshold_s_to_s_moves": 0,
+    "unscorable_rows": 20,
+    "v2_identity_violations": 0,
+    "criteria_ranges": {
+      "g1_emp_abs_decline": [
+        0,
+        6122
+      ],
+      "g2_emp_rel_decline": [
+        0,
+        40.625
+      ],
+      "g3_prod_decline_nominal": [
+        0,
+        52.4301696673
+      ],
+      "g4_delta00": [
+        0,
+        18
+      ]
+    },
+    "golden_rows": [
+      {
+        "industry": "기계",
+        "quarter": "2026Q2",
+        "g1_emp_abs_decline": 3979,
+        "g2_emp_rel_decline": 6.3397,
+        "g3_prod_decline_nominal": 19.5474,
+        "g4_delta00": 2
+      },
+      {
+        "industry": "전기전자",
+        "quarter": "2026Q2",
+        "g1_emp_abs_decline": 116,
+        "g2_emp_rel_decline": 0.4129,
+        "g3_prod_decline_nominal": 0,
+        "g4_delta00": 6
+      },
+      {
+        "industry": "운송장비",
+        "quarter": "2026Q2",
+        "g1_emp_abs_decline": 129,
+        "g2_emp_rel_decline": 0.7848,
+        "g3_prod_decline_nominal": 0,
+        "g4_delta00": 6
+      },
+      {
+        "industry": "비금속",
+        "quarter": "2026Q2",
+        "g1_emp_abs_decline": 2,
+        "g2_emp_rel_decline": 1.0811,
+        "g3_prod_decline_nominal": 0,
+        "g4_delta00": 18,
+        "g4_delta00_left_censored": true
+      }
+    ],
+    "g4_delta00_latest": {
+      "비금속": 18,
+      "전기전자": 6,
+      "운송장비": 6,
+      "음식료": 6,
+      "철강": 4,
+      "기계": 2,
+      "목재종이": 2
+    },
+    "g4_delta00_latest_left_censored": {
+      "비금속": true
+    },
+    "production_only_decline_rows": 16,
+    "ppi_latest": {
+      "음식료": {
+        "state": "S2",
+        "ppi_direction_status": "OPPOSITE_ALL",
+        "ppi_alt_state_set": "S4"
+      },
+      "전기전자": {
+        "state": "S2",
+        "ppi_candidate_n": 2,
+        "ppi_alt_state_set": "S4",
+        "ppi_alt_state_all_same": true
+      },
+      "석유화학": {
+        "state": "S3",
+        "ppi_candidate_n": 2,
+        "ppi_direction_status": "SAME_ALL"
+      },
+      "기타": {
+        "ppi_direction_status": "NOT_COMPARABLE",
+        "ppi_mapping_confirmed": false
+      }
+    },
+    "ppi_full_period_direction_status_counts": {
+      "SAME_ALL": 125,
+      "OPPOSITE_ALL": 13,
+      "CANDIDATE_DEPENDENT": 6
+    },
+    "q2_baseline_latest": {
+      "기계": {
+        "proportional_expected_delta": -2281.68,
+        "excess_delta": -1697.32
+      }
+    },
+    "criteria_redundancy": {
+      "complete_cases": {
+        "n_rows_used": 160,
+        "spearman": {
+          "g1_g2": 0.819,
+          "g1_g4": 0.789,
+          "g2_g4": 0.853
+        }
+      },
+      "employment_decline_complete_cases": {
+        "n_rows_used": 89,
+        "spearman": {
+          "g1_g2": 0.042
+        }
+      }
+    }
+  }
+}
