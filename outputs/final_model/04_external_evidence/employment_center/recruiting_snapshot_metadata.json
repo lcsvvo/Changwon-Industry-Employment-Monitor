@@ -1,10 +1,18 @@
 {
-  "source": "data\\raw\\employment_center\\changwon_jobs\\changwon_jobs_20260918.csv",
-  "sha256": "f33f36a335dfaf335095ad31ab7778b09eeb63ed0770731d41be2ee8ce8c5028",
-  "rows": 1504,
-  "unique_wanted_auth_no": 1504,
-  "registration_date_min": "26-07-20",
-  "registration_date_max": "26-09-18",
+  "source": "data\\processed\\work24\\work24_analysis_ready.csv",
+  "sha256": "3343b399eddfd0888d28e91f7d1486392bb415a03d9a3fff62193eebeb4205b1",
+  "rows": 2045,
+  "unique_wanted_auth_no": 2045,
+  "registration_date_min": "2026-07-21",
+  "registration_date_max": "2026-09-18",
   "role": "CONTEXT",
-  "industry_signal_usable": false
+  "industry_signal_usable": false,
+  "source_kind": "canonical_normalized",
+  "raw_provenance": "data/raw/work24/ (수집원본; 분석입력으로 사용하지 않음)",
+  "registration_quarters": [
+    "2026Q3"
+  ],
+  "recruitment_count_coverage_pct": 0.0,
+  "kicox_mapped_rows": 663,
+  "usage": "post-period corroboration / follow-up evidence / field-check support"
 }

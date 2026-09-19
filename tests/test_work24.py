@@ -287,6 +287,7 @@ def _analysis():
 
 
 @needs_outputs
+@needs_snapshot          # RAW 도 함께 읽는다. outputs 만 보고 돌면 IndexError 가 난다
 def test_out_of_scope_rows_excluded_from_analysis_but_kept_in_raw():
     import pandas as pd
     a = pd.read_csv(w.OUT_DIR / "work24_analysis_ready.csv", encoding="utf-8-sig")
