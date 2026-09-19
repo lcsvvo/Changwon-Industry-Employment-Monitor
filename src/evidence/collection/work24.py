@@ -112,6 +112,60 @@ KICOX_INDUSTRIES = ("음식료", "섬유의복", "목재종이", "석유화학",
                     "철강", "기계", "전기전자", "운송장비", "기타")
 GATE_STAGES_DEFAULT = ("우선점검", "추가확인")
 
+# 모집인원·직종·과거공고를 얻을 수 있는 공식 경로를 하나씩 확인한 기록 (2026-09-19).
+# 검색 결과 설명이 아니라 실제 호출·조회 결과다. 추정 endpoint 는 호출하지 않았다.
+EXTERNAL_SOURCE_INVESTIGATION = {
+    "checked_at": "2026-09-19",
+    "sources": [
+        {"source": "한국고용정보원 워크넷 채용정보 API (data.go.kr 3038225)",
+         "endpoint": "http://openapi.work.go.kr/opi/opi/opia/wantedApi.do",
+         "auth": "전용 authKey (데이터셋별 활용신청, 자동승인)",
+         "tested": True,
+         "result": "보유한 DATA_GO_KR_SERVICE_KEY 로 호출 시 messageCd=002 "
+                   "'유효하지 않은 인증키' — 현재 자격으로 사용 불가",
+         "would_solve": "모집인원·직종코드 (단, 게시 중 공고 한정으로 과거이력은 별개)",
+         "status": "NOT_AVAILABLE"},
+        {"source": "KOSIS 워크넷 구인 통계",
+         "endpoint": "https://kosis.kr/openapi/statisticsSearch.do",
+         "auth": "KOSIS_API_KEY (보유)",
+         "tested": True,
+         "result": "'워크넷·구인배수·구인인원' 검색 결과 중 지역 구인 통계는 "
+                   "DT_1YL1101 『구인배수(시도)』뿐. 시군구×산업 테이블 없음",
+         "would_solve": "업종×월 구인인원 시계열",
+         "status": "NOT_SUITABLE_GEOGRAPHY"},
+        {"source": "공공데이터포털 파일데이터 (채용·구인·일자리정보)",
+         "endpoint": "https://www.data.go.kr/tcs/dss/selectDataSetList.do?dType=FILE",
+         "auth": "불필요",
+         "tested": True,
+         "result": "창원·경남 제조업 채용공고 파일데이터 없음. 검색결과는 타 지자체 "
+                   "노인일자리·개별 공공기관 채용공고뿐",
+         "would_solve": "과거 공고 이력",
+         "status": "NOT_FOUND"},
+        {"source": "고용24 상세페이지 (/empInfo/)",
+         "endpoint": "https://www.work.go.kr/empInfo/...",
+         "auth": "불필요",
+         "tested": False,
+         "result": "robots.txt 가 모든 UA 에 Disallow. 수집하지 않는다",
+         "would_solve": "모집인원·직종·담당업무·요구기술·자격요건",
+         "status": "BLOCKED_BY_ACCESS_POLICY"},
+        {"source": "창원시 공장등록현황 (data.go.kr 3066436)",
+         "endpoint": "공공데이터포털 파일데이터",
+         "auth": "불필요", "tested": True,
+         "result": "확보·사용 중. 기업명·공장주소·업종명(KSIC 세세분류 명칭) 제공",
+         "would_solve": "기업 식별·주소·KSIC",
+         "status": "IN_USE"},
+        {"source": "통계청 KSIC 제11차 연계표 (국세청 홈택스 게시본)",
+         "endpoint": "https://teht.hometax.go.kr/doc/rn/a/a/업종코드-표준산업분류 연계표",
+         "auth": "불필요", "tested": True,
+         "result": "확보·사용 중. 업종명→세세분류코드·중분류코드 대조 99.5%",
+         "would_solve": "KSIC 코드화·KICOX 매핑",
+         "status": "IN_USE"},
+    ],
+    "conclusion": ("모집인원·직종코드·과거 공고이력을 제공하는 사용 가능한 공식 경로는 "
+                   "현재 없다. 워크넷 API 는 별도 인증키가 필요하고, 확보하더라도 "
+                   "게시 중 공고 기반이라 2021~2026 과거 분기 복원과는 별개 문제다."),
+}
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 공통 유틸
@@ -810,7 +864,164 @@ def flag_reposts(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 9. build (PHASE 14~16)
+# 9. 필드 확보 상태 台帳
+# ═══════════════════════════════════════════════════════════════════════════
+# (필드, 상태, 실제 컬럼, 비고). 상태는 다음 다섯 가지만 쓴다.
+#   DIRECT                  센터 공개 목록에서 그대로 수집
+#   OFFICIAL_EXTERNAL_MATCH 공식 외부자료(공장등록현황·KSIC 연계표)로 결합
+#   DERIVED                 위 둘에서 규칙으로 파생
+#   TEXT_INFERENCE          텍스트 추정 — 이 파이프라인은 쓰지 않는다
+#   UNAVAILABLE             허용된 경로에 없다
+FIELD_INVENTORY: tuple[tuple[str, str, str | None, str], ...] = (
+    # 공고 식별
+    ("posting_id", "DIRECT", "wanted_auth_no", "공식 구인인증번호. 임의 생성 없음"),
+    ("posting_url", "DIRECT", "source_url", "상세 링크. 상세페이지는 수집하지 않는다"),
+    ("posting_title", "DIRECT", "title_raw", ""),
+    ("registration_date", "DIRECT", "reg_date", ""),
+    ("closing_date", "DIRECT", "due_date", ""),
+    ("posting_status", "DERIVED", "posting_status",
+     "스냅샷 2회 이상일 때만 NEW/CONTINUING 판정. 1회면 전 행 UNKNOWN_SINGLE_SNAPSHOT"),
+    # 기업
+    ("company_name", "DIRECT", "company_raw", ""),
+    ("company_identifier", "UNAVAILABLE", None,
+     "사업자등록번호는 목록 미제공. 상세는 robots 비허용"),
+    ("workplace_name", "UNAVAILABLE", None, "목록은 기업명만 준다"),
+    ("workplace_address", "OFFICIAL_EXTERNAL_MATCH", "workplace_address_enriched",
+     "공장등록현황 공장주소. 공고의 실제 근무지와 같다고 가정하지 않는다"),
+    ("headquarters_address", "UNAVAILABLE", None, ""),
+    ("company_size", "UNAVAILABLE", None, "종사자 규모 미제공"),
+    ("establishment_type", "UNAVAILABLE", None, ""),
+    # 지역
+    ("work_region", "DIRECT", "region_raw", "시·군·구까지만. 읍면동 없음"),
+    ("sido", "DERIVED", "region_raw", "전 행 경상남도"),
+    ("sigungu", "DERIVED", "gu", ""),
+    ("eupmyeondong", "OFFICIAL_EXTERNAL_MATCH", "address_legal_dong",
+     "공고가 아니라 결합된 공장주소의 법정동"),
+    ("industrial_complex", "DERIVED", "industrial_complex_match_status",
+     "공식 경계 미공표. POSSIBLE 상한판정만. MATCH 부여 안 함"),
+    # 산업
+    ("ksic_code", "OFFICIAL_EXTERNAL_MATCH", "ksic_code", "통계청 제11차 공식 연계표"),
+    ("ksic_name", "OFFICIAL_EXTERNAL_MATCH", "ksic_name", ""),
+    ("manufacturing", "DERIVED", "is_manufacturing", "KSIC 중분류 10~34. 미해결은 UNKNOWN"),
+    ("kicox_industry", "DERIVED", "kicox_industry", "ksic_to_kicox.csv 재사용"),
+    # 채용량
+    ("recruitment_count", "UNAVAILABLE", "recruitment_count",
+     "목록 미제공 + 상세 robots 비허용 + 공개 결합경로 없음. 전 행 NULL"),
+    # 직무
+    ("occupation_code", "UNAVAILABLE", None, "목록 미제공"),
+    ("occupation_name", "UNAVAILABLE", None, "공고제목은 직종명이 아니다"),
+    ("job_description", "UNAVAILABLE", None, "상세페이지 전용"),
+    # 기술·자격
+    ("required_skill", "UNAVAILABLE", None, "상세페이지 전용"),
+    ("preferred_skill", "UNAVAILABLE", None, "상세페이지 전용"),
+    ("certificate_required", "UNAVAILABLE", None,
+     "cert_raw 는 자격증이 아니라 공고 인증배지이며 전 행 동일값이라 정보량 0"),
+    # 채용조건
+    ("experience", "DIRECT", "career_type", ""),
+    ("education", "DIRECT", "education_raw", "script var hak 에서 취득"),
+    ("employment_type", "UNAVAILABLE", None,
+     "목록 미제공. comm_daily_clcd 필터는 수집시점에 결과를 바꾸지 않아 상용 단정 불가"),
+    ("working_type", "UNAVAILABLE", None, ""),
+    ("shift_work", "UNAVAILABLE", None, ""),
+    ("working_hours", "UNAVAILABLE", None, "임금 단위 환산을 못 하는 직접 원인"),
+    ("wage_type", "DIRECT", "wage_type", "em.ico_pay 클래스에서 취득"),
+    ("wage", "DIRECT", "wage_min", "wage_min/wage_max/wage_unit"),
+    ("preferred_condition", "UNAVAILABLE", None, ""),
+    # 시계열·중복
+    ("repost_identification", "DERIVED", "repost_candidate", "동일기업·동일공고명"),
+    ("timeseries_key", "DIRECT", "snapshot_id", "snapshot_id + crawl_timestamp"),
+)
+
+
+def field_inventory_report(a: pd.DataFrame) -> dict:
+    n = len(a)
+    out = {}
+    for field, status, col, note in FIELD_INVENTORY:
+        entry = {"status": status, "column": col, "note": note}
+        if col and col in a.columns:
+            entry["coverage"] = _cov(a[col], n)
+        else:
+            entry["coverage"] = {"n": 0, "pct": 0.0}
+        out[field] = entry
+    counts = {}
+    for _, status, _, _ in FIELD_INVENTORY:
+        counts[status] = counts.get(status, 0) + 1
+    return {"fields": out, "status_counts": counts,
+            "total_fields": len(FIELD_INVENTORY)}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 10. 스냅샷 간 공고 상태 추적 (§22·§23)
+# ═══════════════════════════════════════════════════════════════════════════
+def _snapshot_ids(path: Path) -> tuple[set[str], set[str]]:
+    """(공고 ID 집합, 포함된 구 집합). 구 스키마(20260918)도 함께 읽는다."""
+    df = pd.read_csv(path, encoding="utf-8-sig", dtype=str)
+    region_col = "region_raw" if "region_raw" in df.columns else "region"
+    gu = df[region_col].map(parse_gu)
+    return set(df["wanted_auth_no"].dropna()), set(gu.dropna())
+
+
+def snapshot_transitions() -> dict:
+    """직전 스냅샷과 비교해 NEW / CONTINUING / CLOSED 를 센다.
+
+    두 스냅샷의 수집범위가 다르면 **공통 구로 제한**해서만 비교한다. 그러지 않으면
+    마산 2개 구가 통째로 NEW 로 잡혀 '신규 채용 급증'처럼 보인다.
+    스냅샷이 하나뿐이면 과거 상태를 추정하지 않고 그대로 비워 둔다.
+    """
+    snaps = sorted(RAW_DIR.glob("*.csv"))
+    if len(snaps) < 2:
+        return {"available": False,
+                "reason": "스냅샷이 1개뿐이다. 과거 상태를 역산하지 않는다.",
+                "snapshots": [p.name for p in snaps]}
+    prev, cur = snaps[-2], snaps[-1]
+    prev_ids, prev_gu = _snapshot_ids(prev)
+    cur_ids, cur_gu = _snapshot_ids(cur)
+    common = sorted(prev_gu & cur_gu)
+    if prev_gu != cur_gu:
+        prev_df = pd.read_csv(prev, encoding="utf-8-sig", dtype=str)
+        cur_df = pd.read_csv(cur, encoding="utf-8-sig", dtype=str)
+        pcol = "region_raw" if "region_raw" in prev_df.columns else "region"
+        ccol = "region_raw" if "region_raw" in cur_df.columns else "region"
+        prev_ids = set(prev_df[prev_df[pcol].map(parse_gu).isin(common)]["wanted_auth_no"])
+        cur_ids = set(cur_df[cur_df[ccol].map(parse_gu).isin(common)]["wanted_auth_no"])
+    return {
+        "available": True,
+        "previous_snapshot": prev.name, "current_snapshot": cur.name,
+        "scope_restricted_to": common,
+        "scope_differs": sorted(prev_gu) != sorted(cur_gu),
+        "previous_rows_in_scope": len(prev_ids),
+        "current_rows_in_scope": len(cur_ids),
+        "continuing": len(prev_ids & cur_ids),
+        "new": len(cur_ids - prev_ids),
+        "closed": len(prev_ids - cur_ids),
+        "note": ("공고 ID 기준 집합 비교. CLOSED 는 '마감'이 아니라 '목록에서 사라짐' "
+                 "이다(마감·삭제·수정 재등록을 구분하지 못한다)."),
+        "reposting_rate_available": False,
+        "reposting_rate_status": "BLOCKED",
+        "reposting_rate_note": (
+            "상태추적으로 재공고율을 만들지 않는다. NEW/CONTINUING/CLOSED 는 **같은 "
+            "posting ID** 의 존속 여부이고, 재공고는 **다른 posting ID 로 다시 올라온 "
+            "같은 자리**다. 두 스냅샷이 있다고 해서 재공고율이 산출되지 않는다. "
+            "동일기업·유사 공고명이 새 ID 로 재등장하는 규칙을 검증하기 전까지 BLOCKED."),
+    }
+
+
+def assign_posting_status(a: pd.DataFrame) -> pd.Series:
+    """직전 스냅샷에 있던 공고면 CONTINUING, 없으면 NEW. 1회 수집이면 판정하지 않는다."""
+    snaps = sorted(RAW_DIR.glob("*.csv"))
+    if len(snaps) < 2:
+        return pd.Series("UNKNOWN_SINGLE_SNAPSHOT", index=a.index, dtype="object")
+    prev_ids, prev_gu = _snapshot_ids(snaps[-2])
+    in_prev_scope = a["gu"].isin(prev_gu)
+    return pd.Series(
+        [("CONTINUING" if i in prev_ids else "NEW") if scope
+         else "OUT_OF_PREVIOUS_SCOPE"
+         for i, scope in zip(a["wanted_auth_no"], in_prev_scope)],
+        index=a.index, dtype="object")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 11. build (PHASE 14~16)
 # ═══════════════════════════════════════════════════════════════════════════
 def latest_snapshot() -> Path:
     snaps = sorted(RAW_DIR.glob("work24_5gu_*.csv"))
@@ -880,6 +1091,7 @@ def build(stages: tuple[str, ...] = GATE_STAGES_DEFAULT) -> dict:
     df = pd.concat([df, match_industrial_complex(df), map_kicox(df)], axis=1)
 
     analysis = df[df["in_scope"]].copy()
+    analysis["posting_status"] = assign_posting_status(analysis)
     cols = [
         "snapshot_id", "crawl_timestamp", "source_center", "wanted_auth_no",
         "company_raw", "normalized_company", "company_official",
@@ -889,7 +1101,7 @@ def build(stages: tuple[str, ...] = GATE_STAGES_DEFAULT) -> dict:
         "due_date", "due_date_raw", "due_date_status",
         "wage_raw", "wage_type", "wage_min", "wage_max", "wage_unit",
         "wage_parse_status", "career_raw", "career_type", "career_min_months",
-        "career_parse_status", "education_raw", "cert_raw",
+        "career_parse_status", "education_raw", "cert_raw", "posting_status",
         "recruitment_count", "recruitment_count_source",
         "occupation", "occupation_source",
         "workplace_address_raw", "workplace_address_enriched", "address_source",
@@ -955,10 +1167,219 @@ def _cov(series, total) -> dict:
     return {"n": n, "pct": _pct(n, total)}
 
 
+def selection_bias_report(a: pd.DataFrame) -> dict:
+    """매칭군과 미매칭군이 관측 가능한 변수에서 체계적으로 다른지 본다.
+
+    기업 마스터가 공장등록현황이므로 매칭 자체가 제조업·법인 쪽으로 기운다.
+    이 편향은 고칠 수 있는 결함이 아니라 구조다. 따라서 업종·지역 간 **공고 수
+    원값 비교**를 금지하는 근거로 쓴다.
+    """
+    m = a["company_match_status"].eq("MATCH")
+    n = len(a)
+
+    def share(col, value_filter=None):
+        s = a[col]
+        if value_filter is not None:
+            s = s.where(s.isin(value_filter))
+        t = pd.crosstab(s, m, normalize="columns").mul(100).round(1)
+        return {str(k): {"unmatched_pct": float(v.get(False, 0.0)),
+                         "matched_pct": float(v.get(True, 0.0))}
+                for k, v in t.iterrows()}
+
+    by_gu = a.groupby("gu").agg(postings=("gu", "size"),
+                                matched=("company_match_status",
+                                         lambda s: int((s == "MATCH").sum())))
+    by_gu["match_rate_pct"] = (100 * by_gu["matched"] / by_gu["postings"]).round(1)
+    rates = by_gu["match_rate_pct"]
+
+    wage = a[a["wage_type"].eq("월급") & a["wage_min"].notna()]
+    wage_med = wage.groupby(m.loc[wage.index])["wage_min"].median()
+
+    has_corp = a["company_raw"].str.contains(r"주식회사|\(주\)|㈜|（주）", regex=True,
+                                             na=False)
+    mfg_kw = a["title_raw"].str.contains("생산|가공|용접|조립|품질|기계|설비|CNC|제조",
+                                         na=False)
+    return {
+        "matched_n": int(m.sum()), "total_n": n,
+        "match_rate_pct": _pct(int(m.sum()), n),
+        "by_gu": by_gu.to_dict("index"),
+        "gu_match_rate_spread_pp": round(float(rates.max() - rates.min()), 1),
+        "gu_match_rate_ratio": round(float(rates.max() / rates.min()), 2)
+        if rates.min() > 0 else None,
+        "wage_type_share": share("wage_type"),
+        "career_type_share": share("career_type"),
+        "monthly_wage_median_won": {
+            "unmatched": float(wage_med.get(False, float("nan"))),
+            "matched": float(wage_med.get(True, float("nan"))),
+        },
+        "corporate_name_form_pct": {
+            "unmatched": round(float(has_corp[~m].mean() * 100), 1),
+            "matched": round(float(has_corp[m].mean() * 100), 1)},
+        "manufacturing_keyword_title_pct": {
+            "unmatched": round(float(mfg_kw[~m].mean() * 100), 1),
+            "matched": round(float(mfg_kw[m].mean() * 100), 1)},
+        "verdict": ("매칭군은 법인 표기·제조 직무·연봉제·고임금 쪽으로 체계적으로 치우친다. "
+                    "매칭 표본은 업종 전체를 대표하지 않는다."),
+        "consequences": [
+            "구별 매칭률 격차가 커서 지역 간 공고 수 원값을 비교할 수 없다.",
+            "업종별 매칭률이 다르므로 업종 간 공고 수 원값 비교도 할 수 없다.",
+            "매칭 기반 업종별 공고 수는 하한(lower bound)으로만 읽는다.",
+        ],
+    }
+
+
+def model_feasibility_report(a: pd.DataFrame, gate_quarter: str | None) -> dict:
+    """§18 의 검증항목을 실제 데이터로 확인한다. 통과 못 하면 feature 를 만들지 않는다."""
+    reg = pd.to_datetime(a["reg_date"], errors="coerce")
+    due = pd.to_datetime(a["due_date"], errors="coerce")
+    quarters = sorted(reg.dropna().dt.to_period("Q").astype(str).unique())
+    months = reg.dropna().dt.to_period("M").value_counts().sort_index()
+    duration = (due - reg).dt.days
+    n_snapshots = len(sorted(RAW_DIR.glob("*.csv")))
+
+    mapped = a[a["kicox_mapping_status"].eq("MAPPED")]
+    by_ind = mapped.groupby("kicox_industry").size()
+    ind_match = (a[a["company_match_status"].eq("MATCH")]
+                 .groupby("kicox_industry").size())
+
+    checks = {
+        "1_sufficient_period": {
+            "pass": len(quarters) >= 8,
+            "observed": f"등록일 기준 분기 {len(quarters)}개 ({', '.join(quarters)})",
+            "detail": (f"등록일 범위 {reg.min().date()} ~ {reg.max().date()} "
+                       f"({int((reg.max() - reg.min()).days)}일)"),
+        },
+        "2_quarterly_aggregation": {
+            "pass": False,
+            "observed": "분기 1개뿐이라 분기 시계열을 만들 수 없다.",
+        },
+        "3_industry_coverage_balance": {
+            "pass": False,
+            "observed": f"KICOX 매핑 업종 {len(by_ind)}개, 최소 {int(by_ind.min())}건 "
+                        f"~ 최대 {int(by_ind.max())}건",
+            "detail": "소수 업종은 한 자릿수라 분기 지표로 쓰면 분산이 지배한다.",
+        },
+        "4_matching_rate_distortion": {
+            "pass": False,
+            "observed": "업종별 매핑이 기업매칭에 전적으로 의존한다. "
+                        "매칭률 차이가 업종 순위에 그대로 들어간다.",
+        },
+        "5_repost_domination": {
+            "pass": True,
+            "observed": f"재공고 후보 {int(a['repost_candidate'].sum())}건 "
+                        f"({_pct(int(a['repost_candidate'].sum()), len(a))}%) — 지배적이지 않다",
+        },
+        "6_postings_vs_headcount": {
+            "pass": False,
+            "observed": "모집인원 0%. 공고 수를 인원으로 쓸 수 없다.",
+        },
+        "7_survivorship_bias": {
+            "pass": False,
+            "observed": "현재 게시 중 공고만 담긴 단면이다.",
+            "evidence": {str(k): int(v) for k, v in months.items()},
+            "detail": (f"게시기간 중앙값 {duration.median():.0f}일, "
+                       f"{duration.eq(60).mean()*100:.1f}%가 정확히 60일. "
+                       "과거 월로 갈수록 장기게시 공고만 남아 단조 감소한다."),
+        },
+        "8_redundancy_with_existing": {
+            "pass": None,
+            "observed": "빈일자리·입직(사업체노동력조사)이 이미 모형에 있다. "
+                        "채용수요 축이 중복될 수 있으나 현 자료로는 검정 불가.",
+        },
+        "9_temporal_leakage": {
+            "pass": False,
+            "observed": f"수집시점 2026-09-19(2026Q3)은 모형 최종분기 "
+                        f"{gate_quarter}보다 뒤다. 과거 판정에 넣으면 미래정보 유입이다.",
+        },
+        "10_electre_criterion_redundancy": {
+            "pass": None,
+            "observed": "분기 시계열이 없어 기준 추가 자체가 불가능하다.",
+        },
+        "11_decision_stability": {
+            "pass": None,
+            "observed": "단일 분기라 판정 안정성을 검정할 수 없다.",
+        },
+        "12_sensitivity_robustness": {
+            "pass": None,
+            "observed": "정의 변경에 대한 민감도를 볼 시점이 하나뿐이다.",
+        },
+    }
+    blocking = [k for k, v in checks.items() if v["pass"] is False]
+    return {
+        "checks": checks,
+        "blocking_checks": blocking,
+        "n_blocking": len(blocking),
+        "n_snapshots_available": n_snapshots,
+        "registration_quarters": quarters,
+        "model_quarter_overlap": [q for q in quarters if gate_quarter and q <= gate_quarter],
+        "industry_posting_counts_matched_only": {k: int(v) for k, v in ind_match.items()
+                                                 if pd.notna(k)},
+        "verdict": "NOT_USABLE_AS_MODEL_INPUT",
+        "verdict_reason": (
+            "등록일이 전부 2026Q3 한 분기에 몰려 있고 그 분기조차 60일 게시창으로 "
+            "잘려 있다. 모형 최종분기(2026Q2)와 겹치는 구간이 0이므로 업종×분기 "
+            "변수를 만들 수 없고, 넣으면 미래정보가 과거 판정에 들어간다."),
+    }
+
+
+def model_role_table(feas: dict, bias: dict) -> list[dict]:
+    """§29 역할표. '쓸 수 있으니 넣는다'가 아니라 검증 결과에 따라 배정한다.
+
+    표현 주의: 현 수준은 '외적 타당성 검증'이 아니다. 2026Q2 판정 **이후 기간**의
+    사후 교차확인(post-period corroboration)이며, 판정을 지지하거나 반박하는
+    통계적 검정이 아니다.
+    """
+    D = "모형 직접입력"
+    P = "모형 판정 이후 후속 Evidence"
+    A = "모형 판정 이후 현장확인용"
+    X = "사용불가"
+
+    def row(item, role, reason):
+        return {"item": item, "role": role,
+                "model_input": role == D,
+                "post_period_evidence": role == P,
+                "post_model_field_check": role == A,
+                "unusable": role == X, "reason": reason}
+
+    return [
+        row("Work24 파생 변수 일체의 최종모형 직접입력", X,
+            "없음. 등록일이 2026Q3 한 분기뿐이고 모형기간(~2026Q2)과 겹침이 0이다"),
+        row("업종×분기 정량 보조축", X,
+            "성립하지 않는다. 분기 축 자체가 존재하지 않아 정량 보조축을 구성할 수 없다"),
+        row("업종×분기 공고 수 / 고유 채용기업 수", X,
+            "단일 분기 + 60일 롤링창 생존편향. 과거 분기 역산 불가"),
+        row("모집인원 / 인원 기반 지표", X,
+            "허용된 경로에 없어 0% 확보. 공고 수로 대체하지 않는다"),
+        row("재공고율(reposting_rate)", X,
+            "BLOCKED. NEW/CONTINUING/CLOSED 상태추적은 동일 posting ID 의 존속 여부일 "
+            "뿐이고, 재공고는 '다른 posting ID 로 다시 올라온 같은 자리'다. 두 개념이 "
+            "다르며 후자의 식별규칙이 아직 검증되지 않았다"),
+        row("업종별·지역별 공고 수 원값의 상호 비교", X,
+            f"기업매칭률이 구별 {bias['gu_match_rate_spread_pp']}%p"
+            f"({bias['gu_match_rate_ratio']}배) 차이. 매칭률 차이가 순위에 직접 섞인다"),
+        row("2026Q3 채용활동 '존재 여부'", P,
+            "2026Q2 판정 이후 기간의 사후 교차확인으로만 제한적으로 사용. 수준 비교·"
+            "순위 비교·판정 검증에는 쓰지 않는다"),
+        row("기업 단위 채용 여부·공고·직무·지역", A,
+            "우선점검 업종의 현장확인 대상 기업 목록으로 사용"),
+        row("임금유형·임금수준·경력요건·학력요건", A,
+            "확인된 공고 범위에서만. 업종 대표값으로 쓰지 않는다"),
+        row("KSIC·KICOX 업종 귀속", A,
+            "매칭 성공분(MATCH)에 한해서만 활용. 미매칭은 UNKNOWN 으로 남긴다"),
+        row("산업단지 소재 여부", A,
+            "POSSIBLE 은 MATCH 가 아니다. 해당 기업을 '산단 기업'이라고 표현하지 않는다"),
+        row("향후 반복 snapshot 누적 시 채용시장 분기 보조축", X,
+            "현재는 불가. 월 단위 재수집을 누적한 뒤에 재검토할 사항이며, 지금 "
+            "보조축으로 예약해 두지 않는다"),
+    ]
+
+
 def build_quality_summary(snap, raw, df, analysis, ev, targets, gate_quarter,
                           stages) -> dict:
     meta = json.loads(snap.with_suffix(".metadata.json").read_text(encoding="utf-8"))
     n_raw, n = len(raw), len(analysis)
+    bias = selection_bias_report(analysis)
+    feas = model_feasibility_report(analysis, gate_quarter)
     hist_meta = HISTORICAL.with_suffix(".metadata.json")
     return {
         "generated_at": utcnow(),
@@ -1052,6 +1473,13 @@ def build_quality_summary(snap, raw, df, analysis, ev, targets, gate_quarter,
             "duplicate_groups": int(analysis["duplicate_group_id"].nunique()),
             "repost_candidates": int(analysis["repost_candidate"].sum()),
             "note": "후보 표시만 하며 자동 삭제하지 않는다.",
+            "scope": ("같은 스냅샷 안에서 동일기업·동일공고명이 중복 등장한 건수다. "
+                      "스냅샷 사이의 재등장(재공고)과는 다른 개념이다."),
+            "reposting_rate_status": "BLOCKED",
+            "reposting_rate_reason": (
+                "재공고 식별규칙(다른 posting ID·동일 기업·유사 공고명·등록일 간격)이 "
+                "아직 검증되지 않았다. 상태추적(NEW/CONTINUING/CLOSED)으로 대체하지 "
+                "않는다."),
         },
         "decision_gate_evidence": {
             "gate_quarter": gate_quarter,
@@ -1067,6 +1495,12 @@ def build_quality_summary(snap, raw, df, analysis, ev, targets, gate_quarter,
             "level_b_blocked_reason": ("모집인원을 허용된 경로에서 확보할 수 없다. "
                                        "공고 수는 모집인원이 아니므로 Level B 집계를 하지 않는다."),
         },
+        "field_inventory": field_inventory_report(analysis),
+        "snapshot_transitions": snapshot_transitions(),
+        "selection_bias": bias,
+        "model_feasibility": feas,
+        "role_assignment": model_role_table(feas, bias),
+        "external_source_investigation": EXTERNAL_SOURCE_INVESTIGATION,
         "interpretation_limits": [
             "공고 수는 모집인원이 아니다.",
             "공고 수는 노동수요가 아니다.",

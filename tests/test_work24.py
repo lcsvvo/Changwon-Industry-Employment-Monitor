@@ -24,6 +24,9 @@ HAS_OUTPUTS = (w.OUT_DIR / "work24_analysis_ready.csv").exists()
 
 needs_snapshot = pytest.mark.skipif(not HAS_SNAPSHOT, reason="5개 구 RAW 없음(로컬 자료)")
 needs_outputs = pytest.mark.skipif(not HAS_OUTPUTS, reason="processed 산출물 없음")
+# 다른 파이프라인이 만드는 참조자료. 이 브랜치의 산출물이 아니라 입력이다.
+needs_crosswalk = pytest.mark.skipif(
+    not w.KSIC_TO_KICOX.exists(), reason="ksic_to_kicox.csv 없음(다른 파이프라인 산출물)")
 
 
 # ── 목록 파서 ────────────────────────────────────────────────────────────
@@ -182,6 +185,7 @@ def test_unresolved_company_stays_unknown_not_non_manufacturing():
     assert w.is_manufacturing_mid(None) is None
 
 
+@needs_crosswalk
 def test_kicox_map_covers_manufacturing_mids():
     m = w.load_kicox_map()
     assert m["29"]["kicox_industry"] == "기계"
@@ -189,6 +193,7 @@ def test_kicox_map_covers_manufacturing_mids():
     assert m["24"]["kicox_industry"] == "철강"
 
 
+@needs_crosswalk
 def test_kicox_etc_is_a_real_industry_not_a_fallback():
     """KICOX 실제 업종 '기타' 와 매핑 실패 UNMAPPED 는 다른 값이다."""
     m = w.load_kicox_map()
@@ -405,3 +410,165 @@ def test_quality_summary_reports_failures_and_limits():
     assert s["industrial_complex"]["match_status_blocked"] is True
     assert any("모집인원" in t for t in s["interpretation_limits"])
     assert any("노동수요" in t for t in s["interpretation_limits"])
+
+
+# ── 필드 台帳 (§7) ───────────────────────────────────────────────────────
+def test_field_inventory_uses_only_declared_statuses():
+    allowed = {"DIRECT", "OFFICIAL_EXTERNAL_MATCH", "DERIVED",
+               "TEXT_INFERENCE", "UNAVAILABLE"}
+    assert {s for _, s, _, _ in w.FIELD_INVENTORY} <= allowed
+
+
+def test_no_field_is_filled_by_text_inference():
+    """직무명·공고제목에서 산업이나 직종을 추정하지 않는다."""
+    inferred = [f for f, s, _, _ in w.FIELD_INVENTORY if s == "TEXT_INFERENCE"]
+    assert inferred == []
+
+
+def test_unavailable_fields_are_declared_not_silently_dropped():
+    inv = {f: s for f, s, _, _ in w.FIELD_INVENTORY}
+    for field in ("recruitment_count", "occupation_code", "occupation_name",
+                  "job_description", "required_skill", "company_identifier",
+                  "working_hours", "employment_type"):
+        assert inv[field] == "UNAVAILABLE", field
+
+
+def test_cert_field_is_not_labelled_as_a_qualification():
+    """cert_raw 는 공고 인증배지다. 자격증 요건으로 표시하면 안 된다."""
+    entry = next(e for e in w.FIELD_INVENTORY if e[0] == "certificate_required")
+    assert entry[1] == "UNAVAILABLE"
+    assert entry[2] is None
+
+
+@needs_outputs
+def test_cert_column_carries_no_information():
+    a = _analysis()
+    assert a["cert_raw"].nunique() == 1        # 전 행 동일값
+
+
+# ── 스냅샷 상태추적 (§22·§23) ────────────────────────────────────────────
+@needs_outputs
+def test_posting_status_does_not_invent_new_for_newly_scoped_regions():
+    """이전 스냅샷에 없던 구를 '신규 공고'로 세지 않는다."""
+    a = _analysis()
+    masan = a[a["gu"].isin(["마산합포구", "마산회원구"])]
+    assert (masan["posting_status"] == "OUT_OF_PREVIOUS_SCOPE").all()
+    assert (masan["posting_status"] == "NEW").sum() == 0
+
+
+@needs_outputs
+def test_posting_status_values_are_closed_set():
+    a = _analysis()
+    assert set(a["posting_status"]) <= {
+        "NEW", "CONTINUING", "OUT_OF_PREVIOUS_SCOPE", "UNKNOWN_SINGLE_SNAPSHOT"}
+
+
+@needs_snapshot
+def test_snapshot_transitions_restrict_to_common_scope():
+    t = w.snapshot_transitions()
+    if not t["available"]:
+        pytest.skip("스냅샷 1개")
+    assert set(t["scope_restricted_to"]) == {"의창구", "성산구", "진해구"}
+    assert t["continuing"] + t["new"] == t["current_rows_in_scope"]
+    assert t["continuing"] + t["closed"] == t["previous_rows_in_scope"]
+
+
+# ── 모형 투입 가능성 (§18·§19) ───────────────────────────────────────────
+@needs_outputs
+def test_model_features_file_is_not_created_when_infeasible():
+    """분기 축이 없으면 model feature 를 억지로 만들지 않는다."""
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    if s["model_feasibility"]["verdict"] == "NOT_USABLE_AS_MODEL_INPUT":
+        assert not (w.OUT_DIR / "work24_model_features.csv").exists()
+
+
+@needs_outputs
+def test_no_temporal_leakage_into_model_period():
+    """수집 분기가 모형 판정 분기보다 뒤이면 모형 입력으로 쓰지 않는다."""
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    f = s["model_feasibility"]
+    assert f["model_quarter_overlap"] == []
+    assert f["checks"]["9_temporal_leakage"]["pass"] is False
+
+
+@needs_outputs
+def test_survivorship_bias_is_measured_not_assumed():
+    """생존편향을 주장이 아니라 월별 분포로 보인다(과거 월일수록 적어야 한다)."""
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    ev = s["model_feasibility"]["checks"]["7_survivorship_bias"]["evidence"]
+    months = [ev[k] for k in sorted(ev)]
+    assert len(months) >= 2
+    assert months == sorted(months)            # 과거→현재로 단조 증가
+
+
+@needs_outputs
+def test_role_table_assigns_nothing_to_direct_model_input():
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    roles = s["role_assignment"]
+    assert roles, "역할표가 비어 있다"
+    assert [r for r in roles if r["model_input"]] == []
+    assert any(r["post_model_field_check"] for r in roles)
+
+
+@needs_outputs
+def test_no_quarterly_auxiliary_axis_is_claimed():
+    """업종×분기 정량 보조축은 성립하지 않는다 — 역할표에서 사용불가여야 한다."""
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    axis = next(r for r in s["role_assignment"] if "정량 보조축" in r["item"])
+    assert axis["unusable"] is True
+
+
+@needs_outputs
+def test_reposting_rate_stays_blocked_with_two_snapshots():
+    """스냅샷이 둘이어도 재공고율을 산출 가능하다고 보지 않는다."""
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    assert s["reposts"]["reposting_rate_status"] == "BLOCKED"
+    t = s["snapshot_transitions"]
+    if t["available"]:
+        assert t["reposting_rate_available"] is False
+        assert t["reposting_rate_status"] == "BLOCKED"
+    rate = next(r for r in s["role_assignment"] if "reposting_rate" in r["item"])
+    assert rate["unusable"] is True
+
+
+@needs_outputs
+def test_post_period_evidence_is_not_called_external_validation():
+    """2026Q3 자료를 '외적 타당성 검증'으로 격상해 표현하지 않는다."""
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    roles = s["role_assignment"]
+    assert not any("외적 타당성" in r["role"] for r in roles)
+    ev = [r for r in roles if r["post_period_evidence"]]
+    assert ev and all("사후 교차확인" in r["reason"] for r in ev)
+
+
+@needs_outputs
+def test_raw_posting_counts_are_not_offered_for_cross_industry_comparison():
+    s = json.loads((w.OUT_DIR / "work24_quality_summary.json")
+                   .read_text(encoding="utf-8"))
+    bias = s["selection_bias"]
+    assert bias["gu_match_rate_spread_pp"] > 0
+    assert any("업종 간" in c for c in bias["consequences"])
+
+
+# ── 외부 소스 조사 기록 ──────────────────────────────────────────────────
+def test_external_source_investigation_records_actual_tests():
+    inv = w.EXTERNAL_SOURCE_INVESTIGATION
+    assert inv["sources"], "조사 기록이 비어 있다"
+    for s in inv["sources"]:
+        assert set(("source", "auth", "tested", "result", "status")) <= set(s)
+    # 검색 설명만 보고 '가능'으로 적지 않았는지 — 미검증 항목은 접근정책 차단뿐
+    untested = [s for s in inv["sources"] if not s["tested"]]
+    assert all(s["status"] == "BLOCKED_BY_ACCESS_POLICY" for s in untested)
+
+
+def test_worknet_api_is_not_claimed_available():
+    inv = w.EXTERNAL_SOURCE_INVESTIGATION
+    wn = next(s for s in inv["sources"] if "워크넷 채용정보 API" in s["source"])
+    assert wn["status"] == "NOT_AVAILABLE"
