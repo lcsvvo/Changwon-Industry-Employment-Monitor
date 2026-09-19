@@ -1,0 +1,5 @@
+﻿region,posting_count,unique_posting_count,registration_date_min,registration_date_max,role,industry_signal_usable,interpretation
+전체,1504,1504,26-07-20,26-09-18,CONTEXT,False,현재 공개공고 조회용; 공고 수를 고용 증가로 해석하지 않음
+경남 창원시 성산구,616,1504,26-07-20,26-09-18,CONTEXT,False,현재 공개공고 조회용; 공고 수를 고용 증가로 해석하지 않음
+경남 창원시 의창구,621,1504,26-07-20,26-09-18,CONTEXT,False,현재 공개공고 조회용; 공고 수를 고용 증가로 해석하지 않음
+경남 창원시 진해구,267,1504,26-07-20,26-09-18,CONTEXT,False,현재 공개공고 조회용; 공고 수를 고용 증가로 해석하지 않음

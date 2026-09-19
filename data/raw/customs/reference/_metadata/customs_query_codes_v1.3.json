@@ -1,0 +1,28 @@
+{
+  "dataset_name": "관세청조회코드 v1.3 (시군구별 품목별 수출입실적 API 참고문서)",
+  "institution": "관세청",
+  "source_url": "https://www.data.go.kr/data/15134343/openapi.do",
+  "api_endpoint": "https://www.data.go.kr/cmm/cmm/fileDownload.do (참고문서 첨부)",
+  "retrieved_at": "2026-09-19T02:41:35+00:00",
+  "observation_start": null,
+  "observation_end": null,
+  "geography": "해당없음(코드표)",
+  "industry_classification": "해당없음",
+  "frequency": "비정기",
+  "unit": "코드",
+  "original_filename": "관세청조회코드_v1.3.xlsx",
+  "file_hash_sha256": "43942b94f0e8763067100c91ff743bbb2869c875aadf0144e8e0262fdbda0fe6",
+  "api_parameters": {
+    "atchFileId": "FILE_000000007620468",
+    "fileDetailSn": "1",
+    "auth": "none"
+  },
+  "pagination": "단일 파일",
+  "mapping_notes": "API 조회 파라미터 코드표",
+  "role": "REFERENCE / API_CODES",
+  "revision_vintage": "v1.3",
+  "terms_limitations": "공공데이터포털 이용약관",
+  "limitations": "코드표이며 거래실적이 아니다",
+  "notes": "시도코드 등 API 조회용 코드 정의",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

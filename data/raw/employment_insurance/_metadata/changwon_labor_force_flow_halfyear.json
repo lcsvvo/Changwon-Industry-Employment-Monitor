@@ -1,0 +1,93 @@
+{
+  "dataset_name": "고용노동부 사업체노동력조사(지역편) — 행정구역(시군구)/산업별 고용",
+  "institution": "고용노동부 (KOSIS 수록)",
+  "source_url": "https://kosis.kr/statHtml/statHtml.do?orgId=118&tblId=DT_118N_MONA59",
+  "api_endpoint": "https://kosis.kr/openapi/Param/statisticsParameterData.do",
+  "retrieved_at": "2026-09-18T17:44:45+00:00",
+  "observation_start": "201801",
+  "observation_end": "202601",
+  "geography": "경상남도 창원시(시군구). 창원국가산단이 아니다",
+  "industry_classification": "산업 대분류 5구분. 제조업은 '광업.제조업(BC)' 한 덩어리로 KICOX 10업종 분해 불가(매핑등급 D)",
+  "frequency": "반기",
+  "unit": "명, %",
+  "original_filename": "(KOSIS OpenAPI JSON 응답을 CSV 로 직렬화)",
+  "file_hash_sha256": "665398903597d24022d4b623cb1601254ac58b762a05ae25f82b93fdf3d90a0f",
+  "api_parameters": {
+    "org_id": "118",
+    "tables": [
+      "DT_118N_MONA49",
+      "DT_118N_MONA59"
+    ],
+    "prd_se": "S",
+    "region_codes": [
+      "ZONE2017A383811"
+    ],
+    "industry_codes": [
+      "IND201700",
+      "IND201701"
+    ],
+    "item_ids": [
+      "16118z1",
+      "16118z3",
+      "16118z4",
+      "16118z5",
+      "16118z7",
+      "16118z9",
+      "16118z11",
+      "16118z12",
+      "16118z13"
+    ],
+    "requests": [
+      {
+        "table_id": "DT_118N_MONA49",
+        "region_code": "ZONE2017A383811",
+        "endpoint": "https://kosis.kr/openapi/Param/statisticsParameterData.do",
+        "parameters_without_key": {
+          "method": "getList",
+          "format": "json",
+          "jsonVD": "Y",
+          "orgId": "118",
+          "tblId": "DT_118N_MONA49",
+          "itmId": "ALL",
+          "objL1": "ZONE2017A383811",
+          "objL2": "ALL",
+          "prdSe": "S",
+          "startPrdDe": "201801",
+          "endPrdDe": "202302"
+        },
+        "returned_rows": 568
+      },
+      {
+        "table_id": "DT_118N_MONA59",
+        "region_code": "ZONE2017A383811",
+        "endpoint": "https://kosis.kr/openapi/Param/statisticsParameterData.do",
+        "parameters_without_key": {
+          "method": "getList",
+          "format": "json",
+          "jsonVD": "Y",
+          "orgId": "118",
+          "tblId": "DT_118N_MONA59",
+          "itmId": "ALL",
+          "objL1": "ZONE2017A383811",
+          "objL2": "ALL",
+          "prdSe": "S",
+          "startPrdDe": "202401",
+          "endPrdDe": "202602"
+        },
+        "returned_rows": 244
+      }
+    ],
+    "auth": "KOSIS_API_KEY (환경변수, 기록에서 제외)"
+  },
+  "pagination": "KOSIS 이 통계표는 페이지 분할 없이 기간범위로 일괄 반환한다. startPrdDe/endPrdDe 로 전 구간을 덮었고 반환행수를 requests 에 기록했다.",
+  "mapping_notes": "KICOX 10업종 매핑 불가(매핑등급 D). 제조업 총계 수준에서만 방향 비교에 쓴다. 입직-이직을 KICOX 고용 증감과 같다고 보지 않는다.",
+  "role": "FLOW_INTERPRETATION",
+  "revision_vintage": "LST_CHN_DE 열에 통계표 최종변경일 보존. 과거치 개정 가능",
+  "terms_limitations": "KOSIS 이용약관. 표본조사이므로 RSE 동반. 시군구 단위이며 산업단지 내부만 분리할 수 없다.",
+  "limitations": "반기 빈도. 2018상~2025하. 업종별 분해 없음. 고용보험 DB 기반 피보험자/취득/상실 표는 KOSIS 에서 확인되지 않음.",
+  "notes": "수집 238행 / 원본 응답 kosis_118_regional_labor_force_raw.json. 실패 0건.",
+  "collection_errors": [],
+  "raw_response_file": "kosis_118_regional_labor_force_raw.json",
+  "raw_response_sha256": "885d0831f66c4169720a13c1af1c9196dd11e7b3b42061b1996693c25f6b3ef4",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

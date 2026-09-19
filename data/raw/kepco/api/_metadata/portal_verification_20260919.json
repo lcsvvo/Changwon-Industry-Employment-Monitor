@@ -1,0 +1,46 @@
+{
+  "verified_at": "2026-09-19T08:13:36+00:00",
+  "method": "사용자 본인 계정으로 로그인된 브라우저에서 포털 화면을 직접 열어 확인했다. 로그인 우회·자동입력은 하지 않았고, 인증키 값은 어디에도 기록하지 않는다",
+  "sso_entry": "https://en-ter.co.kr/loginSsoEtc.do?ssoTarget=bigdata",
+  "http_403_investigation": {
+    "question": "일부 API 호출의 403 이 인증상품 미등록 때문인가, 호출 한도 때문인가",
+    "screen": "데이터공개 > OPEN API > 인증키 현황 (pcode=000495)",
+    "finding_key_scope": "인증키 현황 화면에는 API Key 한 개와 사용이력 조회일만 있다. API별 상품 등록·승인 목록 자체가 존재하지 않는다",
+    "finding_key_identity": "저장소 .env 의 KEPCO_API_KEY 와 포털이 표시하는 키가 sha256 기준 동일함을 대조 확인했다 (값은 기록하지 않음)",
+    "finding_call_counts_20260919": {
+      "공통코드": 10,
+      "산업분류별 전기사용고객 증감": 76,
+      "계약종별 전력사용량": 1,
+      "산업분류별 전력사용량": 124,
+      "업종별 전력사용량": 129,
+      "합계": 340
+    },
+    "rejected_hypothesis_1": "'인증키에 해당 API 상품이 미등록' — 기각. 상품 등록 개념이 없고, 4개 API 모두 호출이 정상 집계된다",
+    "rejected_hypothesis_2": "'호출 한도 초과' — 근거 없음. 당일 340건이고 포털 어디에도 한도가 공표돼 있지 않다",
+    "remaining": "403 의 정확한 원인은 여전히 미확정이다. 요청 단위의 일시적 거부 가능성이 남지만 공식 근거가 없으므로 단정하지 않는다"
+  },
+  "custnum_definition_conflict": {
+    "screen": "데이터공개 > OPEN API > OPEN API 소개 (pcode=000493)",
+    "api_intro_text": "산업분류별 전기사용 신설, 증설, 해지 건수 데이터를 제공합니다",
+    "statistics_screen_and_api_values": "신설(KWH) · 증설(KWH) · 해지(KWH)",
+    "verdict": "공식 화면끼리 '건수' 와 'KWH' 로 서로 충돌한다. 추가 공표 자료 없음. NOT_SUITABLE 유지"
+  },
+  "legal_dong_series": {
+    "screen": "데이터 공유 > 맞춤데이터 공유 (pcode=000502)",
+    "series_name": "산업분류-법정동별 전력사용량",
+    "n_entries": 25,
+    "oldest_entry": "2022년 4월 산업분류-법정동별 전력사용량 (등록일 2022-06-08)",
+    "newest_entry": "2026년 산업분류-법정동별 전력사용량 (등록일 2026-07-31)",
+    "coverage": "2022년 4월 ~ 2026년. 분기 또는 월 단위로 나뉘어 등록",
+    "no_2021_file": "이 시리즈에 2021년 자료는 없다. 따라서 잘린 2021 XLSX 의 5개월은 이 경로로 재수신할 수 없다",
+    "official_field_definitions": {
+      "법정동": "법정동명 (코드 아님)",
+      "호수": "5호미만제거",
+      "전력사용량": "kwh",
+      "전기요금": "원",
+      "분류": "대분류코드 + 산업분류(대) + 중분류코드 + 산업분류(중)"
+    },
+    "sample_filename_pattern": "(제공)YYMM_산업분류별-법정동별 전력데이터_v1.xlsx",
+    "implication": "분석기간(2022Q1~2026Q2)을 법정동 × KSIC 해상도로 덮을 수 있는 공식 경로가 존재한다. 다만 분류체계가 KSIC 이라 businessType.do 의 한전 자체 36업종을 대체하지는 못한다"
+  }
+}

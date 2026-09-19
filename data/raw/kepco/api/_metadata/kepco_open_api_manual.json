@@ -1,0 +1,28 @@
+{
+  "dataset_name": "전력데이터개방포털 Open-API 사용 매뉴얼 (한국전력공사_산업분류별 전력사용량 참고문서)",
+  "institution": "한국전력공사",
+  "source_url": "https://www.data.go.kr/data/15101403/openapi.do",
+  "api_endpoint": "https://www.data.go.kr/cmm/cmm/fileDownload.do (참고문서 첨부)",
+  "retrieved_at": "2026-09-18T18:37:33+00:00",
+  "observation_start": null,
+  "observation_end": null,
+  "geography": "해당없음(이용 안내 문서)",
+  "industry_classification": "해당없음",
+  "frequency": "해당없음",
+  "unit": "해당없음",
+  "original_filename": "전력데이터개방포털 Open-API 사용 매뉴얼.pptx",
+  "file_hash_sha256": "33a6efad9dda497b0f634900fe3b746c5527db2be019e9b49282c396277c36b5",
+  "api_parameters": {
+    "atchFileId": "FILE_000000002558506",
+    "fileDetailSn": "1",
+    "auth": "none"
+  },
+  "pagination": "단일 파일",
+  "mapping_notes": "해당없음",
+  "role": "REFERENCE / ACCESS_GUIDE",
+  "revision_vintage": "제공기관 등록본",
+  "terms_limitations": "공공데이터포털 이용약관",
+  "limitations": "매뉴얼 본문이 endpoint URL 을 싣지 않는다. 4개 슬라이드 전체가 \"회원가입·로그인 필수\", \"OPEN API 소개 페이지에서 URL·파라미터 조회 가능\" 이라는 포털 화면 안내다. 즉 URL·파라미터는 로그인 후에만 열람 가능하다.",
+  "notes": "슬라이드 원문: \"전력데이터 개방포털 서비스는 로그인 정보 기반으로 데이터 제공함으로 회원가입 및 로그인 필수 진행\" / \"OPEN API 소개 - OPEN API 의 세부 내용(URL, 파라미터 등) 조회 가능 페이지\". 로그인 우회는 하지 않는다.",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

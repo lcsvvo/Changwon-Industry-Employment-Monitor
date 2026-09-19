@@ -1,0 +1,24 @@
+{
+  "dataset_name": "한국산업단지공단_국가산업단지 산업동향정보_업종별 가동업체 현황",
+  "institution": "한국산업단지공단",
+  "source_url": "https://www.data.go.kr/data/15085896/fileData.do",
+  "api_endpoint": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000007660396&fileDetailSn=1&insertDataPrcus=N",
+  "retrieved_at": "2026-09-18T13:18:17+00:00",
+  "observation_start": null,
+  "observation_end": null,
+  "geography": "전국 국가산업단지(창원 포함)",
+  "industry_classification": "KICOX 10업종",
+  "frequency": "분기",
+  "unit": "개사",
+  "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_업종별 가동업체 현황.csv",
+  "file_hash_sha256": "44e9f99076dd4ae1550512f1a90edddaff9eadd8d65a127b5bcaff2797c94c13",
+  "api_parameters": {
+    "dataset_pk": "15085896",
+    "method": "GET",
+    "auth": "none (public file download)"
+  },
+  "revision_vintage": "포털 제공 파일명에 표기된 공표 시점(연간보정 여부 포함)",
+  "terms_limitations": "공공데이터포털 이용약관. 파일데이터는 현재 공표본 1개만 제공되며 과거 공표본은 포털에서 재취득 불가. 로그인·CAPTCHA 우회 없이 수집.",
+  "notes": "포털 공표 제목: 한국산업단지공단_국가산업단지 산업동향정보_업종별 가동업체 현황_20260630 | 공공데이터포털. 인코딩 cp949, 행 수 40, 헤더: 산업단지,구분,음식료(개사),섬유의복(개사),목재종이(개사),석유화학(개사),비금속(개사),철강(개사),기계(개사),전기전자(개사),운송장비(개사),기타(개사),비제조(개사),총계(개사)",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

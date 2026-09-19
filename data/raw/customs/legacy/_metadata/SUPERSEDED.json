@@ -1,0 +1,6 @@
+{
+  "status": "SUPERSEDED",
+  "superseded_by": "data/raw/external/customs_trade/",
+  "reason": "인증키 확보 전 미수집 기록. 2026-09-19 실제 수집 성공으로 대체됨. 기록 보존용.",
+  "recorded_at": "2026-09-18T18:01:09+00:00"
+}

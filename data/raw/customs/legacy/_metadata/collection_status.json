@@ -1,0 +1,11 @@
+{
+  "status": "NOT_COLLECTED",
+  "reason": "DATA_GO_KR_SERVICE_KEY 미설정 — API 인증키 없이 조회할 수 없다.",
+  "checked_at": "2026-09-18T13:09:18+00:00",
+  "endpoint": "https://apis.data.go.kr/1220000/sigunguperprlstperacrs/getSigunguPerPrlstPerAcrs",
+  "required_env": "DATA_GO_KR_SERVICE_KEY",
+  "issuer": "공공데이터포털 data.go.kr 활용신청(관세청 15134343)",
+  "hs6_targets_ready": 0,
+  "crosswalk": "data\\reference\\industry_crosswalk\\hs_to_kicox.csv",
+  "crosswalk_level_note": "현재 크로스워크는 HS 류(2단위)까지만 근거 확보. API 는 HS 6단위를 필수로 요구한다."
+}

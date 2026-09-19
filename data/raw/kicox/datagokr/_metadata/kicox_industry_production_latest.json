@@ -1,0 +1,24 @@
+{
+  "dataset_name": "한국산업단지공단_국가산업단지 산업동향정보_업종별 생산",
+  "institution": "한국산업단지공단",
+  "source_url": "https://www.data.go.kr/data/15085898/fileData.do",
+  "api_endpoint": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000007660392&fileDetailSn=1&insertDataPrcus=N",
+  "retrieved_at": "2026-09-18T13:18:09+00:00",
+  "observation_start": null,
+  "observation_end": null,
+  "geography": "전국 국가산업단지(창원 포함)",
+  "industry_classification": "KICOX 10업종(산업단지 산업동향 분류)",
+  "frequency": "분기(2024Q2 이후) / 이전 월별",
+  "unit": "백만원",
+  "original_filename": "(연간보정)(2026.2분기)주요국가산업단지 산업동향_업종별 생산실적.csv",
+  "file_hash_sha256": "2f145ad36cd916bf0efa2b4cc7b73c2f85b8c0b596b7b1a30a3a5d7ae89cafd0",
+  "api_parameters": {
+    "dataset_pk": "15085898",
+    "method": "GET",
+    "auth": "none (public file download)"
+  },
+  "revision_vintage": "포털 제공 파일명에 표기된 공표 시점(연간보정 여부 포함)",
+  "terms_limitations": "공공데이터포털 이용약관. 파일데이터는 현재 공표본 1개만 제공되며 과거 공표본은 포털에서 재취득 불가. 로그인·CAPTCHA 우회 없이 수집.",
+  "notes": "포털 공표 제목: 한국산업단지공단_국가산업단지 산업동향정보_업종별 생산실적_20260630 | 공공데이터포털. 인코딩 cp949, 행 수 40, 헤더: 산업단지,구분,음식료(억원),섬유의복(억원),목재종이(억원),석유화학(억원),비금속(억원),철강(억원),기계(억원),전기전자(억원),운송장비(억원),기타(억원),계(억원)",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

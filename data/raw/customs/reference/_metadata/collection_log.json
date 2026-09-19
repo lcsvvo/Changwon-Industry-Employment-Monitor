@@ -1,0 +1,19 @@
+{
+  "run_at": "2026-09-18T18:29:22+00:00",
+  "results": [
+    {
+      "pk": "15049722",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\customs_reference\\customs_hs_code_20260101.xlsx",
+      "bytes": 1419595,
+      "original_filename": "HS코드(2026).xlsx"
+    },
+    {
+      "pk": "15049720",
+      "status": "COLLECTED",
+      "path": "data\\raw\\external\\customs_reference\\customs_hsk_nature_classification_20260101.xlsx",
+      "bytes": 2581321,
+      "original_filename": "HSK별 신성질별_성질별 분류(2025년_2026년).xlsx"
+    }
+  ]
+}

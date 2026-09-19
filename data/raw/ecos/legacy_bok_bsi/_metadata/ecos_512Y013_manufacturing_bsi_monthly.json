@@ -1,0 +1,36 @@
+{
+  "dataset_name": "한국은행 ECOS 6.1.1.1. 기업경기조사(실적) — 제조업 월별 BSI",
+  "institution": "한국은행",
+  "source_url": "https://ecos.bok.or.kr/",
+  "api_endpoint": "https://ecos.bok.or.kr/api/StatisticSearch/{API_KEY}/json/kr/1/N/512Y013/M/{start}/{end}/C0000/{bsi_code}",
+  "retrieved_at": "2026-09-18T12:56:12+00:00",
+  "observation_start": "202101",
+  "observation_end": "202608",
+  "geography": "전국(지역 분류축 없음 — 경남·창원 단위로 분해 불가)",
+  "industry_classification": "ECOS 업종코드(C0000=제조업). KICOX 10업종으로 매핑 불가",
+  "frequency": "월",
+  "unit": "지수(기준 100)",
+  "original_filename": "(API 응답을 CSV 로 직렬화)",
+  "file_hash_sha256": "bd00ed93bdaa8311c2e1f5f3dbed7be8ddecad05f3a3319b72fedf1a5b60ae76",
+  "api_parameters": {
+    "stat_code": "512Y013",
+    "cycle": "M",
+    "sector": "C0000",
+    "items": {
+      "AA": "업황실적BSI",
+      "AC": "생산실적BSI",
+      "AD": "신규수주실적BSI",
+      "AK": "가동률실적BSI",
+      "AJ": "인력사정실적BSI"
+    },
+    "start": "202101",
+    "end": "202608",
+    "auth_key_source": "공개 sample 키(1회 10건 한도 준수)",
+    "rows_per_call": 10
+  },
+  "revision_vintage": "한국은행 공표 시점 기준. 과거치 개정 가능",
+  "terms_limitations": "한국은행 ECOS OpenAPI 이용약관. 지역 분류축이 없어 경남·창원 단위 BSI 는 제공되지 않는다.",
+  "notes": "수집 행 340건, 실패 청크 0건. 역할=거시 배경정보(context). 업종 판정·해석층 입력이 아니다.",
+  "collection_errors": [],
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

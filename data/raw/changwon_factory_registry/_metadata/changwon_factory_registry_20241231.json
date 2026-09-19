@@ -1,0 +1,24 @@
+{
+  "dataset_name": "경상남도 창원시_공장등록현황",
+  "institution": "경상남도 창원시",
+  "source_url": "https://www.data.go.kr/data/3066436/fileData.do",
+  "api_endpoint": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003094655&fileDetailSn=1&insertDataPrcus=N",
+  "retrieved_at": "2026-09-18T13:18:30+00:00",
+  "observation_start": null,
+  "observation_end": null,
+  "geography": "경상남도 창원시 전역(산업단지 내외 구분 없음)",
+  "industry_classification": "KSIC 세세분류 업종명(문자열)",
+  "frequency": "비정기 스냅샷",
+  "unit": "공장 1건",
+  "original_filename": "경상남도 창원시_공장등록현황(24. 12. 31. 기준).csv",
+  "file_hash_sha256": "ad44c171850d18c3776f2b19094ee03e75e5c4cf2b8c772229c6129563798cb1",
+  "api_parameters": {
+    "dataset_pk": "3066436",
+    "method": "GET",
+    "auth": "none (public file download)"
+  },
+  "revision_vintage": "포털 제공 파일명에 표기된 공표 시점(연간보정 여부 포함)",
+  "terms_limitations": "공공데이터포털 이용약관. 파일데이터는 현재 공표본 1개만 제공되며 과거 공표본은 포털에서 재취득 불가. 로그인·CAPTCHA 우회 없이 수집.",
+  "notes": "포털 공표 제목: 경상남도 창원시_공장등록현황_20241231 | 공공데이터포털. 인코딩 utf-8-sig, 행 수 5636, 헤더: 순번,회사명,공장대표주소(도로명),업종명,생산품,전화번호,팩스번호",
+  "metadata_schema": "changwon-external-collection/1.0.0"
+}

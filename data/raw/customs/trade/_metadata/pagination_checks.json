@@ -1,0 +1,45 @@
+{
+  "runs": [
+    {
+      "run_at": "2026-09-19T02:52:00+00:00",
+      "calls": 6393,
+      "answered": 4904,
+      "pagination_mismatch": 0,
+      "rate_limited_calls": 1489,
+      "rate_limited": true,
+      "checks": [],
+      "reconstructed": true,
+      "note": "2026-09-19 최초 전수 수집(탐색 1,248 + 본수집). 실행 당시 보고값: 총 호출 6,393 / 불완전 1,489(전부 HTTP 429) / 응답받은 호출의 totalCount 불일치 0건. 이후 probe 실행이 metadata 의 checks 를 덮어써 호출별 원본 기록은 남지 않았고, 성공 조합 수는 coverage_manifest 의 completed 항목(4904건)에서 재구성했다. checks 배열은 비어 있다."
+    },
+    {
+      "run_at": "2026-09-19T02:52:00+00:00",
+      "calls": 1,
+      "answered": 0,
+      "pagination_mismatch": 0,
+      "rate_limited_calls": 1,
+      "rate_limited": true,
+      "checks": [
+        {
+          "hs6": "850870",
+          "window": [
+            "202201",
+            "202212"
+          ],
+          "http_status": 429,
+          "error": "HTTPError 429",
+          "retry_after": null,
+          "phase": "backfill"
+        }
+      ],
+      "note": "2026-09-19 최초 전수 수집(탐색 1,248 + 본수집). 4,904번째부터 429."
+    }
+  ],
+  "cumulative": {
+    "runs": 2,
+    "calls": 6394,
+    "answered": 4904,
+    "pagination_mismatch": 0,
+    "rate_limited_calls": 1490
+  },
+  "note": "호출별 검증기록은 실행마다 누적한다. 첫 항목은 metadata 덮어쓰기로 원본 checks 가 유실되어 재구성한 요약이며 reconstructed=true 로 표시한다."
+}
