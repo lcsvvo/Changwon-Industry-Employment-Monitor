@@ -1,0 +1,13 @@
+﻿number,deliverable,path
+1,최종 데이터 역할표,outputs/final_model/04_external_evidence/data_role_table.csv
+2,최종 core panel,outputs/final_model/01_core/tables/core_panel.csv
+3,최종 decision panel,outputs/final_model/02_triage/tables/triage_panel.csv
+4,최종 Triage,outputs/final_model/02_triage/tables/triage_latest.csv
+5,선택적 ELECTRE/SMAA,outputs/final_model/03_electre_smaa/tables/electre_smaa_review_cases.csv
+6,External Evidence panel,outputs/final_model/04_external_evidence/external_evidence_summary.csv
+7,업종별 explanation trace,outputs/final_model/05_handoff/tables/explanation_trace.csv
+8,Human Review / Handoff,outputs/final_model/05_handoff/tables/institution_routing_map.csv
+9,최종모형 구조도,reports/final_methodology.md
+10,최종 방법론,reports/final_methodology.md
+11,QA 결과,outputs/final_model/qa_summary.json
+12,최종 실행방법,outputs/final_model/RUNBOOK.md

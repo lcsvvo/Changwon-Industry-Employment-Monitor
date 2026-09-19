@@ -1,0 +1,19 @@
+{
+  "triage_tests": {
+    "tests": 15,
+    "skipped": 0,
+    "passed": 15,
+    "skip_reasons": []
+  },
+  "full_tests": {
+    "tests": 27,
+    "skipped": 0,
+    "passed": 27,
+    "skip_reasons": []
+  },
+  "panel_rows": 180,
+  "latest_cards": 10,
+  "executed_code_cells": 16,
+  "metadata_hashes_match": true,
+  "cards_match": true
+}

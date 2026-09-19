@@ -12,7 +12,7 @@ raw 쓰기 금지)에 맞춰 새로 작성했다.
     pytest tests/test_pipeline_rules.py -v
 
 data/processed/kicox/*.csv 가 먼저 생성되어 있어야 한다
-(notebooks/01_data_preprocessing.ipynb 또는 src/build_*.py 를 먼저 실행할 것).
+(notebooks/00_data_preparation.ipynb 또는 src/core/build_*.py 를 먼저 실행할 것).
 """
 from __future__ import annotations
 
@@ -167,7 +167,7 @@ def test_revision_source_is_applied(ind):
 # ----------------------------------------------------------------------------
 
 def test_raw_directory_not_written_by_pipeline():
-    import build_changwon_master as m
+    from core import build_changwon_master as m
     before = m._raw_mtimes()
     m.load_raw()
     m.load_revision()
