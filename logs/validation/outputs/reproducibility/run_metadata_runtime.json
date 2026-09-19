@@ -1,0 +1,13 @@
+{
+  "_derived_from": "outputs/decision_support_final/run_metadata.json",
+  "_note": "실행시각·환경 필드. 재현성 판정에 쓰지 않는다.",
+  "_policy_version": "changwon-protection-policy/2.5.0",
+  "_source_file_sha256": "d8694590145eb4030b42fcce743aa3a649051b8cecca8d632b33cdc3c1d07314",
+  "runtime": {
+    "git_head": "812b4dcf89a1ca786d33edab4e8e3ef40a5a915c",
+    "numpy": "2.3.5",
+    "pandas": "3.0.1",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "run_at_utc": "2026-09-19T10:53:16.567733+00:00"
+  }
+}

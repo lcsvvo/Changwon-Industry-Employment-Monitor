@@ -1,0 +1,54 @@
+# GPT Sol 결정안의 분석팀 시범실행 사전등록본. 실제 행정 승인이 아니다.
+model_spec_version: changwon-transition-diagnosis-model/1.0.0
+parameter_set_id: changwon-electre-pilot-v1
+parameter_status: SCENARIO_REGISTERED
+
+fixed:
+  q: 0
+  p: 0
+  veto: null
+  assignment_rule: pessimistic
+  missing_rule: complete_case_no_renormalization
+  criteria_direction: {g1: increasing, g2: increasing, g3: increasing, g4: increasing}
+
+scenarios:
+  - scenario_id: 기준
+    weights: {g1: 0.20, g2: 0.20, g3: 0.30, g4: 0.30}
+    profiles:
+      b1: {g1: 100, g2: 2.0, g3: 5.0, g4: 2}
+      b2: {g1: 500, g2: 5.0, g3: 10.0, g4: 4}
+    lambda: 0.50
+    delta_emp: 0.0
+    require_employment_evidence: true
+  - scenario_id: 고용중시
+    weights: {g1: 0.30, g2: 0.30, g3: 0.20, g4: 0.20}
+    profiles:
+      b1: {g1: 100, g2: 2.0, g3: 5.0, g4: 2}
+      b2: {g1: 500, g2: 5.0, g3: 10.0, g4: 4}
+    lambda: 0.60
+    delta_emp: 0.0
+    require_employment_evidence: true
+  - scenario_id: 지속성중시
+    weights: {g1: 0.20, g2: 0.20, g3: 0.20, g4: 0.40}
+    profiles:
+      b1: {g1: 100, g2: 2.0, g3: 5.0, g4: 2}
+      b2: {g1: 500, g2: 5.0, g3: 10.0, g4: 4}
+    lambda: 0.60
+    delta_emp: 0.0
+    require_employment_evidence: true
+
+registration:
+  registered_at: '2026-09-16T15:14:40.6445696+09:00'
+  registered_by: BOAZ 27기 시각화 미니프로젝트 3조
+  briefing_doc_sha256: 453e6fa179995284362a7f1fe83ea155cac194058c2b3eec311cdb49f3d240ca
+  parameter_file_sha256: bef58985e0714e5a149bbbbf667ed271296f86fc1b7d056f18d3518723da70f0
+
+approval:
+  approved_scenario_id: null
+  approved_parameter_file_sha256: null
+  approved_scenario_block_sha256: null
+  approver_name: null
+  approver_role: null
+  approver_org: null
+  approved_at: null
+  approval_reference: null

@@ -1,0 +1,6 @@
+﻿action,source,reason_or_destination
+DELETE,aux_analysis_report.html,archived identical copy retained under logs/experiments/electre_mrsort/data/processed/auxiliary
+DELETE,aux_summary_2026Q2.csv,archived identical copy retained under logs/experiments/electre_mrsort/data/processed/auxiliary
+DELETE,ppi_grade_criteria.csv,archived identical copy retained under logs/experiments/electre_mrsort/data/processed/auxiliary
+MOVE,changwon_jobs.csv,data/raw/external/changwon_jobs/changwon_jobs_20260918.csv
+MOVE,crawl_changwon_jobs.py,src/data_collection/collect_changwon_jobs.py

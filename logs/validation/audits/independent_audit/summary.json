@@ -1,0 +1,17 @@
+{
+  "rows": 180,
+  "complete": 160,
+  "discriminating": 89,
+  "replicates": 400,
+  "seed": 99,
+  "gate_changes": 0,
+  "history_g4_changed_rows": 40,
+  "vrc4_duration_1_pass_count": 40,
+  "vrc4_duration_2_pass_count": 899,
+  "vrc4_duration_3_pass_count": 899,
+  "vrc4_duration_4_pass_count": 899,
+  "corner_qp_configurations_tried": 81,
+  "continuous_certified_rows": 154,
+  "continuous_unresolved_rows": 6,
+  "sample_missed_categories": 5
+}

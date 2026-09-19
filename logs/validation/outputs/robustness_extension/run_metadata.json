@@ -1,0 +1,57 @@
+{
+  "layer": "context-interpretation/1.0.0",
+  "run_at_utc": "2026-09-19T10:53:21+00:00",
+  "window": [
+    "2022Q1",
+    "2026Q2"
+  ],
+  "rows": 180,
+  "triage_rule_version": "changwon-triage-rule/3.1.0-audited",
+  "triage_untouched": true,
+  "frozen_columns": [
+    "stage",
+    "stage_reason",
+    "E",
+    "R",
+    "A",
+    "P",
+    "scale_ok",
+    "persist",
+    "E_entry",
+    "E_up",
+    "R_entry",
+    "R_up",
+    "A_entry",
+    "A_up",
+    "P_support"
+  ],
+  "git_head": "812b4dcf89a1ca786d33edab4e8e3ef40a5a915c",
+  "inputs": {
+    "outputs\\decision_support_final\\decision_panel.csv": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a",
+    "data\\processed\\kicox\\changwon_industry_master.csv": "4fb6f7bd85180e848813301bab43fc203a205e3c9829bf98deba4ddfe1240c28",
+    "data\\processed\\ppi\\ppi_industry_panel.csv": "538f011ca99475eb4d7de2091269ddf00cf95ce71ab6144700f72ae144f48777",
+    "data\\raw\\eis\\eis_changwon_insured_2022M03_2026M06.csv": "a70a9135c6acbedb692874d61e95266755b0deddfa62dce4da2c34162b40eaf7",
+    "data\\raw\\cci_report\\창원시_업종별_고용보험피보험자_동향.csv": "9dda98409731eace021cf90e699bce7fec0574de012c5b74a3cc9f77c56387b4"
+  },
+  "code_sha256": {
+    "src\\context\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src\\context\\config.py": "f5778577d76ed6ec653437ff1d4b0187fee937352de79669d13b68cd50e0593b",
+    "src\\context\\cross_source.py": "6f001fe9e0dd5ff018e61f1eec0501411df6bbfe7cbb06e89639cd99d46e9167",
+    "src\\context\\external_panels.py": "1db7f924ccc2c829d777667b39039a80768e5af85f376eb49533788bc970cb2e",
+    "src\\context\\external_signals.py": "a2371e8276c4d43681c3729d6d8d06c5c772736d190505d80c6727b9d3325331",
+    "src\\context\\firm_activity.py": "9f1796899494821b5f66f0133e6446843a07543eb8b22f08ab61f57b96ab29df",
+    "src\\context\\kepco_power.py": "52b24507010797084ba2c573cec84df7f29f86deb59b2da3497d10ebad24e93c",
+    "src\\context\\kepco_report.py": "aff2d8671f3829dc25f80b94febcb5a821d754aba445f862925f140c272c9978",
+    "src\\context\\monthly_panel.py": "78fcb225499800775287de8fcc754c1fd1c39b5271ffad9a1e0858d77aa97507",
+    "src\\context\\ppi_adjusted.py": "97a8df85e15ab1f0a4f700643eb52889927751703d1102d9630f61fa1e0488ce",
+    "src\\context\\quality.py": "b35f35016858ab1acccf711003bd410cf857cf64b72d85f377828d8b5b644968",
+    "src\\context\\questions.py": "47315b27ac755d6a57cbca2945324b7ae46fa40263ec69258c8315ca7f608aea",
+    "src\\context\\signals.py": "8f429a46b975eef880e1d121b520affd478fb1edf325011e67ae3874ac3e4892",
+    "src\\build_context_layer.py": "29cda15b11d505a2e6b2223ffcfb902dd6d5402e6a53c809e39e55117960a3fa"
+  },
+  "thresholds_are_own": true,
+  "note": "해석층은 Triage stage 를 바꾸지 않는다. 새 자료는 판정 입력이 아니라 해석·교차확인·자료품질 표시에 쓰인다.",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "pandas": "3.0.1",
+  "numpy": "2.3.5"
+}

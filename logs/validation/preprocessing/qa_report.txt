@@ -1,4 +1,4 @@
-QA 실행 2026-09-08 11:34:53 | base=Changwon-Industry-Employment-Monitor
+QA 실행 2026-09-19 21:28:38 | base=Changwon-Industry-Employment-Monitor
 
 ==============================================================================
 A. 구조
@@ -62,7 +62,7 @@ D. 값 범위 · 단위 일관성
 ==============================================================================
 E. 업종별 합계 vs 단지 전체
 ==============================================================================
-  저장 -> logs\preprocessing\total_vs_industry.csv
+  저장 -> logs\validation\preprocessing\total_vs_industry.csv
   production 상대오차 (알려진 결측분기 제외) max=0.003205% median=0.000000%
   [PASS] 업종합계 vs production_total 상대오차 <=1% (실제 max 0.0032%)
   employment 상대오차 분포: min=0.46% median=1.27% max=4.05%
@@ -73,7 +73,7 @@ E. 업종별 합계 vs 단지 전체
 ==============================================================================
 F. 연간보정본 비제조 고용 대조
 ==============================================================================
-  저장 -> logs\preprocessing\nonmfg_check.csv
+  저장 -> logs\validation\preprocessing\nonmfg_check.csv
   전체 revision 시점: 24개
   분기말(stock 유효) 시점: 12개
   일치: 12 / 불일치: 0

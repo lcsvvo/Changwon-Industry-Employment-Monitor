@@ -1,0 +1,287 @@
+{
+  "n_rows_joined": 180,
+  "n_comparable": 130,
+  "quarters_with_power_yoy": [
+    "2023Q2",
+    "2023Q3",
+    "2023Q4",
+    "2024Q1",
+    "2024Q2",
+    "2024Q3",
+    "2024Q4",
+    "2025Q1",
+    "2025Q2",
+    "2025Q3",
+    "2025Q4",
+    "2026Q1",
+    "2026Q2"
+  ],
+  "pooled": {
+    "production_vs_power": {
+      "n": 110,
+      "agree": 60,
+      "agree_pct": 54.5,
+      "spearman_rho": 0.14152784978473054,
+      "p_value": 0.14025702581087993,
+      "n_corr": 110
+    },
+    "employment_vs_power": {
+      "n": 130,
+      "agree": 65,
+      "agree_pct": 50.0,
+      "spearman_rho": -0.08945892838142509,
+      "p_value": 0.3114574706405537,
+      "n_corr": 130
+    }
+  },
+  "pooled_deadband_1pct": {
+    "production_vs_power": {
+      "n": 91,
+      "agree": 50,
+      "agree_pct": 54.9
+    },
+    "employment_vs_power": {
+      "n": 97,
+      "agree": 50,
+      "agree_pct": 51.5
+    }
+  },
+  "sensitivity_B_grade_only": {
+    "production_vs_power": {
+      "n": 77,
+      "agree": 37,
+      "agree_pct": 48.1
+    },
+    "employment_vs_power": {
+      "n": 91,
+      "agree": 45,
+      "agree_pct": 49.5
+    }
+  },
+  "multiple_testing": {
+    "n_tests": 20,
+    "n_p_below_05": 5,
+    "n_q_below_05_bh": 0,
+    "note": "업종 10 × (생산·고용) 2 = 20회 검정. Benjamini-Hochberg FDR 보정 후 몇 개가 남는지로 판단한다"
+  },
+  "by_state": [
+    {
+      "state": "INVALID",
+      "n": 20,
+      "power_yoy_median": -1.1662520288,
+      "power_yoy_mean": 5.005373112,
+      "n_negative": 12,
+      "pct_negative": 60.0
+    },
+    {
+      "state": "N",
+      "n": 4,
+      "power_yoy_median": -0.5233274914,
+      "power_yoy_mean": -2.0300140242,
+      "n_negative": 2,
+      "pct_negative": 50.0
+    },
+    {
+      "state": "S1",
+      "n": 30,
+      "power_yoy_median": 0.8240720687,
+      "power_yoy_mean": 0.8217566998,
+      "n_negative": 13,
+      "pct_negative": 43.3
+    },
+    {
+      "state": "S2",
+      "n": 29,
+      "power_yoy_median": 0.7432052759,
+      "power_yoy_mean": 6.980020381,
+      "n_negative": 14,
+      "pct_negative": 48.3
+    },
+    {
+      "state": "S3",
+      "n": 13,
+      "power_yoy_median": -0.7385642747,
+      "power_yoy_mean": -1.4820490995,
+      "n_negative": 7,
+      "pct_negative": 53.8
+    },
+    {
+      "state": "S4",
+      "n": 34,
+      "power_yoy_median": -0.415051398,
+      "power_yoy_mean": 6.2823881439,
+      "n_negative": 18,
+      "pct_negative": 52.9
+    }
+  ],
+  "by_stage": [
+    {
+      "stage": "관찰",
+      "n": 88,
+      "power_yoy_median": -0.2937373465
+    },
+    {
+      "stage": "우선점검",
+      "n": 12,
+      "power_yoy_median": -0.5342932191
+    },
+    {
+      "stage": "추가확인",
+      "n": 30,
+      "power_yoy_median": 9.5821167187
+    }
+  ],
+  "lead_lag_exploratory": [
+    {
+      "power_lag_quarters": -2,
+      "prod_spearman": 0.2301436391,
+      "prod_p": 0.0290949809,
+      "prod_n": 90,
+      "emp_spearman": -0.0563547918,
+      "emp_p": 0.5587042934,
+      "emp_n": 110
+    },
+    {
+      "power_lag_quarters": -1,
+      "prod_spearman": 0.1884188419,
+      "prod_p": 0.0604698985,
+      "prod_n": 100,
+      "emp_spearman": -0.1111703375,
+      "emp_p": 0.2267341988,
+      "emp_n": 120
+    },
+    {
+      "power_lag_quarters": 0,
+      "prod_spearman": 0.1415278498,
+      "prod_p": 0.1402570258,
+      "prod_n": 110,
+      "emp_spearman": -0.0894589284,
+      "emp_p": 0.3114574706,
+      "emp_n": 130
+    },
+    {
+      "power_lag_quarters": 1,
+      "prod_spearman": 0.1328652865,
+      "prod_p": 0.1875708515,
+      "prod_n": 100,
+      "emp_spearman": -0.0245234304,
+      "emp_p": 0.7903402056,
+      "emp_n": 120
+    },
+    {
+      "power_lag_quarters": 2,
+      "prod_spearman": 0.0284726509,
+      "prod_p": 0.7899361778,
+      "prod_n": 90,
+      "emp_spearman": -0.0271496069,
+      "emp_p": 0.7782912133,
+      "emp_n": 110
+    }
+  ],
+  "macro_check": {
+    "ratio_median": 0.9966,
+    "ratio_min": 0.9939,
+    "ratio_max": 0.9997,
+    "yoy_pearson": 0.9942,
+    "yoy_mean_abs_diff_pp": 0.151,
+    "n": 13,
+    "interpretation": "업종별 API 의 제조업 업종 합계와 산업분류별 API 의 KSIC C 제조업이 일치하면, KEPCO 업종↔KSIC 제조업 '범위' 대응이 실증 확인된 것이다. 단 이는 총량 수준의 확인이며 KICOX 10업종 배분의 정확성을 보증하지 않는다"
+  },
+  "custnum_plausibility": {
+    "usable": false,
+    "manufacturing_customer_base": 5963.0,
+    "max_quarterly_value": 365951.0,
+    "n_all_zero_quarters": 2,
+    "reason": "분기 최대값이 창원 제조업 전체 고객호수를 크게 넘고 전 항목이 0 인 분기가 섞여 있다 → '건수' 로 해석할 수 없다"
+  },
+  "completeness_by_quarter": [
+    {
+      "quarter": "2021Q1",
+      "completeness": "NO_DATA"
+    },
+    {
+      "quarter": "2021Q2",
+      "completeness": "NO_DATA"
+    },
+    {
+      "quarter": "2021Q3",
+      "completeness": "NO_DATA"
+    },
+    {
+      "quarter": "2021Q4",
+      "completeness": "NO_DATA"
+    },
+    {
+      "quarter": "2022Q1",
+      "completeness": "PARTIAL"
+    },
+    {
+      "quarter": "2022Q2",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2022Q3",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2022Q4",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2023Q1",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2023Q2",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2023Q3",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2023Q4",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2024Q1",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2024Q2",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2024Q3",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2024Q4",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2025Q1",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2025Q2",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2025Q3",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2025Q4",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2026Q1",
+      "completeness": "COMPLETE"
+    },
+    {
+      "quarter": "2026Q2",
+      "completeness": "COMPLETE"
+    }
+  ]
+}

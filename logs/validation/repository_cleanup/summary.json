@@ -1,0 +1,57 @@
+{
+  "audited_files_before": 1708,
+  "files_after": 842,
+  "git_changes_before": 633,
+  "git_changes_after": 187,
+  "git_tracked_modified": 4,
+  "git_untracked": 183,
+  "classification": {
+    "KEEP_FINAL": 700,
+    "DELETE_LOW_VALUE": 893,
+    "ARCHIVE_EXPERIMENT": 115
+  },
+  "moved": 116,
+  "deleted_original": 893,
+  "deleted_regenerated": 36,
+  "raw_files_preserved": 533,
+  "final_csv_identical": 20,
+  "core_rule_and_delivery_unchanged": true,
+  "notebooks": [
+    {
+      "notebook": "01_data_preprocessing.ipynb",
+      "code_cells": 11,
+      "errors": 0
+    },
+    {
+      "notebook": "02_eda.ipynb",
+      "code_cells": 40,
+      "errors": 0
+    },
+    {
+      "notebook": "03_q1_q2_q3_integrated_analysis.ipynb",
+      "code_cells": 14,
+      "errors": 0
+    }
+  ],
+  "delivery": {
+    "triage_tests": {
+      "tests": 15,
+      "skipped": 0,
+      "passed": 15,
+      "skip_reasons": []
+    },
+    "full_tests": {
+      "tests": 27,
+      "skipped": 0,
+      "passed": 27,
+      "skip_reasons": []
+    },
+    "panel_rows": 180,
+    "latest_cards": 10,
+    "executed_code_cells": 16,
+    "metadata_hashes_match": true,
+    "cards_match": true
+  },
+  "broken_active_markdown_links": [],
+  "review_uncertain": []
+}

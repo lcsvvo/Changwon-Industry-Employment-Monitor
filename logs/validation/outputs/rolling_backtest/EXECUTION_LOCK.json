@@ -1,0 +1,26 @@
+{
+  "analysis_name": "재구축 패널 기반 사후적 시간외 정합성 검증(retrospective reconstructed-panel temporal validation)",
+  "protocol_id": "CW-RBT-1.0",
+  "protocol_path": "outputs/rolling_backtest_protocol/PROTOCOL.md",
+  "protocol_sha256_raw_bytes": "ef9c4edca39d59306e981fe39ba2d189b2cf56f970416a7f4f2b4aa3e53f3994",
+  "approval_date_local": "2026-09-18",
+  "approval": "사용자 2단계 실행 승인 및 10개 추가 준수조건",
+  "primary_comparison": "fixed representative ELECTRE crisp versus final triage CHECK/additional-confirmation-or-higher; h=2 primary on common paired sample",
+  "immutable_definitions": "CW-RBT-1.0 D/E/C/G/H/I/K/L: outcomes, periods, horizons, cutoffs, metrics, sensitivity specifications unchanged",
+  "constraints": [
+    "Use the official analysis name; do not claim independent external validation, real-time backtesting or crisis prediction accuracy validation",
+    "No post-result changes to PROTOCOL definitions",
+    "Compute primary fixed crisp paired comparison first; parameter-space and observed possible-assignment sets are auxiliary",
+    "No observed RC/VRC filtering, including future RC2 and RC3",
+    "Separate common paired performance from missing-production operational coverage",
+    "Retain unfavorable and undefined results without posthoc adjustment",
+    "Allow INSUFFICIENT_EVIDENCE for sparse or concentrated events; no general model winner",
+    "Consolidated long-format CSVs; no per-parameter-draw files",
+    "Preserve existing final model and ELECTRE audit artifacts; write only separate rolling_backtest outputs",
+    "Stop performance calculation and report if solving a problem requires protocol definition changes"
+  ],
+  "output_directory": "outputs/rolling_backtest",
+  "parameter_space_filter": "none",
+  "historical_available_at_check": "UNVERIFIABLE",
+  "protocol_deviations_authorized": []
+}

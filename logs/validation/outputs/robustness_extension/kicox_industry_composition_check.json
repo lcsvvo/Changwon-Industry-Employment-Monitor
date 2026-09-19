@@ -1,0 +1,113 @@
+{
+  "expected_kicox_10": [
+    "음식료",
+    "섬유의복",
+    "목재종이",
+    "석유화학",
+    "비금속",
+    "철강",
+    "기계",
+    "전기전자",
+    "운송장비",
+    "기타"
+  ],
+  "per_indicator": [
+    {
+      "indicator": "employment",
+      "published_industries": [
+        "음식료",
+        "섬유의복",
+        "목재종이",
+        "석유화학",
+        "비금속",
+        "철강",
+        "기계",
+        "전기전자",
+        "운송장비",
+        "기타"
+      ],
+      "n_published": 10,
+      "matches_kicox_10": true,
+      "missing_from_published": [],
+      "extra_columns": []
+    },
+    {
+      "indicator": "production",
+      "published_industries": [
+        "음식료",
+        "섬유의복",
+        "목재종이",
+        "석유화학",
+        "비금속",
+        "철강",
+        "기계",
+        "전기전자",
+        "운송장비",
+        "기타"
+      ],
+      "n_published": 10,
+      "matches_kicox_10": true,
+      "missing_from_published": [],
+      "extra_columns": []
+    },
+    {
+      "indicator": "firms_op",
+      "published_industries": [
+        "음식료",
+        "섬유의복",
+        "목재종이",
+        "석유화학",
+        "비금속",
+        "철강",
+        "기계",
+        "전기전자",
+        "운송장비",
+        "기타"
+      ],
+      "n_published": 10,
+      "matches_kicox_10": true,
+      "missing_from_published": [],
+      "extra_columns": []
+    },
+    {
+      "indicator": "firms_in",
+      "published_industries": [
+        "음식료",
+        "섬유의복",
+        "목재종이",
+        "석유화학",
+        "비금속",
+        "철강",
+        "기계",
+        "전기전자",
+        "운송장비",
+        "기타"
+      ],
+      "n_published": 10,
+      "matches_kicox_10": true,
+      "missing_from_published": [],
+      "extra_columns": []
+    },
+    {
+      "indicator": "op_rate_official",
+      "published_industries": [
+        "음식료",
+        "섬유의복",
+        "목재종이",
+        "석유화학",
+        "비금속",
+        "철강",
+        "기계",
+        "전기전자",
+        "운송장비",
+        "기타"
+      ],
+      "n_published": 10,
+      "matches_kicox_10": true,
+      "missing_from_published": [],
+      "extra_columns": []
+    }
+  ],
+  "all_match": true,
+  "note": "동일 KICOX 계열 자료다. 업종 구성 일치는 공표 일관성 확인이며 외부검증이 아니다."
+}

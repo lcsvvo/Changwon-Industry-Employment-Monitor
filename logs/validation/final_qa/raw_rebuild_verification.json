@@ -1,0 +1,17 @@
+[
+  {
+    "file": "changwon_industry_master",
+    "rows": 340,
+    "match": true
+  },
+  {
+    "file": "changwon_total_master",
+    "rows": 34,
+    "match": true
+  },
+  {
+    "file": "changwon_state_panel",
+    "rows": 180,
+    "match": true
+  }
+]
