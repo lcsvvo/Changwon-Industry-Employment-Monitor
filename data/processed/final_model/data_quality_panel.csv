@@ -1,0 +1,181 @@
+﻿industry,quarter,employment_cross_source_agreement,employment_cross_source_disagreement,monthly_signal_3of3,monthly_signal_2of3,monthly_data_unavailable,nominal_real_sign_disagreement,ppi_mapping_uncertain,small_base_warning,source_missing,source_missing_fields,source_revision_warning,industry_mapping_uncertain,op_rate_definition_break,quality_flags_raised,quality_flag_list,quality_score_intentionally_absent
+기계,2022Q1,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2022Q1,False,False,False,False,True,False,True,True,False,,False,False,False,3,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2022Q1,False,False,False,False,True,True,False,True,False,,False,False,False,3,명목·PPI 조정 생산 방향 불일치 · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2022Q1,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2022Q1,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2022Q1,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2022Q1,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2022Q1,False,False,False,False,True,True,False,True,False,,False,False,False,3,명목·PPI 조정 생산 방향 불일치 · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2022Q1,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2022Q1,False,False,False,False,True,True,False,False,False,,False,False,False,2,명목·PPI 조정 생산 방향 불일치 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2022Q2,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2022Q2,False,False,False,False,True,False,True,True,False,,False,False,False,3,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2022Q2,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2022Q2,False,False,False,False,True,True,False,True,False,,False,False,False,3,명목·PPI 조정 생산 방향 불일치 · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2022Q2,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2022Q2,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2022Q2,False,False,False,False,True,False,False,False,False,,False,True,False,2,외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2022Q2,False,False,False,False,True,True,False,True,False,,False,False,False,3,명목·PPI 조정 생산 방향 불일치 · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2022Q2,False,False,False,False,True,False,True,False,False,,False,True,False,3,PPI 매핑 불확실(C·D 등급) · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2022Q2,False,False,False,False,True,True,False,False,False,,False,False,False,2,명목·PPI 조정 생산 방향 불일치 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2022Q3,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2022Q3,False,False,False,False,True,False,True,True,False,,False,False,False,3,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2022Q3,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2022Q3,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2022Q3,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2022Q3,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2022Q3,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2022Q3,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2022Q3,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2022Q3,False,False,False,False,True,True,False,False,False,,False,False,False,2,명목·PPI 조정 생산 방향 불일치 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2022Q4,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2022Q4,False,False,False,False,True,False,True,True,False,,True,False,False,4,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2022Q4,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2022Q4,False,False,False,False,True,True,False,True,False,,True,False,False,4,명목·PPI 조정 생산 방향 불일치 · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2022Q4,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2022Q4,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2022Q4,False,False,False,False,True,False,False,False,False,,True,True,False,3,연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2022Q4,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2022Q4,False,False,False,False,True,False,True,False,False,,True,True,False,4,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2022Q4,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2023Q1,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2023Q1,False,False,False,False,True,False,True,True,False,,True,False,False,4,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2023Q1,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2023Q1,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2023Q1,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2023Q1,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2023Q1,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2023Q1,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2023Q1,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2023Q1,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2023Q2,False,False,False,False,True,True,False,False,False,,True,False,False,3,명목·PPI 조정 생산 방향 불일치 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2023Q2,False,False,False,False,True,False,True,True,False,,True,False,False,4,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2023Q2,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2023Q2,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2023Q2,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2023Q2,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2023Q2,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2023Q2,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2023Q2,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2023Q2,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2023Q3,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2023Q3,False,False,False,False,True,False,True,True,False,,True,False,False,4,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2023Q3,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2023Q3,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2023Q3,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2023Q3,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2023Q3,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2023Q3,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2023Q3,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2023Q3,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2023Q4,False,True,True,False,False,False,False,False,True,production,True,False,False,4,고용보험 지표와 방향 불일치 · 분기 내 3개월 모두 같은 방향 · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2023Q4,False,False,False,False,False,False,True,True,True,production,True,False,False,4,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2023Q4,False,False,False,True,False,False,False,True,True,production,True,False,False,4,분기 내 2개월에서 같은 방향 · 소규모 분모 — 비율 변동 과대 가능 · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2023Q4,False,False,True,False,False,False,False,True,True,production,True,False,False,4,분기 내 3개월 모두 같은 방향 · 소규모 분모 — 비율 변동 과대 가능 · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2023Q4,False,False,False,False,False,False,True,False,True,production,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2023Q4,False,False,True,False,False,False,False,True,True,production,True,False,False,4,분기 내 3개월 모두 같은 방향 · 소규모 분모 — 비율 변동 과대 가능 · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2023Q4,True,False,False,False,False,False,False,False,True,production,True,True,False,4,고용보험 지표와 방향 일치 · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2023Q4,False,False,True,False,False,False,False,True,True,production,True,False,False,4,분기 내 3개월 모두 같은 방향 · 소규모 분모 — 비율 변동 과대 가능 · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2023Q4,True,False,False,False,False,False,True,False,True,production,True,True,False,5,고용보험 지표와 방향 일치 · PPI 매핑 불확실(C·D 등급) · 입력 자료 일부 미확인 · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2023Q4,False,False,False,False,False,False,False,False,True,production,True,False,False,2,입력 자료 일부 미확인 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2024Q1,False,False,True,False,False,False,False,False,False,,True,False,False,2,분기 내 3개월 모두 같은 방향 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2024Q1,False,False,False,False,False,False,True,True,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2024Q1,False,False,True,False,False,False,False,True,False,,True,False,False,3,분기 내 3개월 모두 같은 방향 · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2024Q1,False,False,True,False,False,False,False,True,False,,True,False,False,3,분기 내 3개월 모두 같은 방향 · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2024Q1,False,False,False,False,False,False,True,False,False,,True,False,False,2,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2024Q1,False,False,True,False,False,False,False,True,False,,True,False,False,3,분기 내 3개월 모두 같은 방향 · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2024Q1,False,False,False,True,False,True,False,False,False,,True,True,False,4,분기 내 2개월에서 같은 방향 · 명목·PPI 조정 생산 방향 불일치 · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2024Q1,False,False,False,False,False,False,False,True,False,,True,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2024Q1,False,False,False,False,False,False,True,False,False,,True,True,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2024Q1,False,False,False,False,False,False,False,False,False,,True,False,False,1,연간보정 개정본 사용 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2024Q2,False,False,False,False,True,False,False,False,False,,True,False,True,3,연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2024Q2,False,False,False,False,True,False,True,True,False,,True,False,True,5,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2024Q2,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2024Q2,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2024Q2,False,False,False,False,True,False,True,False,False,,True,False,True,4,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2024Q2,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2024Q2,False,False,False,False,True,False,False,False,False,,True,True,True,4,연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2024Q2,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2024Q2,False,False,False,False,True,False,True,False,False,,True,True,True,5,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2024Q2,False,False,False,False,True,False,False,False,False,,True,False,True,3,연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2024Q3,False,False,False,False,True,False,False,False,False,,True,False,True,3,연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2024Q3,False,False,False,False,True,False,True,True,False,,True,False,True,5,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2024Q3,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2024Q3,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2024Q3,False,False,False,False,True,False,True,False,False,,True,False,True,4,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2024Q3,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2024Q3,False,False,False,False,True,False,False,False,False,,True,True,True,4,연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2024Q3,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2024Q3,False,False,False,False,True,False,True,False,False,,True,True,True,5,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2024Q3,False,False,False,False,True,False,False,False,False,,True,False,True,3,연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2024Q4,True,False,False,False,True,False,False,False,False,,True,False,True,4,고용보험 지표와 방향 일치 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2024Q4,False,False,False,False,True,False,True,True,False,,True,False,True,5,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2024Q4,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2024Q4,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2024Q4,False,False,False,False,True,False,True,False,False,,True,False,True,4,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2024Q4,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2024Q4,True,False,False,False,True,False,False,False,False,,True,True,True,5,고용보험 지표와 방향 일치 · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2024Q4,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2024Q4,True,False,False,False,True,False,True,False,False,,True,True,True,6,고용보험 지표와 방향 일치 · PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2024Q4,False,False,False,False,True,False,False,False,False,,True,False,True,3,연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2025Q1,True,False,False,False,True,False,False,False,False,,True,False,True,4,고용보험 지표와 방향 일치 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2025Q1,False,False,False,False,True,False,True,True,False,,True,False,True,5,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2025Q1,False,False,False,False,True,False,False,False,False,,True,False,True,3,연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2025Q1,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2025Q1,False,False,False,False,True,False,True,False,False,,True,False,True,4,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2025Q1,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2025Q1,True,False,False,False,True,False,False,False,False,,True,True,True,5,고용보험 지표와 방향 일치 · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2025Q1,False,False,False,False,True,False,False,True,False,,True,False,True,4,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2025Q1,False,True,False,False,True,False,True,False,False,,True,True,True,6,고용보험 지표와 방향 불일치 · PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2025Q1,False,False,False,False,True,False,False,False,False,,True,False,True,3,연간보정 개정본 사용 구간 · 가동률 공표 정의 단절 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2025Q2,False,True,False,False,True,False,False,False,False,,False,False,False,2,고용보험 지표와 방향 불일치 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2025Q2,False,False,False,False,True,False,True,True,False,,False,False,False,3,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2025Q2,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2025Q2,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2025Q2,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2025Q2,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2025Q2,True,False,False,False,True,False,False,False,False,,False,True,False,3,고용보험 지표와 방향 일치 · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2025Q2,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2025Q2,True,False,False,False,True,False,True,False,False,,False,True,False,4,고용보험 지표와 방향 일치 · PPI 매핑 불확실(C·D 등급) · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2025Q2,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2025Q3,True,False,False,False,True,False,False,False,False,,False,False,False,2,고용보험 지표와 방향 일치 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2025Q3,False,False,False,False,True,False,True,True,False,,False,False,False,3,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2025Q3,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2025Q3,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2025Q3,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2025Q3,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2025Q3,True,False,False,False,True,False,False,False,False,,False,True,False,3,고용보험 지표와 방향 일치 · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2025Q3,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2025Q3,True,False,False,False,True,False,True,False,False,,False,True,False,4,고용보험 지표와 방향 일치 · PPI 매핑 불확실(C·D 등급) · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2025Q3,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2025Q4,True,False,False,False,True,False,False,False,False,,False,False,False,2,고용보험 지표와 방향 일치 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2025Q4,False,False,False,False,True,False,True,True,False,,False,False,False,3,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2025Q4,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2025Q4,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2025Q4,False,False,False,False,True,False,True,False,False,,False,False,False,2,PPI 매핑 불확실(C·D 등급) · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2025Q4,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2025Q4,True,False,False,False,True,False,False,False,False,,False,True,False,3,고용보험 지표와 방향 일치 · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2025Q4,False,False,False,False,True,False,False,True,False,,False,False,False,2,소규모 분모 — 비율 변동 과대 가능 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2025Q4,True,False,False,False,True,False,True,False,False,,False,True,False,4,고용보험 지표와 방향 일치 · PPI 매핑 불확실(C·D 등급) · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2025Q4,False,False,False,False,True,False,False,False,False,,False,False,False,1,월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2026Q1,False,True,False,False,True,False,False,False,False,,True,False,False,3,고용보험 지표와 방향 불일치 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2026Q1,False,False,False,False,True,False,True,True,False,,True,False,False,4,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2026Q1,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2026Q1,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2026Q1,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2026Q1,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2026Q1,True,False,False,False,True,False,False,False,False,,True,True,False,4,고용보험 지표와 방향 일치 · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2026Q1,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2026Q1,True,False,False,False,True,False,True,False,False,,True,True,False,5,고용보험 지표와 방향 일치 · PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 외부자료 업종 대응 불확실 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2026Q1,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기계,2026Q2,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+기타,2026Q2,False,False,False,False,True,False,True,True,False,,True,False,False,4,PPI 매핑 불확실(C·D 등급) · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+목재종이,2026Q2,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+비금속,2026Q2,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+석유화학,2026Q2,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+섬유의복,2026Q2,False,False,False,False,True,False,False,True,False,,True,False,False,3,소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+운송장비,2026Q2,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+음식료,2026Q2,False,False,False,False,True,True,False,True,False,,True,False,False,4,명목·PPI 조정 생산 방향 불일치 · 소규모 분모 — 비율 변동 과대 가능 · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+전기전자,2026Q2,False,False,False,False,True,False,True,False,False,,True,False,False,3,PPI 매핑 불확실(C·D 등급) · 연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.
+철강,2026Q2,False,False,False,False,True,False,False,False,False,,True,False,False,2,연간보정 개정본 사용 구간 · 월별 원자료 미제공 구간,가중치 근거가 없어 신뢰도 점수를 만들지 않는다. 플래그를 그대로 읽는다.

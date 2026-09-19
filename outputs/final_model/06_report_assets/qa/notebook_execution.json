@@ -1,0 +1,42 @@
+{
+  "executed_at": "2026-09-19T12:29:37.737574+00:00",
+  "python": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\.venv\\Scripts\\python.exe",
+  "notebooks": [
+    {
+      "notebook": "00_data_preparation.ipynb",
+      "code_cells": 11,
+      "errors": 0,
+      "html": "outputs\\final_model\\06_report_assets\\notebooks\\00_data_preparation.html"
+    },
+    {
+      "notebook": "01_core_analysis.ipynb",
+      "code_cells": 14,
+      "errors": 0,
+      "html": "outputs\\final_model\\06_report_assets\\notebooks\\01_core_analysis.html"
+    },
+    {
+      "notebook": "02_triage.ipynb",
+      "code_cells": 2,
+      "errors": 0,
+      "html": "outputs\\final_model\\06_report_assets\\notebooks\\02_triage.html"
+    },
+    {
+      "notebook": "03_selective_electre_smaa.ipynb",
+      "code_cells": 2,
+      "errors": 0,
+      "html": "outputs\\final_model\\06_report_assets\\notebooks\\03_selective_electre_smaa.html"
+    },
+    {
+      "notebook": "04_external_evidence.ipynb",
+      "code_cells": 2,
+      "errors": 0,
+      "html": "outputs\\final_model\\06_report_assets\\notebooks\\04_external_evidence.html"
+    },
+    {
+      "notebook": "05_final_results.ipynb",
+      "code_cells": 16,
+      "errors": 0,
+      "html": "outputs\\final_model\\06_report_assets\\notebooks\\05_final_results.html"
+    }
+  ]
+}

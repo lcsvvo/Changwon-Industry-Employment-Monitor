@@ -12,6 +12,8 @@ __pycache__/
 .venv/
 venv/
 env/
+.audit_deps/
+outputs/independent_audit/baseline/snapshot/
 
 # Tests and coverage
 .pytest_cache/
@@ -26,6 +28,8 @@ htmlcov/
 *.key
 credentials*.json
 secrets*.json
+*_api_key.txt
+*_apikey.txt
 
 # Editors and local tools
 .vscode/
@@ -38,6 +42,7 @@ Thumbs.db
 
 # Local scratch files
 tmp/
+temp/
 *.tmp
 *.log
 
@@ -50,6 +55,14 @@ tmp/
 # 원자료 (용량/배포제한, 로컬 보관)
 data/raw/**
 
+# 외부 수집물의 '수집 증빙'은 공유한다: 안내문·출처/해시 metadata·수집 로그.
+# 원본 CSV 자체는 위 원칙대로 로컬 보관이다.
+!data/raw/**/
+!data/raw/**/README.md
+!data/raw/**/_collection*.json
+!data/raw/**/_metadata/
+!data/raw/**/_metadata/*.json
+
 # 재실행 시 자동 보관되는 이전 가공본
 data/processed/kicox/_previous/**
 
@@ -60,12 +73,13 @@ archive/**
 # 빌드 로그 (산출 CSV/JSON 은 커밋)
 logs/**/*.log
 
-# EDA에서 재생성하는 그림
-outputs/figures/*.png
-
-# 보고서 HTML은 기본 로컬. 검토 완료된 공유 미리보기만 예외
-outputs/report/*.html
-!outputs/report/eda_preview.html
-
 # 로컬 전용 조사메모
 private/
+
+# 모형 실행별 산출물 보관(로컬). canonical 산출물과 outputs/current_run_manifest.json만 공유
+outputs/runs/
+
+# Final verification recreates these local intermediates; canonical results remain shared.
+outputs/final_model/06_report_assets/qa/jupyter/
+outputs/final_model/06_report_assets/qa/jupyter_runtime/
+logs/validation/final_qa/*tests.xml

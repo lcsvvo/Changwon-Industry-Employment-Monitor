@@ -1,0 +1,51 @@
+{
+  "status": "READY_FOR_REPORT",
+  "checks": {
+    "decision_rows_180": true,
+    "decision_unique_industry_quarter": true,
+    "context_rows_180": true,
+    "stage_unchanged_after_context": true,
+    "latest_industries_10": true,
+    "roles_only_four_allowed": true,
+    "required_series_classified": true,
+    "kepco_legal_month_rows_41508": true,
+    "kepco_legal_quarter_rows_13869": true,
+    "kepco_legal_period_2022_04_to_2026_03": true,
+    "kepco_legal_suppression_about_40_47pct": true,
+    "kepco_legal_no_2026q2": true,
+    "kepco_legal_all_10_industries_profiled": true,
+    "kepco_legal_no_complete_industry_quarter": true,
+    "kepco_industry_quality_join_complete": true,
+    "kepco_legal_no_imputation": true,
+    "jobs_rows_1504": true,
+    "jobs_ids_unique": true,
+    "jobs_not_used_as_industry_signal": true,
+    "selective_electre_rows_equal_triage_additional_check": true,
+    "selective_electre_does_not_overwrite_triage": true,
+    "external_data_not_used_as_electre_criteria": true
+  },
+  "decision_panel_sha256": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a",
+  "stage_counts": {
+    "관찰": 128,
+    "추가확인": 35,
+    "우선점검": 17
+  },
+  "latest_quarter": "2026Q2",
+  "electre_adopted": "SELECTIVE_ADVISORY",
+  "electre_scope": "Triage 추가확인 35행에만 적용; 원 Triage 단계 불변",
+  "electre_reason": "전체 재분류의 중복을 피하면서 경계사례의 다기준 배정과 파라미터 민감도를 담당자에게 제시한다. ELECTRE OBSERVE도 추가확인을 자동 하향하지 않는다.",
+  "electre_stage_counts": {
+    "PRIORITY": 20,
+    "CHECK": 9,
+    "UNDETERMINED": 4,
+    "OBSERVE": 2
+  },
+  "smaa_parameter_sensitive_rows": 29,
+  "known_limitations": [
+    "Triage thresholds are transparent operating rules, not validated policy cutoffs.",
+    "KICOX production is nominal and PPI mapping is incomplete.",
+    "External sources differ in geography, population, frequency, and industry mapping.",
+    "KEPCO legal-dong×KSIC has 40.47% suppression, no complete industry quarter, and no 2026Q2.",
+    "Recruiting data is a current posting snapshot without industry codes or a historical denominator."
+  ]
+}

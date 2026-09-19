@@ -12,7 +12,7 @@ raw 쓰기 금지)에 맞춰 새로 작성했다.
     pytest tests/test_pipeline_rules.py -v
 
 data/processed/kicox/*.csv 가 먼저 생성되어 있어야 한다
-(notebooks/01_data_preprocessing.ipynb 또는 src/build_*.py 를 먼저 실행할 것).
+(notebooks/00_data_preparation.ipynb 또는 src/core/build_*.py 를 먼저 실행할 것).
 """
 from __future__ import annotations
 
@@ -31,6 +31,7 @@ P_IND = ROOT / "data" / "processed" / "kicox" / "changwon_industry_master.csv"
 P_TOT = ROOT / "data" / "processed" / "kicox" / "changwon_total_master.csv"
 P_STATE = ROOT / "data" / "processed" / "kicox" / "changwon_state_panel.csv"
 P_STATE_REF = ROOT / "data" / "processed" / "kicox" / "changwon_state_reference_panel.csv"
+RAW_KICOX_CORE = ROOT / "data" / "raw" / "kicox" / "core"
 
 pytestmark = pytest.mark.skipif(
     not (P_IND.exists() and P_STATE.exists()),
@@ -166,8 +167,12 @@ def test_revision_source_is_applied(ind):
 # 6. data/raw/ 쓰기 금지 가드
 # ----------------------------------------------------------------------------
 
+@pytest.mark.skipif(
+    not RAW_KICOX_CORE.is_dir(),
+    reason="원자료 미존재: data/raw/kicox/core (.gitignore 로 로컬 보관). "
+           "별도 전달받은 원자료를 배치한 뒤 실행할 것.")
 def test_raw_directory_not_written_by_pipeline():
-    import build_changwon_master as m
+    from core import build_changwon_master as m
     before = m._raw_mtimes()
     m.load_raw()
     m.load_revision()

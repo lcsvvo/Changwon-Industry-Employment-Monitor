@@ -1,0 +1,181 @@
+﻿industry,quarter,external_validation_observability,label_status,event_id,counter_evidence_event_id,note
+기계,2022Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2022Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2022Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2022Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2023Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2023Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2023Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2023Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2024Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2024Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2024Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2024Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2025Q1,observable,no_confirmed_event_found,,CE-01,사건 미확인(결측). 정상 아님
+기계,2025Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2025Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2025Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2026Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+기계,2026Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2022Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2022Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2022Q3,observable,provisional_event,EV-01,,
+운송장비,2022Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2023Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2023Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2023Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2023Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2024Q1,observable,unusable_event,EV-03,,
+운송장비,2024Q2,observable,supplementary_event,EV-04,,
+운송장비,2024Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2024Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2025Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2025Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2025Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2025Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2026Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+운송장비,2026Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2022Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2022Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2022Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2022Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2023Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2023Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2023Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2023Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2024Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2024Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2024Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2024Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2025Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2025Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2025Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2025Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2026Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+전기전자,2026Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2022Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2022Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2022Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2022Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2023Q1,observable,supplementary_event,EV-02,,
+철강,2023Q2,observable,supplementary_event,EV-02,,
+철강,2023Q3,observable,supplementary_event,EV-02,,
+철강,2023Q4,observable,supplementary_event,EV-02,,
+철강,2024Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2024Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2024Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2024Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2025Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2025Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2025Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2025Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2026Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+철강,2026Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2022Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2022Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2022Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2022Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2023Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2023Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2023Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2023Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2024Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2024Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2024Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2024Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2025Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2025Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2025Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2025Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2026Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+음식료,2026Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2022Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2022Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2022Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2022Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2023Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2023Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2023Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2023Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2024Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2024Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2024Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2024Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2025Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2025Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2025Q3,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2025Q4,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2026Q1,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+석유화학,2026Q2,observable,no_confirmed_event_found,,,사건 미확인(결측). 정상 아님
+목재종이,2022Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2022Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2022Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2022Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2023Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2023Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2023Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2023Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2024Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2024Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2024Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2024Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2025Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2025Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2025Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2025Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2026Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+목재종이,2026Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2022Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2022Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2022Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2022Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2023Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2023Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2023Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2023Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2024Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2024Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2024Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2024Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2025Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2025Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2025Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2025Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2026Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+비금속,2026Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2022Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2022Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2022Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2022Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2023Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2023Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2023Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2023Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2024Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2024Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2024Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2024Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2025Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2025Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2025Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2025Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2026Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+섬유의복,2026Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2022Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2022Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2022Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2022Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2023Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2023Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2023Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2023Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2024Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2024Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2024Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2024Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2025Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2025Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2025Q3,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2025Q4,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2026Q1,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
+기타,2026Q2,structurally_unobservable_external,structurally_unobservable,,,공개 KICOX 집계에서 '기타'로 병합되어 업종 단위 독립 외부검증이 구조적으로 어려움
