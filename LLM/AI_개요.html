@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>창원국가산단 산업·고용 동태 진단 — 프로젝트 구조 개요도</title>
+<style>
+:root{
+  --navy:#0f172a; --navy2:#1e3a8a; --blue:#2563eb; --sky:#eff6ff;
+  --ink:#1e293b; --sub:#475569; --muted:#64748b; --line:#e2e8f0;
+  --bg:#f8fafc; --card:#fff; --green:#166534; --rose:#b91c1c;
+  --amber:#92400e; --purple:#6d28d9; --teal:#0f766e;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  line-height:1.72;-webkit-font-smoothing:antialiased}
+.hero{background:linear-gradient(135deg,#07111f,#172554 58%,#2563eb);color:#fff;padding:58px 0 48px}
+.hero .inner{max-width:1280px;margin:0 auto;padding:0 34px}
+.eyebrow{font-size:12px;letter-spacing:.16em;color:#bfdbfe;font-weight:900}
+.hero h1{font-size:30px;line-height:1.28;letter-spacing:-.03em;margin:12px 0 14px;font-weight:900}
+.hero p{max-width:920px;color:#dbeafe;margin:0;font-size:15px}
+.meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.meta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:5px 13px;font-size:12px;color:#e0ecff}
+.summary-wrap{max-width:1280px;margin:-29px auto 0;padding:0 34px;position:relative;z-index:3}
+.summary-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:26px 30px;box-shadow:0 20px 45px rgba(15,23,42,.14)}
+.summary-card .label{font-size:11px;letter-spacing:.14em;color:var(--blue);font-weight:900}
+.summary-card h3{margin:4px 0 8px;font-size:19px;color:var(--navy)}
+.summary-card p{margin:0;color:var(--sub)}
+.shell{max-width:1280px;margin:0 auto;padding:0 34px;display:grid;grid-template-columns:250px 1fr;gap:34px;align-items:start}
+
+/* 사이드바 목차 스타일 */
+nav.toc {
+  position: sticky;
+  top: 24px;
+  padding: 10px 0 30px;
+}
+nav.toc .lbl {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--navy);
+  font-weight: 900;
+  padding: 0 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+nav.toc .lbl::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--blue);
+  border-radius: 50%;
+}
+nav.toc .toc-group {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 800;
+  padding: 14px 12px 6px;
+  text-transform: uppercase;
+}
+nav.toc a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  margin-bottom: 3px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--sub);
+  font-size: 12.5px;
+  font-weight: 650;
+  transition: all 0.2s ease;
+}
+nav.toc a .no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 20px;
+  background: #e2e8f0;
+  color: var(--navy);
+  font-weight: 800;
+  font-size: 10.5px;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+}
+nav.toc a:hover {
+  background: #eff6ff;
+  color: var(--blue);
+}
+nav.toc a:hover .no {
+  background: var(--blue);
+  color: #fff;
+}
+nav.toc a.active {
+  background: #eff6ff;
+  color: var(--blue);
+  font-weight: 800;
+}
+nav.toc a.active .no {
+  background: var(--blue);
+  color: #fff;
+}
+
+main{padding:34px 0 90px;min-width:0}
+section{margin-bottom:56px;scroll-margin-top:22px}
+.sec{font-size:11.5px;letter-spacing:.14em;color:var(--blue);font-weight:900}
+h2{font-size:22px;color:var(--navy);margin:5px 0 8px;letter-spacing:-.02em;font-weight:900}
+h3{font-size:16px;color:var(--navy);margin:20px 0 10px;font-weight:850}
+.lead{color:var(--muted);margin:0 0 16px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:10px 0}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:center}
+th{background:#f1f5f9;color:var(--navy);font-weight:800;font-size:12px}
+td.rowhead{text-align:left;font-weight:800;color:var(--navy);background:#f8fafc}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800}
+.badge.rose{background:#fee2e2;color:var(--rose)}
+.badge.blue{background:var(--sky);color:var(--navy2)}
+.badge.green{background:#dcfce7;color:var(--green)}
+.badge.amber{background:#fef3c7;color:var(--amber)}
+.note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--line);padding:8px 12px;margin-top:10px;background:#fafbfc}
+.flow-box{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:16px;margin:10px 0;font-family:monospace;font-size:13px;line-height:1.6;color:var(--navy2)}
+@media(max-width:900px){.shell{grid-template-columns:1fr}nav.toc{position:static}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="inner">
+    <div class="eyebrow">창원국가산단 산업·고용 동태 진단 공모전</div>
+    <h1>프로젝트 구조 개요도 및 코파일럿 아키텍처</h1>
+    <p>본 문서는 창원국가산단 10개 제조업종의 장기 패널 데이터를 바탕으로 상태·규모·시간의 3차원 동태 분석체계를 구축하고, 이를 지자체 행정 현장에 연결하는 AI 코파일럿 시스템의 전체 구조를 정의합니다.</p>
+    <div class="meta">
+      <span>아키텍처 유형: Human-in-the-Loop 3계층 분업화</span>
+      <span>핵심 엔진: KICOX 패널 기반 Triage 규칙 엔진</span>
+      <span>인터페이스: AI 행정 비서 코파일럿</span>
+    </div>
+  </div>
+</div>
+
+<div class="summary-wrap">
+  <div class="summary-card">
+    <div class="label">EXECUTIVE SUMMARY</div>
+    <h3>"단순 통계 나열을 넘어, 3차원 동태 진단과 미시 증거(채용공고)를 결합한 실무형 지자체 행정 지원 솔루션"</h3>
+    <p>본 프로젝트는 산단 위기를 정밀 감지하기 위해 <b>Q1(상태) → Q2(규모) → Q3(시간)</b>의 순차적 분석 프레임을 적용합니다. 계산은 결정론적 파이썬 룰 엔진이 수행하고, 생성형 AI는 공무원이 현장 실사 시 활용할 체크리스트와 브리핑 카드를 렌더링하도록 역할을 엄격히 분리하여 환각(Hallucination)을 원천 차단합니다.</p>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="toc">
+    <div class="lbl">CONTENTS</div>
+    
+    <div class="toc-group">Architecture</div>
+    <a href="#pipeline"><span class="no">01</span>전체 파이프라인 개요도</a>
+    <a href="#axes"><span class="no">02</span>3대 분석 축 질문 체계</a>
+
+    <div class="toc-group">System & Data</div>
+    <a href="#copilot"><span class="no">03</span>AI 코파일럿 챗봇 아키텍처</a>
+    <a href="#schema"><span class="no">04</span>데이터 스키마 및 검증체계</a>
+    <a href="#effect"><span class="no">05</span>최종 기대 효과</a>
+  </nav>
+
+  <main>
+
+    <!-- 01. 전체 파이프라인 개요도 -->
+    <section id="pipeline">
+      <div class="sec">SECTION 01</div>
+      <h2>전체 파이프라인 개요도 (Integrated Pipeline)</h2>
+      <p class="lead">창원시의 흩어진 기관별 기능과 단절된 행정 절차를 하나의 유기적인 파이프라인으로 통합합니다.</p>
+      
+      <div class="card">
+        <h3>[ STEP 1. 거시 산업·고용 동태 진단 ]</h3>
+        <div class="flow-box">
+          ① [Q1. 상태 식별] 생산·고용 부호 결합 BBQ 4국면 (S1 ~ S4 판정)<br>
+          ② [Q2. 규모 보정] 고용 순감소 기여율 및 비례 기준선 초과(Excess Delta)<br>
+          ③ [Q3. 시간 동태] 국면 지속기간(Run-length) 및 전환경로 추적
+        </div>
+
+        <h3>[ STEP 2. 위기 조기감지 및 Triage 스크리닝 ]</h3>
+        <div class="flow-box">
+          • 8단계 단계형 판정 룰 기반 3단계 조치등급 자동 분류<br>
+          • [🔴 우선점검] / [🟡 추가확인] / [🟢 일반관찰]
+        </div>
+
+        <h3>[ STEP 3. 미시 현장 검증 및 Evidence Layer ]</h3>
+        <div class="flow-box">
+          • 고용24 채용공고 마이닝 (실제 구인 기업, 요구 기술, 경력 조건 대조)<br>
+          • 보조지표 결합 분해 (가동률 추이 및 공장 폐업 vs 사업장 슬림화)
+        </div>
+
+        <h3>[ STEP 4. 행정 인계 및 정책 연계 (Human-in-the-Loop) ]</h3>
+        <div class="flow-box">
+          • 「업종별 1페이지 진단카드」 및 현장 실사 체크리스트(질문표) 자동 발급<br>
+          • 원인별 맞춤형 시책 연계 (스마트그린산단 AX 재직자 훈련, 고용안정 등)
+        </div>
+      </div>
+    </section>
+
+    <!-- 02. 3대 분석 축 질문 체계 -->
+    <section id="axes">
+      <div class="sec">SECTION 02</div>
+      <h2>핵심 분석 질문 체계 (3대 분석 축)</h2>
+      <p class="lead">복잡한 수치 계산을 단순화하여, 실무자가 현장에서 던져야 할 3가지 핵심 질문으로 구조화했습니다.</p>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;width:15%">분석 축</th>
+              <th style="text-align:left;width:25%">핵심 질문</th>
+              <th style="text-align:left;width:35%">통계적 백본 및 측정 방식</th>
+              <th style="text-align:left;width:25%">실무·정책적 의미</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rowhead"><b>① 상태 (State)</b></td>
+              <td>창원 산단, 공장 잘 돌아가면 고용도 늘고 있을까?</td>
+              <td><b>NBER BBQ 알고리즘 & ±1% 중립 버퍼</b><br>생산(ΔP)과 고용(ΔE) 부호 결합 4국면(S1~S4) 판정</td>
+              <td>고용 감소 구간 중 약 48%가 생산 증가를 동반한 <b>S2 (고용 없는 성장)</b>임을 규명</td>
+            </tr>
+            <tr>
+              <td class="rowhead"><b>② 규모 (Scale)</b></td>
+              <td>제조업 전체 고용 증감은 어느 업종의 변화로 구성되는가?</td>
+              <td><b>기여율(R ≥ 0.30) 게이트 & 비례 기준선 편차</b><br>영세 업종 착시 제거 및 산단 전체 충격도 정량화</td>
+              <td>기계 업종이 전체 순감소의 90% 이상을 독점하며, 단순 규모를 넘어선 <b>초과 감소(−1,697명)</b>임을 입증</td>
+            </tr>
+            <tr>
+              <td class="rowhead"><b>③ 시간 (Time)</b></td>
+              <td>각 업종의 국면은 얼마나 이어지고 어떤 상태로 바뀌는가?</td>
+              <td><b>지속기간(Run-length) & 마르코프 전이 빈도</b><br>일시적 노이즈와 구조적 고착 상태 분리</td>
+              <td>S2나 S4에 진입한 업종이 자연 회복되기 어렵고 만성 침체로 굳어지는 경로 확인</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 03. AI 코파일럿 챗봇 아키텍처 -->
+    <section id="copilot">
+      <div class="sec">SECTION 03</div>
+      <h2>AI 행정 코파일럿 챗봇 아키텍처 (3계층 분업화)</h2>
+      <p class="lead">LLM이 백지에서 답변을 지어내는 환각(Hallucination) 현상을 원천 차단하기 위해, 결정론적 계산 엔진과 생성형 AI의 역할을 명확히 분리했습니다.</p>
+
+      <div class="card">
+        <h3>[1단계: 결정론적 계산 엔진 (Rule & Python Engine)]</h3>
+        <p style="margin:0 0 10px;font-size:13.5px;color:var(--sub)">• KICOX 패널 및 고용24 데이터 조회 → Q1~Q3 수치 및 Triage 등급 산출<br>• 확정된 정량 팩트 구조체(JSON) 생성 (인과관계 왜곡 방지)</p>
+        
+        <h3 style="margin-top:16px">[2단계: 템플릿 기반 프롬프트 조립 (System Prompt Guardrail)]</h3>
+        <p style="margin:0 0 10px;font-size:13.5px;color:var(--sub)">• "원인을 임의로 단정하지 말고, 데이터가 말하는 사실과 현장 점검 질문을 분리하라"</p>
+        
+        <h3 style="margin-top:16px">[3단계: 웹 UI 및 챗봇 인터페이스 (Streamlit / HTML)]</h3>
+        <p style="margin:0;font-size:13.5px;color:var(--sub)">• 「업종별 1페이지 진단카드」 Markdown 자동 렌더링<br>• 담당 공무원 추가 질의응답 (실사 체크리스트 및 정책 연계 가이드 동적 생성)</p>
+      </div>
+    </section>
+
+    <!-- 04. 데이터 스키마 및 검증체계 -->
+    <section id="schema">
+      <div class="sec">SECTION 04</div>
+      <h2>데이터 스키마 및 검증 체계</h2>
+      <p class="lead">거시 지표의 타당성을 확보하고 미시 채용 시장 데이터와 결합하는 데이터 아키텍처입니다.</p>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th style="text-align:left;width:25%">데이터 레이어</th><th style="text-align:left;width:35%">주요 원천 및 범위</th><th style="text-align:left;width:40%">챗봇 및 분석 시스템에서의 역할</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rowhead">CORE 데이터셋 (정량)</td>
+              <td>KICOX 10개 제조업종 분기 패널 (2018Q1~2026Q2, 180 관측치)</td>
+              <td>생산액, 고용인원, 가동률, 가동업체 수 등 기본 지표 산출 및 Triage 1차 판정</td>
+            </tr>
+            <tr>
+              <td class="rowhead">Validation 데이터셋 (보정)</td>
+              <td>생산자물가지수(PPI), 고용행정통계(EIS)</td>
+              <td>명목 금액의 가격 착시 통제 및 고용보험 DB 교차 검증</td>
+            </tr>
+            <tr>
+              <td class="rowhead">Evidence 데이터셋 (미시)</td>
+              <td>고용24 오픈API 채용공고 텍스트 마이닝</td>
+              <td>요구 기술(PLC, 스마트팩토리 등), 경력 조건, 임금 조건 매칭을 통한 실무 질문 구체화</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 05. 최종 기대 효과 -->
+    <section id="effect">
+      <div class="sec">SECTION 05</div>
+      <h2>최종 기대 효과 (Human-in-the-Loop Value)</h2>
+      <p class="lead">본 시스템 도입을 통해 지자체 산업정책과가 얻을 수 있는 실무적 효익입니다.</p>
+
+      <div class="card">
+        <ul style="margin:0;padding-left:20px;font-size:13.5px;color:var(--sub);line-height:1.8">
+          <li><b>객관적 우선순위 스크리닝:</b> 한정된 지자체 행정 인력이 즉각 집중해야 할 위기 업종을 3단계 조치등급(🔴 우선점검 / 🟡 추가확인 / 🟢 일반관찰)으로 투명하게 분류합니다.</li>
+          <li><b>현장 실사 가이드(진단카드):</b> 거시 통계와 현장 지원을 잇는 가교로서, 공무원이 현장 방문 시 물어봐야 할 구체적 체크리스트를 제공합니다.</li>
+          <li><b>타깃형 정책 매칭:</b> 모든 기업에 일괄적으로 뿌리던 보조금을 지양하고, 기계 업종의 제조 AX 인재 양성(창원대 글로컬 트랙 및 산단 AI 자율제조 사업 등) 등 실무적 대안으로 직결합니다.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
