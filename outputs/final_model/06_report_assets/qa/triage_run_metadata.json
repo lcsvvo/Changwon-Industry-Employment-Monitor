@@ -1,6 +1,6 @@
 {
   "rule_version": "changwon-triage-rule/3.1.0-audited",
-  "run_at_utc": "2026-09-19T12:38:44.051261+00:00",
+  "run_at_utc": "2026-09-19T18:10:39.297795+00:00",
   "window": [
     "2022Q1",
     "2026Q2"
@@ -118,7 +118,7 @@
       "checked_at": "2026-09-18"
     }
   ],
-  "git_head": "812b4dcf89a1ca786d33edab4e8e3ef40a5a915c",
+  "git_head": "6f06118d6aeb5de49d67e566f3540199ee533b22",
   "working_tree_note": "Uncommitted source hashes are authoritative",
   "inputs": {
     "data\\processed\\kicox\\changwon_industry_master.csv": "4fb6f7bd85180e848813301bab43fc203a205e3c9829bf98deba4ddfe1240c28",
@@ -640,7 +640,7 @@
     "data\\raw\\kicox\\datagokr\\kicox_industry_op_rate_latest.csv": "c0efa730c0f9caa774eff63eb63e30fabc6f8a99a58ec12495c501c028dda7c9",
     "data\\raw\\kicox\\datagokr\\kicox_industry_production_latest.csv": "2f145ad36cd916bf0efa2b4cc7b73c2f85b8c0b596b7b1a30a3a5d7ae89cafd0",
     "data\\raw\\kicox\\datagokr\\kicox_national_complex_status_latest.csv": "e8eadedc11d90e53dbc452833b5009a0999e09199e75631c7564a5970623a719",
-    "data\\raw\\kicox\\datagokr\\README.md": "651728e06df6973f3a910eb52ad2b7a189b4683f51f3b739ee2fd3256802b3db",
+    "data\\raw\\kicox\\datagokr\\README.md": "64055a68eb4325422d29d96debeded9bb72fde45956a5c94c8f03afd45ec2c66",
     "data\\raw\\kicox\\revision\\2022_10_2025_Q1\\xlsx\\2022M10.xlsx": "45f9227cffe21fdd01979108b35fd239f33f06e31a6fbd55a06f941e12c777fb",
     "data\\raw\\kicox\\revision\\2022_10_2025_Q1\\xlsx\\2022M11.xlsx": "cd943a49658e88c5696d0a94ea34f4ded3ea8738fd5609f5272f72c0ea136f1e",
     "data\\raw\\kicox\\revision\\2022_10_2025_Q1\\xlsx\\2022M12.xlsx": "ea502ed9a314fe73b9c6804ec34a79bb81baf977a493aad143d00e3dee87d27d",
@@ -667,16 +667,16 @@
     "data\\raw\\kicox\\revision\\2026_Q1_Q2\\xlsx\\2026Q2.xlsx": "820ae60235caab10e42f91fb7815be824e33a5615c452065a21143390730aab7"
   },
   "code_sha256": {
-    "src\\triage\\run_triage.py": "db692f1eb841339ea80d4ca56ee22d1cf84b942fd93ed80405da27f779abec66",
-    "src\\triage\\triage_rule.py": "02d8312ce24eb4f1bf67e4f9eb66f9d4bcf98134f2216bc809706bc2df3adc63",
-    "src\\handoff\\delivery.py": "d347dadac7b2a10a9515fb625ec4e2424cd279f3de4714250831533fe2969ede",
-    "src\\triage\\triage_audit.py": "5af53101117280d8303d9004c4c58d1e50be210ee181b387e057d33aa2ff869f",
-    "src\\core\\build_changwon_master.py": "ed55c42757536f056157b7fb33a583c5a418f4e5963f6afaea367274f982ea3c",
-    "src\\core\\build_kicox_analysis_panel.py": "6f61a11c43637b1e88e24313e2479c0a913682ca46285870118ce2723b6295de"
+    "src\\triage\\run_triage.py": "ddbe85404d3635a1dd4a669b00f3ba43a7ed5439a8210416805cc47e6d9038e5",
+    "src\\triage\\triage_rule.py": "91bdad2cb0f03240af5154657488c34f3022e3d93d6165d4d545cd1d9986bcf4",
+    "src\\handoff\\delivery.py": "b415179a1af1b5f3080874ca465e425ed46797608fbaa6a765e4e92275aac4c5",
+    "src\\triage\\triage_audit.py": "1409c59ad0250669dabb2ac656a172fdfe6c6228f7cbdba677b0257456150dbe",
+    "src\\core\\build_changwon_master.py": "8594fb0fac58412ede274aaf3399582bc2da816378d561869a765d9c875bb2b1",
+    "src\\core\\build_kicox_analysis_panel.py": "95598690b20532c0de8a9d744df6ccd52330e1352715fbe519e1c68a5b42e1c7"
   },
   "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
-  "pandas": "3.0.5",
-  "numpy": "2.5.2",
+  "pandas": "3.0.3",
+  "numpy": "2.4.5",
   "randomness": "none",
   "missing_policy": "partial",
   "purpose": "기존 산업동향 분석을 기업·현장 확인의 표준화된 진입점으로 전환한다.",

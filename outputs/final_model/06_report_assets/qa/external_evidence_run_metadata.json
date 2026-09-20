@@ -1,6 +1,6 @@
 {
   "layer": "context-interpretation/1.0.0",
-  "run_at_utc": "2026-09-19T12:39:00+00:00",
+  "run_at_utc": "2026-09-19T18:10:56+00:00",
   "window": [
     "2022Q1",
     "2026Q2"
@@ -25,7 +25,7 @@
     "A_up",
     "P_support"
   ],
-  "git_head": "812b4dcf89a1ca786d33edab4e8e3ef40a5a915c",
+  "git_head": "6f06118d6aeb5de49d67e566f3540199ee533b22",
   "inputs": {
     "outputs\\final_model\\02_triage\\tables\\triage_panel.csv": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a",
     "data\\processed\\kicox\\changwon_industry_master.csv": "4fb6f7bd85180e848813301bab43fc203a205e3c9829bf98deba4ddfe1240c28",
@@ -35,23 +35,23 @@
   },
   "code_sha256": {
     "src\\evidence\\modules\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src\\evidence\\modules\\config.py": "114522820da012ba657c87f18ad1dd66859e563eecd84d24f4005c8ffd3dd882",
-    "src\\evidence\\modules\\cross_source.py": "2eb4e00ceff32cb44bfe235abb86b6a66564515feef7395753d2b47c7468d419",
-    "src\\evidence\\modules\\external_panels.py": "f70d603538c4bacd9ec0fd6128fc41559316e07566e37307a68e0c232df54e7d",
+    "src\\evidence\\modules\\config.py": "b633a82d58ab3d0fc70640f6d201e4a912e8997abd254e8f0fe716dd6e87802e",
+    "src\\evidence\\modules\\cross_source.py": "0a2173ec2314dd8e6b336af92778fb152dd0b3ddcf2e48ac4ee180fc5be0bd85",
+    "src\\evidence\\modules\\external_panels.py": "937486163eb6217032ffa05451d1876404561cd3f4512309201db4b53747ef5a",
     "src\\evidence\\modules\\external_signals.py": "a2371e8276c4d43681c3729d6d8d06c5c772736d190505d80c6727b9d3325331",
     "src\\evidence\\modules\\firm_activity.py": "9f1796899494821b5f66f0133e6446843a07543eb8b22f08ab61f57b96ab29df",
-    "src\\evidence\\modules\\kepco_power.py": "70deb1fe5a8f01907e04655c3497fca7048032e6d8e678bd85663445e3ef3e4a",
-    "src\\evidence\\modules\\kepco_report.py": "cf16e38f7a0e2f6ec1843f3710c86960333d24596cb4f9a1992537f5faf58eae",
+    "src\\evidence\\modules\\kepco_power.py": "5504fe6fe2e395e960b782a5d892ea8a512b74e77b9cc76cef77132beb254b79",
+    "src\\evidence\\modules\\kepco_report.py": "5ccbb6b20124c30abea2aeb52872a0404054adfc5a3439cfee224e8cb907a1d2",
     "src\\evidence\\modules\\monthly_panel.py": "78fcb225499800775287de8fcc754c1fd1c39b5271ffad9a1e0858d77aa97507",
     "src\\evidence\\modules\\ppi_adjusted.py": "97a8df85e15ab1f0a4f700643eb52889927751703d1102d9630f61fa1e0488ce",
-    "src\\evidence\\modules\\quality.py": "b35f35016858ab1acccf711003bd410cf857cf64b72d85f377828d8b5b644968",
+    "src\\evidence\\modules\\quality.py": "4242c3dd5fe31dbba7d087d80d478234d83a9d88d144863b4c91f6b23c7f467f",
     "src\\evidence\\modules\\questions.py": "47315b27ac755d6a57cbca2945324b7ae46fa40263ec69258c8315ca7f608aea",
     "src\\evidence\\modules\\signals.py": "8f429a46b975eef880e1d121b520affd478fb1edf325011e67ae3874ac3e4892",
-    "src\\evidence\\build_context_layer.py": "fffa3f82550fa1a5780f9a6be1132a04e00367f88c556e06431650a52bb41f0c"
+    "src\\evidence\\build_context_layer.py": "28fef3344dc93f806fe81d88025bc7dcdfe26fbf9ef09245719f09b3972a3cf8"
   },
   "thresholds_are_own": true,
   "note": "해석층은 Triage stage 를 바꾸지 않는다. 새 자료는 판정 입력이 아니라 해석·교차확인·자료품질 표시에 쓰인다.",
   "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
-  "pandas": "3.0.5",
-  "numpy": "2.5.2"
+  "pandas": "3.0.3",
+  "numpy": "2.4.5"
 }

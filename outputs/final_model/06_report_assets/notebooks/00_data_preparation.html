@@ -7796,61 +7796,25 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=09d19c35">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=85186843">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="STEP0.-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84%EC%99%80-%ED%92%88%EC%A7%88%EA%B2%80%EC%A6%9D">STEP0. 데이터 준비와 품질검증<a class="anchor-link" href="#STEP0.-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84%EC%99%80-%ED%92%88%EC%A7%88%EA%B2%80%EC%A6%9D">¶</a></h1><blockquote>
-<p><strong>Takeaway.</strong> 원자료를 수정하지 않고 KICOX 마스터와 검증 패널을 재현한다.</p>
-</blockquote>
-<h2 id="%EB%B6%84%EC%84%9D-%EC%A7%88%EB%AC%B8">분석 질문<a class="anchor-link" href="#%EB%B6%84%EC%84%9D-%EC%A7%88%EB%AC%B8">¶</a></h2><p>동일한 원자료에서 본분석 입력을 누락·중복 없이 다시 만들 수 있는가?</p>
-<h2 id="%EC%9E%85%EB%A0%A5">입력<a class="anchor-link" href="#%EC%9E%85%EB%A0%A5">¶</a></h2><table>
-<thead>
-<tr>
-<th>구분</th>
-<th>설정 변수</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>원자료</td>
-<td><code>config.RAW_DIR</code></td>
-</tr>
-<tr>
-<td>경로 설정</td>
-<td><code>config.PROCESSED_DIR</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="%EC%B6%9C%EB%A0%A5">출력<a class="anchor-link" href="#%EC%B6%9C%EB%A0%A5">¶</a></h2><table>
-<thead>
-<tr>
-<th>구분</th>
-<th>설정 변수</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>KICOX 업종 마스터</td>
-<td><code>config.KICOX_INDUSTRY_PATH</code></td>
-</tr>
-<tr>
-<td>상태 패널</td>
-<td><code>config.STATE_PANEL_PATH</code></td>
-</tr>
-</tbody>
-</table>
+<h1 id="Notebook-00.-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84%EC%99%80-%ED%92%88%EC%A7%88%EA%B2%80%EC%A6%9D">Notebook 00. 데이터 준비와 품질검증<a class="anchor-link" href="#Notebook-00.-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%A4%80%EB%B9%84%EC%99%80-%ED%92%88%EC%A7%88%EA%B2%80%EC%A6%9D">¶</a></h1><h2 id="%EC%9D%B4-%EB%8B%A8%EA%B3%84%EC%9D%98-%EC%A7%88%EB%AC%B8">이 단계의 질문<a class="anchor-link" href="#%EC%9D%B4-%EB%8B%A8%EA%B3%84%EC%9D%98-%EC%A7%88%EB%AC%B8">¶</a></h2><p>분석에 사용할 업종×분기 패널을 동일한 정의와 품질규칙으로 재현할 수 있는가?</p>
+<h2 id="%EC%9D%B4%EC%A0%84-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%99%95%EC%9D%B8%ED%95%9C-%EA%B2%83">이전 단계에서 확인한 것<a class="anchor-link" href="#%EC%9D%B4%EC%A0%84-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%99%95%EC%9D%B8%ED%95%9C-%EA%B2%83">¶</a></h2><p>첫 단계이므로 이전 분석 결론은 없다. 이 노트북은 01~05 보고서의 기술적 전제다.</p>
+<h2 id="%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EB%8A%94-%EA%B2%83">이번 단계에서 하는 것<a class="anchor-link" href="#%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EB%8A%94-%EA%B2%83">¶</a></h2><p>KICOX 원자료와 개정본을 master·state·run·transition 패널로 만들고 PPI/EIS validation 입력을 점검한다.</p>
+<h2 id="%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EC%A7%80-%EC%95%8A%EB%8A%94-%EA%B2%83">이번 단계에서 하지 않는 것<a class="anchor-link" href="#%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EC%A7%80-%EC%95%8A%EB%8A%94-%EA%B2%83">¶</a></h2><p>산업상태를 해석하거나 Triage·정책 우선순위를 결정하지 않는다.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=507de008">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8b5e5db7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">전체 흐름<a class="anchor-link" href="#%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">¶</a></h2><p><code>원자료 확인 → 마스터 구축 → 분석기간 확정 → 상태·검증 패널 생성 → QA</code></p>
+<h2 id="%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">전체 흐름<a class="anchor-link" href="#%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">¶</a></h2><p><code>원자료·개정본 → master → YoY·state·run·transition → validation panel → QA</code></p>
 </div>
 </div>
 </div>
@@ -7919,7 +7883,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>root    : Changwon-Industry-Employment-Monitor
-pandas  : 3.0.5
+pandas  : 3.0.3
 offline : True — build_changwon_master.py 에는 네트워크 호출 코드가 없다
 raw 파일 수: 618
 </pre>
@@ -7951,7 +7915,7 @@ raw 파일 수: 618
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>build_changwon_master.py exit code: 0
-실행 2026-09-19 21:28:29 | base=Changwon-Industry-Employment-Monitor | offline-only
+실행 2026-09-20 03:07:02 | base=Changwon-Industry-Employment-Monitor | offline-only
 [load] production       : 84건
 [load] employment       : 33건
 [load] op_rate          : 33건
@@ -8079,7 +8043,7 @@ total master    : 34행
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>QA 실행 2026-09-19 21:28:38 | base=Changwon-Industry-Employment-Monitor
+<pre>QA 실행 2026-09-20 03:07:21 | base=Changwon-Industry-Employment-Monitor
 
 ==============================================================================
 A. 구조
@@ -8532,11 +8496,10 @@ run reset, X 보존, revision 반영, raw 쓰기 금지)을 검증한다.</li>
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>============================= test session starts =============================
-platform win32 -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\jiwoo\Desktop\GitHub\Changwon-Industry-Employment-Monitor\.venv\Scripts\python.exe
+platform win32 -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\jiwoo\AppData\Local\Python\pythoncore-3.14-64\python.exe
 cachedir: .pytest_cache
 rootdir: C:\Users\jiwoo\Desktop\GitHub\Changwon-Industry-Employment-Monitor
 configfile: pytest.ini
-plugins: anyio-4.15.0
 collecting ... collected 12 items
 
 tests/test_pipeline_rules.py::test_yoy_independent_recalculation_matches_within_industry PASSED [  8%]
@@ -8552,7 +8515,7 @@ tests/test_pipeline_rules.py::test_masked_x_preserved_as_nan_not_zero PASSED [ 8
 tests/test_pipeline_rules.py::test_revision_source_is_applied PASSED     [ 91%]
 tests/test_pipeline_rules.py::test_raw_directory_not_written_by_pipeline PASSED [100%]
 
-============================= 12 passed in 8.15s ==============================
+============================= 12 passed in 14.14s =============================
 
 </pre>
 </div>
@@ -8615,6 +8578,8 @@ tests/test_pipeline_rules.py::test_raw_directory_not_written_by_pipeline PASSED 
   data\processed\ppi\ppi_industry_panel.csv
   data\processed\ppi\ppi_kicox_matched_2021_2026.csv
   data\processed\ppi\ppi_validation_panel.csv
+  data\processed\work24\work24_analysis_ready.csv
+  data\processed\work24\work24_decision_gate_evidence.csv
 </pre>
 </div>
 </div>
@@ -8641,15 +8606,16 @@ tests/test_pipeline_rules.py::test_raw_directory_not_written_by_pipeline PASSED 
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=64a3654a">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b375ed26">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h2><p>행 수, 기간, 중복, 결측 및 원자료 불변 여부를 출력으로 확인한다.</p>
-<h2 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h2><p>이 단계의 산출물은 뒤 단계의 공통 입력이며 별도의 정책 판정을 만들지 않는다.</p>
-<h2 id="%ED%95%9C%EA%B3%84">한계<a class="anchor-link" href="#%ED%95%9C%EA%B3%84">¶</a></h2><p>외부 원천의 개정·공표 지연은 이 저장소 내부 QA만으로 해소되지 않는다.</p>
-<h2 id="Takeaway">Takeaway<a class="anchor-link" href="#Takeaway">¶</a></h2><p>원자료를 수정하지 않고 KICOX 마스터와 검증 패널을 재현한다.</p>
+<h1 id="%EB%8B%A8%EA%B3%84-%EA%B2%B0%EB%A1%A0">단계 결론<a class="anchor-link" href="#%EB%8B%A8%EA%B3%84-%EA%B2%B0%EB%A1%A0">¶</a></h1><h2 id="%ED%99%95%EC%9D%B8%EB%90%9C-%EC%82%AC%EC%8B%A4">확인된 사실<a class="anchor-link" href="#%ED%99%95%EC%9D%B8%EB%90%9C-%EC%82%AC%EC%8B%A4">¶</a></h2><p>행 수·기간·중복·결측·원자료 불변 여부를 점검하고 01~05의 공통 입력을 생성했다.</p>
+<h2 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h2><p>뒤 단계는 동일한 source of truth에서 상태·규모·시간과 의사결정지원 결과를 읽을 수 있다.</p>
+<h2 id="%EC%9D%B4-%EB%8B%A8%EA%B3%84%EB%A7%8C%EC%9C%BC%EB%A1%9C-%EB%A7%90%ED%95%A0-%EC%88%98-%EC%97%86%EB%8A%94-%EA%B2%83">이 단계만으로 말할 수 없는 것<a class="anchor-link" href="#%EC%9D%B4-%EB%8B%A8%EA%B3%84%EB%A7%8C%EC%9C%BC%EB%A1%9C-%EB%A7%90%ED%95%A0-%EC%88%98-%EC%97%86%EB%8A%94-%EA%B2%83">¶</a></h2><p>외부 공표지연·재개정 가능성과 집계자료의 모집단 제약은 이 QA만으로 해소되지 않는다.</p>
+<h2 id="%EB%8B%A4%EC%9D%8C-%EB%8B%A8%EA%B3%84%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0">다음 단계가 필요한 이유<a class="anchor-link" href="#%EB%8B%A4%EC%9D%8C-%EB%8B%A8%EA%B3%84%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0">¶</a></h2><p>준비된 패널에서 실제 생산·고용 변화의 상태·규모·시간을 진단해야 한다.</p>
+<p>→ 다음: <code>01_core_analysis.ipynb</code></p>
 </div>
 </div>
 </div>

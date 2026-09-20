@@ -1,4 +1,4 @@
-QA 실행 2026-09-19 21:28:38 | base=Changwon-Industry-Employment-Monitor
+QA 실행 2026-09-20 03:07:21 | base=Changwon-Industry-Employment-Monitor
 
 ==============================================================================
 A. 구조

@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>창원국가산단 산업·고용 전환진단 및 지원연계 모형</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>Notebook</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7796,1219 +7796,68 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3f803c5d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5c46ac13">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="STEP5.-%EC%B5%9C%EC%A2%85-%EA%B2%B0%EA%B3%BC%EC%99%80-%EC%A7%80%EC%9B%90%EC%97%B0%EA%B3%84">STEP5. 최종 결과와 지원연계<a class="anchor-link" href="#STEP5.-%EC%B5%9C%EC%A2%85-%EA%B2%B0%EA%B3%BC%EC%99%80-%EC%A7%80%EC%9B%90%EC%97%B0%EA%B3%84">¶</a></h1><blockquote>
-<p><strong>Takeaway.</strong> 핵심 신호부터 현장 확인 질문과 기존 기관 인계까지 한 흐름으로 제시한다.</p>
-</blockquote>
-<h2 id="%EB%B6%84%EC%84%9D-%EC%A7%88%EB%AC%B8">분석 질문<a class="anchor-link" href="#%EB%B6%84%EC%84%9D-%EC%A7%88%EB%AC%B8">¶</a></h2><p>어느 업종을 먼저 확인하고 무엇을 확인한 뒤 어디로 인계할 것인가?</p>
-<h2 id="%EC%9E%85%EB%A0%A5">입력<a class="anchor-link" href="#%EC%9E%85%EB%A0%A5">¶</a></h2><table>
-<thead>
-<tr>
-<th>구분</th>
-<th>설정 변수</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>분류 결과</td>
-<td><code>config.TRIAGE_PANEL_PATH</code></td>
-</tr>
-<tr>
-<td>설명 근거</td>
-<td><code>config.HANDOFF_TRACE_PATH</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="%EC%B6%9C%EB%A0%A5">출력<a class="anchor-link" href="#%EC%B6%9C%EB%A0%A5">¶</a></h2><table>
-<thead>
-<tr>
-<th>구분</th>
-<th>설정 변수</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>인계 카드</td>
-<td><code>config.HANDOFF_CARD_PATH</code></td>
-</tr>
-<tr>
-<td>보고 자산</td>
-<td><code>config.REPORT_ASSET_DIR</code></td>
-</tr>
-</tbody>
-</table>
+<h1 id="Notebook-05.-%EC%B5%9C%EC%A2%85-%EA%B2%B0%EA%B3%BC%EC%99%80-Human-in-the-Loop-%EC%9D%B8%EA%B3%84">Notebook 05. 최종 결과와 Human-in-the-Loop 인계<a class="anchor-link" href="#Notebook-05.-%EC%B5%9C%EC%A2%85-%EA%B2%B0%EA%B3%BC%EC%99%80-Human-in-the-Loop-%EC%9D%B8%EA%B3%84">¶</a></h1><h2 id="%EC%9D%B4-%EB%8B%A8%EA%B3%84%EC%9D%98-%EC%A7%88%EB%AC%B8">이 단계의 질문<a class="anchor-link" href="#%EC%9D%B4-%EB%8B%A8%EA%B3%84%EC%9D%98-%EC%A7%88%EB%AC%B8">¶</a></h2><p>현재 어떤 업종을 무엇 때문에 확인해야 하며, 담당자가 무엇을 확인한 뒤 어디로 연결할 수 있는가?</p>
+<h2 id="%EC%9D%B4%EC%A0%84-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%99%95%EC%9D%B8%ED%95%9C-%EA%B2%83">이전 단계에서 확인한 것<a class="anchor-link" href="#%EC%9D%B4%EC%A0%84-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%99%95%EC%9D%B8%ED%95%9C-%EA%B2%83">¶</a></h2><p>Notebook 04에서 외부근거는 판정을 덮어쓰지 않고 변화의 맥락과 확인질문을 보강한다는 원칙을 확인했다.</p>
+<h2 id="%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EB%8A%94-%EA%B2%83">이번 단계에서 하는 것<a class="anchor-link" href="#%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EB%8A%94-%EA%B2%83">¶</a></h2><p>최신분기 결과를 먼저 요약하고, 중요 사례를 CORE→Triage→선택적 재검토(해당 시)→외부근거→확인질문→기존 기능 인계의 진단카드로 제시한다.</p>
+<h2 id="%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EC%A7%80-%EC%95%8A%EB%8A%94-%EA%B2%83">이번 단계에서 하지 않는 것<a class="anchor-link" href="#%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EC%A7%80-%EC%95%8A%EB%8A%94-%EA%B2%83">¶</a></h2><p>자동 정책대상 선정, 사업 처방, 예산 배분, 위기 확정 또는 기업별 지원결정을 하지 않는다.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b09b5480">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c4cfbe23">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">전체 흐름<a class="anchor-link" href="#%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">¶</a></h2><p><code>핵심 신호 → 1차 분류 → 선택적 재검토 → 외부 근거 → 설명·인계</code></p>
+<h2 id="%EC%B5%9C%EC%A2%85-%EC%9A%B4%EC%98%81-%ED%9D%90%EB%A6%84">최종 운영 흐름<a class="anchor-link" href="#%EC%B5%9C%EC%A2%85-%EC%9A%B4%EC%98%81-%ED%9D%90%EB%A6%84">¶</a></h2><div class="highlight"><pre><span></span>Q1~Q3 CORE
+     ↓
+   Triage
+     ├─ 관찰 ─────────────────────→ 정기 모니터링
+     ├─ 추가확인 → Selective ELECTRE/SMAA → 외부근거 확인
+     └─ 우선점검 ─────────────────→ 외부근거 확인
+                                      ↓
+                             담당자 Human-in-the-Loop
+                                      ↓
+                              기업·현장 추가 확인
+                                      ↓
+                 기존 산업동향·기업·고용·훈련·위기대응 기능 인계
+                                      ↓
+                              다음 분기 재점검
+</pre></div>
+<p>ELECTRE는 모든 경로의 필수 단계가 아니며 <strong>추가확인에서만</strong> 선택적으로 진입한다.</p>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1bd9e830">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EC%B0%BD%EC%9B%90%EA%B5%AD%EA%B0%80%EC%82%B0%EB%8B%A8-%EC%82%B0%EC%97%85%C2%B7%EA%B3%A0%EC%9A%A9-%EC%A0%84%ED%99%98%EC%A7%84%EB%8B%A8-%EB%B0%8F-%EC%A7%80%EC%9B%90%EC%97%B0%EA%B3%84-%EB%AA%A8%ED%98%95">창원국가산단 산업·고용 전환진단 및 지원연계 모형<a class="anchor-link" href="#%EC%B0%BD%EC%9B%90%EA%B5%AD%EA%B0%80%EC%82%B0%EB%8B%A8-%EC%82%B0%EC%97%85%C2%B7%EA%B3%A0%EC%9A%A9-%EC%A0%84%ED%99%98%EC%A7%84%EB%8B%A8-%EB%B0%8F-%EC%A7%80%EC%9B%90%EC%97%B0%EA%B3%84-%EB%AA%A8%ED%98%95">¶</a></h2><h2 id="1.-%EB%AC%B8%EC%A0%9C-%EC%A0%95%EC%9D%98">1. 문제 정의<a class="anchor-link" href="#1.-%EB%AC%B8%EC%A0%9C-%EC%A0%95%EC%9D%98">¶</a></h2><p><strong>기존 산업동향 분석을 기업·현장 확인의 표준화된 진입점으로 전환한다.</strong></p>
-<p>창원에는 산업동향·위기대응·기업진단·고용·훈련지원 기능이 이미 존재한다. 기관별 분석단위와 업무 진입경로가 다르므로, 분산된 기존 체계 사이의 연결 공백을 보완하는 <strong>업종 단위 의사결정 지원모형</strong>을 제안한다.</p>
-<p>공개자료 확인 범위에서 표준 연결 사례를 확인하기 어렵다는 뜻이며, 실제 협업이 없다는 주장은 아니다.</p>
-<p>모형은 이번 분기에 어느 업종을 어느 수준으로 먼저 확인할지만 결정한다. 위기 여부·확률·원인·기업별 지원·사업 선정·예산은 결정하지 않는다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=6128fd5e">
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2477f4d6">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2.-%EA%B8%B0%EC%A1%B4-%EC%B0%BD%EC%9B%90%EC%9D%98-%EA%B4%80%EB%A0%A8-%EC%B2%B4%EA%B3%84">2. 기존 창원의 관련 체계<a class="anchor-link" href="#2.-%EA%B8%B0%EC%A1%B4-%EC%B0%BD%EC%9B%90%EC%9D%98-%EA%B4%80%EB%A0%A8-%EC%B2%B4%EA%B3%84">¶</a></h2><p>기존 기관과 기능을 전제로 한다. 링크는 확인한 공개자료이며 담당기관 배정·사업 이용 가능성은 현장 인계 시 재확인한다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=628515a1">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=b3f947a6">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=1cefe23f">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>role</th>
-<th>institution</th>
-<th>unit</th>
-<th>function</th>
-<th>source_url</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>산업·경제동향</td>
-<td>창원상공회의소</td>
-<td>지역·산단·업종</td>
-<td>정기 경제동향</td>
-<td><a href="https://changwoncci.korcham.net/front/board/boardContentsView.do?boardId=11175&amp;contId=130203&amp;menuId=3992" target="_blank">https://changwoncci.korcham.net/front/board/boardContentsView.do?boardId=11175&amp;contId=130203&amp;menuId=3992</a></td>
-</tr>
-<tr>
-<td>산업·고용동향</td>
-<td>창원산업진흥원</td>
-<td>지역·산업</td>
-<td>산업·경제동향 및 고용동향 자료</td>
-<td><a href="https://www.cwip.or.kr/" target="_blank">https://www.cwip.or.kr/</a></td>
-</tr>
-<tr>
-<td>지역 위기진단</td>
-<td>경남TP 위기지원센터</td>
-<td>중소기업 밀집지역·기업</td>
-<td>모니터링·심층현장조사·맞춤지원</td>
-<td><a href="https://www.gntp.or.kr/introduce/staff" target="_blank">https://www.gntp.or.kr/introduce/staff</a></td>
-</tr>
-<tr>
-<td>기업 진단·고용지원</td>
-<td>창원고용복지+센터</td>
-<td>기업·구직자</td>
-<td>기업 도약보장 패키지 등 진단·연계(운영 공지 시점 확인 필요)</td>
-<td><a href="https://www.moel.go.kr/local/changwon/news/reportexplan/view.do?bbs_seq=20240901144" target="_blank">https://www.moel.go.kr/local/changwon/news/reportexplan/view.do?bbs_seq=20240901144</a></td>
-</tr>
-<tr>
-<td>기업 현장지원</td>
-<td>창원산업진흥원 기업지원 기능·마이스터센터</td>
-<td>기업</td>
-<td>현장애로 컨설팅·기술지원</td>
-<td><a href="https://www.cwip.or.kr/" target="_blank">https://www.cwip.or.kr/</a></td>
-</tr>
-<tr>
-<td>인력·훈련 연계</td>
-<td>경남지역인적자원개발위원회</td>
-<td>산업·기업 인력수요</td>
-<td>수요조사·맞춤형 훈련 연계</td>
-<td><a href="https://gnhrd.or.kr/" target="_blank">https://gnhrd.or.kr/</a></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d39c53ad">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3.-%EC%97%B0%EA%B2%B0-%EA%B3%B5%EB%B0%B1">3. 연결 공백<a class="anchor-link" href="#3.-%EC%97%B0%EA%B2%B0-%EA%B3%B5%EB%B0%B1">¶</a></h2><p><strong>어느 업종을 먼저 확인하고, 무엇을 확인한 뒤, 어느 기존 기능으로 넘길 것인가?</strong></p>
-<p>산업동향은 지역·산단·업종, 위기대응은 밀집지역, 기업지원은 기업, 고용·훈련은 기업·근로자·산업수요 단위다. 이 사이를 잇는 근거와 질문을 표준화한다.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0d50deb7">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4.-%EC%9A%B0%EB%A6%AC%EA%B0%80-%EB%B3%B4%EC%99%84%ED%95%98%EB%8A%94-%EC%98%81%EC%97%AD">4. 우리가 보완하는 영역<a class="anchor-link" href="#4.-%EC%9A%B0%EB%A6%AC%EA%B0%80-%EB%B3%B4%EC%99%84%ED%95%98%EB%8A%94-%EC%98%81%EC%97%AD">¶</a></h2>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=65d16ec3">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="font-family:Malgun Gothic,sans-serif;max-width:1000px;padding:24px;background:#f3f7fa;border-radius:16px;color:#16324a">
-<h2>기존 기능 사이를 잇는 업종 단위 진입점</h2>
-<div style="padding:16px;background:white;border-left:6px solid #59758b"><b>기존 기능</b>　산업·고용 동향 분석</div>
-<p style="text-align:center">↓</p>
-<div style="padding:18px;border:2px dashed #bd731d;background:#fff9ed"><b>연결할 질문</b><br/>어느 업종을 먼저 볼 것인가?　왜 봐야 하는가?　무엇을 확인할 것인가?</div>
-<p style="text-align:center">↓</p>
-<div style="padding:20px;background:#123e59;color:white"><b>우리 프로젝트</b><br/><br/>Q1 상태: 확인질문　│　Q2 규모: 영향·처리순서　│　Q3 시간: 반복신호<br/><br/>선제점검 판단 → 관찰 / 추가확인 / 우선점검 → 표준 업종 진단카드</div>
-<p style="text-align:center">↓ 담당자에게 근거·질문·자료 한계 인계</p>
-<div style="padding:18px;background:white;border-left:6px solid #258575"><b>기존 기능</b>　담당자 검토 → 기업·현장 확인<br/><br/>기업·경영 확인 → 기업지원 검토<br/>고용조정 확인 → 고용지원 검토<br/>인력·숙련 확인 → 직업훈련 검토</div>
-<p><b>↻ 다음 분기 재점검</b>　현장 근거·지원 검토결과는 담당자가 기록</p>
-<small>모형은 점검의 순서와 수준을 제안합니다. 위기 확정·기업 선정·지원사업 처방은 하지 않습니다.</small></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=25117a15">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5.-%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%99%80-%EB%8F%85%EB%A6%BD-%EC%9E%AC%ED%98%84">5. 데이터와 독립 재현<a class="anchor-link" href="#5.-%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%99%80-%EB%8F%85%EB%A6%BD-%EC%9E%AC%ED%98%84">¶</a></h2><p>로컬 KICOX 원자료 → 제조업 10개 업종 master → Q1~Q3·E/R/A/P → 2022Q1~2026Q2 180행. 명목 생산은 분기 합계, 고용은 분기말. 반복신호는 분석 시작 이전 분기도 사용한다. 원자료 재구축·독립 scalar 검산은 기존 ELECTRE 출력을 덮어쓰지 않는다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=5b8d2663">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>file</th>
-<th>rows</th>
-<th>match</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>changwon_industry_master</td>
-<td>340</td>
-<td>True</td>
-</tr>
-<tr>
-<td>changwon_total_master</td>
-<td>34</td>
-<td>True</td>
-</tr>
-<tr>
-<td>changwon_state_panel</td>
-<td>180</td>
-<td>True</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>{'historical_reference_rows': 180,
- 'independent_scalar_axes_match': True,
- 'independent_scalar_stages_match': True,
- 'original_v3_distribution': {'관찰': 113, '추가확인': 32, '자료확인': 20, '우선점검': 15},
- 'final_distribution': {'관찰': 128, '추가확인': 35, '우선점검': 17},
- 'baseline_to_final_changes': 21}</pre>
+<pre>최신분기 2026Q2 | stage={'관찰': 8, '우선점검': 2} | Human review required=[True]
+</pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4dd251f3">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d11fd35e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="6.-Q1-%EC%83%81%ED%83%9C-%E2%80%94-%EB%AC%B4%EC%97%87%EC%9D%84-%ED%99%95%EC%9D%B8%ED%95%A0-%EA%B2%83%EC%9D%B8%EA%B0%80">6. Q1 상태 — 무엇을 확인할 것인가<a class="anchor-link" href="#6.-Q1-%EC%83%81%ED%83%9C-%E2%80%94-%EB%AC%B4%EC%97%87%EC%9D%84-%ED%99%95%EC%9D%B8%ED%95%A0-%EA%B2%83%EC%9D%B8%EA%B0%80">¶</a></h2><p>상태가 단계를 직접 결정하지 않는다. S1 확장·인력수급, S2 자동화·외주·미충원, S3 선행채용·생산 일시성, S4 수주·감산·고용조정 가능성을 <strong>질문</strong>으로 넘긴다. 원인 확정이 아니다.</p>
+<h2 id="1.-%EC%B5%9C%EC%8B%A0%EB%B6%84%EA%B8%B0-%ED%95%9C%EB%88%88%EC%97%90-%EB%B3%B4%EA%B8%B0">1. 최신분기 한눈에 보기<a class="anchor-link" href="#1.-%EC%B5%9C%EC%8B%A0%EB%B6%84%EA%B8%B0-%ED%95%9C%EB%88%88%EC%97%90-%EB%B3%B4%EA%B8%B0">¶</a></h2><p>결론을 뒤에 숨기지 않고 최신 10개 업종을 먼저 제시한다. <code>외부근거 가용</code>은 적어도 하나의 맥락자료가 있다는 뜻이지 판정에 쓸 수 있다는 뜻이 아니다.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=34a59872">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>q1_state</th>
-<th>q1_state_label</th>
-<th>q1_question_route</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>기계</td>
-<td>S4</td>
-<td>생산↓·고용↓</td>
-<td>수주잔량·가동률·휴업/감산·기업 수 변동·고용조정 계획 신고 여부를 확인한다(원인 후보이며 입증된 원인이 아님).</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>S4</td>
-<td>생산↓·고용↓</td>
-<td>수주잔량·가동률·휴업/감산·기업 수 변동·고용조정 계획 신고 여부를 확인한다(원인 후보이며 입증된 원인이 아님).</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>S2</td>
-<td>생산↑·고용↓</td>
-<td>자동화·설비투자, 외주·도급 전환, 미충원·숙련 불일치, 직무구조 변화 가능성을 질문으로 확인한다(원인 후보이며 입증된 원인이 아님).</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>S2</td>
-<td>생산↑·고용↓</td>
-<td>자동화·설비투자, 외주·도급 전환, 미충원·숙련 불일치, 직무구조 변화 가능성을 질문으로 확인한다(원인 후보이며 입증된 원인이 아님).</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>S2</td>
-<td>생산↑·고용↓</td>
-<td>자동화·설비투자, 외주·도급 전환, 미충원·숙련 불일치, 직무구조 변화 가능성을 질문으로 확인한다(원인 후보이며 입증된 원인이 아님).</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>S2</td>
-<td>생산↑·고용↓</td>
-<td>자동화·설비투자, 외주·도급 전환, 미충원·숙련 불일치, 직무구조 변화 가능성을 질문으로 확인한다(원인 후보이며 입증된 원인이 아님).</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>S2</td>
-<td>생산↑·고용↓</td>
-<td>자동화·설비투자, 외주·도급 전환, 미충원·숙련 불일치, 직무구조 변화 가능성을 질문으로 확인한다(원인 후보이며 입증된 원인이 아님).</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>S1</td>
-<td>생산↑·고용↑</td>
-<td>미충원·숙련수요·증가의 지속가능성을 확인한다.</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>S3</td>
-<td>생산↓·고용↑</td>
-<td>선제채용·신규 입주기업·고용조정 시차·생산 단가와 물량 구분 가능성을 확인한다.</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>N</td>
-<td>한 축 이상 정확한 0</td>
-<td>원자료상 정확한 0인지 반올림·개정 영향인지, 0이 아닌 축의 방향과 규모를 확인한다.</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=34cab891">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="7.-Q2-%EA%B7%9C%EB%AA%A8-%E2%80%94-%EC%96%BC%EB%A7%88%EB%82%98-%ED%81%B0-%EC%98%81%ED%96%A5%EC%9D%B8%EA%B0%80">7. Q2 규모 — 얼마나 큰 영향인가<a class="anchor-link" href="#7.-Q2-%EA%B7%9C%EB%AA%A8-%E2%80%94-%EC%96%BC%EB%A7%88%EB%82%98-%ED%81%B0-%EC%98%81%ED%96%A5%EC%9D%B8%EA%B0%80">¶</a></h2><p>고용인원 변화·비중·순증감 기여율과 같은 단계 내 처리순서를 전달한다. 기여율은 전체 순변화 상쇄가 크면 미표시한다. A는 현재 산단 전체 고용 대비 감소인원으로 별도 정의한 규모효과다. Q2 전체 점수를 만들지 않는다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=78866a04">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>q2_employment_delta</th>
-<th>q2_employment_yoy</th>
-<th>q2_employment_share</th>
-<th>q2_contribution</th>
-<th>q2_same_stage_rank</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>기계</td>
-<td>-3979.0</td>
-<td>-6.340</td>
-<td>51.192</td>
-<td>91.851</td>
-<td>1</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>-48.0</td>
-<td>-10.084</td>
-<td>0.373</td>
-<td>1.108</td>
-<td>2</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>-129.0</td>
-<td>-0.785</td>
-<td>14.202</td>
-<td>2.978</td>
-<td>1</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>-116.0</td>
-<td>-0.413</td>
-<td>24.366</td>
-<td>2.678</td>
-<td>2</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>-112.0</td>
-<td>-1.143</td>
-<td>8.438</td>
-<td>2.585</td>
-<td>3</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>-25.0</td>
-<td>-3.788</td>
-<td>0.553</td>
-<td>0.577</td>
-<td>4</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>-2.0</td>
-<td>-1.081</td>
-<td>0.159</td>
-<td>0.046</td>
-<td>5</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>25.0</td>
-<td>17.123</td>
-<td>0.149</td>
-<td>-0.577</td>
-<td>6</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>54.0</td>
-<td>9.558</td>
-<td>0.539</td>
-<td>-1.247</td>
-<td>7</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>0.0</td>
-<td>0.000</td>
-<td>0.030</td>
-<td>-0.000</td>
-<td>8</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cd904b7e">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="8.-Q3-%EC%8B%9C%EA%B0%84-%E2%80%94-%EB%B0%98%EB%B3%B5%C2%B7%EC%A7%80%EC%86%8D-%EC%97%AC%EB%B6%80">8. Q3 시간 — 반복·지속 여부<a class="anchor-link" href="#8.-Q3-%EC%8B%9C%EA%B0%84-%E2%80%94-%EB%B0%98%EB%B3%B5%C2%B7%EC%A7%80%EC%86%8D-%EC%97%AC%EB%B6%80">¶</a></h2><p><strong>Q3 시간축에서 도출한 반복·지속 신호를 상위 점검단계의 보강조건으로 활용하였다.</strong></p>
-<p>현재와 직전 달력분기의 고용축 진입신호다. 동일 상태 지속기간이나 음의 고용 YoY 연속길이 g4와 다르다. 생산 결측 때 Q1 INVALID는 그대로 남는다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=bd269d81">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>quarter</th>
-<th>q3_state_run_length</th>
-<th>q3_transition</th>
-<th>q3_repeated_signal</th>
-<th>g4_delta00</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>전기전자</td>
-<td>2026Q1</td>
-<td>1.0</td>
-<td>S2 → S4</td>
-<td>False</td>
-<td>5</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2026Q2</td>
-<td>1.0</td>
-<td>S4 → S2</td>
-<td>False</td>
-<td>6</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q1</td>
-<td>1.0</td>
-<td>이전 또는 현재 상태 미확인</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q2</td>
-<td>2.0</td>
-<td>S1 → S1</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q3</td>
-<td>3.0</td>
-<td>S1 → S1</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q4</td>
-<td>1.0</td>
-<td>S1 → S4</td>
-<td>False</td>
-<td>1</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q1</td>
-<td>2.0</td>
-<td>S4 → S4</td>
-<td>False</td>
-<td>2</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q2</td>
-<td>3.0</td>
-<td>S4 → S4</td>
-<td>False</td>
-<td>3</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q3</td>
-<td>4.0</td>
-<td>S4 → S4</td>
-<td>False</td>
-<td>4</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q4</td>
-<td>미확인</td>
-<td>이전 또는 현재 상태 미확인</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q1</td>
-<td>1.0</td>
-<td>이전 또는 현재 상태 미확인</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q2</td>
-<td>2.0</td>
-<td>S3 → S3</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q3</td>
-<td>3.0</td>
-<td>S3 → S3</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q4</td>
-<td>미확인</td>
-<td>이전 또는 현재 상태 미확인</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q1</td>
-<td>1.0</td>
-<td>이전 또는 현재 상태 미확인</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q2</td>
-<td>1.0</td>
-<td>S3 → S1</td>
-<td>False</td>
-<td>0</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q3</td>
-<td>1.0</td>
-<td>S1 → S2</td>
-<td>False</td>
-<td>1</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q4</td>
-<td>2.0</td>
-<td>S2 → S2</td>
-<td>False</td>
-<td>2</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2026Q1</td>
-<td>3.0</td>
-<td>S2 → S2</td>
-<td>False</td>
-<td>3</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2026Q2</td>
-<td>4.0</td>
-<td>S2 → S2</td>
-<td>False</td>
-<td>4</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2750a196">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="9.-%EB%B6%84%EC%84%9D%EA%B3%BC-%ED%8C%90%EB%8B%A8%EC%97%94%EC%A7%84%EC%9D%98-%EC%97%AD%ED%95%A0">9. 분석과 판단엔진의 역할<a class="anchor-link" href="#9.-%EB%B6%84%EC%84%9D%EA%B3%BC-%ED%8C%90%EB%8B%A8%EC%97%94%EC%A7%84%EC%9D%98-%EC%97%AD%ED%95%A0">¶</a></h2><table>
-<thead>
-<tr>
-<th>분석</th>
-<th>역할</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Q1</td>
-<td>확인질문·담당 기능</td>
-</tr>
-<tr>
-<td>Q2</td>
-<td>영향 규모·같은 단계 처리순서; A에 감소인원 반영</td>
-</tr>
-<tr>
-<td>Q3 시간축</td>
-<td>반복 고용진입신호 보강</td>
-</tr>
-<tr>
-<td>E/R/A 및 P·반복·규모 조건</td>
-<td>점검단계 판단</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=685e7371">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="10.-%EC%B5%9C%EC%A2%85-%ED%8A%B8%EB%A6%AC%EC%95%84%EC%A7%80-%EA%B7%9C%EC%B9%99">10. 최종 트리아지 규칙<a class="anchor-link" href="#10.-%EC%B5%9C%EC%A2%85-%ED%8A%B8%EB%A6%AC%EC%95%84%EC%A7%80-%EA%B7%9C%EC%B9%99">¶</a></h2><p>고용 핵심자료가 없으면 판정보류(자료확인). 그 외 <strong>상위 고용신호 AND (생산 보강 OR 반복) AND 300인 이상 → 우선점검</strong>. 이 조건에 못 미치더라도 진입신호가 있으면 추가확인, 나머지는 관찰. P만 없으면 알려진 신호로 최소판정하고 자료 플래그를 인계한다. 관찰도 다음 분기 재점검한다.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7718d326">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="11.-%EC%B6%9C%EC%B2%98%EC%99%80-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%9A%B4%EC%98%81%EA%B7%9C%EC%B9%99">11. 출처와 프로젝트 운영규칙<a class="anchor-link" href="#11.-%EC%B6%9C%EC%B2%98%EC%99%80-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EC%9A%B4%EC%98%81%EA%B7%9C%EC%B9%99">¶</a></h2><p>법정 지정기준을 직접 적용하지 않는다. 같은 숫자도 대상·기간·목적이 달라 DIRECT_OFFICIAL은 없다. R 상위 10%p와 A 1/2는 자체 운영규칙이다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=f9eeb44c">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>rule_name</th>
-<th>definition</th>
-<th>threshold</th>
-<th>role</th>
-<th>source_category</th>
-<th>source_url</th>
-<th>source_note</th>
-<th>reason_for_adaptation</th>
-<th>checked_at</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>E</td>
-<td>max(0, -KICOX 분기말 고용 YoY)</td>
-<td>5% / 10%</td>
-<td>고용 진입·상위 신호</td>
-<td>PRINCIPLE_ADAPTED</td>
-<td><a href="https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000278624&amp;chrClsCd=010201" target="_blank">https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000278624&amp;chrClsCd=010201</a></td>
-<td>2026.5.4 시행 고용위기지역 고시 제3조①2호 5%, ④2호 10% 확인. 지역 피보험자 최근 6개월 평균을 업종 종사자 분기말 YoY로 변경. 다른 법정 결합요건·심의절차를 재현하지 않음.</td>
-<td>2026.5.4 시행 고용위기지역 고시 제3조①2호 5%, ④2호 10% 확인. 지역 피보험자 최근 6개월 평균을 업종 종사자 분기말 YoY로 변경. 다른 법정 결합요건·심의절차를 재현하지 않음.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>R_entry</td>
-<td>max(0, 산단 제조업 전체 YoY - 업종 YoY)</td>
-<td>5%p</td>
-<td>상대 열위 진입</td>
-<td>PRINCIPLE_ADAPTED</td>
-<td><a href="https://m.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systClId=SC00000364&amp;systCnntId=CI00001365&amp;systId=SI00000375" target="_blank">https://m.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systClId=SC00000364&amp;systCnntId=CI00001365&amp;systId=SI00000375</a></td>
-<td>공식 비교는 모든 업종 피보험자 평균. 본 모형은 동일 산단 제조업 10개 업종 합계와 비교.</td>
-<td>공식 비교는 모든 업종 피보험자 평균. 본 모형은 동일 산단 제조업 10개 업종 합계와 비교.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>R_up</td>
-<td>R과 동일</td>
-<td>10%p</td>
-<td>상대 열위 상위</td>
-<td>PROJECT_OPERATIONAL</td>
-<td>미확인</td>
-<td>10%p 상위 경계의 직접 조문 근거 없음. 진입 경계와 출처 분리.</td>
-<td>10%p 상위 경계의 직접 조문 근거 없음. 진입 경계와 출처 분리.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>A</td>
-<td>max(0, 전년동기 고용 - 현재 고용) / 현재 산단 제조업 고용 × 100</td>
-<td>1% / 2%</td>
-<td>규모효과 진입·상위</td>
-<td>PROJECT_OPERATIONAL</td>
-<td>미확인</td>
-<td>현재 산단 고용 100명당 전년동기 대비 감소인원 1/2명에 해당. 최적값·정책기준 아님. 대형 업종 영향 큼.</td>
-<td>현재 산단 고용 100명당 전년동기 대비 감소인원 1/2명에 해당. 최적값·정책기준 아님. 대형 업종 영향 큼.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>P</td>
-<td>max(0, -명목 분기 생산액 YoY)</td>
-<td>5%</td>
-<td>상위단계 보강</td>
-<td>PRINCIPLE_ADAPTED</td>
-<td><a href="https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000255684" target="_blank">https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000255684</a></td>
-<td>현행 제2조는 전년 및 전전년 동기 생산액/생산량 등 결합요건. 본 모형은 명목 생산액 전년동기 비교만 사용하며 가격·물량 분해 불가.</td>
-<td>현행 제2조는 전년 및 전전년 동기 생산액/생산량 등 결합요건. 본 모형은 명목 생산액 전년동기 비교만 사용하며 가격·물량 분해 불가.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>repeated_employment_entry_signal</td>
-<td>현재 및 실제 직전 달력분기에 E/R/A 진입신호 존재</td>
-<td>연속 2분기</td>
-<td>Q3 시간축 보강</td>
-<td>PRINCIPLE_ADAPTED</td>
-<td><a href="https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000209796" target="_blank">https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000209796</a></td>
-<td>지속성 원리 참고. 고시 월별 지속요건, 기존 g4 음의 고용 YoY 연속길이, 동일 Q1 상태 run_length와 모두 다름.</td>
-<td>지속성 원리 참고. 고시 월별 지속요건, 기존 g4 음의 고용 YoY 연속길이, 동일 Q1 상태 run_length와 모두 다름.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>scale_gate</td>
-<td>현재 업종 고용이 기준 이상</td>
-<td>300인</td>
-<td>우선점검 진입만 제한</td>
-<td>PRINCIPLE_ADAPTED</td>
-<td><a href="https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000255684" target="_blank">https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000255684</a></td>
-<td>공식 주된 산업의 비중·종사자 요건 중 규모 원리만 참고한 운영규칙. 추가확인 신호 보존. 300인 최적성 미입증.</td>
-<td>공식 주된 산업의 비중·종사자 요건 중 규모 원리만 참고한 운영규칙. 추가확인 신호 보존. 300인 최적성 미입증.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>ladder</td>
-<td>상위 고용신호 AND (P OR 반복) AND 규모; 아니면 진입신호</td>
-<td>관찰 / 추가확인 / 우선점검</td>
-<td>행동단계</td>
-<td>PROJECT_OPERATIONAL</td>
-<td>미확인</td>
-<td>법정 지정의 결합식이 아니라 내부 점검 사다리.</td>
-<td>법정 지정의 결합식이 아니라 내부 점검 사다리.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>missing</td>
-<td>핵심 E/R/A·고용 미확인 시 판정보류; P만 없으면 알려진 신호로 최소판정</td>
-<td>보간 없음</td>
-<td>자료품질</td>
-<td>PROJECT_OPERATIONAL</td>
-<td>미확인</td>
-<td>미확인 보강조건은 충족으로 간주하지 않음. 최소판정과 자료 플래그 함께 전달.</td>
-<td>미확인 보강조건은 충족으로 간주하지 않음. 최소판정과 자료 플래그 함께 전달.</td>
-<td>2026-09-18</td>
-</tr>
-<tr>
-<td>same_stage_rank</td>
-<td>같은 분기·단계에서 감소인원 내림차순, 동률 업종명</td>
-<td>감소인원</td>
-<td>처리순서</td>
-<td>PROJECT_OPERATIONAL</td>
-<td>미확인</td>
-<td>Q2 전체 점수화 아님. 동률 순서는 위험 우열이 아닌 결정적 표시순서.</td>
-<td>Q2 전체 점수화 아님. 동률 순서는 위험 우열이 아닌 결정적 표시순서.</td>
-<td>2026-09-18</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=30562a6f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="12.-%ED%95%B5%EC%8B%AC-%EB%AF%BC%EA%B0%90%EB%8F%84%EC%99%80-%EA%B0%90%EC%82%AC">12. 핵심 민감도와 감사<a class="anchor-link" href="#12.-%ED%95%B5%EC%8B%AC-%EB%AF%BC%EA%B0%90%EB%8F%84%EC%99%80-%EA%B0%90%EC%82%AC">¶</a></h2><p>원본 Q3 제거는 6행, 수정판은 8행이다. 생산결측 20행 처리와 분석창 이전 정보 복구를 분리했다. A 2/4에서 최신 기계, 규모 500인에서 최신 목재종이가 추가확인으로 바뀐다. 핵심 대상의 <strong>우선점검 단계는 운영규칙에 조건부</strong>이며 최적성·예측 정확도를 주장하지 않는다. 1/2 사전 선택의 증거는 확보하지 못했다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=87cdad43">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>variant</th>
-<th>changed_rows</th>
-<th>priority_changed_rows</th>
-<th>latest_changed_rows</th>
-<th>우선점검</th>
-<th>추가확인</th>
-<th>관찰</th>
-<th>자료확인</th>
-<th>규모미달</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>A 0.5/1</td>
-<td>5</td>
-<td>2</td>
-<td>0</td>
-<td>19</td>
-<td>36</td>
-<td>125</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>A 1/2</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>17</td>
-<td>35</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>A 2/4</td>
-<td>6</td>
-<td>6</td>
-<td>1</td>
-<td>11</td>
-<td>41</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>A 제거</td>
-<td>9</td>
-<td>9</td>
-<td>1</td>
-<td>8</td>
-<td>40</td>
-<td>132</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>규모 200</td>
-<td>4</td>
-<td>4</td>
-<td>0</td>
-<td>21</td>
-<td>31</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>규모 300</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>17</td>
-<td>35</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>규모 500</td>
-<td>2</td>
-<td>2</td>
-<td>1</td>
-<td>15</td>
-<td>37</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>규모 1000</td>
-<td>8</td>
-<td>8</td>
-<td>1</td>
-<td>9</td>
-<td>43</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>gate 없음</td>
-<td>24</td>
-<td>24</td>
-<td>0</td>
-<td>41</td>
-<td>11</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>hard exclusion</td>
-<td>66</td>
-<td>0</td>
-<td>3</td>
-<td>17</td>
-<td>4</td>
-<td>93</td>
-<td>0</td>
-<td>66</td>
-</tr>
-<tr>
-<td>flag 정렬만</td>
-<td>24</td>
-<td>24</td>
-<td>0</td>
-<td>41</td>
-<td>11</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>Q3 제거</td>
-<td>8</td>
-<td>8</td>
-<td>0</td>
-<td>9</td>
-<td>43</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>P 제거</td>
-<td>4</td>
-<td>4</td>
-<td>1</td>
-<td>13</td>
-<td>39</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>완전 자료확인</td>
-<td>20</td>
-<td>1</td>
-<td>0</td>
-<td>16</td>
-<td>31</td>
-<td>113</td>
-<td>20</td>
-<td>0</td>
-</tr>
-<tr>
-<td>R 상위 제거</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>16</td>
-<td>36</td>
-<td>128</td>
-<td>0</td>
-<td>0</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>quarter</th>
-<th>data_quality_core_missing</th>
-<th>data_quality_production_missing</th>
-<th>complete_stage</th>
-<th>stage</th>
-<th>rows</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>2023Q4</td>
-<td>False</td>
-<td>True</td>
-<td>자료확인</td>
-<td>관찰</td>
-<td>7</td>
-</tr>
-<tr>
-<td>2023Q4</td>
-<td>False</td>
-<td>True</td>
-<td>자료확인</td>
-<td>우선점검</td>
-<td>1</td>
-</tr>
-<tr>
-<td>2023Q4</td>
-<td>False</td>
-<td>True</td>
-<td>자료확인</td>
-<td>추가확인</td>
-<td>2</td>
-</tr>
-<tr>
-<td>2024Q4</td>
-<td>False</td>
-<td>True</td>
-<td>자료확인</td>
-<td>관찰</td>
-<td>8</td>
-</tr>
-<tr>
-<td>2024Q4</td>
-<td>False</td>
-<td>True</td>
-<td>자료확인</td>
-<td>추가확인</td>
-<td>2</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>quarter</th>
-<th>E</th>
-<th>R</th>
-<th>A</th>
-<th>P</th>
-<th>persist</th>
-<th>stage</th>
-<th>stage_reason</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>기계</td>
-<td>2022Q1</td>
-<td>3.671835</td>
-<td>3.911123</td>
-<td>2.041025</td>
-<td>0.0</td>
-<td>True</td>
-<td>우선점검</td>
-<td>산단 제조업 고용의 2.04% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>quarter</th>
-<th>stage</th>
-<th>stage_reason</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>기계</td>
-<td>2022Q1</td>
-<td>우선점검</td>
-<td>산단 제조업 고용의 2.04% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2022Q2</td>
-<td>우선점검</td>
-<td>산단 제조업 고용의 2.16% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2022Q3</td>
-<td>우선점검</td>
-<td>산단 제조업 고용의 2.10% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q1</td>
-<td>우선점검</td>
-<td>고용감소 9.7%(진입경계 5% 통과) · 산단평균 대비 6.7%p 열위(진입경계 통과) · 산단 제조업 고용의 5.38% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q2</td>
-<td>우선점검</td>
-<td>고용감소 8.8%(진입경계 5% 통과) · 산단평균 대비 5.8%p 열위(진입경계 통과) · 산단 제조업 고용의 4.82% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q3</td>
-<td>우선점검</td>
-<td>고용감소 8.4%(진입경계 5% 통과) · 산단평균 대비 6.5%p 열위(진입경계 통과) · 산단 제조업 고용의 4.54% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q4</td>
-<td>우선점검</td>
-<td>고용감소 6.8%(진입경계 5% 통과) · 산단평균 대비 7.8%p 열위(진입경계 통과) · 산단 제조업 고용의 3.61% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속) [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2026Q1</td>
-<td>우선점검</td>
-<td>고용감소 21.5%(상위경계 10% 통과) · 산단평균 대비 19.8%p 열위(상위경계 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5b5eae85">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="13.-180%ED%96%89-%EC%A0%84%EC%B2%B4-%EA%B2%B0%EA%B3%BC">13. 180행 전체 결과<a class="anchor-link" href="#13.-180%ED%96%89-%EC%A0%84%EC%B2%B4-%EA%B2%B0%EA%B3%BC">¶</a></h2><p>색과 단계명을 함께 표시한다. 각 행의 계산·근거·품질 플래그는 decision_panel.csv에 있다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=34affd69">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=4777ea24">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
@@ -9016,2506 +7865,431 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
 <style type="text/css">
-#T_aa0d5_row0_col0, #T_aa0d5_row0_col1, #T_aa0d5_row0_col2, #T_aa0d5_row0_col3, #T_aa0d5_row0_col4, #T_aa0d5_row0_col5, #T_aa0d5_row0_col6, #T_aa0d5_row0_col7, #T_aa0d5_row0_col17, #T_aa0d5_row2_col16, #T_aa0d5_row2_col17, #T_aa0d5_row4_col13, #T_aa0d5_row7_col12, #T_aa0d5_row7_col13, #T_aa0d5_row7_col14, #T_aa0d5_row7_col15, #T_aa0d5_row7_col16 {
-  background-color: #ffd5cc;
-  color: #172b3a;
-  font-size: 11px;
-  white-space: nowrap;
-}
-#T_aa0d5_row0_col8, #T_aa0d5_row0_col9, #T_aa0d5_row0_col10, #T_aa0d5_row0_col11, #T_aa0d5_row0_col12, #T_aa0d5_row0_col13, #T_aa0d5_row0_col14, #T_aa0d5_row0_col15, #T_aa0d5_row0_col16, #T_aa0d5_row1_col0, #T_aa0d5_row1_col1, #T_aa0d5_row1_col2, #T_aa0d5_row1_col7, #T_aa0d5_row1_col8, #T_aa0d5_row1_col9, #T_aa0d5_row1_col10, #T_aa0d5_row1_col11, #T_aa0d5_row1_col16, #T_aa0d5_row1_col17, #T_aa0d5_row2_col0, #T_aa0d5_row2_col1, #T_aa0d5_row2_col2, #T_aa0d5_row2_col3, #T_aa0d5_row2_col4, #T_aa0d5_row2_col5, #T_aa0d5_row2_col12, #T_aa0d5_row2_col13, #T_aa0d5_row2_col14, #T_aa0d5_row2_col15, #T_aa0d5_row3_col0, #T_aa0d5_row3_col1, #T_aa0d5_row3_col2, #T_aa0d5_row3_col3, #T_aa0d5_row3_col4, #T_aa0d5_row3_col5, #T_aa0d5_row3_col6, #T_aa0d5_row3_col7, #T_aa0d5_row3_col8, #T_aa0d5_row3_col11, #T_aa0d5_row3_col16, #T_aa0d5_row3_col17, #T_aa0d5_row4_col0, #T_aa0d5_row4_col1, #T_aa0d5_row4_col2, #T_aa0d5_row4_col3, #T_aa0d5_row4_col4, #T_aa0d5_row4_col5, #T_aa0d5_row4_col6, #T_aa0d5_row4_col7, #T_aa0d5_row4_col8, #T_aa0d5_row4_col9, #T_aa0d5_row4_col10, #T_aa0d5_row4_col11, #T_aa0d5_row4_col12, #T_aa0d5_row4_col14, #T_aa0d5_row4_col15, #T_aa0d5_row4_col16, #T_aa0d5_row4_col17, #T_aa0d5_row5_col3, #T_aa0d5_row5_col4, #T_aa0d5_row5_col5, #T_aa0d5_row5_col6, #T_aa0d5_row5_col15, #T_aa0d5_row5_col16, #T_aa0d5_row5_col17, #T_aa0d5_row6_col0, #T_aa0d5_row6_col1, #T_aa0d5_row6_col2, #T_aa0d5_row6_col3, #T_aa0d5_row6_col4, #T_aa0d5_row6_col5, #T_aa0d5_row6_col6, #T_aa0d5_row6_col7, #T_aa0d5_row6_col8, #T_aa0d5_row6_col9, #T_aa0d5_row6_col10, #T_aa0d5_row6_col11, #T_aa0d5_row6_col12, #T_aa0d5_row6_col13, #T_aa0d5_row6_col14, #T_aa0d5_row6_col16, #T_aa0d5_row6_col17, #T_aa0d5_row7_col0, #T_aa0d5_row7_col1, #T_aa0d5_row7_col2, #T_aa0d5_row7_col3, #T_aa0d5_row7_col4, #T_aa0d5_row7_col5, #T_aa0d5_row7_col6, #T_aa0d5_row7_col7, #T_aa0d5_row7_col8, #T_aa0d5_row7_col9, #T_aa0d5_row7_col10, #T_aa0d5_row7_col11, #T_aa0d5_row7_col17, #T_aa0d5_row8_col0, #T_aa0d5_row8_col1, #T_aa0d5_row8_col2, #T_aa0d5_row8_col3, #T_aa0d5_row8_col4, #T_aa0d5_row8_col5, #T_aa0d5_row8_col6, #T_aa0d5_row8_col7, #T_aa0d5_row8_col8, #T_aa0d5_row8_col9, #T_aa0d5_row8_col10, #T_aa0d5_row8_col11, #T_aa0d5_row8_col14, #T_aa0d5_row8_col16, #T_aa0d5_row8_col17, #T_aa0d5_row9_col0, #T_aa0d5_row9_col1, #T_aa0d5_row9_col2, #T_aa0d5_row9_col3, #T_aa0d5_row9_col4, #T_aa0d5_row9_col5, #T_aa0d5_row9_col6, #T_aa0d5_row9_col7, #T_aa0d5_row9_col8, #T_aa0d5_row9_col9, #T_aa0d5_row9_col10, #T_aa0d5_row9_col11, #T_aa0d5_row9_col12, #T_aa0d5_row9_col13, #T_aa0d5_row9_col14, #T_aa0d5_row9_col15, #T_aa0d5_row9_col16, #T_aa0d5_row9_col17 {
-  background-color: #e7eff5;
-  color: #172b3a;
-  font-size: 11px;
-  white-space: nowrap;
-}
-#T_aa0d5_row1_col3, #T_aa0d5_row1_col4, #T_aa0d5_row1_col5, #T_aa0d5_row1_col6, #T_aa0d5_row1_col12, #T_aa0d5_row1_col13, #T_aa0d5_row1_col14, #T_aa0d5_row1_col15, #T_aa0d5_row2_col6, #T_aa0d5_row2_col7, #T_aa0d5_row2_col8, #T_aa0d5_row2_col9, #T_aa0d5_row2_col10, #T_aa0d5_row2_col11, #T_aa0d5_row3_col9, #T_aa0d5_row3_col10, #T_aa0d5_row3_col12, #T_aa0d5_row3_col13, #T_aa0d5_row3_col14, #T_aa0d5_row3_col15, #T_aa0d5_row5_col0, #T_aa0d5_row5_col1, #T_aa0d5_row5_col2, #T_aa0d5_row5_col7, #T_aa0d5_row5_col8, #T_aa0d5_row5_col9, #T_aa0d5_row5_col10, #T_aa0d5_row5_col11, #T_aa0d5_row5_col12, #T_aa0d5_row5_col13, #T_aa0d5_row5_col14, #T_aa0d5_row6_col15, #T_aa0d5_row8_col12, #T_aa0d5_row8_col13, #T_aa0d5_row8_col15 {
-  background-color: #ffedbc;
-  color: #172b3a;
-  font-size: 11px;
-  white-space: nowrap;
-}
 </style>
-<table id="T_aa0d5">
+<table id="T_b5b4f">
 <thead>
 <tr>
-<th class="index_name level0">quarter</th>
-<th class="col_heading level0 col0" id="T_aa0d5_level0_col0">2022Q1</th>
-<th class="col_heading level0 col1" id="T_aa0d5_level0_col1">2022Q2</th>
-<th class="col_heading level0 col2" id="T_aa0d5_level0_col2">2022Q3</th>
-<th class="col_heading level0 col3" id="T_aa0d5_level0_col3">2022Q4</th>
-<th class="col_heading level0 col4" id="T_aa0d5_level0_col4">2023Q1</th>
-<th class="col_heading level0 col5" id="T_aa0d5_level0_col5">2023Q2</th>
-<th class="col_heading level0 col6" id="T_aa0d5_level0_col6">2023Q3</th>
-<th class="col_heading level0 col7" id="T_aa0d5_level0_col7">2023Q4</th>
-<th class="col_heading level0 col8" id="T_aa0d5_level0_col8">2024Q1</th>
-<th class="col_heading level0 col9" id="T_aa0d5_level0_col9">2024Q2</th>
-<th class="col_heading level0 col10" id="T_aa0d5_level0_col10">2024Q3</th>
-<th class="col_heading level0 col11" id="T_aa0d5_level0_col11">2024Q4</th>
-<th class="col_heading level0 col12" id="T_aa0d5_level0_col12">2025Q1</th>
-<th class="col_heading level0 col13" id="T_aa0d5_level0_col13">2025Q2</th>
-<th class="col_heading level0 col14" id="T_aa0d5_level0_col14">2025Q3</th>
-<th class="col_heading level0 col15" id="T_aa0d5_level0_col15">2025Q4</th>
-<th class="col_heading level0 col16" id="T_aa0d5_level0_col16">2026Q1</th>
-<th class="col_heading level0 col17" id="T_aa0d5_level0_col17">2026Q2</th>
-</tr>
-<tr>
-<th class="index_name level0">industry</th>
-<th class="blank col0"> </th>
-<th class="blank col1"> </th>
-<th class="blank col2"> </th>
-<th class="blank col3"> </th>
-<th class="blank col4"> </th>
-<th class="blank col5"> </th>
-<th class="blank col6"> </th>
-<th class="blank col7"> </th>
-<th class="blank col8"> </th>
-<th class="blank col9"> </th>
-<th class="blank col10"> </th>
-<th class="blank col11"> </th>
-<th class="blank col12"> </th>
-<th class="blank col13"> </th>
-<th class="blank col14"> </th>
-<th class="blank col15"> </th>
-<th class="blank col16"> </th>
-<th class="blank col17"> </th>
+<th class="col_heading level0 col0" id="T_b5b4f_level0_col0">업종</th>
+<th class="col_heading level0 col1" id="T_b5b4f_level0_col1">단계</th>
+<th class="col_heading level0 col2" id="T_b5b4f_level0_col2">핵심 trigger</th>
+<th class="col_heading level0 col3" id="T_b5b4f_level0_col3">고용증감(명)</th>
+<th class="col_heading level0 col4" id="T_b5b4f_level0_col4">고용비중(%)</th>
+<th class="col_heading level0 col5" id="T_b5b4f_level0_col5">상태지속(Q)</th>
+<th class="col_heading level0 col6" id="T_b5b4f_level0_col6">고용진입 반복</th>
+<th class="col_heading level0 col7" id="T_b5b4f_level0_col7">외부근거 가용</th>
+<th class="col_heading level0 col8" id="T_b5b4f_level0_col8">외부 맥락</th>
+<th class="col_heading level0 col9" id="T_b5b4f_level0_col9">주요 해석/선정 이유</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th class="row_heading level0 row0" id="T_aa0d5_level0_row0">기계</th>
-<td class="data row0 col0" id="T_aa0d5_row0_col0">우선점검</td>
-<td class="data row0 col1" id="T_aa0d5_row0_col1">우선점검</td>
-<td class="data row0 col2" id="T_aa0d5_row0_col2">우선점검</td>
-<td class="data row0 col3" id="T_aa0d5_row0_col3">우선점검</td>
-<td class="data row0 col4" id="T_aa0d5_row0_col4">우선점검</td>
-<td class="data row0 col5" id="T_aa0d5_row0_col5">우선점검</td>
-<td class="data row0 col6" id="T_aa0d5_row0_col6">우선점검</td>
-<td class="data row0 col7" id="T_aa0d5_row0_col7">우선점검</td>
-<td class="data row0 col8" id="T_aa0d5_row0_col8">관찰</td>
-<td class="data row0 col9" id="T_aa0d5_row0_col9">관찰</td>
-<td class="data row0 col10" id="T_aa0d5_row0_col10">관찰</td>
-<td class="data row0 col11" id="T_aa0d5_row0_col11">관찰</td>
-<td class="data row0 col12" id="T_aa0d5_row0_col12">관찰</td>
-<td class="data row0 col13" id="T_aa0d5_row0_col13">관찰</td>
-<td class="data row0 col14" id="T_aa0d5_row0_col14">관찰</td>
-<td class="data row0 col15" id="T_aa0d5_row0_col15">관찰</td>
-<td class="data row0 col16" id="T_aa0d5_row0_col16">관찰</td>
-<td class="data row0 col17" id="T_aa0d5_row0_col17">우선점검</td>
+<td class="data row0 col0" id="T_b5b4f_row0_col0">기계</td>
+<td class="data row0 col1" id="T_b5b4f_row0_col1">우선점검</td>
+<td class="data row0 col2" id="T_b5b4f_row0_col2">E|A|P</td>
+<td class="data row0 col3" id="T_b5b4f_row0_col3">-3979.000000</td>
+<td class="data row0 col4" id="T_b5b4f_row0_col4">51.190000</td>
+<td class="data row0 col5" id="T_b5b4f_row0_col5">2.000000</td>
+<td class="data row0 col6" id="T_b5b4f_row0_col6">False</td>
+<td class="data row0 col7" id="T_b5b4f_row0_col7">True</td>
+<td class="data row0 col8" id="T_b5b4f_row0_col8">가동 위축 신호 · 실질생산 위축 신호(PPI 조정)</td>
+<td class="data row0 col9" id="T_b5b4f_row0_col9">고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</td>
 </tr>
 <tr>
-<th class="row_heading level0 row1" id="T_aa0d5_level0_row1">기타</th>
-<td class="data row1 col0" id="T_aa0d5_row1_col0">관찰</td>
-<td class="data row1 col1" id="T_aa0d5_row1_col1">관찰</td>
-<td class="data row1 col2" id="T_aa0d5_row1_col2">관찰</td>
-<td class="data row1 col3" id="T_aa0d5_row1_col3">추가확인</td>
-<td class="data row1 col4" id="T_aa0d5_row1_col4">추가확인</td>
-<td class="data row1 col5" id="T_aa0d5_row1_col5">추가확인</td>
-<td class="data row1 col6" id="T_aa0d5_row1_col6">추가확인</td>
-<td class="data row1 col7" id="T_aa0d5_row1_col7">관찰</td>
-<td class="data row1 col8" id="T_aa0d5_row1_col8">관찰</td>
-<td class="data row1 col9" id="T_aa0d5_row1_col9">관찰</td>
-<td class="data row1 col10" id="T_aa0d5_row1_col10">관찰</td>
-<td class="data row1 col11" id="T_aa0d5_row1_col11">관찰</td>
-<td class="data row1 col12" id="T_aa0d5_row1_col12">추가확인</td>
-<td class="data row1 col13" id="T_aa0d5_row1_col13">추가확인</td>
-<td class="data row1 col14" id="T_aa0d5_row1_col14">추가확인</td>
-<td class="data row1 col15" id="T_aa0d5_row1_col15">추가확인</td>
-<td class="data row1 col16" id="T_aa0d5_row1_col16">관찰</td>
-<td class="data row1 col17" id="T_aa0d5_row1_col17">관찰</td>
+<td class="data row1 col0" id="T_b5b4f_row1_col0">목재종이</td>
+<td class="data row1 col1" id="T_b5b4f_row1_col1">우선점검</td>
+<td class="data row1 col2" id="T_b5b4f_row1_col2">E|R|P</td>
+<td class="data row1 col3" id="T_b5b4f_row1_col3">-48.000000</td>
+<td class="data row1 col4" id="T_b5b4f_row1_col4">0.370000</td>
+<td class="data row1 col5" id="T_b5b4f_row1_col5">2.000000</td>
+<td class="data row1 col6" id="T_b5b4f_row1_col6">True</td>
+<td class="data row1 col7" id="T_b5b4f_row1_col7">True</td>
+<td class="data row1 col8" id="T_b5b4f_row1_col8">실질생산 위축 신호(PPI 조정)</td>
+<td class="data row1 col9" id="T_b5b4f_row1_col9">고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</td>
 </tr>
 <tr>
-<th class="row_heading level0 row2" id="T_aa0d5_level0_row2">목재종이</th>
-<td class="data row2 col0" id="T_aa0d5_row2_col0">관찰</td>
-<td class="data row2 col1" id="T_aa0d5_row2_col1">관찰</td>
-<td class="data row2 col2" id="T_aa0d5_row2_col2">관찰</td>
-<td class="data row2 col3" id="T_aa0d5_row2_col3">관찰</td>
-<td class="data row2 col4" id="T_aa0d5_row2_col4">관찰</td>
-<td class="data row2 col5" id="T_aa0d5_row2_col5">관찰</td>
-<td class="data row2 col6" id="T_aa0d5_row2_col6">추가확인</td>
-<td class="data row2 col7" id="T_aa0d5_row2_col7">추가확인</td>
-<td class="data row2 col8" id="T_aa0d5_row2_col8">추가확인</td>
-<td class="data row2 col9" id="T_aa0d5_row2_col9">추가확인</td>
-<td class="data row2 col10" id="T_aa0d5_row2_col10">추가확인</td>
-<td class="data row2 col11" id="T_aa0d5_row2_col11">추가확인</td>
-<td class="data row2 col12" id="T_aa0d5_row2_col12">관찰</td>
-<td class="data row2 col13" id="T_aa0d5_row2_col13">관찰</td>
-<td class="data row2 col14" id="T_aa0d5_row2_col14">관찰</td>
-<td class="data row2 col15" id="T_aa0d5_row2_col15">관찰</td>
-<td class="data row2 col16" id="T_aa0d5_row2_col16">우선점검</td>
-<td class="data row2 col17" id="T_aa0d5_row2_col17">우선점검</td>
+<td class="data row2 col0" id="T_b5b4f_row2_col0">운송장비</td>
+<td class="data row2 col1" id="T_b5b4f_row2_col1">관찰</td>
+<td class="data row2 col2" id="T_b5b4f_row2_col2">없음</td>
+<td class="data row2 col3" id="T_b5b4f_row2_col3">-129.000000</td>
+<td class="data row2 col4" id="T_b5b4f_row2_col4">14.200000</td>
+<td class="data row2 col5" id="T_b5b4f_row2_col5">2.000000</td>
+<td class="data row2 col6" id="T_b5b4f_row2_col6">False</td>
+<td class="data row2 col7" id="T_b5b4f_row2_col7">True</td>
+<td class="data row2 col8" id="T_b5b4f_row2_col8">해석 보류</td>
+<td class="data row2 col9" id="T_b5b4f_row2_col9">고용 축 진입신호 없음</td>
 </tr>
 <tr>
-<th class="row_heading level0 row3" id="T_aa0d5_level0_row3">비금속</th>
-<td class="data row3 col0" id="T_aa0d5_row3_col0">관찰</td>
-<td class="data row3 col1" id="T_aa0d5_row3_col1">관찰</td>
-<td class="data row3 col2" id="T_aa0d5_row3_col2">관찰</td>
-<td class="data row3 col3" id="T_aa0d5_row3_col3">관찰</td>
-<td class="data row3 col4" id="T_aa0d5_row3_col4">관찰</td>
-<td class="data row3 col5" id="T_aa0d5_row3_col5">관찰</td>
-<td class="data row3 col6" id="T_aa0d5_row3_col6">관찰</td>
-<td class="data row3 col7" id="T_aa0d5_row3_col7">관찰</td>
-<td class="data row3 col8" id="T_aa0d5_row3_col8">관찰</td>
-<td class="data row3 col9" id="T_aa0d5_row3_col9">추가확인</td>
-<td class="data row3 col10" id="T_aa0d5_row3_col10">추가확인</td>
-<td class="data row3 col11" id="T_aa0d5_row3_col11">관찰</td>
-<td class="data row3 col12" id="T_aa0d5_row3_col12">추가확인</td>
-<td class="data row3 col13" id="T_aa0d5_row3_col13">추가확인</td>
-<td class="data row3 col14" id="T_aa0d5_row3_col14">추가확인</td>
-<td class="data row3 col15" id="T_aa0d5_row3_col15">추가확인</td>
-<td class="data row3 col16" id="T_aa0d5_row3_col16">관찰</td>
-<td class="data row3 col17" id="T_aa0d5_row3_col17">관찰</td>
+<td class="data row3 col0" id="T_b5b4f_row3_col0">전기전자</td>
+<td class="data row3 col1" id="T_b5b4f_row3_col1">관찰</td>
+<td class="data row3 col2" id="T_b5b4f_row3_col2">없음</td>
+<td class="data row3 col3" id="T_b5b4f_row3_col3">-116.000000</td>
+<td class="data row3 col4" id="T_b5b4f_row3_col4">24.370000</td>
+<td class="data row3 col5" id="T_b5b4f_row3_col5">1.000000</td>
+<td class="data row3 col6" id="T_b5b4f_row3_col6">False</td>
+<td class="data row3 col7" id="T_b5b4f_row3_col7">True</td>
+<td class="data row3 col8" id="T_b5b4f_row3_col8">해석 보류</td>
+<td class="data row3 col9" id="T_b5b4f_row3_col9">고용 축 진입신호 없음</td>
 </tr>
 <tr>
-<th class="row_heading level0 row4" id="T_aa0d5_level0_row4">석유화학</th>
-<td class="data row4 col0" id="T_aa0d5_row4_col0">관찰</td>
-<td class="data row4 col1" id="T_aa0d5_row4_col1">관찰</td>
-<td class="data row4 col2" id="T_aa0d5_row4_col2">관찰</td>
-<td class="data row4 col3" id="T_aa0d5_row4_col3">관찰</td>
-<td class="data row4 col4" id="T_aa0d5_row4_col4">관찰</td>
-<td class="data row4 col5" id="T_aa0d5_row4_col5">관찰</td>
-<td class="data row4 col6" id="T_aa0d5_row4_col6">관찰</td>
-<td class="data row4 col7" id="T_aa0d5_row4_col7">관찰</td>
-<td class="data row4 col8" id="T_aa0d5_row4_col8">관찰</td>
-<td class="data row4 col9" id="T_aa0d5_row4_col9">관찰</td>
-<td class="data row4 col10" id="T_aa0d5_row4_col10">관찰</td>
-<td class="data row4 col11" id="T_aa0d5_row4_col11">관찰</td>
-<td class="data row4 col12" id="T_aa0d5_row4_col12">관찰</td>
-<td class="data row4 col13" id="T_aa0d5_row4_col13">우선점검</td>
-<td class="data row4 col14" id="T_aa0d5_row4_col14">관찰</td>
-<td class="data row4 col15" id="T_aa0d5_row4_col15">관찰</td>
-<td class="data row4 col16" id="T_aa0d5_row4_col16">관찰</td>
-<td class="data row4 col17" id="T_aa0d5_row4_col17">관찰</td>
+<td class="data row4 col0" id="T_b5b4f_row4_col0">철강</td>
+<td class="data row4 col1" id="T_b5b4f_row4_col1">관찰</td>
+<td class="data row4 col2" id="T_b5b4f_row4_col2">없음</td>
+<td class="data row4 col3" id="T_b5b4f_row4_col3">-112.000000</td>
+<td class="data row4 col4" id="T_b5b4f_row4_col4">8.440000</td>
+<td class="data row4 col5" id="T_b5b4f_row4_col5">4.000000</td>
+<td class="data row4 col6" id="T_b5b4f_row4_col6">False</td>
+<td class="data row4 col7" id="T_b5b4f_row4_col7">True</td>
+<td class="data row4 col8" id="T_b5b4f_row4_col8">생산유지·고용감소 신호</td>
+<td class="data row4 col9" id="T_b5b4f_row4_col9">고용 축 진입신호 없음</td>
 </tr>
 <tr>
-<th class="row_heading level0 row5" id="T_aa0d5_level0_row5">섬유의복</th>
-<td class="data row5 col0" id="T_aa0d5_row5_col0">추가확인</td>
-<td class="data row5 col1" id="T_aa0d5_row5_col1">추가확인</td>
-<td class="data row5 col2" id="T_aa0d5_row5_col2">추가확인</td>
-<td class="data row5 col3" id="T_aa0d5_row5_col3">관찰</td>
-<td class="data row5 col4" id="T_aa0d5_row5_col4">관찰</td>
-<td class="data row5 col5" id="T_aa0d5_row5_col5">관찰</td>
-<td class="data row5 col6" id="T_aa0d5_row5_col6">관찰</td>
-<td class="data row5 col7" id="T_aa0d5_row5_col7">추가확인</td>
-<td class="data row5 col8" id="T_aa0d5_row5_col8">추가확인</td>
-<td class="data row5 col9" id="T_aa0d5_row5_col9">추가확인</td>
-<td class="data row5 col10" id="T_aa0d5_row5_col10">추가확인</td>
-<td class="data row5 col11" id="T_aa0d5_row5_col11">추가확인</td>
-<td class="data row5 col12" id="T_aa0d5_row5_col12">추가확인</td>
-<td class="data row5 col13" id="T_aa0d5_row5_col13">추가확인</td>
-<td class="data row5 col14" id="T_aa0d5_row5_col14">추가확인</td>
-<td class="data row5 col15" id="T_aa0d5_row5_col15">관찰</td>
-<td class="data row5 col16" id="T_aa0d5_row5_col16">관찰</td>
-<td class="data row5 col17" id="T_aa0d5_row5_col17">관찰</td>
+<td class="data row5 col0" id="T_b5b4f_row5_col0">음식료</td>
+<td class="data row5 col1" id="T_b5b4f_row5_col1">관찰</td>
+<td class="data row5 col2" id="T_b5b4f_row5_col2">없음</td>
+<td class="data row5 col3" id="T_b5b4f_row5_col3">-25.000000</td>
+<td class="data row5 col4" id="T_b5b4f_row5_col4">0.550000</td>
+<td class="data row5 col5" id="T_b5b4f_row5_col5">2.000000</td>
+<td class="data row5 col6" id="T_b5b4f_row5_col6">False</td>
+<td class="data row5 col7" id="T_b5b4f_row5_col7">True</td>
+<td class="data row5 col8" id="T_b5b4f_row5_col8">해석 보류</td>
+<td class="data row5 col9" id="T_b5b4f_row5_col9">고용 축 진입신호 없음</td>
 </tr>
 <tr>
-<th class="row_heading level0 row6" id="T_aa0d5_level0_row6">운송장비</th>
-<td class="data row6 col0" id="T_aa0d5_row6_col0">관찰</td>
-<td class="data row6 col1" id="T_aa0d5_row6_col1">관찰</td>
-<td class="data row6 col2" id="T_aa0d5_row6_col2">관찰</td>
-<td class="data row6 col3" id="T_aa0d5_row6_col3">관찰</td>
-<td class="data row6 col4" id="T_aa0d5_row6_col4">관찰</td>
-<td class="data row6 col5" id="T_aa0d5_row6_col5">관찰</td>
-<td class="data row6 col6" id="T_aa0d5_row6_col6">관찰</td>
-<td class="data row6 col7" id="T_aa0d5_row6_col7">관찰</td>
-<td class="data row6 col8" id="T_aa0d5_row6_col8">관찰</td>
-<td class="data row6 col9" id="T_aa0d5_row6_col9">관찰</td>
-<td class="data row6 col10" id="T_aa0d5_row6_col10">관찰</td>
-<td class="data row6 col11" id="T_aa0d5_row6_col11">관찰</td>
-<td class="data row6 col12" id="T_aa0d5_row6_col12">관찰</td>
-<td class="data row6 col13" id="T_aa0d5_row6_col13">관찰</td>
-<td class="data row6 col14" id="T_aa0d5_row6_col14">관찰</td>
-<td class="data row6 col15" id="T_aa0d5_row6_col15">추가확인</td>
-<td class="data row6 col16" id="T_aa0d5_row6_col16">관찰</td>
-<td class="data row6 col17" id="T_aa0d5_row6_col17">관찰</td>
+<td class="data row6 col0" id="T_b5b4f_row6_col0">비금속</td>
+<td class="data row6 col1" id="T_b5b4f_row6_col1">관찰</td>
+<td class="data row6 col2" id="T_b5b4f_row6_col2">없음</td>
+<td class="data row6 col3" id="T_b5b4f_row6_col3">-2.000000</td>
+<td class="data row6 col4" id="T_b5b4f_row6_col4">0.160000</td>
+<td class="data row6 col5" id="T_b5b4f_row6_col5">3.000000</td>
+<td class="data row6 col6" id="T_b5b4f_row6_col6">False</td>
+<td class="data row6 col7" id="T_b5b4f_row6_col7">True</td>
+<td class="data row6 col8" id="T_b5b4f_row6_col8">업체수 감소 신호 · 생산유지·고용감소 신호</td>
+<td class="data row6 col9" id="T_b5b4f_row6_col9">고용 축 진입신호 없음</td>
 </tr>
 <tr>
-<th class="row_heading level0 row7" id="T_aa0d5_level0_row7">음식료</th>
-<td class="data row7 col0" id="T_aa0d5_row7_col0">관찰</td>
-<td class="data row7 col1" id="T_aa0d5_row7_col1">관찰</td>
-<td class="data row7 col2" id="T_aa0d5_row7_col2">관찰</td>
-<td class="data row7 col3" id="T_aa0d5_row7_col3">관찰</td>
-<td class="data row7 col4" id="T_aa0d5_row7_col4">관찰</td>
-<td class="data row7 col5" id="T_aa0d5_row7_col5">관찰</td>
-<td class="data row7 col6" id="T_aa0d5_row7_col6">관찰</td>
-<td class="data row7 col7" id="T_aa0d5_row7_col7">관찰</td>
-<td class="data row7 col8" id="T_aa0d5_row7_col8">관찰</td>
-<td class="data row7 col9" id="T_aa0d5_row7_col9">관찰</td>
-<td class="data row7 col10" id="T_aa0d5_row7_col10">관찰</td>
-<td class="data row7 col11" id="T_aa0d5_row7_col11">관찰</td>
-<td class="data row7 col12" id="T_aa0d5_row7_col12">우선점검</td>
-<td class="data row7 col13" id="T_aa0d5_row7_col13">우선점검</td>
-<td class="data row7 col14" id="T_aa0d5_row7_col14">우선점검</td>
-<td class="data row7 col15" id="T_aa0d5_row7_col15">우선점검</td>
-<td class="data row7 col16" id="T_aa0d5_row7_col16">우선점검</td>
-<td class="data row7 col17" id="T_aa0d5_row7_col17">관찰</td>
+<td class="data row7 col0" id="T_b5b4f_row7_col0">섬유의복</td>
+<td class="data row7 col1" id="T_b5b4f_row7_col1">관찰</td>
+<td class="data row7 col2" id="T_b5b4f_row7_col2">P</td>
+<td class="data row7 col3" id="T_b5b4f_row7_col3">0.000000</td>
+<td class="data row7 col4" id="T_b5b4f_row7_col4">0.030000</td>
+<td class="data row7 col5" id="T_b5b4f_row7_col5">nan</td>
+<td class="data row7 col6" id="T_b5b4f_row7_col6">False</td>
+<td class="data row7 col7" id="T_b5b4f_row7_col7">True</td>
+<td class="data row7 col8" id="T_b5b4f_row7_col8">가동 위축 신호 · 실질생산 위축 신호(PPI 조정)</td>
+<td class="data row7 col9" id="T_b5b4f_row7_col9">고용 축 진입신호 없음 (생산 12.3% 단독 감소 — 확인질문에 반영)</td>
 </tr>
 <tr>
-<th class="row_heading level0 row8" id="T_aa0d5_level0_row8">전기전자</th>
-<td class="data row8 col0" id="T_aa0d5_row8_col0">관찰</td>
-<td class="data row8 col1" id="T_aa0d5_row8_col1">관찰</td>
-<td class="data row8 col2" id="T_aa0d5_row8_col2">관찰</td>
-<td class="data row8 col3" id="T_aa0d5_row8_col3">관찰</td>
-<td class="data row8 col4" id="T_aa0d5_row8_col4">관찰</td>
-<td class="data row8 col5" id="T_aa0d5_row8_col5">관찰</td>
-<td class="data row8 col6" id="T_aa0d5_row8_col6">관찰</td>
-<td class="data row8 col7" id="T_aa0d5_row8_col7">관찰</td>
-<td class="data row8 col8" id="T_aa0d5_row8_col8">관찰</td>
-<td class="data row8 col9" id="T_aa0d5_row8_col9">관찰</td>
-<td class="data row8 col10" id="T_aa0d5_row8_col10">관찰</td>
-<td class="data row8 col11" id="T_aa0d5_row8_col11">관찰</td>
-<td class="data row8 col12" id="T_aa0d5_row8_col12">추가확인</td>
-<td class="data row8 col13" id="T_aa0d5_row8_col13">추가확인</td>
-<td class="data row8 col14" id="T_aa0d5_row8_col14">관찰</td>
-<td class="data row8 col15" id="T_aa0d5_row8_col15">추가확인</td>
-<td class="data row8 col16" id="T_aa0d5_row8_col16">관찰</td>
-<td class="data row8 col17" id="T_aa0d5_row8_col17">관찰</td>
+<td class="data row8 col0" id="T_b5b4f_row8_col0">기타</td>
+<td class="data row8 col1" id="T_b5b4f_row8_col1">관찰</td>
+<td class="data row8 col2" id="T_b5b4f_row8_col2">없음</td>
+<td class="data row8 col3" id="T_b5b4f_row8_col3">25.000000</td>
+<td class="data row8 col4" id="T_b5b4f_row8_col4">0.150000</td>
+<td class="data row8 col5" id="T_b5b4f_row8_col5">2.000000</td>
+<td class="data row8 col6" id="T_b5b4f_row8_col6">False</td>
+<td class="data row8 col7" id="T_b5b4f_row8_col7">True</td>
+<td class="data row8 col8" id="T_b5b4f_row8_col8">업체수 감소 신호</td>
+<td class="data row8 col9" id="T_b5b4f_row8_col9">고용 축 진입신호 없음</td>
 </tr>
 <tr>
-<th class="row_heading level0 row9" id="T_aa0d5_level0_row9">철강</th>
-<td class="data row9 col0" id="T_aa0d5_row9_col0">관찰</td>
-<td class="data row9 col1" id="T_aa0d5_row9_col1">관찰</td>
-<td class="data row9 col2" id="T_aa0d5_row9_col2">관찰</td>
-<td class="data row9 col3" id="T_aa0d5_row9_col3">관찰</td>
-<td class="data row9 col4" id="T_aa0d5_row9_col4">관찰</td>
-<td class="data row9 col5" id="T_aa0d5_row9_col5">관찰</td>
-<td class="data row9 col6" id="T_aa0d5_row9_col6">관찰</td>
-<td class="data row9 col7" id="T_aa0d5_row9_col7">관찰</td>
-<td class="data row9 col8" id="T_aa0d5_row9_col8">관찰</td>
-<td class="data row9 col9" id="T_aa0d5_row9_col9">관찰</td>
-<td class="data row9 col10" id="T_aa0d5_row9_col10">관찰</td>
-<td class="data row9 col11" id="T_aa0d5_row9_col11">관찰</td>
-<td class="data row9 col12" id="T_aa0d5_row9_col12">관찰</td>
-<td class="data row9 col13" id="T_aa0d5_row9_col13">관찰</td>
-<td class="data row9 col14" id="T_aa0d5_row9_col14">관찰</td>
-<td class="data row9 col15" id="T_aa0d5_row9_col15">관찰</td>
-<td class="data row9 col16" id="T_aa0d5_row9_col16">관찰</td>
-<td class="data row9 col17" id="T_aa0d5_row9_col17">관찰</td>
+<td class="data row9 col0" id="T_b5b4f_row9_col0">석유화학</td>
+<td class="data row9 col1" id="T_b5b4f_row9_col1">관찰</td>
+<td class="data row9 col2" id="T_b5b4f_row9_col2">P</td>
+<td class="data row9 col3" id="T_b5b4f_row9_col3">54.000000</td>
+<td class="data row9 col4" id="T_b5b4f_row9_col4">0.540000</td>
+<td class="data row9 col5" id="T_b5b4f_row9_col5">1.000000</td>
+<td class="data row9 col6" id="T_b5b4f_row9_col6">False</td>
+<td class="data row9 col7" id="T_b5b4f_row9_col7">True</td>
+<td class="data row9 col8" id="T_b5b4f_row9_col8">가동 위축 신호</td>
+<td class="data row9 col9" id="T_b5b4f_row9_col9">고용 축 진입신호 없음 (생산 6.7% 단독 감소 — 확인질문에 반영)</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><details><summary>전체 180행 펼치기</summary><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>quarter</th>
-<th>decision_stage</th>
-<th>decision_entry_trigger</th>
-<th>decision_reinforcement</th>
-<th>decision_scale_gate</th>
-<th>decision_reason</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>기계</td>
-<td>2022Q1</td>
-<td>우선점검</td>
-<td>A</td>
-<td>반복</td>
-<td>True</td>
-<td>산단 제조업 고용의 2.04% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 11.2% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2022Q1</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 11.4%(상위경계 10% 통과) · 산단평균 대비 11.6%p 열위(상위경계 통과) [상위경계 통과했으나 고용 39인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2022Q2</td>
-<td>우선점검</td>
-<td>A</td>
-<td>반복</td>
-<td>True</td>
-<td>산단 제조업 고용의 2.16% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 20.4% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2022Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 11.4%(상위경계 10% 통과) · 산단평균 대비 11.3%p 열위(상위경계 통과) [상위경계 통과했으나 고용 39인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2022Q3</td>
-<td>우선점검</td>
-<td>A</td>
-<td>반복</td>
-<td>True</td>
-<td>산단 제조업 고용의 2.10% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 13.0% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2022Q3</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 11.4%(상위경계 10% 통과) · 산단평균 대비 11.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 39인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2022Q4</td>
-<td>우선점검</td>
-<td>A</td>
-<td>생산|반복</td>
-<td>True</td>
-<td>산단 제조업 고용의 2.62% 감소(상위경계 2.0% 통과) → 보강: 생산 8.4% 감소 / 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2022Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산</td>
-<td>False</td>
-<td>고용감소 19.4%(상위경계 10% 통과) · 산단평균 대비 16.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 158인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 49.9% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 7.8% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2022Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 15.2% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q1</td>
-<td>우선점검</td>
-<td>E|R|A</td>
-<td>반복</td>
-<td>True</td>
-<td>고용감소 9.7%(진입경계 5% 통과) · 산단평균 대비 6.7%p 열위(진입경계 통과) · 산단 제조업 고용의 5.38% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2023Q1</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 24.6%(상위경계 10% 통과) · 산단평균 대비 21.6%p 열위(상위경계 통과) [상위경계 통과했으나 고용 147인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 49.4% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 11.4% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q2</td>
-<td>우선점검</td>
-<td>E|R|A</td>
-<td>반복</td>
-<td>True</td>
-<td>고용감소 8.8%(진입경계 5% 통과) · 산단평균 대비 5.8%p 열위(진입경계 통과) · 산단 제조업 고용의 4.82% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2023Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 18.6%(상위경계 10% 통과) · 산단평균 대비 15.6%p 열위(상위경계 통과) [상위경계 통과했으나 고용 158인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 52.4% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 13.5% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q3</td>
-<td>우선점검</td>
-<td>E|R|A</td>
-<td>반복</td>
-<td>True</td>
-<td>고용감소 8.4%(진입경계 5% 통과) · 산단평균 대비 6.5%p 열위(진입경계 통과) · 산단 제조업 고용의 4.54% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2023Q3</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 12.4%(상위경계 10% 통과) · 산단평균 대비 10.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 170인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2023Q3</td>
-<td>추가확인</td>
-<td>E</td>
-<td>생산</td>
-<td>False</td>
-<td>고용감소 5.6%(진입경계 5% 통과)</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2023Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 6.8% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2023Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2023Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2023Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2023Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2023Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 9.9% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2023Q4</td>
-<td>우선점검</td>
-<td>E|R|A</td>
-<td>반복</td>
-<td>True</td>
-<td>고용감소 6.8%(진입경계 5% 통과) · 산단평균 대비 7.8%p 열위(진입경계 통과) · 산단 제조업 고용의 3.61% 감소(상위경계 2.0% 통과) → 보강: 직전 분기에도 진입신호(지속) [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2023Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2023Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 9.1%(진입경계 5% 통과) · 산단평균 대비 10.2%p 열위(상위경계 통과) [상위경계 통과했으나 고용 239인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2023Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2023Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2023Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용감소 40.6%(상위경계 10% 통과) · 산단평균 대비 41.7%p 열위(상위경계 통과) [상위경계 통과했으나 고용 38인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2023Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2023Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2023Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2023Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2024Q1</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 7.4%(진입경계 5% 통과) · 산단평균 대비 7.6%p 열위(진입경계 통과)</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2024Q1</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 28.3%(상위경계 10% 통과) · 산단평균 대비 28.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 38인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 8.8% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2024Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2024Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2024Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 8.1%(진입경계 5% 통과) · 산단평균 대비 10.7%p 열위(상위경계 통과) [상위경계 통과했으나 고용 237인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2024Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용감소 7.2%(진입경계 5% 통과) · 산단평균 대비 9.8%p 열위(진입경계 통과)</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2024Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 9.0% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2024Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 13.6%(상위경계 10% 통과) · 산단평균 대비 16.2%p 열위(상위경계 통과) [상위경계 통과했으나 고용 38인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2024Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2024Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2024Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 12.4% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2024Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2024Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2024Q3</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 16.3%(상위경계 10% 통과) · 산단평균 대비 18.9%p 열위(상위경계 통과) [상위경계 통과했으나 고용 211인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2024Q3</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 6.0%(진입경계 5% 통과) · 산단평균 대비 8.6%p 열위(진입경계 통과)</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2024Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 15.8% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2024Q3</td>
-<td>추가확인</td>
-<td>R</td>
-<td>반복</td>
-<td>False</td>
-<td>산단평균 대비 5.2%p 열위(진입경계 통과)</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2024Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2024Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2024Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 12.8% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2024Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 11.4%p 열위(상위경계 통과) [상위경계 통과했으나 고용 214인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2024Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 11.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 34인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2024Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2025Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2025Q1</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용감소 15.0%(상위경계 10% 통과) · 산단평균 대비 17.6%p 열위(상위경계 통과) [상위경계 통과했으나 고용 147인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2025Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2025Q1</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산</td>
-<td>False</td>
-<td>고용감소 25.6%(상위경계 10% 통과) · 산단평균 대비 28.2%p 열위(상위경계 통과) [상위경계 통과했으나 고용 186인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2025Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 43.3% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2025Q1</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 13.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 34인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2025Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2025Q1</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>생산</td>
-<td>True</td>
-<td>고용감소 8.9%(진입경계 5% 통과) · 산단평균 대비 11.4%p 열위(상위경계 통과) → 보강: 생산 12.9% 감소</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2025Q1</td>
-<td>추가확인</td>
-<td>R</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>산단평균 대비 5.7%p 열위(진입경계 통과)</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 11.3% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2025Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2025Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 15.6%(상위경계 10% 통과) · 산단평균 대비 18.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 146인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2025Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2025Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 20.6%(상위경계 10% 통과) · 산단평균 대비 23.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 185인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2025Q2</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>생산</td>
-<td>True</td>
-<td>고용감소 10.0%(상위경계 10% 통과) · 산단평균 대비 12.5%p 열위(상위경계 통과) → 보강: 생산 50.2% 감소</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2025Q2</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 13.0%p 열위(상위경계 통과) [상위경계 통과했으나 고용 34인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2025Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2025Q2</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>True</td>
-<td>고용감소 30.5%(상위경계 10% 통과) · 산단평균 대비 32.9%p 열위(상위경계 통과) → 보강: 생산 18.5% 감소 / 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2025Q2</td>
-<td>추가확인</td>
-<td>R|A</td>
-<td>반복</td>
-<td>True</td>
-<td>산단평균 대비 7.0%p 열위(진입경계 통과) · 산단 제조업 고용의 1.13% 감소(진입경계 1.0% 통과)</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2025Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2025Q3</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 16.2%(상위경계 10% 통과) · 산단평균 대비 16.4%p 열위(상위경계 통과) [상위경계 통과했으나 고용 145인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2025Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2025Q3</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 22.9%(상위경계 10% 통과) · 산단평균 대비 23.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 182인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2025Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 44.5% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2025Q3</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>False</td>
-<td>고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 10.7%p 열위(상위경계 통과) [상위경계 통과했으나 고용 34인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2025Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2025Q3</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>True</td>
-<td>고용감소 28.4%(상위경계 10% 통과) · 산단평균 대비 28.5%p 열위(상위경계 통과) → 보강: 생산 17.5% 감소 / 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2025Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q3</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2025Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2025Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 27.0%(상위경계 10% 통과) · 산단평균 대비 27.8%p 열위(상위경계 통과) [상위경계 통과했으나 고용 143인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2025Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2025Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>반복</td>
-<td>False</td>
-<td>고용감소 27.6%(상위경계 10% 통과) · 산단평균 대비 28.4%p 열위(상위경계 통과) [상위경계 통과했으나 고용 178인 &lt; 300인으로 우선점검 제외]</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2025Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 38.8% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2025Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 18.7% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2025Q4</td>
-<td>추가확인</td>
-<td>E|R</td>
-<td>생산</td>
-<td>True</td>
-<td>고용감소 5.3%(진입경계 5% 통과) · 산단평균 대비 6.1%p 열위(진입경계 통과)</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2025Q4</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>True</td>
-<td>고용감소 32.6%(상위경계 10% 통과) · 산단평균 대비 33.4%p 열위(상위경계 통과) → 보강: 생산 15.3% 감소 / 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2025Q4</td>
-<td>추가확인</td>
-<td>R|A</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>산단평균 대비 5.5%p 열위(진입경계 통과) · 산단 제조업 고용의 1.20% 감소(진입경계 1.0% 통과)</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2025Q4</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 9.6% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2026Q1</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>생산</td>
-<td>True</td>
-<td>고용감소 10.6%(상위경계 10% 통과) · 산단평균 대비 9.0%p 열위(진입경계 통과) → 보강: 생산 14.3% 감소</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 10.0% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 9.2% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2026Q1</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>반복</td>
-<td>True</td>
-<td>고용감소 21.5%(상위경계 10% 통과) · 산단평균 대비 19.8%p 열위(상위경계 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 7.0% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2026Q1</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기계</td>
-<td>2026Q2</td>
-<td>우선점검</td>
-<td>E|A</td>
-<td>생산</td>
-<td>True</td>
-<td>고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2026Q2</td>
-<td>우선점검</td>
-<td>E|R</td>
-<td>생산|반복</td>
-<td>True</td>
-<td>고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>False</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>True</td>
-<td>고용 축 진입신호 없음 (생산 6.7% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>생산</td>
-<td>False</td>
-<td>고용 축 진입신호 없음 (생산 12.3% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>없음</td>
-<td>확인된 보강 없음</td>
-<td>True</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-</tbody>
-</table></details></div>
 </div>
 </div>
 </div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c02b324a">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6d89b100">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="14.-%EB%B6%84%EA%B8%B0%EB%B3%84-%EB%8B%A8%EA%B3%84-%EB%B6%84%ED%8F%AC">14. 분기별 단계 분포<a class="anchor-link" href="#14.-%EB%B6%84%EA%B8%B0%EB%B3%84-%EB%8B%A8%EA%B3%84-%EB%B6%84%ED%8F%AC">¶</a></h2>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=71674295">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto"><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2022Q1</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:55px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 1</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2022Q2</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:55px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 1</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2022Q3</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:55px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 1</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2022Q4</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:55px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 1</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2023Q1</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:55px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 1</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2023Q2</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:55px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 1</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2023Q3</b><span style="display:inline-block;width:385px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 7</span><span style="display:inline-block;width:110px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 2</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2023Q4</b><span style="display:inline-block;width:385px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 7</span><span style="display:inline-block;width:110px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 2</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2024Q1</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:110px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 2</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2024Q2</b><span style="display:inline-block;width:385px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 7</span><span style="display:inline-block;width:165px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 3</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2024Q3</b><span style="display:inline-block;width:385px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 7</span><span style="display:inline-block;width:165px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 3</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2024Q4</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:110px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 2</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2025Q1</b><span style="display:inline-block;width:275px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 5</span><span style="display:inline-block;width:220px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 4</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2025Q2</b><span style="display:inline-block;width:220px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 4</span><span style="display:inline-block;width:220px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 4</span><span style="display:inline-block;width:110px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 2</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2025Q3</b><span style="display:inline-block;width:330px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 6</span><span style="display:inline-block;width:165px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 3</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2025Q4</b><span style="display:inline-block;width:275px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 5</span><span style="display:inline-block;width:220px;background:#c08a20;color:white;text-align:center;padding:7px 0">추가확인 4</span><span style="display:inline-block;width:55px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 1</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2026Q1</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:110px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 2</span></div><div style="margin:5px 0;white-space:nowrap"><b style="display:inline-block;width:80px">2026Q2</b><span style="display:inline-block;width:440px;background:#708fa6;color:white;text-align:center;padding:7px 0">관찰 8</span><span style="display:inline-block;width:110px;background:#b74c39;color:white;text-align:center;padding:7px 0">우선점검 2</span></div></div>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>관찰</th>
-<th>우선점검</th>
-<th>추가확인</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>기계</td>
-<td>9</td>
-<td>9</td>
-<td>0</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>10</td>
-<td>0</td>
-<td>8</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>10</td>
-<td>2</td>
-<td>6</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>12</td>
-<td>0</td>
-<td>6</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>17</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>7</td>
-<td>0</td>
-<td>11</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>17</td>
-<td>0</td>
-<td>1</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>13</td>
-<td>5</td>
-<td>0</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>15</td>
-<td>0</td>
-<td>3</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>18</td>
-<td>0</td>
-<td>0</td>
-</tr>
-</tbody>
-</table></div>
+<h3 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h3><ul>
+<li>최신 2026Q2에는 기계·목재종이가 우선점검이고 나머지 8개 업종은 관찰이다. 추가확인은 0건이다.</li>
+<li>기계는 고용 감소 규모가 크고 A 상위경계와 생산 보강을 충족한다. 목재종이는 비율·상대열위·반복·생산 보강이 함께 나타나지만 절대 감소 인원은 작다.</li>
+</ul>
+<h3 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h3><ul>
+<li>두 사례는 같은 우선점검이라도 Q2 규모와 확인 질문이 다르므로 진단카드로 분리해 인계한다.</li>
+</ul>
+<h3 id="%EC%A3%BC%EC%9D%98">주의<a class="anchor-link" href="#%EC%A3%BC%EC%9D%98">¶</a></h3><ul>
+<li>관찰 업종도 정기 모니터링 대상이며, 생산 단독 감소나 외부 맥락신호는 확인질문에 남는다.</li>
+</ul>
 </div>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b7243b56">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c8b8fbff">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="15.-%EC%B5%9C%EC%8B%A0-10%EA%B0%9C-%EC%97%85%EC%A2%85">15. 최신 10개 업종<a class="anchor-link" href="#15.-%EC%B5%9C%EC%8B%A0-10%EA%B0%9C-%EC%97%85%EC%A2%85">¶</a></h2><p>같은 단계의 순위는 감소인원 기준이다. 관찰업종의 표시순서를 위험순위로 해석하지 않는다.</p>
+<h2 id="2.-%EC%A4%91%EC%9A%94-%EC%82%AC%EB%A1%80-%EC%A7%84%EB%8B%A8%EC%B9%B4%EB%93%9C">2. 중요 사례 진단카드<a class="anchor-link" href="#2.-%EC%A4%91%EC%9A%94-%EC%82%AC%EB%A1%80-%EC%A7%84%EB%8B%A8%EC%B9%B4%EB%93%9C">¶</a></h2><p>다기준 재검토는 해당 사례의 Triage 단계가 추가확인일 때만 표시한다. 최신 우선점검 2건은 ELECTRE/SMAA를 거치지 않는다.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=336b784f">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>quarter</th>
-<th>decision_stage</th>
-<th>q2_same_stage_rank</th>
-<th>employment</th>
-<th>emp_delta</th>
-<th>signal_e</th>
-<th>signal_r</th>
-<th>signal_a</th>
-<th>signal_p</th>
-<th>decision_reason</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>기계</td>
-<td>2026Q2</td>
-<td>우선점검</td>
-<td>1</td>
-<td>58784.0</td>
-<td>-3979.0</td>
-<td>6.340</td>
-<td>2.704</td>
-<td>3.465</td>
-<td>19.547</td>
-<td>고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</td>
-</tr>
-<tr>
-<td>목재종이</td>
-<td>2026Q2</td>
-<td>우선점검</td>
-<td>2</td>
-<td>428.0</td>
-<td>-48.0</td>
-<td>10.084</td>
-<td>6.449</td>
-<td>0.042</td>
-<td>12.897</td>
-<td>고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>1</td>
-<td>16308.0</td>
-<td>-129.0</td>
-<td>0.785</td>
-<td>0.000</td>
-<td>0.112</td>
-<td>0.000</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>2</td>
-<td>27979.0</td>
-<td>-116.0</td>
-<td>0.413</td>
-<td>0.000</td>
-<td>0.101</td>
-<td>0.000</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>3</td>
-<td>9689.0</td>
-<td>-112.0</td>
-<td>1.143</td>
-<td>0.000</td>
-<td>0.098</td>
-<td>0.000</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>4</td>
-<td>635.0</td>
-<td>-25.0</td>
-<td>3.788</td>
-<td>0.152</td>
-<td>0.022</td>
-<td>0.000</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>5</td>
-<td>183.0</td>
-<td>-2.0</td>
-<td>1.081</td>
-<td>0.000</td>
-<td>0.002</td>
-<td>0.000</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>기타</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>6</td>
-<td>171.0</td>
-<td>25.0</td>
-<td>0.000</td>
-<td>0.000</td>
-<td>0.000</td>
-<td>0.000</td>
-<td>고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>7</td>
-<td>619.0</td>
-<td>54.0</td>
-<td>0.000</td>
-<td>0.000</td>
-<td>0.000</td>
-<td>6.730</td>
-<td>고용 축 진입신호 없음 (생산 6.7% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>2026Q2</td>
-<td>관찰</td>
-<td>8</td>
-<td>34.0</td>
-<td>0.0</td>
-<td>0.000</td>
-<td>0.000</td>
-<td>0.000</td>
-<td>12.320</td>
-<td>고용 축 진입신호 없음 (생산 12.3% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=eb438e1c">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="16.-%EB%8C%80%ED%91%9C-%EC%A7%84%EB%8B%A8%EC%B9%B4%EB%93%9C-%E2%80%94-%EC%97%85%EC%A2%85-%EB%B6%84%EC%84%9D%EC%9D%84-%ED%98%84%EC%9E%A5-%EC%97%85%EB%AC%B4%EB%A1%9C-%EC%9D%B8%EA%B3%84">16. 대표 진단카드 — 업종 분석을 현장 업무로 인계<a class="anchor-link" href="#16.-%EB%8C%80%ED%91%9C-%EC%A7%84%EB%8B%A8%EC%B9%B4%EB%93%9C-%E2%80%94-%EC%97%85%EC%A2%85-%EB%B6%84%EC%84%9D%EC%9D%84-%ED%98%84%EC%9E%A5-%EC%97%85%EB%AC%B4%EB%A1%9C-%EC%9D%B8%EA%B3%84">¶</a></h2><p>구조화 카드 10개와 결정적 템플릿 진단문을 CSV/JSON/Markdown으로 생성했다. AI 추정 없이 실제 수치·질문을 전달한다. 담당자 검토·현장 근거·지원 검토결과는 미입력이다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=ef02c4f0">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=4ae21f45">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
-<h1 id="%EC%B0%BD%EC%9B%90%EA%B5%AD%EA%B0%80%EC%82%B0%EB%8B%A8-%EC%82%B0%EC%97%85%C2%B7%EA%B3%A0%EC%9A%A9-%EC%A0%84%ED%99%98%EC%A7%84%EB%8B%A8-%EB%B0%8F-%EC%A7%80%EC%9B%90%EC%97%B0%EA%B3%84-%EB%AA%A8%ED%98%95-%E2%80%94-%EC%97%85%EC%A2%85-%EC%A7%84%EB%8B%A8%EC%B9%B4%EB%93%9C">창원국가산단 산업·고용 전환진단 및 지원연계 모형 — 업종 진단카드<a class="anchor-link" href="#%EC%B0%BD%EC%9B%90%EA%B5%AD%EA%B0%80%EC%82%B0%EB%8B%A8-%EC%82%B0%EC%97%85%C2%B7%EA%B3%A0%EC%9A%A9-%EC%A0%84%ED%99%98%EC%A7%84%EB%8B%A8-%EB%B0%8F-%EC%A7%80%EC%9B%90%EC%97%B0%EA%B3%84-%EB%AA%A8%ED%98%95-%E2%80%94-%EC%97%85%EC%A2%85-%EC%A7%84%EB%8B%A8%EC%B9%B4%EB%93%9C">¶</a></h1><p>기존 산업동향 분석을 기업·현장 확인의 표준화된 진입점으로 전환한다.</p>
-<p>산업동향 데이터 → Q1 상태 / Q2 규모 / Q3 시간 → 선제점검 판단 → 표준 업종 진단카드 → 담당자 검토 → 기업·현장 확인 → 기존 기업지원·고용지원·직업훈련 체계 검토 → 다음 분기 재점검</p>
-<p>모형은 이번 분기에 어느 업종을 어느 수준으로 먼저 확인할지만 결정한다. 위기 여부·확률·원인·기업별 지원·사업 선정·예산은 결정하지 않는다.</p>
-<h2 id="%EA%B8%B0%EA%B3%84-%C2%B7-2026Q2-%C2%B7-%EC%9A%B0%EC%84%A0%EC%A0%90%EA%B2%80">기계 · 2026Q2 · 우선점검<a class="anchor-link" href="#%EA%B8%B0%EA%B3%84-%C2%B7-2026Q2-%C2%B7-%EC%9A%B0%EC%84%A0%EC%A0%90%EA%B2%80">¶</a></h2><ul>
-<li>같은 단계 처리순위: 1 (감소인원 순; 동률은 업종명 순)</li>
-<li>Q1: S4 생산↓·고용↓</li>
-<li>관측사실: 명목 생산 YoY -19.55%; 고용 YoY -6.34%; 고용 증감 -3,979명; 산단 고용비중 51.19%</li>
-<li>Q2 전체 순증감 기여율: 91.85% (상쇄가 커 순변화/총변화 &lt; 0.30이면 미표시)</li>
-<li>Q3 상태 지속: 2분기; 직전→현재 전환: S4 → S4; 반복 고용진입신호: False</li>
-<li>최근 경로: 2025Q3:S3 → 2025Q4:S1 → 2026Q1:S4 → 2026Q2:S4</li>
-<li>E 6.34% / R 2.70%p / A 3.47% / P 19.55%</li>
-<li>경계 통과: E True/False, R False/False, A True/True (진입/상위); P True; 규모 True</li>
-<li>단계 근거: 고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</li>
-<li>자료 플래그: 고용핵심 미확인=False, 생산 미확인=False, 직전신호 미확인=False</li>
-<li>집계자료로 알 수 없는 것: 수주·자동화·외주화·기업이전·고용조정 계획·미충원·설비전환의 유무와 원인은 집계자료만으로 확정할 수 없음</li>
-<li>추가 확인질문: 수주잔량·가동률·휴업/감산·기업 수 변동·고용조정 계획 신고 여부를 확인한다(원인 후보이며 입증된 원인이 아님).</li>
-<li>확인 담당 기능: 기업지원 기능 + 고용지원 기능</li>
-<li>후속 연결: 현장 확인 결과에 따라 기존 기업지원·고용지원·직업훈련 체계 검토</li>
-<li>담당자 검토: 미실시 / 현장 근거: 미입력 / 지원 검토결과: 미입력</li>
-<li>다음 재점검: 2026Q3</li>
+<h3 id="%EA%B8%B0%EA%B3%84">기계<a class="anchor-link" href="#%EA%B8%B0%EA%B3%84">¶</a></h3><h4 id="1.-CORE-%EC%A7%84%EB%8B%A8">1. CORE 진단<a class="anchor-link" href="#1.-CORE-%EC%A7%84%EB%8B%A8">¶</a></h4><ul>
+<li>Q1: 생산↓·고용↓</li>
+<li>Q2: 고용 -3,979명, YoY -6.34%, 고용비중 51.19%</li>
+<li>Q3: 현재 상태 2분기, S4 → S4, 반복신호=False</li>
 </ul>
-<h2 id="%EB%AA%A9%EC%9E%AC%EC%A2%85%EC%9D%B4-%C2%B7-2026Q2-%C2%B7-%EC%9A%B0%EC%84%A0%EC%A0%90%EA%B2%80">목재종이 · 2026Q2 · 우선점검<a class="anchor-link" href="#%EB%AA%A9%EC%9E%AC%EC%A2%85%EC%9D%B4-%C2%B7-2026Q2-%C2%B7-%EC%9A%B0%EC%84%A0%EC%A0%90%EA%B2%80">¶</a></h2><ul>
-<li>같은 단계 처리순위: 2 (감소인원 순; 동률은 업종명 순)</li>
-<li>Q1: S4 생산↓·고용↓</li>
-<li>관측사실: 명목 생산 YoY -12.90%; 고용 YoY -10.08%; 고용 증감 -48명; 산단 고용비중 0.37%</li>
-<li>Q2 전체 순증감 기여율: 1.11% (상쇄가 커 순변화/총변화 &lt; 0.30이면 미표시)</li>
-<li>Q3 상태 지속: 2분기; 직전→현재 전환: S4 → S4; 반복 고용진입신호: True</li>
-<li>최근 경로: 2025Q3:S1 → 2025Q4:S1 → 2026Q1:S4 → 2026Q2:S4</li>
-<li>E 10.08% / R 6.45%p / A 0.04% / P 12.90%</li>
-<li>경계 통과: E True/True, R True/False, A False/False (진입/상위); P True; 규모 True</li>
-<li>단계 근거: 고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</li>
-<li>자료 플래그: 고용핵심 미확인=False, 생산 미확인=False, 직전신호 미확인=False</li>
-<li>집계자료로 알 수 없는 것: 수주·자동화·외주화·기업이전·고용조정 계획·미충원·설비전환의 유무와 원인은 집계자료만으로 확정할 수 없음</li>
-<li>추가 확인질문: 수주잔량·가동률·휴업/감산·기업 수 변동·고용조정 계획 신고 여부를 확인한다(원인 후보이며 입증된 원인이 아님).</li>
-<li>확인 담당 기능: 기업지원 기능 + 고용지원 기능</li>
-<li>후속 연결: 현장 확인 결과에 따라 기존 기업지원·고용지원·직업훈련 체계 검토</li>
-<li>담당자 검토: 미실시 / 현장 근거: 미입력 / 지원 검토결과: 미입력</li>
-<li>다음 재점검: 2026Q3</li>
+<h4 id="2.-Triage">2. Triage<a class="anchor-link" href="#2.-Triage">¶</a></h4><ul>
+<li>단계: <strong>우선점검</strong></li>
+<li>선택 이유: 고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</li>
+</ul>
+<h4 id="3.-%EB%8B%A4%EA%B8%B0%EC%A4%80-%EC%9E%AC%EA%B2%80%ED%86%A0">3. 다기준 재검토<a class="anchor-link" href="#3.-%EB%8B%A4%EA%B8%B0%EC%A4%80-%EC%9E%AC%EA%B2%80%ED%86%A0">¶</a></h4><ul>
+<li>해당 없음 — 우선점검은 외부근거·담당자 검토로 직접 이동</li>
+</ul>
+<h4 id="4.-%EC%99%B8%EB%B6%80%EA%B7%BC%EA%B1%B0">4. 외부근거<a class="anchor-link" href="#4.-%EC%99%B8%EB%B6%80%EA%B7%BC%EA%B1%B0">¶</a></h4><ul>
+<li>가동 위축 신호 · 실질생산 위축 신호(PPI 조정)</li>
+<li>범위 주의: 산단·창원시·경남·전국 자료가 혼재하므로 판정을 덮어쓰지 않음</li>
+</ul>
+<h4 id="5.-%ED%95%B4%EC%84%9D">5. 해석<a class="anchor-link" href="#5.-%ED%95%B4%EC%84%9D">¶</a></h4><ul>
+<li>데이터로 확인: 고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</li>
+<li>아직 추정: 기업별 수주·자동화·외주화·휴업·투자·이직 원인</li>
+</ul>
+<h4 id="6.-%EB%8B%B4%EB%8B%B9%EC%9E%90-%ED%99%95%EC%9D%B8-%EC%A7%88%EB%AC%B8">6. 담당자 확인 질문<a class="anchor-link" href="#6.-%EB%8B%B4%EB%8B%B9%EC%9E%90-%ED%99%95%EC%9D%B8-%EC%A7%88%EB%AC%B8">¶</a></h4><ul>
+<li>수주잔량·가동률·휴업/감산·기업 수 변동·고용조정 계획 신고 여부를 확인한다(원인 후보이며 입증된 원인이 아님).</li>
+<li>가동률 하락이 일시적 생산조정인지 수주·수요 감소에 따른 것인지 확인할 필요가 있다.
+명목생산 변화에 가격효과가 포함되어 있으므로 실제 물량이 줄었는지 추가로 확인할 필요가 있다.
+확인된 품목 기준 수출이 함께 감소하고 있어, 외부수요 약화 가능성을 보려면 수출 감소가 특정 품목·기업에 집중되는지 추가 확인할 필요가 있다.
+창원시 제조업 전체에서 이직자 증가가 함께 관측되므로, 특정 사업장 조정 또는 노동이동과 관련된 것인지 추가 확인할 필요가 있다.
+가동률과 전력사용의 방향이 달라 업종 구성·설비 특성·자료범위(산단 vs 시 전체) 차이를 추가 확인할 필요가 있다.
+경남 제조업 업황 심리지수가 기준선(100)을 밑돌아, 업종 고유 요인인지 지역 전반의 경기 흐름인지 구분해 확인할 필요가 있다.
+같은 업종의 전국 업황 심리지수도 기준선을 밑돌아, 관측된 변화가 산단 고유 현상인지 전국 업종 흐름인지 확인할 필요가 있다.
+이 분기는 월별 원자료가 공표되지 않아 분기 내 지속 여부를 확인할 수 없다. 분기말 단일시점 값에만 의존한 판단임을 감안할 필요가 있다.
+연간보정 개정본을 사용한 구간이다. 이후 재개정 시 값이 달라질 수 있음을 확인할 필요가 있다.</li>
+</ul>
+<h4 id="7.-%EC%9D%B8%EA%B3%84-%EA%B0%80%EB%8A%A5%ED%95%9C-%EA%B8%B0%EC%A1%B4-%EA%B8%B0%EB%8A%A5">7. 인계 가능한 기존 기능<a class="anchor-link" href="#7.-%EC%9D%B8%EA%B3%84-%EA%B0%80%EB%8A%A5%ED%95%9C-%EA%B8%B0%EC%A1%B4-%EA%B8%B0%EB%8A%A5">¶</a></h4><ul>
+<li>기업지원 기능 + 고용지원 기능</li>
+<li>산업동향 · 기업지원 / 산업동향 / 고용지원</li>
 </ul>
 </div>
 </div>
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
+<h3 id="%EB%AA%A9%EC%9E%AC%EC%A2%85%EC%9D%B4">목재종이<a class="anchor-link" href="#%EB%AA%A9%EC%9E%AC%EC%A2%85%EC%9D%B4">¶</a></h3><h4 id="1.-CORE-%EC%A7%84%EB%8B%A8">1. CORE 진단<a class="anchor-link" href="#1.-CORE-%EC%A7%84%EB%8B%A8">¶</a></h4><ul>
+<li>Q1: 생산↓·고용↓</li>
+<li>Q2: 고용 -48명, YoY -10.08%, 고용비중 0.37%</li>
+<li>Q3: 현재 상태 2분기, S4 → S4, 반복신호=True</li>
+</ul>
+<h4 id="2.-Triage">2. Triage<a class="anchor-link" href="#2.-Triage">¶</a></h4><ul>
+<li>단계: <strong>우선점검</strong></li>
+<li>선택 이유: 고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</li>
+</ul>
+<h4 id="3.-%EB%8B%A4%EA%B8%B0%EC%A4%80-%EC%9E%AC%EA%B2%80%ED%86%A0">3. 다기준 재검토<a class="anchor-link" href="#3.-%EB%8B%A4%EA%B8%B0%EC%A4%80-%EC%9E%AC%EA%B2%80%ED%86%A0">¶</a></h4><ul>
+<li>해당 없음 — 우선점검은 외부근거·담당자 검토로 직접 이동</li>
+</ul>
+<h4 id="4.-%EC%99%B8%EB%B6%80%EA%B7%BC%EA%B1%B0">4. 외부근거<a class="anchor-link" href="#4.-%EC%99%B8%EB%B6%80%EA%B7%BC%EA%B1%B0">¶</a></h4><ul>
+<li>실질생산 위축 신호(PPI 조정)</li>
+<li>범위 주의: 산단·창원시·경남·전국 자료가 혼재하므로 판정을 덮어쓰지 않음</li>
+</ul>
+<h4 id="5.-%ED%95%B4%EC%84%9D">5. 해석<a class="anchor-link" href="#5.-%ED%95%B4%EC%84%9D">¶</a></h4><ul>
+<li>데이터로 확인: 고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</li>
+<li>아직 추정: 기업별 수주·자동화·외주화·휴업·투자·이직 원인</li>
+</ul>
+<h4 id="6.-%EB%8B%B4%EB%8B%B9%EC%9E%90-%ED%99%95%EC%9D%B8-%EC%A7%88%EB%AC%B8">6. 담당자 확인 질문<a class="anchor-link" href="#6.-%EB%8B%B4%EB%8B%B9%EC%9E%90-%ED%99%95%EC%9D%B8-%EC%A7%88%EB%AC%B8">¶</a></h4><ul>
+<li>수주잔량·가동률·휴업/감산·기업 수 변동·고용조정 계획 신고 여부를 확인한다(원인 후보이며 입증된 원인이 아님).</li>
+<li>명목생산 변화에 가격효과가 포함되어 있으므로 실제 물량이 줄었는지 추가로 확인할 필요가 있다.
+창원시 제조업 전체에서 이직자 증가가 함께 관측되므로, 특정 사업장 조정 또는 노동이동과 관련된 것인지 추가 확인할 필요가 있다.
+경남 제조업 업황 심리지수가 기준선(100)을 밑돌아, 업종 고유 요인인지 지역 전반의 경기 흐름인지 구분해 확인할 필요가 있다.
+같은 업종의 전국 업황 심리지수도 기준선을 밑돌아, 관측된 변화가 산단 고유 현상인지 전국 업종 흐름인지 확인할 필요가 있다.
+이 분기는 월별 원자료가 공표되지 않아 분기 내 지속 여부를 확인할 수 없다. 분기말 단일시점 값에만 의존한 판단임을 감안할 필요가 있다.
+연간보정 개정본을 사용한 구간이다. 이후 재개정 시 값이 달라질 수 있음을 확인할 필요가 있다.</li>
+</ul>
+<h4 id="7.-%EC%9D%B8%EA%B3%84-%EA%B0%80%EB%8A%A5%ED%95%9C-%EA%B8%B0%EC%A1%B4-%EA%B8%B0%EB%8A%A5">7. 인계 가능한 기존 기능<a class="anchor-link" href="#7.-%EC%9D%B8%EA%B3%84-%EA%B0%80%EB%8A%A5%ED%95%9C-%EA%B8%B0%EC%A1%B4-%EA%B8%B0%EB%8A%A5">¶</a></h4><ul>
+<li>기업지원 기능 + 고용지원 기능</li>
+<li>산업동향 / 고용지원</li>
+</ul>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f63e602d">
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=22b7a593">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="17.-%EA%B8%B0%EC%A1%B4-ELECTRE/MRSort%EC%9D%98-%EC%9C%84%EC%B9%98">17. 기존 ELECTRE/MRSort의 위치<a class="anchor-link" href="#17.-%EA%B8%B0%EC%A1%B4-ELECTRE/MRSort%EC%9D%98-%EC%9C%84%EC%B9%98">¶</a></h2><p>초기 Q1~Q3 → ELECTRE 후보 구현 → 독립 감사(가중치·lambda·RC/VRC·VRC4·possible assignment·revision robustness) → 대안 비교 → 공공 선제대응 논리 조사 → 업종 단위 트리아지. 자유 선호공간에서 연구진 규범이 영향을 주는 점을 확인한 검증 이력이며 삭제하지 않는다.</p>
-<p><strong>새 모형은 외부 기준과 명시된 운영규칙에 따라 하나의 행동단계를 반환하도록 재설계되었다.</strong> 더 정확하다는 주장이 아니다. 대표값은 기존 독립 감사의 v1.0_crisp, possible set은 같은 감사의 연속공간 범위다.</p>
+<h2 id="3.-%EC%84%A0%ED%83%9D%EC%A0%81-ELECTRE/SMAA%EC%99%80-Human-in-the-Loop">3. 선택적 ELECTRE/SMAA와 Human-in-the-Loop<a class="anchor-link" href="#3.-%EC%84%A0%ED%83%9D%EC%A0%81-ELECTRE/SMAA%EC%99%80-Human-in-the-Loop">¶</a></h2>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=ded7ab7e">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=25fa2a55">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="overflow:auto;max-width:100%"><table class="dataframe">
+<style type="text/css">
+</style>
+<table id="T_32ac6">
 <thead>
-<tr style="text-align: right;">
-<th>industry</th>
-<th>legacy_possible_set</th>
-<th>legacy_representative</th>
-<th>stage</th>
-<th>changed_vs_representative</th>
-<th>change_reason</th>
+<tr>
+<th class="col_heading level0 col0" id="T_32ac6_level0_col0">경로</th>
+<th class="col_heading level0 col1" id="T_32ac6_level0_col1">다음 단계</th>
+<th class="col_heading level0 col2" id="T_32ac6_level0_col2">ELECTRE 필수</th>
+<th class="col_heading level0 col3" id="T_32ac6_level0_col3">자동 stage 변경</th>
+<th class="col_heading level0 col4" id="T_32ac6_level0_col4">최종 판단</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>기계</td>
-<td>CHECK|PRIORITY</td>
-<td>우선점검</td>
-<td>우선점검</td>
-<td>False</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</td>
+<td class="data row0 col0" id="T_32ac6_row0_col0">관찰</td>
+<td class="data row0 col1" id="T_32ac6_row0_col1">정기 모니터링</td>
+<td class="data row0 col2" id="T_32ac6_row0_col2">False</td>
+<td class="data row0 col3" id="T_32ac6_row0_col3">False</td>
+<td class="data row0 col4" id="T_32ac6_row0_col4">담당자</td>
 </tr>
 <tr>
-<td>기타</td>
-<td>OBSERVE</td>
-<td>관찰</td>
-<td>관찰</td>
-<td>False</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음</td>
+<td class="data row1 col0" id="T_32ac6_row1_col0">추가확인</td>
+<td class="data row1 col1" id="T_32ac6_row1_col1">선택적 ELECTRE/SMAA → 외부근거</td>
+<td class="data row1 col2" id="T_32ac6_row1_col2">True</td>
+<td class="data row1 col3" id="T_32ac6_row1_col3">False</td>
+<td class="data row1 col4" id="T_32ac6_row1_col4">담당자</td>
 </tr>
 <tr>
-<td>목재종이</td>
-<td>CHECK|PRIORITY</td>
-<td>우선점검</td>
-<td>우선점검</td>
-<td>False</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</td>
-</tr>
-<tr>
-<td>비금속</td>
-<td>OBSERVE|CHECK</td>
-<td>관찰</td>
-<td>관찰</td>
-<td>False</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>석유화학</td>
-<td>OBSERVE</td>
-<td>관찰</td>
-<td>관찰</td>
-<td>False</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음 (생산 6.7% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>섬유의복</td>
-<td>OBSERVE</td>
-<td>관찰</td>
-<td>관찰</td>
-<td>False</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음 (생산 12.3% 단독 감소 — 확인질문에 반영)</td>
-</tr>
-<tr>
-<td>운송장비</td>
-<td>OBSERVE|CHECK</td>
-<td>추가확인</td>
-<td>관찰</td>
-<td>True</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>음식료</td>
-<td>CHECK|PRIORITY</td>
-<td>추가확인</td>
-<td>관찰</td>
-<td>True</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>전기전자</td>
-<td>OBSERVE|CHECK</td>
-<td>추가확인</td>
-<td>관찰</td>
-<td>True</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음</td>
-</tr>
-<tr>
-<td>철강</td>
-<td>OBSERVE|CHECK</td>
-<td>추가확인</td>
-<td>관찰</td>
-<td>True</td>
-<td>외부 논리·명시적 운영규칙의 단일 행동단계로 재설계; 고용 축 진입신호 없음</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=084852ad">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="%EC%B4%88%EA%B8%B0-%EC%84%A4%EA%B3%84%EC%95%88%EC%9D%98-%EC%B1%84%ED%83%9D-%EC%A1%B0%EA%B1%B4%EC%9D%84-%EA%B1%B0%EC%B9%9C-%ED%98%84%EC%9E%AC-%EA%B2%B0%EB%A1%A0">초기 설계안의 채택 조건을 거친 현재 결론<a class="anchor-link" href="#%EC%B4%88%EA%B8%B0-%EC%84%A4%EA%B3%84%EC%95%88%EC%9D%98-%EC%B1%84%ED%83%9D-%EC%A1%B0%EA%B1%B4%EC%9D%84-%EA%B1%B0%EC%B9%9C-%ED%98%84%EC%9E%AC-%EA%B2%B0%EB%A1%A0">¶</a></h3><table>
-<thead>
-<tr>
-<th>초기 구상</th>
-<th>현재 위치</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ELECTRE TRI-B 주모형 후보</td>
-<td>구현·독립 감사한 비교모형</td>
-</tr>
-<tr>
-<td>SMAA-TRI 안정성</td>
-<td>파라미터 공간에 조건부인 후보 검증; 새 트리아지는 고정 시나리오 민감도</td>
-</tr>
-<tr>
-<td>패널 고정효과 회귀</td>
-<td>실행 근거 미확인, 수행 완료로 기재하지 않음</td>
-</tr>
-<tr>
-<td>Isolation Forest</td>
-<td>미수행 선택사항</td>
-</tr>
-<tr>
-<td>Q1~Q3·진단카드</td>
-<td>최종 핵심 흐름</td>
+<td class="data row2 col0" id="T_32ac6_row2_col0">우선점검</td>
+<td class="data row2 col1" id="T_32ac6_row2_col1">외부근거</td>
+<td class="data row2 col2" id="T_32ac6_row2_col2">False</td>
+<td class="data row2 col3" id="T_32ac6_row2_col3">False</td>
+<td class="data row2 col4" id="T_32ac6_row2_col4">담당자</td>
 </tr>
 </tbody>
 </table>
-<p>ELECTRE도 경계별 가중 지지도를 합산하므로 자의성이 자동 제거되는 것은 아니다. veto는 outranking 차단이며 심각한 신호의 자동 승격과 다르다. 표집 수용도는 위기 확률이나 연속공간 전체의 필연성이 아니다. 초기 g4(괴리 후보)와 실제 ELECTRE g4(고용 하회기간), 최종 반복신호는 서로 다르다.</p>
-<p><a href="../reports/model_role_clarification.md">초기 문서의 항목별 정정과 팀원 공유 문장</a></p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4f6b17d7">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="18.-%EC%B5%9C%EC%A2%85-%ED%96%89%EC%A0%95-%EC%97%B0%EA%B2%B0%EA%B3%BC-%EC%9E%AC%EC%A0%90%EA%B2%80">18. 최종 행정 연결과 재점검<a class="anchor-link" href="#18.-%EC%B5%9C%EC%A2%85-%ED%96%89%EC%A0%95-%EC%97%B0%EA%B2%B0%EA%B3%BC-%EC%9E%AC%EC%A0%90%EA%B2%80">¶</a></h2><p>진단카드 수신 → 담당자가 집계·개정·질문 검토 → 기업·현장 근거 확인 → 기업·경영 / 고용조정 / 인력·숙련 담당 기능에서 기존 체계 검토 → 판단·근거 기록 → 다음 분기 새 자료 재점검. 이는 제안 흐름이며 실제 기관 인계·지원 효과는 아직 검증하지 않았다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=e5909cf6">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div style="font-family:Malgun Gothic,sans-serif;max-width:1000px;padding:24px;background:#f3f7fa;border-radius:16px;color:#16324a">
-<h2>기존 기능 사이를 잇는 업종 단위 진입점</h2>
-<div style="padding:16px;background:white;border-left:6px solid #59758b"><b>기존 기능</b>　산업·고용 동향 분석</div>
-<p style="text-align:center">↓</p>
-<div style="padding:18px;border:2px dashed #bd731d;background:#fff9ed"><b>연결할 질문</b><br/>어느 업종을 먼저 볼 것인가?　왜 봐야 하는가?　무엇을 확인할 것인가?</div>
-<p style="text-align:center">↓</p>
-<div style="padding:20px;background:#123e59;color:white"><b>우리 프로젝트</b><br/><br/>Q1 상태: 확인질문　│　Q2 규모: 영향·처리순서　│　Q3 시간: 반복신호<br/><br/>선제점검 판단 → 관찰 / 추가확인 / 우선점검 → 표준 업종 진단카드</div>
-<p style="text-align:center">↓ 담당자에게 근거·질문·자료 한계 인계</p>
-<div style="padding:18px;background:white;border-left:6px solid #258575"><b>기존 기능</b>　담당자 검토 → 기업·현장 확인<br/><br/>기업·경영 확인 → 기업지원 검토<br/>고용조정 확인 → 고용지원 검토<br/>인력·숙련 확인 → 직업훈련 검토</div>
-<p><b>↻ 다음 분기 재점검</b>　현장 근거·지원 검토결과는 담당자가 기록</p>
-<small>모형은 점검의 순서와 수준을 제안합니다. 위기 확정·기업 선정·지원사업 처방은 하지 않습니다.</small></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=047e252a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="19.-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EA%B0%80-%EB%A7%8C%EB%93%9C%EB%8A%94-%EA%B2%83">19. 프로젝트가 만드는 것<a class="anchor-link" href="#19.-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EA%B0%80-%EB%A7%8C%EB%93%9C%EB%8A%94-%EA%B2%83">¶</a></h2><p>업종 단위 점검의 근거·순서·확인질문과 표준 인계카드를 만든다. 기존 행정체계의 기관·지원사업·예산을 새로 만들거나 자동 결정하지 않는다. 선택적 AI는 향후 이 카드의 문장 다듬기로만 제한할 수 있으며 현재 진단문은 결정적 템플릿이다.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e2b3081f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="20.-%ED%95%9C%EA%B3%84%EC%99%80-%EC%8B%A4%ED%96%89-%EA%B7%BC%EA%B1%B0">20. 한계와 실행 근거<a class="anchor-link" href="#20.-%ED%95%9C%EA%B3%84%EC%99%80-%EC%8B%A4%ED%96%89-%EA%B7%BC%EA%B1%B0">¶</a></h2><p>A·300인의 운영규범성, 일부 업종 편중, 사전등록 증거 부족, 명목 생산·집계업종 한계, 개정자료 의존, 현장 정답·연계효과 미검증이 남는다. 전체 감사는 reports/final_result_summary.md, 출처는 rule_provenance.csv와 institution_handoff_map.csv, 코드·원자료 해시는 run_metadata.json에서 확인한다. 노트북은 CSV와 Python 모듈을 표시하며 판정식을 복제하지 않는다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=5e48d9df">
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>'changwon-triage-rule/3.1.0-audited'</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>180행, 최신 10개 카드, 출처·민감도·인계 흐름 표시 완료
+<pre>전체 추가확인: 35 | 선택 재검토: 35 | ELECTRE stage 분포: {'PRIORITY': 20, 'CHECK': 9, 'UNDETERMINED': 4, 'OBSERVE': 2} | overwrite: 0
 </pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cd536a95">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=70d3749a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="%EA%B3%B5%EC%8B%9D-%EC%B6%9C%EC%B2%98%EC%99%80-%EC%83%81%EC%84%B8-%EA%B2%80%EC%A6%9D-%ED%8C%8C%EC%9D%BC">공식 출처와 상세 검증 파일<a class="anchor-link" href="#%EA%B3%B5%EC%8B%9D-%EC%B6%9C%EC%B2%98%EC%99%80-%EC%83%81%EC%84%B8-%EA%B2%80%EC%A6%9D-%ED%8C%8C%EC%9D%BC">¶</a></h3><ul>
-<li><a href="https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000278624&amp;chrClsCd=010201">고용위기지역 고시 — 2026.5.4 시행</a></li>
-<li><a href="https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulSeq=2100000255684">지역 산업위기대응 고시 — 2025.3.4 시행</a></li>
-<li><a href="../reports/final_result_summary.md">최종 감사 보고서 A~N</a></li>
-</ul>
-<p>triage_tests: tests=15, failures=0, errors=0, skipped=0; full_tests: tests=27, failures=0, errors=0, skipped=0</p>
+<h2 id="4.-%EA%B8%B0%EC%A1%B4-%EA%B8%B0%EB%8A%A5%EC%9C%BC%EB%A1%9C%EC%9D%98-%EC%9D%B8%EA%B3%84">4. 기존 기능으로의 인계<a class="anchor-link" href="#4.-%EA%B8%B0%EC%A1%B4-%EA%B8%B0%EB%8A%A5%EC%9C%BC%EB%A1%9C%EC%9D%98-%EC%9D%B8%EA%B3%84">¶</a></h2><p>아래는 자동 사업추천이 아니라 담당자가 현장 확인 후 검토할 수 있는 기존 기능의 지도다. 실제 기관명·사업 운영 여부·지원요건은 인계 시점에 다시 확인한다.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=b0a0297c">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<style type="text/css">
+</style>
+<table id="T_07e5f">
+<thead>
+<tr>
+<th class="col_heading level0 col0" id="T_07e5f_level0_col0">role</th>
+<th class="col_heading level0 col1" id="T_07e5f_level0_col1">institution</th>
+<th class="col_heading level0 col2" id="T_07e5f_level0_col2">unit</th>
+<th class="col_heading level0 col3" id="T_07e5f_level0_col3">function</th>
+<th class="col_heading level0 col4" id="T_07e5f_level0_col4">source_url</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="data row0 col0" id="T_07e5f_row0_col0">산업·경제동향</td>
+<td class="data row0 col1" id="T_07e5f_row0_col1">창원상공회의소</td>
+<td class="data row0 col2" id="T_07e5f_row0_col2">지역·산단·업종</td>
+<td class="data row0 col3" id="T_07e5f_row0_col3">정기 경제동향</td>
+<td class="data row0 col4" id="T_07e5f_row0_col4">https://changwoncci.korcham.net/front/board/boardContentsView.do?boardId=11175&amp;contId=130203&amp;menuId=3992</td>
+</tr>
+<tr>
+<td class="data row1 col0" id="T_07e5f_row1_col0">산업·고용동향</td>
+<td class="data row1 col1" id="T_07e5f_row1_col1">창원산업진흥원</td>
+<td class="data row1 col2" id="T_07e5f_row1_col2">지역·산업</td>
+<td class="data row1 col3" id="T_07e5f_row1_col3">산업·경제동향 및 고용동향 자료</td>
+<td class="data row1 col4" id="T_07e5f_row1_col4">https://www.cwip.or.kr/</td>
+</tr>
+<tr>
+<td class="data row2 col0" id="T_07e5f_row2_col0">지역 위기진단</td>
+<td class="data row2 col1" id="T_07e5f_row2_col1">경남TP 위기지원센터</td>
+<td class="data row2 col2" id="T_07e5f_row2_col2">중소기업 밀집지역·기업</td>
+<td class="data row2 col3" id="T_07e5f_row2_col3">모니터링·심층현장조사·맞춤지원</td>
+<td class="data row2 col4" id="T_07e5f_row2_col4">https://www.gntp.or.kr/introduce/staff</td>
+</tr>
+<tr>
+<td class="data row3 col0" id="T_07e5f_row3_col0">기업 진단·고용지원</td>
+<td class="data row3 col1" id="T_07e5f_row3_col1">창원고용복지+센터</td>
+<td class="data row3 col2" id="T_07e5f_row3_col2">기업·구직자</td>
+<td class="data row3 col3" id="T_07e5f_row3_col3">기업 도약보장 패키지 등 진단·연계(운영 공지 시점 확인 필요)</td>
+<td class="data row3 col4" id="T_07e5f_row3_col4">https://www.moel.go.kr/local/changwon/news/reportexplan/view.do?bbs_seq=20240901144</td>
+</tr>
+<tr>
+<td class="data row4 col0" id="T_07e5f_row4_col0">기업 현장지원</td>
+<td class="data row4 col1" id="T_07e5f_row4_col1">창원산업진흥원 기업지원 기능·마이스터센터</td>
+<td class="data row4 col2" id="T_07e5f_row4_col2">기업</td>
+<td class="data row4 col3" id="T_07e5f_row4_col3">현장애로 컨설팅·기술지원</td>
+<td class="data row4 col4" id="T_07e5f_row4_col4">https://www.cwip.or.kr/</td>
+</tr>
+<tr>
+<td class="data row5 col0" id="T_07e5f_row5_col0">인력·훈련 연계</td>
+<td class="data row5 col1" id="T_07e5f_row5_col1">경남지역인적자원개발위원회</td>
+<td class="data row5 col2" id="T_07e5f_row5_col2">산업·기업 인력수요</td>
+<td class="data row5 col3" id="T_07e5f_row5_col3">수요조사·맞춤형 훈련 연계</td>
+<td class="data row5 col4" id="T_07e5f_row5_col4">https://gnhrd.or.kr/</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dc07256a">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4afa6031">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h2><p>최신 분류와 근거 추적표를 함께 표시해 각 카드의 출처를 확인한다.</p>
-<h2 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h2><p>우선순위는 행정적 확정이 아니라 기업·현장 확인 순서를 표준화하는 지원 정보다.</p>
-<h2 id="%ED%95%9C%EA%B3%84">한계<a class="anchor-link" href="#%ED%95%9C%EA%B3%84">¶</a></h2><p>실제 지원 가능성, 담당기관, 기업 상황은 인계 시점에 다시 확인해야 한다.</p>
-<h2 id="Takeaway">Takeaway<a class="anchor-link" href="#Takeaway">¶</a></h2><p>핵심 신호부터 현장 확인 질문과 기존 기관 인계까지 한 흐름으로 제시한다.</p>
+<h2 id="5.-%EB%8B%B4%EB%8B%B9%EC%9E%90-%EA%B8%B0%EB%A1%9D-%ED%95%84%EB%93%9C%EC%99%80-%EB%8B%A4%EC%9D%8C-%EB%B6%84%EA%B8%B0-%EC%9E%AC%EC%A0%90%EA%B2%80">5. 담당자 기록 필드와 다음 분기 재점검<a class="anchor-link" href="#5.-%EB%8B%B4%EB%8B%B9%EC%9E%90-%EA%B8%B0%EB%A1%9D-%ED%95%84%EB%93%9C%EC%99%80-%EB%8B%A4%EC%9D%8C-%EB%B6%84%EA%B8%B0-%EC%9E%AC%EC%A0%90%EA%B2%80">¶</a></h2><ol>
+<li>기업·현장 확인 대상과 근거</li>
+<li>수주·가동·설비·외주·인력·고용조정 관련 확인 사실</li>
+<li>외부자료와 CORE의 일치/불일치 이유</li>
+<li>기존 지원기능 검토 결과(연계/미연계/추가자료 필요)</li>
+<li>다음 분기 재점검 시 비교할 지표</li>
+</ol>
+<p>이 기록은 모형의 자동 학습 label로 즉시 사용하지 않는다. 정의·수집방식·검증절차가 합의된 뒤 별도 평가자료로 관리해야 한다.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d0b5fbfc">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="%EB%8B%A8%EA%B3%84-%EA%B2%B0%EB%A1%A0">단계 결론<a class="anchor-link" href="#%EB%8B%A8%EA%B3%84-%EA%B2%B0%EB%A1%A0">¶</a></h1><h2 id="%ED%99%95%EC%9D%B8%EB%90%9C-%EC%82%AC%EC%8B%A4">확인된 사실<a class="anchor-link" href="#%ED%99%95%EC%9D%B8%EB%90%9C-%EC%82%AC%EC%8B%A4">¶</a></h2><p>최신 2026Q2에는 기계와 목재종이가 우선점검이며 추가확인은 없다. 전체 기간 추가확인 35건은 선택적 ELECTRE/SMAA 35건과 일치하고 단계 overwrite는 0건이다. 모든 최신 사례는 Human review가 필요하다.</p>
+<h2 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h2><p>현재 구조는 CORE로 현상을 진단하고, Triage로 확인 순서를 정하며, 추가확인만 다기준 재검토하고, 외부근거와 담당자 확인을 거쳐 기존 기능으로 인계하는 의사결정지원 흐름이다.</p>
+<h2 id="%EC%9D%B4-%EB%8B%A8%EA%B3%84%EB%A7%8C%EC%9C%BC%EB%A1%9C-%EB%A7%90%ED%95%A0-%EC%88%98-%EC%97%86%EB%8A%94-%EA%B2%83">이 단계만으로 말할 수 없는 것<a class="anchor-link" href="#%EC%9D%B4-%EB%8B%A8%EA%B3%84%EB%A7%8C%EC%9C%BC%EB%A1%9C-%EB%A7%90%ED%95%A0-%EC%88%98-%EC%97%86%EB%8A%94-%EA%B2%83">¶</a></h2><p>이 결과는 위기 확정, 기업별 원인, 지원대상 선정, 사업 처방, 예산 배분 또는 정책효과를 자동 결정하지 않는다.</p>
+<h2 id="%EB%8B%A4%EC%9D%8C-%EB%8B%A8%EA%B3%84%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0">다음 단계가 필요한 이유<a class="anchor-link" href="#%EB%8B%A4%EC%9D%8C-%EB%8B%A8%EA%B3%84%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0">¶</a></h2><p>담당자 확인 결과를 기록하고 다음 분기 CORE·Triage와 비교해야 모니터링이 완결된다.</p>
+<p>→ 다음: 담당자 확인 결과를 기록하고 다음 분기에 재점검</p>
 </div>
 </div>
 </div>

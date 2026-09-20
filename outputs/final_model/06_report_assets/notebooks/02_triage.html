@@ -7796,384 +7796,915 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=18a7aa26">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2a69e168">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="STEP2.-%EA%B7%9C%EC%B9%99-%EA%B8%B0%EB%B0%98-1%EC%B0%A8-%EB%B6%84%EB%A5%98">STEP2. 규칙 기반 1차 분류<a class="anchor-link" href="#STEP2.-%EA%B7%9C%EC%B9%99-%EA%B8%B0%EB%B0%98-1%EC%B0%A8-%EB%B6%84%EB%A5%98">¶</a></h1><blockquote>
-<p><strong>Takeaway.</strong> 설명 가능한 E/R/A/P 규칙으로 180개 업종×분기를 관찰·추가확인·우선점검으로 나눈다.</p>
-</blockquote>
-<h2 id="%EB%B6%84%EC%84%9D-%EC%A7%88%EB%AC%B8">분석 질문<a class="anchor-link" href="#%EB%B6%84%EC%84%9D-%EC%A7%88%EB%AC%B8">¶</a></h2><p>핵심 신호만으로 어떤 관측을 먼저 확인해야 하는가?</p>
-<h2 id="%EC%9E%85%EB%A0%A5">입력<a class="anchor-link" href="#%EC%9E%85%EB%A0%A5">¶</a></h2><table>
-<thead>
-<tr>
-<th>구분</th>
-<th>설정 변수</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>핵심 패널</td>
-<td><code>config.CORE_TABLE_DIR</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="%EC%B6%9C%EB%A0%A5">출력<a class="anchor-link" href="#%EC%B6%9C%EB%A0%A5">¶</a></h2><table>
-<thead>
-<tr>
-<th>구분</th>
-<th>설정 변수</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>전체 분류</td>
-<td><code>config.TRIAGE_PANEL_PATH</code></td>
-</tr>
-<tr>
-<td>최신 분류</td>
-<td><code>config.TRIAGE_LATEST_PATH</code></td>
-</tr>
-</tbody>
-</table>
+<h1 id="Notebook-02.-Triage-%E2%80%94-%EB%A8%BC%EC%A0%80-%ED%99%95%EC%9D%B8%ED%95%A0-%EC%97%85%EC%A2%85%C3%97%EB%B6%84%EA%B8%B0">Notebook 02. Triage — 먼저 확인할 업종×분기<a class="anchor-link" href="#Notebook-02.-Triage-%E2%80%94-%EB%A8%BC%EC%A0%80-%ED%99%95%EC%9D%B8%ED%95%A0-%EC%97%85%EC%A2%85%C3%97%EB%B6%84%EA%B8%B0">¶</a></h1><h2 id="%EC%9D%B4-%EB%8B%A8%EA%B3%84%EC%9D%98-%EC%A7%88%EB%AC%B8">이 단계의 질문<a class="anchor-link" href="#%EC%9D%B4-%EB%8B%A8%EA%B3%84%EC%9D%98-%EC%A7%88%EB%AC%B8">¶</a></h2><p>Q1~Q3 결과 중 어떤 업종×분기를 먼저 확인해야 하는가?</p>
+<h2 id="%EC%9D%B4%EC%A0%84-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%99%95%EC%9D%B8%ED%95%9C-%EA%B2%83">이전 단계에서 확인한 것<a class="anchor-link" href="#%EC%9D%B4%EC%A0%84-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%99%95%EC%9D%B8%ED%95%9C-%EA%B2%83">¶</a></h2><p>Notebook 01에서 상태만으로는 규모와 지속성의 차이를 반영한 확인 순서를 정할 수 없음을 확인했다.</p>
+<h2 id="%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EB%8A%94-%EA%B2%83">이번 단계에서 하는 것<a class="anchor-link" href="#%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EB%8A%94-%EA%B2%83">¶</a></h2><p>production 코드의 E/R/A/P, 반복신호, 규모 gate와 threshold 출처를 그대로 읽어 관찰·추가확인·우선점검으로 선별하고, 추가확인 사례만 ELECTRE/SMAA로 보내는 경로를 검증한다.</p>
+<h2 id="%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EC%A7%80-%EC%95%8A%EB%8A%94-%EA%B2%83">이번 단계에서 하지 않는 것<a class="anchor-link" href="#%EC%9D%B4%EB%B2%88-%EB%8B%A8%EA%B3%84%EC%97%90%EC%84%9C-%ED%95%98%EC%A7%80-%EC%95%8A%EB%8A%94-%EA%B2%83">¶</a></h2><p>법정 위기 지정, 지원대상 자동 선정, 원인 판정 또는 ELECTRE 결과에 의한 Triage 단계 변경을 하지 않는다.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1cd7a632">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=25354194">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">전체 흐름<a class="anchor-link" href="#%EC%A0%84%EC%B2%B4-%ED%9D%90%EB%A6%84">¶</a></h2><p><code>핵심 지표 → E/R/A/P → 규칙 판정 → 분포·최신 결과 점검</code></p>
+<h2 id="%ED%8C%90%EC%A0%95-%ED%9D%90%EB%A6%84">판정 흐름<a class="anchor-link" href="#%ED%8C%90%EC%A0%95-%ED%9D%90%EB%A6%84">¶</a></h2><div class="highlight"><pre><span></span>Q1 State + Q2 Scale + Q3 Time
+                ↓
+              Triage
+     ┌──────────┼────────────┐
+   관찰       추가확인       우선점검
+정기 모니터링   │          외부근거·담당자 검토
+ ELECTRE X      ↓             ELECTRE X
+        선택적 ELECTRE/SMAA
+                ↓
+          Human-in-the-Loop
+</pre></div>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=55f2d571">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EC%84%A4%EC%A0%95%EA%B3%BC-%EC%9E%85%EB%A0%A5-%EB%A1%9C%EB%93%9C">설정과 입력 로드<a class="anchor-link" href="#%EC%84%A4%EC%A0%95%EA%B3%BC-%EC%9E%85%EB%A0%A5-%EB%A1%9C%EB%93%9C">¶</a></h2><p>경로는 사용자 PC의 절대경로가 아니라 <code>config.*</code> 변수에서 가져온다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=121e03b0">
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=14c66e45">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EA%B4%80%EC%B0%B0-%EA%B2%B0%EA%B3%BC">관찰 결과<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0-%EA%B2%B0%EA%B3%BC">¶</a></h2><p>행 수와 주요 분포를 먼저 확인한다.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=30c07e86">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput" id="cell-id=5f829997">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=9601b7ac">
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child">
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>rows=180 | columns=114
+<pre>전체 180건 | 최신 2026Q2 | 추가확인↔ELECTRE 입력 키 일치: 35건
 </pre>
 </div>
 </div>
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>rows</th>
-</tr>
-<tr>
-<th>stage</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>관찰</th>
-<td>128</td>
-</tr>
-<tr>
-<th>추가확인</th>
-<td>35</td>
-</tr>
-<tr>
-<th>우선점검</th>
-<td>17</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 </div>
-<div class="jp-OutputArea-child">
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>quarter</th>
-<th>industry</th>
-<th>stage</th>
-<th>E</th>
-<th>R</th>
-<th>A</th>
-<th>P</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>2022Q1</td>
-<td>기계</td>
-<td>우선점검</td>
-<td>3.671835</td>
-<td>3.911123</td>
-<td>2.041025</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>1</th>
-<td>2022Q1</td>
-<td>기타</td>
-<td>관찰</td>
-<td>1.515152</td>
-<td>1.754439</td>
-<td>0.002558</td>
-<td>11.160152</td>
-</tr>
-<tr>
-<th>2</th>
-<td>2022Q1</td>
-<td>목재종이</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>3</th>
-<td>2022Q1</td>
-<td>비금속</td>
-<td>관찰</td>
-<td>3.663004</td>
-<td>3.902291</td>
-<td>0.008526</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>4</th>
-<td>2022Q1</td>
-<td>석유화학</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>5</th>
-<td>2022Q1</td>
-<td>섬유의복</td>
-<td>추가확인</td>
-<td>11.363636</td>
-<td>11.602924</td>
-<td>0.004263</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>6</th>
-<td>2022Q1</td>
-<td>운송장비</td>
-<td>관찰</td>
-<td>1.737036</td>
-<td>1.976323</td>
-<td>0.233601</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>7</th>
-<td>2022Q1</td>
-<td>음식료</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>8</th>
-<td>2022Q1</td>
-<td>전기전자</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>9</th>
-<td>2022Q1</td>
-<td>철강</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>10</th>
-<td>2022Q2</td>
-<td>기계</td>
-<td>우선점검</td>
-<td>3.900939</td>
-<td>3.841068</td>
-<td>2.160927</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>11</th>
-<td>2022Q2</td>
-<td>기타</td>
-<td>관찰</td>
-<td>1.522843</td>
-<td>1.462972</td>
-<td>0.002567</td>
-<td>20.411270</td>
-</tr>
-<tr>
-<th>12</th>
-<td>2022Q2</td>
-<td>목재종이</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>13</th>
-<td>2022Q2</td>
-<td>비금속</td>
-<td>관찰</td>
-<td>2.996255</td>
-<td>2.936384</td>
-<td>0.006847</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>14</th>
-<td>2022Q2</td>
-<td>석유화학</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>15</th>
-<td>2022Q2</td>
-<td>섬유의복</td>
-<td>추가확인</td>
-<td>11.363636</td>
-<td>11.303765</td>
-<td>0.004279</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>16</th>
-<td>2022Q2</td>
-<td>운송장비</td>
-<td>관찰</td>
-<td>2.570006</td>
-<td>2.510135</td>
-<td>0.353451</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>17</th>
-<td>2022Q2</td>
-<td>음식료</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>18</th>
-<td>2022Q2</td>
-<td>전기전자</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-<tr>
-<th>19</th>
-<td>2022Q2</td>
-<td>철강</td>
-<td>관찰</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-<td>0.000000</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5cbd336f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=057a3356">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h2><p>단계별 건수와 최신분기 업종별 판정을 확인한다.</p>
-<h2 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h2><p>규칙 기반 분류는 재현 가능한 1차 스크리닝이며 원인 판정이 아니다.</p>
-<h2 id="%ED%95%9C%EA%B3%84">한계<a class="anchor-link" href="#%ED%95%9C%EA%B3%84">¶</a></h2><p>임계값 인접 관측과 상충 신호는 다음 단계의 선택적 검토가 필요하다.</p>
-<h2 id="Takeaway">Takeaway<a class="anchor-link" href="#Takeaway">¶</a></h2><p>설명 가능한 E/R/A/P 규칙으로 180개 업종×분기를 관찰·추가확인·우선점검으로 나눈다.</p>
+<h2 id="1.-%EC%8B%A0%ED%98%B8-%EC%A0%95%EC%9D%98%C2%B7%EC%82%B0%EC%8B%9D%C2%B7threshold%C2%B7%EC%B6%9C%EC%B2%98-%EC%84%B1%EA%B2%A9">1. 신호 정의·산식·threshold·출처 성격<a class="anchor-link" href="#1.-%EC%8B%A0%ED%98%B8-%EC%A0%95%EC%9D%98%C2%B7%EC%82%B0%EC%8B%9D%C2%B7threshold%C2%B7%EC%B6%9C%EC%B2%98-%EC%84%B1%EA%B2%A9">¶</a></h2><p><code>PRINCIPLE_ADAPTED</code>는 외부 기준의 원리를 자료 단위와 목적에 맞게 변형한 값이고, <code>PROJECT_OPERATIONAL</code>은 프로젝트 자체 운영기준이다. 이 저장소에는 단위·기간·목적이 모두 같은 직접 공식 threshold가 없다.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=a6beb0d5">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<style type="text/css">
+</style>
+<table id="T_766a1">
+<thead>
+<tr>
+<th class="col_heading level0 col0" id="T_766a1_level0_col0">신호/규칙</th>
+<th class="col_heading level0 col1" id="T_766a1_level0_col1">정의·산식</th>
+<th class="col_heading level0 col2" id="T_766a1_level0_col2">threshold</th>
+<th class="col_heading level0 col3" id="T_766a1_level0_col3">역할</th>
+<th class="col_heading level0 col4" id="T_766a1_level0_col4">출처 성격</th>
+<th class="col_heading level0 col5" id="T_766a1_level0_col5">적용상 주의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="data row0 col0" id="T_766a1_row0_col0">E</td>
+<td class="data row0 col1" id="T_766a1_row0_col1">max(0, -KICOX 분기말 고용 YoY)</td>
+<td class="data row0 col2" id="T_766a1_row0_col2">5% / 10%</td>
+<td class="data row0 col3" id="T_766a1_row0_col3">고용 진입·상위 신호</td>
+<td class="data row0 col4" id="T_766a1_row0_col4">PRINCIPLE_ADAPTED</td>
+<td class="data row0 col5" id="T_766a1_row0_col5">2026.5.4 시행 고용위기지역 고시 제3조①2호 5%, ④2호 10% 확인. 지역 피보험자 최근 6개월 평균을 업종 종사자 분기말 YoY로 변경. 다른 법정 결합요건·심의절차를 재현하지 않음.</td>
+</tr>
+<tr>
+<td class="data row1 col0" id="T_766a1_row1_col0">R_entry</td>
+<td class="data row1 col1" id="T_766a1_row1_col1">max(0, 산단 제조업 전체 YoY - 업종 YoY)</td>
+<td class="data row1 col2" id="T_766a1_row1_col2">5%p</td>
+<td class="data row1 col3" id="T_766a1_row1_col3">상대 열위 진입</td>
+<td class="data row1 col4" id="T_766a1_row1_col4">PRINCIPLE_ADAPTED</td>
+<td class="data row1 col5" id="T_766a1_row1_col5">공식 비교는 모든 업종 피보험자 평균. 본 모형은 동일 산단 제조업 10개 업종 합계와 비교.</td>
+</tr>
+<tr>
+<td class="data row2 col0" id="T_766a1_row2_col0">R_up</td>
+<td class="data row2 col1" id="T_766a1_row2_col1">R과 동일</td>
+<td class="data row2 col2" id="T_766a1_row2_col2">10%p</td>
+<td class="data row2 col3" id="T_766a1_row2_col3">상대 열위 상위</td>
+<td class="data row2 col4" id="T_766a1_row2_col4">PROJECT_OPERATIONAL</td>
+<td class="data row2 col5" id="T_766a1_row2_col5">10%p 상위 경계의 직접 조문 근거 없음. 진입 경계와 출처 분리.</td>
+</tr>
+<tr>
+<td class="data row3 col0" id="T_766a1_row3_col0">A</td>
+<td class="data row3 col1" id="T_766a1_row3_col1">max(0, 전년동기 고용 - 현재 고용) / 현재 산단 제조업 고용 × 100</td>
+<td class="data row3 col2" id="T_766a1_row3_col2">1% / 2%</td>
+<td class="data row3 col3" id="T_766a1_row3_col3">규모효과 진입·상위</td>
+<td class="data row3 col4" id="T_766a1_row3_col4">PROJECT_OPERATIONAL</td>
+<td class="data row3 col5" id="T_766a1_row3_col5">현재 산단 고용 100명당 전년동기 대비 감소인원 1/2명에 해당. 최적값·정책기준 아님. 대형 업종 영향 큼.</td>
+</tr>
+<tr>
+<td class="data row4 col0" id="T_766a1_row4_col0">P</td>
+<td class="data row4 col1" id="T_766a1_row4_col1">max(0, -명목 분기 생산액 YoY)</td>
+<td class="data row4 col2" id="T_766a1_row4_col2">5%</td>
+<td class="data row4 col3" id="T_766a1_row4_col3">상위단계 보강</td>
+<td class="data row4 col4" id="T_766a1_row4_col4">PRINCIPLE_ADAPTED</td>
+<td class="data row4 col5" id="T_766a1_row4_col5">현행 제2조는 전년 및 전전년 동기 생산액/생산량 등 결합요건. 본 모형은 명목 생산액 전년동기 비교만 사용하며 가격·물량 분해 불가.</td>
+</tr>
+<tr>
+<td class="data row5 col0" id="T_766a1_row5_col0">repeated_employment_entry_signal</td>
+<td class="data row5 col1" id="T_766a1_row5_col1">현재 및 실제 직전 달력분기에 E/R/A 진입신호 존재</td>
+<td class="data row5 col2" id="T_766a1_row5_col2">연속 2분기</td>
+<td class="data row5 col3" id="T_766a1_row5_col3">Q3 시간축 보강</td>
+<td class="data row5 col4" id="T_766a1_row5_col4">PRINCIPLE_ADAPTED</td>
+<td class="data row5 col5" id="T_766a1_row5_col5">지속성 원리 참고. 고시 월별 지속요건, 기존 g4 음의 고용 YoY 연속길이, 동일 Q1 상태 run_length와 모두 다름.</td>
+</tr>
+<tr>
+<td class="data row6 col0" id="T_766a1_row6_col0">scale_gate</td>
+<td class="data row6 col1" id="T_766a1_row6_col1">현재 업종 고용이 기준 이상</td>
+<td class="data row6 col2" id="T_766a1_row6_col2">300인</td>
+<td class="data row6 col3" id="T_766a1_row6_col3">우선점검 진입만 제한</td>
+<td class="data row6 col4" id="T_766a1_row6_col4">PRINCIPLE_ADAPTED</td>
+<td class="data row6 col5" id="T_766a1_row6_col5">공식 주된 산업의 비중·종사자 요건 중 규모 원리만 참고한 운영규칙. 추가확인 신호 보존. 300인 최적성 미입증.</td>
+</tr>
+<tr>
+<td class="data row7 col0" id="T_766a1_row7_col0">ladder</td>
+<td class="data row7 col1" id="T_766a1_row7_col1">상위 고용신호 AND (P OR 반복) AND 규모; 아니면 진입신호</td>
+<td class="data row7 col2" id="T_766a1_row7_col2">관찰 / 추가확인 / 우선점검</td>
+<td class="data row7 col3" id="T_766a1_row7_col3">행동단계</td>
+<td class="data row7 col4" id="T_766a1_row7_col4">PROJECT_OPERATIONAL</td>
+<td class="data row7 col5" id="T_766a1_row7_col5">법정 지정의 결합식이 아니라 내부 점검 사다리.</td>
+</tr>
+<tr>
+<td class="data row8 col0" id="T_766a1_row8_col0">missing</td>
+<td class="data row8 col1" id="T_766a1_row8_col1">핵심 E/R/A·고용 미확인 시 판정보류; P만 없으면 알려진 신호로 최소판정</td>
+<td class="data row8 col2" id="T_766a1_row8_col2">보간 없음</td>
+<td class="data row8 col3" id="T_766a1_row8_col3">자료품질</td>
+<td class="data row8 col4" id="T_766a1_row8_col4">PROJECT_OPERATIONAL</td>
+<td class="data row8 col5" id="T_766a1_row8_col5">미확인 보강조건은 충족으로 간주하지 않음. 최소판정과 자료 플래그 함께 전달.</td>
+</tr>
+<tr>
+<td class="data row9 col0" id="T_766a1_row9_col0">same_stage_rank</td>
+<td class="data row9 col1" id="T_766a1_row9_col1">같은 분기·단계에서 감소인원 내림차순, 동률 업종명</td>
+<td class="data row9 col2" id="T_766a1_row9_col2">감소인원</td>
+<td class="data row9 col3" id="T_766a1_row9_col3">처리순서</td>
+<td class="data row9 col4" id="T_766a1_row9_col4">PROJECT_OPERATIONAL</td>
+<td class="data row9 col5" id="T_766a1_row9_col5">Q2 전체 점수화 아님. 동률 순서는 위험 우열이 아닌 결정적 표시순서.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=af69a538">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="2.-%EC%8B%A4%EC%A0%9C-%EB%8B%A8%EA%B3%84-%EA%B7%9C%EC%B9%99">2. 실제 단계 규칙<a class="anchor-link" href="#2.-%EC%8B%A4%EC%A0%9C-%EB%8B%A8%EA%B3%84-%EA%B7%9C%EC%B9%99">¶</a></h2><div class="highlight"><pre><span></span>진입신호 = E≥5% 또는 R≥5%p 또는 A≥1%
+상위신호 = E≥10% 또는 R≥10%p 또는 A≥2%
+보강신호 = P≥5% 또는 직전분기에도 진입신호
+
+우선점검 = 상위신호 AND 보강신호 AND 현재 고용≥300명
+추가확인 = 진입신호는 있으나 우선점검 조건이 완결되지 않음
+관찰     = 고용축 진입신호 없음
+</pre></div>
+<p>P는 단독으로 단계에 진입시키지 않으며, 300인 gate는 우선점검만 제한한다. 작은 업종의 고용 신호를 삭제하지 않고 추가확인에 남긴다.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=a98552c1">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
+<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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AAAAhEaP7OXLl2Xp0qVy+PBh+fnnn1Pc7qn1AAAAAAhqkD158qQ50YGesatFixbSrVs3iYuLc7uP4yxfAAAAQMi0FowePVo6d+4sgwcPNtcTEhIkNjZWHnvsMalatWqgthEAAADIWEV29erV0qNHD+d17YfVwV1r1qxxrqO1AAAAACFXkY2IiJD4+HiJiopyrjtz5oxER0fLf//7X5k/f76cPn1ann76adNicPbs2UBsMwAAAJB6kH300UelT58+8tlnn0mhQoXMYC+9/NJLL8nBgwfNKWsdp61VrpcBAACAoAVZbSvQ2QpiYmJMW0GRIkXMNFyRkZFmqVatml83DgAAAMj09FvDhg0z7QU6l+y2bdukXr16aT0EAAAACH6QNXfKkUMKFy7s/60BAAAAfBlkAQAAgFBDkAUAAICVCLIAAACwEkEWAAAAViLIAgAAwEoEWQAAAFiJIAsAAAArEWQBAABgJYIsAAAArESQBQAAgJUIsgAAALASQRYAAABWIsgCAADASgRZAAAAWIkgCwAAACsRZAEAAGAlgiwAAACsZEWQfe6556RSpUrO65s2bZI6depITEyMVK5cWZYtWxbU7QMAAEDghXyQPXTokMycOdN5/fz589KmTRsZNWqUHDhwQKZMmSIdO3aU48ePB3U7AQAAEFghH2T79+8vTz31lPP67NmzpVatWtKsWTNzvWHDhtKgQQOZO3duELcSAAAAgRbSQfbrr7+WU6dOSYcOHZzr1q5dK7GxsW73q127tmzevDkIWwgAAIBgCdkgqwH2xRdfNK0Dro4dOybFixd3WxcVFWXu701CQoKcO3fObQEAAIDdQjLIJiUlSffu3aVfv35ug7xUYmKiud3V9evXJSwszOvzjRkzRiIiIpxLdHS037YdQPqNGzdOKlasKLfffrtUqVJFFixY4LytQIECUqpUKSlTpoxZtBceAABX4W7XQsTrr78u165dkxdeeCHFbZGRkXLy5Em3dSdOnJASJUp4fb64uDgZMGCA87pWZAmzQPBpW5D2wefMmVN++OEHadmypRw+fFiKFClibl+9erWULVs22JsJAAhRIVmRffvtt+XHH3+UwoULS6FCheTBBx+UXbt2mcs1atSQNWvWuN1fr9etW9fr8+XOnVsKFizotgAIPh2sqSFW6aDNfPnymR1TB/0/DwCAVUFW+2C1anrmzBmzLFq0SO644w5zuUuXLrJ8+XJZsWKFue/ixYtl27ZtHHYELHblyhWZOHGimZHE0U6UI0cO0woEAIBVrQWpKV26tMyZM0d69+4tp0+flgoVKsjChQslf/78wd40ABm0Z88eadSokRw5ckTuu+8++fTTT523ad97+fLlTcX2/vvvl5EjR0rJkiV5jQEAoV2RTU6/6LZv3+68rn10ev2vv/4ybQU6SASAfTSo6klPLl26ZGYp0RYhbSNS8fHxsm/fPlm/fr1pOdAToSQf6AkAyN6sCLIAsrY8efJI586dTT/8jBkznK0FStsLJk2aJDt27JC9e/cGeUsBAKGEIAsgZOjAzLx586ZYf+PGDbPkypUrKNsFAAhNBFkAQaF9sXrKaZ0bWun0W1999ZUZuKm9szt37nSe0KRv375mIBjT5gEAXBFkAQSt+vrhhx+aAVzaKzt8+HATZPUECTqQs3Xr1uaECHfddZdcvXpVPv/8c/5SAAC7Zy0AkDUULVpUvvvuO4+3afV19+7dAd8mAIBdqMgCAADASlRkgWxq6wdMW5dRd/f8zS9/CwBA5lCRBQAAgJUIsgAAALASQRYAAABWIsgCAADASgRZAAAAWIkgCwAAACsRZAEAAGAlgiwAAACsRJAFAACAlQiyAAAAsBJBFgAAAFYiyAIAAMBKBFkAAABYiSALAAAAKxFkAQAAYCWCLAAAAKxEkAUAAICVCLIAAACwEkEWAAAAViLIAgAAwEoEWQAAAFiJIAsAAAArEWQBAABgJYIsAAAArESQBQAAgJUIsgAAALASQRYAAABWIsgCAADASgRZAAAAWIkgCwAAACsRZAEAWV5SUpLMnDlT6tat61zXvXt3KVOmjNuSP39+6dOnT1C3FUAWCLIrVqyQ2NhYqVChgpQvX17eeecd52379++X5s2bS0xMjLl91qxZQd1WAEDoWrJkiVStWlVGjBgh8fHxzvUffvih+T5xLFu3bpWCBQvKCy+8ENTtBZAFguz8+fNl2rRpsnv3blm2bJmMHTvWfBhdv35d2rRpI126dJEDBw7IggUL5MUXX5TNmzcHe5MBACHo4sWL5jtk6tSpqd7vrbfekr///e9y5513BmzbANyccAlRkyZNcl4uV66cPPLII6ZKmyNHDgkPD5cnn3zS3Fa5cmXp2rWrzJgxQ6pVqxbELQYAhKL27dubf7///nuv97lw4YI58vfzzz8HcMsAZNmKbHInTpyQiIgIWbt2rWk5cFW7dm0qsgCATPvoo4+kfv36UrZsWV5FwCJWBNl169bJokWLpHPnznLs2DEpXry42+1RUVFy6tQpr49PSEiQc+fOuS0AADho24G2qQGwS8gH2Tlz5kjbtm1N64DuKScmJprRp660bzYsLMzrc4wZM8ZUcx1LdHR0ALYcAGCDDRs2mGJIw4YNg70pALJKj6yGU50CZeXKlbJ06VK55557zPrIyEg5efJkiraDEiVKeH2uuLg4GTBggPO6VmQJswAApTPf/OMf/0i1IAIgNIVsRbZfv36yd+9es6fsCLGqRo0asmbNGrf76nXXuQGTy507t5lSxXUBAEDpjDhNmzblxQAsFJJB9sqVKzJlyhTTfK+TU7vSqbeOHj3qnDtWg65O1dWjR48gbS0AwFZnzpyRHTt2SPXq1YO9KQCySmuBVmJv3LiRosqqc/tpm8HChQulZ8+epl1AWwo+/fRTKV26dNC2FwAQ+ho1aiTbt293W1eoUKEU4y4A2CMkg6zODatB1httL/jll18Cuk0AAAAILSHZWgAAAABYWZEFAGQNa9o3CvYmWKneF97PQgbg/0dFFgAAAFYiyAIAAMBKBFkAAABYiSALAAAAKxFkAQAAYCWCLAAAAKxEkAUAAICVCLIAAACwEkEWAAAAViLIAgAAwEoEWQAAAFiJIAsAAAArEWQBAABgJYIsAAAArESQBQAAgJUIsgAAALASQRYAAABWIsgCAADASgRZAAAAWIkgCwAAACsRZAEAAGAlgiwAAACsRJAFAACAlQiyAAAAsBJBFgAAAFYiyAIAAMBKBFkAAABYiSALAADgB5cvX5ZevXpJTEyMlC5dWgYNGiRJSUm81j5EkAUAAPCDgQMHyo0bN2TPnj3y+++/y8qVK+Xdd9/ltfYhgiwAAICPXbhwQWbMmCHjxo2T8PBwiYiIkLi4OJk2bRqvtQ8RZAEAAHxs48aNUrZsWYmMjHSuq127tmzdulWuX7/O6+0jBFkAAAAfO3bsmBQvXtxtXVRUlCQmJsrZs2d5vX2EIAsAAOBjGliTD+xyVGLDwsJ4vX2EIAsAAOBj2lJw8uRJt3UnTpyQPHnymH5Z+AZBFgAAwMeqV68uO3bskPj4eOe6NWvWmD7ZHDmIX75i7SvJ3GwAACBUlShRQlq1aiWDBw82bQZanR09erT069cv2JuWpVgbZJmbDQAAhLIPP/xQjh49KrfddpvUrFnTnBzhoYceCvZmZSnhYvHcbIcOHXKbm23kyJHSp0+fYG8eAACAFC1aVObPn88r4UdWVmSZmw0AAADhWXFuNtfJh1VCQoJZHBzzt507d05CTcLlS8HeBOuE4t/RBhcuMyF3RvFey7iL1xIz8SjwXkN2du7/+15PPn1ZlgmyGZ2bbcyYMTJ8+PAU66Ojo/24lQiUt156mhcbgdGXKXMQIEzPBMj58+fTnKosPDvMzab9swMGDHBev3Hjhpw+fVqKFCnCpMQZ2DvS4K99yQULFrzZPyHA+wxBxWcaeK+FLi1WaogtWbJkmvcNt31utsKFC6c5N1vu3LnN4qpQoUIB296sREMsQRa8z5BV8JkG3muhKb0njbBysBdzswEAAMDKIKuYmw0AACB7s7K1QDE3W2Bpa8bQoUNTtGgAvM9gIz7TwHstawhLSs/cBgAAAECIsba1AIHRqFEj+e6779J9m06DVqZMmQBtHULB8uXL5aeffvLrz1i3bp3s2rUrxfrvv//erz8XWcuTTz4pU6dOzfDjZs6cKT///HOGHzdx4kRZsWJFhh+HrI3PM98iyGZjOmWZDpxLvuTNm1c++ugjj4957LHHpHTp0mZZu3Ztiuta4D9w4EDAfxcEz8KFC28qUO7fv9+8f1Izbdo0E5iTa9y4caZ+ZteuXWX69OmZeiwCRz9LXnzxRbnrrrukXLlyZvnb3/4mL7/8shw/ftzr4+rUqSMbNmxI189o166daVXT5ZZbbjHTO+pl/Sx0+Pbbb2Xbtm1uj5szZ47zcY4lV65cMnfuXOd9dBsOHjyYqd8doUE/m/Qzypf4PPMtgmw2VqxYMfNlkHzRD3b9QPZk9uzZcvjwYbNUrlzZVDcc1+vWrRvw3wGB98ADD7jt+Lz//vsyevRot3XPPvusWzUr+c6STqvy6KOPpvpzypcv77z/f//7Xxk2bJjz+j/+8Y9UH7tnzx55+OGHpVSpUnL77bfLU089JX/99ZfPXgP435kzZ8xnSsWKFWX9+vWyd+9es/z4449mZ7t+/fpy7do1j4/VI0OOk+SkZf78+WZecl30ffnDDz+Yy6kFZaXvX8fjdNHCgL7fatSokanfF4E3fvx452dKvnz5zN/fcV2rpt5oocdTEcix6ImZrly54vYYPs/8x9rBXvCtP/74w1Q99D+gTkKsJ5dIjX6h/P7776YqocE3uYceesiE4c8++4w/VRbz9ddfOy9rkLj33nvNpNVLly71eIKRJ554wiyuNJRevnw5zTCa2QDUrFkzcza/zz//3JwAZdy4cfLggw+a+abDw/nYs8HmzZslf/788sILL7it14qpvn80hOjn0J133pnisbt37zYVVJ1b/KuvvjKfVerXX381AdjbZ6C+d5YsWSJ33323eb84WmYuXLhg3lOp0fdahQoVzAI7vPTSS2ZRuvNds2ZN6dGjR5qP0x1jXbzx9DnI55n/UJGF8yQTCQkJ5rIGWf2ycA0runfpGBd46dIlE0zeeOMN07eofWDJ6YdBav/RYb8///zT7LDol/7Vq1dNhSqtKpbD6tWrpV69emneT6u9WuGqWrWq3HPPPaYve+XKlak+Rqu3GmD0PaqHinPmzClDhgwxXy6Z6XNEcOjfXT+TdIdEj/jo54/ulGgg6NOnj6lw6ZLcN998Y6pr7777rrm/nvzGtW3KE31uDTR6yPeDDz6QrVu3yqJFi5zV1g4dOqS6rdu3bzftDu+9954899xzzlYDDbewg+5Y63ebP/F55h+UJpBCmzZt3L4gNKBoGNCKm54Fp1u3buZwrfau6W2tW7c2h2H0C6ds2bLmMVrNQNajX+oaQhcvXmz6BgcNGmS+uBMTE02FTKuzzZs3l1atWpnFdYfIYd++fbJlyxZp2bJlqj9Lq2G6k6SHejUUKK2y3X///aZ3Uqt1nughXk89t7qO9gJ73HrrreZzZcqUKdKpUyfz3tOdkeLFi5vPHG0xSF5dP3v2rLzyyivyxRdfmCD76quvyr/+9S9nL7W+d5PTsKzVuEqVKpnBYNWqVTOtK/q4tAKsWrBggTz//POm51rbIHR7dXH0YsMOWsXX91x66GfdiBEjPH6+qZiYmBRVWT7P/IeKbDal/WP6ha9VNa12KK2uaiWiSZMmJmzoYTalXwr6JVKlShVp27atOTT3ySefOL9U9HCtVuW0autYh6x7fnqtMmllVE8T3bt3b/M31x2duLg482XQsGFD036g1TBPNGj069fPrX3l1KlTprqri2NQjVbV9JCu/hx9b128eNFc1iqrLg56KFertQ5ajdWdLg3XDno6a/0ioX/RLlpF1R3k//3vf+Zvr5XPVatWmfdQ8tOM69EA3YHWHSsd7KX9+xs3bjQhVd+3nuiRhNjYWPNz3nzzTbNOg6y2F+hnnOOz0RMd3Ko78v/85z/Njl3Tpk19/NsjUPR7UFtLdKfE9XPDQf/O+pnn2lalR3x0EJi3Jfmc63ye+Q8V2WzqyJEj5oNXA4FWNXTgVq9evcx/Pj38ptUu3eN0pT2v2reW/D+oXh88eLDzenoPL8M+Omp81qxZXm/X90337t3N4olWqnbu3GkGgLnSSoijV00HzChtJ9BDcdrCotU3vU+DBg3MlG+uIVjDsyu9j1bg9N/HH3/chBU9XKzPr0cSENoOHTpkKvsZDSJatdWjRY4eR32PaHvAqFGjzE65Hk1KTj/TdDaM5Od01/e59tY66A6b6ywGulP19ttvm6MKGnhdd6xc6fZER0dn6HdB4E2ePNmEVQ2g+tn09NNPu92u34U6DsDx2ZQZfJ75D0E2m9IvdE/zcqbFEWL1MK2nPVfHlwrn2ciaAaNWrVoZeozrTo2G0rFjx5oe1+SDCTVQuA7C0Z+lO01a1dUwqn3b2u6i99E+Vw0fXbp08fpzNWRoFU/bErRa/Omnn5ovEoQ+DX56BCg5reLr545jhyc5rdQqne6qQIEC5rCv/u21opsaR4jVtgJvc2art956ywRcxw6bzuCievbsaaag82bSpEmmbQGhSY9C/uc//zGfN3rkRiuvuiPsaJNT2jLiOj+6/v31yJTuIOtlxyw/2tqil7UYpM/pGAjN55l/EWRhplPSw3C33XZbildD/zPrl0JyqR1y8zRiE1kjYHiqtuuocj28r0HD246N9tL+8ssvJsS6fkF4o1XUo0ePmveSVrs0zOoXhO5Iab+svif1UJ32JnqjO1p9+/Y190P2oYf6dYfH0+hzXa+hxBMNz//+97899vdryNUqrCcafrSX29N0cvq4tGbnQPBowOzYsaOpyDoGBOrOdosWLcygQW8zUGj7ii46k4XuWOl4AEdPtK7Tv7srPs/8iyALM/DGMWNBct5OjKDtCN4msddGd8DhtddeM1Uv7VH1NkArOceI9Hnz5kn//v1Tva8O6vF2WFcrbJ6+jLTtgGmSsp/0TK2E7ENnv9Aeatd5qTWEam++Hs3x1WcEn2f+RZBFpmlvInNyIi3aUpBZWi3RxdfVf+0HB5C96UBmT/3NyecudtB2Jdd503UQoZ6sQ1tYlAZgPcGGo/1FW/j0SJQDn2f+QZCFob2P3gYsaC/ihAkTUqxP7bSiOp9i+/bteXUB+IS2lXg742By2sqiJ03wRKdvc/S3JqctLMkHszp6H7V30hut6nlqrUnrcQgub9953ugMF576txFcBFmk2u/qjbeBXkAgpdXGct9990mOHJ5nGdRZO+bOneunLYOvae9ieuh8rpmhMxxkBic9gK/weZY5YUkMLwcQRDoQQttUdAo4AAglOr+s9sqm92gAAo8gCwAAACtxZi8AAABYiSALAAAAKxFkAQAAYCWCLAAAAKxEkAUAAICVCLIAAACwEkEWAAAAViLIAgAAwEoEWQAAAFiJIAsAAACx0f8D1s87ehC0ME4AAAAASUVORK5CYII="/>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
+<h3 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h3><ul>
+<li>전체 180건은 <strong>관찰 128건, 추가확인 35건, 우선점검 17건</strong>이다.</li>
+</ul>
+<h3 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h3><ul>
+<li>Triage는 전체를 다시 등급화하는 위험점수가 아니라 확인 강도를 세 단계로 나누는 운영 사다리다.</li>
+</ul>
+<h3 id="%EC%A3%BC%EC%9D%98">주의<a class="anchor-link" href="#%EC%A3%BC%EC%9D%98">¶</a></h3><ul>
+<li>분포 자체는 threshold의 정책 타당성을 증명하지 않는다.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=79665fb8">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedImage jp-OutputArea-output" tabindex="0">
+<img alt="No description has been provided for this image" class="" src="data:image/png;base64,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"/>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
+<h3 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h3><ul>
+<li>단계는 업종별로 고정되지 않고 분기마다 이동한다.</li>
+</ul>
+<h3 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h3><ul>
+<li>이 구조는 업종 낙인이나 영구 순위가 아니라 분기별 확인 큐에 가깝다.</li>
+</ul>
+<h3 id="%EC%A3%BC%EC%9D%98">주의<a class="anchor-link" href="#%EC%A3%BC%EC%9D%98">¶</a></h3><ul>
+<li>과거 우선점검 이력은 해당 시점의 집계신호이며 실제 위기 발생의 사후 라벨이 아니다.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=16bb6c44">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="3.-%EC%B5%9C%EC%8B%A0%EB%B6%84%EA%B8%B0-%EA%B2%B0%EA%B3%BC%EC%99%80-%EC%A3%BC%EC%9A%94-%EC%82%AC%EB%A1%80">3. 최신분기 결과와 주요 사례<a class="anchor-link" href="#3.-%EC%B5%9C%EC%8B%A0%EB%B6%84%EA%B8%B0-%EA%B2%B0%EA%B3%BC%EC%99%80-%EC%A3%BC%EC%9A%94-%EC%82%AC%EB%A1%80">¶</a></h2>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=e8c2e34e">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<style type="text/css">
+</style>
+<table id="T_043ce">
+<thead>
+<tr>
+<th class="col_heading level0 col0" id="T_043ce_level0_col0">업종</th>
+<th class="col_heading level0 col1" id="T_043ce_level0_col1">분기</th>
+<th class="col_heading level0 col2" id="T_043ce_level0_col2">단계</th>
+<th class="col_heading level0 col3" id="T_043ce_level0_col3">발동신호</th>
+<th class="col_heading level0 col4" id="T_043ce_level0_col4">고용증감(명)</th>
+<th class="col_heading level0 col5" id="T_043ce_level0_col5">고용YoY(%)</th>
+<th class="col_heading level0 col6" id="T_043ce_level0_col6">A(%)</th>
+<th class="col_heading level0 col7" id="T_043ce_level0_col7">상태지속(Q)</th>
+<th class="col_heading level0 col8" id="T_043ce_level0_col8">선정 이유</th>
+<th class="col_heading level0 col9" id="T_043ce_level0_col9">ELECTRE 재검토</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="data row0 col0" id="T_043ce_row0_col0">운송장비</td>
+<td class="data row0 col1" id="T_043ce_row0_col1">2026Q2</td>
+<td class="data row0 col2" id="T_043ce_row0_col2">관찰</td>
+<td class="data row0 col3" id="T_043ce_row0_col3">없음 / 보강:확인된 보강 없음</td>
+<td class="data row0 col4" id="T_043ce_row0_col4">-129.000000</td>
+<td class="data row0 col5" id="T_043ce_row0_col5">-0.780000</td>
+<td class="data row0 col6" id="T_043ce_row0_col6">0.110000</td>
+<td class="data row0 col7" id="T_043ce_row0_col7">2.000000</td>
+<td class="data row0 col8" id="T_043ce_row0_col8">고용 축 진입신호 없음</td>
+<td class="data row0 col9" id="T_043ce_row0_col9">False</td>
+</tr>
+<tr>
+<td class="data row1 col0" id="T_043ce_row1_col0">전기전자</td>
+<td class="data row1 col1" id="T_043ce_row1_col1">2026Q2</td>
+<td class="data row1 col2" id="T_043ce_row1_col2">관찰</td>
+<td class="data row1 col3" id="T_043ce_row1_col3">없음 / 보강:확인된 보강 없음</td>
+<td class="data row1 col4" id="T_043ce_row1_col4">-116.000000</td>
+<td class="data row1 col5" id="T_043ce_row1_col5">-0.410000</td>
+<td class="data row1 col6" id="T_043ce_row1_col6">0.100000</td>
+<td class="data row1 col7" id="T_043ce_row1_col7">1.000000</td>
+<td class="data row1 col8" id="T_043ce_row1_col8">고용 축 진입신호 없음</td>
+<td class="data row1 col9" id="T_043ce_row1_col9">False</td>
+</tr>
+<tr>
+<td class="data row2 col0" id="T_043ce_row2_col0">철강</td>
+<td class="data row2 col1" id="T_043ce_row2_col1">2026Q2</td>
+<td class="data row2 col2" id="T_043ce_row2_col2">관찰</td>
+<td class="data row2 col3" id="T_043ce_row2_col3">없음 / 보강:확인된 보강 없음</td>
+<td class="data row2 col4" id="T_043ce_row2_col4">-112.000000</td>
+<td class="data row2 col5" id="T_043ce_row2_col5">-1.140000</td>
+<td class="data row2 col6" id="T_043ce_row2_col6">0.100000</td>
+<td class="data row2 col7" id="T_043ce_row2_col7">4.000000</td>
+<td class="data row2 col8" id="T_043ce_row2_col8">고용 축 진입신호 없음</td>
+<td class="data row2 col9" id="T_043ce_row2_col9">False</td>
+</tr>
+<tr>
+<td class="data row3 col0" id="T_043ce_row3_col0">음식료</td>
+<td class="data row3 col1" id="T_043ce_row3_col1">2026Q2</td>
+<td class="data row3 col2" id="T_043ce_row3_col2">관찰</td>
+<td class="data row3 col3" id="T_043ce_row3_col3">없음 / 보강:확인된 보강 없음</td>
+<td class="data row3 col4" id="T_043ce_row3_col4">-25.000000</td>
+<td class="data row3 col5" id="T_043ce_row3_col5">-3.790000</td>
+<td class="data row3 col6" id="T_043ce_row3_col6">0.020000</td>
+<td class="data row3 col7" id="T_043ce_row3_col7">2.000000</td>
+<td class="data row3 col8" id="T_043ce_row3_col8">고용 축 진입신호 없음</td>
+<td class="data row3 col9" id="T_043ce_row3_col9">False</td>
+</tr>
+<tr>
+<td class="data row4 col0" id="T_043ce_row4_col0">비금속</td>
+<td class="data row4 col1" id="T_043ce_row4_col1">2026Q2</td>
+<td class="data row4 col2" id="T_043ce_row4_col2">관찰</td>
+<td class="data row4 col3" id="T_043ce_row4_col3">없음 / 보강:확인된 보강 없음</td>
+<td class="data row4 col4" id="T_043ce_row4_col4">-2.000000</td>
+<td class="data row4 col5" id="T_043ce_row4_col5">-1.080000</td>
+<td class="data row4 col6" id="T_043ce_row4_col6">0.000000</td>
+<td class="data row4 col7" id="T_043ce_row4_col7">3.000000</td>
+<td class="data row4 col8" id="T_043ce_row4_col8">고용 축 진입신호 없음</td>
+<td class="data row4 col9" id="T_043ce_row4_col9">False</td>
+</tr>
+<tr>
+<td class="data row5 col0" id="T_043ce_row5_col0">기타</td>
+<td class="data row5 col1" id="T_043ce_row5_col1">2026Q2</td>
+<td class="data row5 col2" id="T_043ce_row5_col2">관찰</td>
+<td class="data row5 col3" id="T_043ce_row5_col3">없음 / 보강:확인된 보강 없음</td>
+<td class="data row5 col4" id="T_043ce_row5_col4">25.000000</td>
+<td class="data row5 col5" id="T_043ce_row5_col5">17.120000</td>
+<td class="data row5 col6" id="T_043ce_row5_col6">0.000000</td>
+<td class="data row5 col7" id="T_043ce_row5_col7">2.000000</td>
+<td class="data row5 col8" id="T_043ce_row5_col8">고용 축 진입신호 없음</td>
+<td class="data row5 col9" id="T_043ce_row5_col9">False</td>
+</tr>
+<tr>
+<td class="data row6 col0" id="T_043ce_row6_col0">석유화학</td>
+<td class="data row6 col1" id="T_043ce_row6_col1">2026Q2</td>
+<td class="data row6 col2" id="T_043ce_row6_col2">관찰</td>
+<td class="data row6 col3" id="T_043ce_row6_col3">없음 / 보강:생산</td>
+<td class="data row6 col4" id="T_043ce_row6_col4">54.000000</td>
+<td class="data row6 col5" id="T_043ce_row6_col5">9.560000</td>
+<td class="data row6 col6" id="T_043ce_row6_col6">0.000000</td>
+<td class="data row6 col7" id="T_043ce_row6_col7">1.000000</td>
+<td class="data row6 col8" id="T_043ce_row6_col8">고용 축 진입신호 없음 (생산 6.7% 단독 감소 — 확인질문에 반영)</td>
+<td class="data row6 col9" id="T_043ce_row6_col9">False</td>
+</tr>
+<tr>
+<td class="data row7 col0" id="T_043ce_row7_col0">섬유의복</td>
+<td class="data row7 col1" id="T_043ce_row7_col1">2026Q2</td>
+<td class="data row7 col2" id="T_043ce_row7_col2">관찰</td>
+<td class="data row7 col3" id="T_043ce_row7_col3">없음 / 보강:생산</td>
+<td class="data row7 col4" id="T_043ce_row7_col4">0.000000</td>
+<td class="data row7 col5" id="T_043ce_row7_col5">0.000000</td>
+<td class="data row7 col6" id="T_043ce_row7_col6">0.000000</td>
+<td class="data row7 col7" id="T_043ce_row7_col7">nan</td>
+<td class="data row7 col8" id="T_043ce_row7_col8">고용 축 진입신호 없음 (생산 12.3% 단독 감소 — 확인질문에 반영)</td>
+<td class="data row7 col9" id="T_043ce_row7_col9">False</td>
+</tr>
+<tr>
+<td class="data row8 col0" id="T_043ce_row8_col0">기계</td>
+<td class="data row8 col1" id="T_043ce_row8_col1">2026Q2</td>
+<td class="data row8 col2" id="T_043ce_row8_col2">우선점검</td>
+<td class="data row8 col3" id="T_043ce_row8_col3">E|A / 보강:생산</td>
+<td class="data row8 col4" id="T_043ce_row8_col4">-3979.000000</td>
+<td class="data row8 col5" id="T_043ce_row8_col5">-6.340000</td>
+<td class="data row8 col6" id="T_043ce_row8_col6">3.470000</td>
+<td class="data row8 col7" id="T_043ce_row8_col7">2.000000</td>
+<td class="data row8 col8" id="T_043ce_row8_col8">고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</td>
+<td class="data row8 col9" id="T_043ce_row8_col9">False</td>
+</tr>
+<tr>
+<td class="data row9 col0" id="T_043ce_row9_col0">목재종이</td>
+<td class="data row9 col1" id="T_043ce_row9_col1">2026Q2</td>
+<td class="data row9 col2" id="T_043ce_row9_col2">우선점검</td>
+<td class="data row9 col3" id="T_043ce_row9_col3">E|R / 보강:생산|반복</td>
+<td class="data row9 col4" id="T_043ce_row9_col4">-48.000000</td>
+<td class="data row9 col5" id="T_043ce_row9_col5">-10.080000</td>
+<td class="data row9 col6" id="T_043ce_row9_col6">0.040000</td>
+<td class="data row9 col7" id="T_043ce_row9_col7">2.000000</td>
+<td class="data row9 col8" id="T_043ce_row9_col8">고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</td>
+<td class="data row9 col9" id="T_043ce_row9_col9">False</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<style type="text/css">
+</style>
+<table id="T_2642a">
+<thead>
+<tr>
+<th class="col_heading level0 col0" id="T_2642a_level0_col0">quarter</th>
+<th class="col_heading level0 col1" id="T_2642a_level0_col1">industry</th>
+<th class="col_heading level0 col2" id="T_2642a_level0_col2">stage</th>
+<th class="col_heading level0 col3" id="T_2642a_level0_col3">decision_entry_trigger</th>
+<th class="col_heading level0 col4" id="T_2642a_level0_col4">decision_reinforcement</th>
+<th class="col_heading level0 col5" id="T_2642a_level0_col5">stage_reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="data row0 col0" id="T_2642a_row0_col0">2025Q2</td>
+<td class="data row0 col1" id="T_2642a_row0_col1">기타</td>
+<td class="data row0 col2" id="T_2642a_row0_col2">추가확인</td>
+<td class="data row0 col3" id="T_2642a_row0_col3">E|R</td>
+<td class="data row0 col4" id="T_2642a_row0_col4">반복</td>
+<td class="data row0 col5" id="T_2642a_row0_col5">고용감소 15.6%(상위경계 10% 통과) · 산단평균 대비 18.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 146인 &lt; 300인으로 우선점검 제외]</td>
+</tr>
+<tr>
+<td class="data row1 col0" id="T_2642a_row1_col0">2025Q2</td>
+<td class="data row1 col1" id="T_2642a_row1_col1">섬유의복</td>
+<td class="data row1 col2" id="T_2642a_row1_col2">추가확인</td>
+<td class="data row1 col3" id="T_2642a_row1_col3">E|R</td>
+<td class="data row1 col4" id="T_2642a_row1_col4">반복</td>
+<td class="data row1 col5" id="T_2642a_row1_col5">고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 13.0%p 열위(상위경계 통과) [상위경계 통과했으나 고용 34인 &lt; 300인으로 우선점검 제외]</td>
+</tr>
+<tr>
+<td class="data row2 col0" id="T_2642a_row2_col0">2025Q3</td>
+<td class="data row2 col1" id="T_2642a_row2_col1">음식료</td>
+<td class="data row2 col2" id="T_2642a_row2_col2">우선점검</td>
+<td class="data row2 col3" id="T_2642a_row2_col3">E|R</td>
+<td class="data row2 col4" id="T_2642a_row2_col4">생산|반복</td>
+<td class="data row2 col5" id="T_2642a_row2_col5">고용감소 28.4%(상위경계 10% 통과) · 산단평균 대비 28.5%p 열위(상위경계 통과) → 보강: 생산 17.5% 감소 / 직전 분기에도 진입신호(지속)</td>
+</tr>
+<tr>
+<td class="data row3 col0" id="T_2642a_row3_col0">2025Q3</td>
+<td class="data row3 col1" id="T_2642a_row3_col1">비금속</td>
+<td class="data row3 col2" id="T_2642a_row3_col2">추가확인</td>
+<td class="data row3 col3" id="T_2642a_row3_col3">E|R</td>
+<td class="data row3 col4" id="T_2642a_row3_col4">생산|반복</td>
+<td class="data row3 col5" id="T_2642a_row3_col5">고용감소 22.9%(상위경계 10% 통과) · 산단평균 대비 23.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 182인 &lt; 300인으로 우선점검 제외]</td>
+</tr>
+<tr>
+<td class="data row4 col0" id="T_2642a_row4_col0">2025Q3</td>
+<td class="data row4 col1" id="T_2642a_row4_col1">기타</td>
+<td class="data row4 col2" id="T_2642a_row4_col2">추가확인</td>
+<td class="data row4 col3" id="T_2642a_row4_col3">E|R</td>
+<td class="data row4 col4" id="T_2642a_row4_col4">반복</td>
+<td class="data row4 col5" id="T_2642a_row4_col5">고용감소 16.2%(상위경계 10% 통과) · 산단평균 대비 16.4%p 열위(상위경계 통과) [상위경계 통과했으나 고용 145인 &lt; 300인으로 우선점검 제외]</td>
+</tr>
+<tr>
+<td class="data row5 col0" id="T_2642a_row5_col0">2025Q3</td>
+<td class="data row5 col1" id="T_2642a_row5_col1">섬유의복</td>
+<td class="data row5 col2" id="T_2642a_row5_col2">추가확인</td>
+<td class="data row5 col3" id="T_2642a_row5_col3">E|R</td>
+<td class="data row5 col4" id="T_2642a_row5_col4">생산|반복</td>
+<td class="data row5 col5" id="T_2642a_row5_col5">고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 10.7%p 열위(상위경계 통과) [상위경계 통과했으나 고용 34인 &lt; 300인으로 우선점검 제외]</td>
+</tr>
+<tr>
+<td class="data row6 col0" id="T_2642a_row6_col0">2025Q4</td>
+<td class="data row6 col1" id="T_2642a_row6_col1">음식료</td>
+<td class="data row6 col2" id="T_2642a_row6_col2">우선점검</td>
+<td class="data row6 col3" id="T_2642a_row6_col3">E|R</td>
+<td class="data row6 col4" id="T_2642a_row6_col4">생산|반복</td>
+<td class="data row6 col5" id="T_2642a_row6_col5">고용감소 32.6%(상위경계 10% 통과) · 산단평균 대비 33.4%p 열위(상위경계 통과) → 보강: 생산 15.3% 감소 / 직전 분기에도 진입신호(지속)</td>
+</tr>
+<tr>
+<td class="data row7 col0" id="T_2642a_row7_col0">2025Q4</td>
+<td class="data row7 col1" id="T_2642a_row7_col1">전기전자</td>
+<td class="data row7 col2" id="T_2642a_row7_col2">추가확인</td>
+<td class="data row7 col3" id="T_2642a_row7_col3">R|A</td>
+<td class="data row7 col4" id="T_2642a_row7_col4">확인된 보강 없음</td>
+<td class="data row7 col5" id="T_2642a_row7_col5">산단평균 대비 5.5%p 열위(진입경계 통과) · 산단 제조업 고용의 1.20% 감소(진입경계 1.0% 통과)</td>
+</tr>
+<tr>
+<td class="data row8 col0" id="T_2642a_row8_col0">2025Q4</td>
+<td class="data row8 col1" id="T_2642a_row8_col1">운송장비</td>
+<td class="data row8 col2" id="T_2642a_row8_col2">추가확인</td>
+<td class="data row8 col3" id="T_2642a_row8_col3">E|R</td>
+<td class="data row8 col4" id="T_2642a_row8_col4">생산</td>
+<td class="data row8 col5" id="T_2642a_row8_col5">고용감소 5.3%(진입경계 5% 통과) · 산단평균 대비 6.1%p 열위(진입경계 통과)</td>
+</tr>
+<tr>
+<td class="data row9 col0" id="T_2642a_row9_col0">2025Q4</td>
+<td class="data row9 col1" id="T_2642a_row9_col1">비금속</td>
+<td class="data row9 col2" id="T_2642a_row9_col2">추가확인</td>
+<td class="data row9 col3" id="T_2642a_row9_col3">E|R</td>
+<td class="data row9 col4" id="T_2642a_row9_col4">반복</td>
+<td class="data row9 col5" id="T_2642a_row9_col5">고용감소 27.6%(상위경계 10% 통과) · 산단평균 대비 28.4%p 열위(상위경계 통과) [상위경계 통과했으나 고용 178인 &lt; 300인으로 우선점검 제외]</td>
+</tr>
+<tr>
+<td class="data row10 col0" id="T_2642a_row10_col0">2025Q4</td>
+<td class="data row10 col1" id="T_2642a_row10_col1">기타</td>
+<td class="data row10 col2" id="T_2642a_row10_col2">추가확인</td>
+<td class="data row10 col3" id="T_2642a_row10_col3">E|R</td>
+<td class="data row10 col4" id="T_2642a_row10_col4">반복</td>
+<td class="data row10 col5" id="T_2642a_row10_col5">고용감소 27.0%(상위경계 10% 통과) · 산단평균 대비 27.8%p 열위(상위경계 통과) [상위경계 통과했으나 고용 143인 &lt; 300인으로 우선점검 제외]</td>
+</tr>
+<tr>
+<td class="data row11 col0" id="T_2642a_row11_col0">2026Q1</td>
+<td class="data row11 col1" id="T_2642a_row11_col1">음식료</td>
+<td class="data row11 col2" id="T_2642a_row11_col2">우선점검</td>
+<td class="data row11 col3" id="T_2642a_row11_col3">E|R</td>
+<td class="data row11 col4" id="T_2642a_row11_col4">반복</td>
+<td class="data row11 col5" id="T_2642a_row11_col5">고용감소 21.5%(상위경계 10% 통과) · 산단평균 대비 19.8%p 열위(상위경계 통과) → 보강: 직전 분기에도 진입신호(지속)</td>
+</tr>
+<tr>
+<td class="data row12 col0" id="T_2642a_row12_col0">2026Q1</td>
+<td class="data row12 col1" id="T_2642a_row12_col1">목재종이</td>
+<td class="data row12 col2" id="T_2642a_row12_col2">우선점검</td>
+<td class="data row12 col3" id="T_2642a_row12_col3">E|R</td>
+<td class="data row12 col4" id="T_2642a_row12_col4">생산</td>
+<td class="data row12 col5" id="T_2642a_row12_col5">고용감소 10.6%(상위경계 10% 통과) · 산단평균 대비 9.0%p 열위(진입경계 통과) → 보강: 생산 14.3% 감소</td>
+</tr>
+<tr>
+<td class="data row13 col0" id="T_2642a_row13_col0">2026Q2</td>
+<td class="data row13 col1" id="T_2642a_row13_col1">기계</td>
+<td class="data row13 col2" id="T_2642a_row13_col2">우선점검</td>
+<td class="data row13 col3" id="T_2642a_row13_col3">E|A</td>
+<td class="data row13 col4" id="T_2642a_row13_col4">생산</td>
+<td class="data row13 col5" id="T_2642a_row13_col5">고용감소 6.3%(진입경계 5% 통과) · 산단 제조업 고용의 3.47% 감소(상위경계 2.0% 통과) → 보강: 생산 19.5% 감소</td>
+</tr>
+<tr>
+<td class="data row14 col0" id="T_2642a_row14_col0">2026Q2</td>
+<td class="data row14 col1" id="T_2642a_row14_col1">목재종이</td>
+<td class="data row14 col2" id="T_2642a_row14_col2">우선점검</td>
+<td class="data row14 col3" id="T_2642a_row14_col3">E|R</td>
+<td class="data row14 col4" id="T_2642a_row14_col4">생산|반복</td>
+<td class="data row14 col5" id="T_2642a_row14_col5">고용감소 10.1%(상위경계 10% 통과) · 산단평균 대비 6.4%p 열위(진입경계 통과) → 보강: 생산 12.9% 감소 / 직전 분기에도 진입신호(지속)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bbf32aca">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h3><ul>
+<li>최신분기에는 우선점검 2개 업종이 있고 추가확인은 없다. 과거 기간 전체에서는 추가확인 35건이 존재한다.</li>
+</ul>
+<h3 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h3><ul>
+<li>최신분기 우선점검은 ELECTRE를 거치지 않고 외부근거·담당자 검토로 이동한다. 추가확인은 기준 간 경계와 미완결 조건을 사람이 다시 볼 수 있도록 선택적 다기준 재검토로 보낸다.</li>
+</ul>
+<h3 id="%EC%A3%BC%EC%9D%98">주의<a class="anchor-link" href="#%EC%A3%BC%EC%9D%98">¶</a></h3><ul>
+<li>최신분기 추가확인이 0건이라는 사실은 ELECTRE 경로가 불필요하다는 뜻이 아니라, 이번 분기에는 해당 경로로 들어갈 사례가 없다는 뜻이다.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8ac60cf1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="4.-%EC%B6%94%EA%B0%80%ED%99%95%EC%9D%B8-%E2%86%92-%EC%84%A0%ED%83%9D%EC%A0%81-ELECTRE/SMAA-%EC%9E%85%EB%A0%A5-%EA%B2%80%EC%A6%9D">4. 추가확인 → 선택적 ELECTRE/SMAA 입력 검증<a class="anchor-link" href="#4.-%EC%B6%94%EA%B0%80%ED%99%95%EC%9D%B8-%E2%86%92-%EC%84%A0%ED%83%9D%EC%A0%81-ELECTRE/SMAA-%EC%9E%85%EB%A0%A5-%EA%B2%80%EC%A6%9D">¶</a></h2>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noInput" id="cell-id=731209d6">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<style type="text/css">
+</style>
+<table id="T_7ceb9">
+<thead>
+<tr>
+<th class="col_heading level0 col0" id="T_7ceb9_level0_col0">quarter</th>
+<th class="col_heading level0 col1" id="T_7ceb9_level0_col1">industry</th>
+<th class="col_heading level0 col2" id="T_7ceb9_level0_col2">stage</th>
+<th class="col_heading level0 col3" id="T_7ceb9_level0_col3">decision_entry_trigger</th>
+<th class="col_heading level0 col4" id="T_7ceb9_level0_col4">decision_reinforcement</th>
+<th class="col_heading level0 col5" id="T_7ceb9_level0_col5">stage_reason</th>
+<th class="col_heading level0 col6" id="T_7ceb9_level0_col6">electre_review_required</th>
+<th class="col_heading level0 col7" id="T_7ceb9_level0_col7">electre_stage</th>
+<th class="col_heading level0 col8" id="T_7ceb9_level0_col8">possible_stages</th>
+<th class="col_heading level0 col9" id="T_7ceb9_level0_col9">n_possible</th>
+<th class="col_heading level0 col10" id="T_7ceb9_level0_col10">smaa_parameter_sensitive</th>
+<th class="col_heading level0 col11" id="T_7ceb9_level0_col11">boundary_action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="data row0 col0" id="T_7ceb9_row0_col0">2022Q1</td>
+<td class="data row0 col1" id="T_7ceb9_row0_col1">섬유의복</td>
+<td class="data row0 col2" id="T_7ceb9_row0_col2">추가확인</td>
+<td class="data row0 col3" id="T_7ceb9_row0_col3">E|R</td>
+<td class="data row0 col4" id="T_7ceb9_row0_col4">반복</td>
+<td class="data row0 col5" id="T_7ceb9_row0_col5">고용감소 11.4%(상위경계 10% 통과) · 산단평균 대비 11.6%p 열위(상위경계 통과) [상위경계 통과했으나 고용 39인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row0 col6" id="T_7ceb9_row0_col6">True</td>
+<td class="data row0 col7" id="T_7ceb9_row0_col7">OBSERVE</td>
+<td class="data row0 col8" id="T_7ceb9_row0_col8">OBSERVE|CHECK</td>
+<td class="data row0 col9" id="T_7ceb9_row0_col9">2</td>
+<td class="data row0 col10" id="T_7ceb9_row0_col10">True</td>
+<td class="data row0 col11" id="T_7ceb9_row0_col11">Triage-ELECTRE 불일치 확인(관찰로 자동 하향하지 않음)</td>
+</tr>
+<tr>
+<td class="data row1 col0" id="T_7ceb9_row1_col0">2022Q2</td>
+<td class="data row1 col1" id="T_7ceb9_row1_col1">섬유의복</td>
+<td class="data row1 col2" id="T_7ceb9_row1_col2">추가확인</td>
+<td class="data row1 col3" id="T_7ceb9_row1_col3">E|R</td>
+<td class="data row1 col4" id="T_7ceb9_row1_col4">반복</td>
+<td class="data row1 col5" id="T_7ceb9_row1_col5">고용감소 11.4%(상위경계 10% 통과) · 산단평균 대비 11.3%p 열위(상위경계 통과) [상위경계 통과했으나 고용 39인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row1 col6" id="T_7ceb9_row1_col6">True</td>
+<td class="data row1 col7" id="T_7ceb9_row1_col7">CHECK</td>
+<td class="data row1 col8" id="T_7ceb9_row1_col8">OBSERVE|CHECK</td>
+<td class="data row1 col9" id="T_7ceb9_row1_col9">2</td>
+<td class="data row1 col10" id="T_7ceb9_row1_col10">True</td>
+<td class="data row1 col11" id="T_7ceb9_row1_col11">추가확인 유지</td>
+</tr>
+<tr>
+<td class="data row2 col0" id="T_7ceb9_row2_col0">2022Q3</td>
+<td class="data row2 col1" id="T_7ceb9_row2_col1">섬유의복</td>
+<td class="data row2 col2" id="T_7ceb9_row2_col2">추가확인</td>
+<td class="data row2 col3" id="T_7ceb9_row2_col3">E|R</td>
+<td class="data row2 col4" id="T_7ceb9_row2_col4">반복</td>
+<td class="data row2 col5" id="T_7ceb9_row2_col5">고용감소 11.4%(상위경계 10% 통과) · 산단평균 대비 11.1%p 열위(상위경계 통과) [상위경계 통과했으나 고용 39인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row2 col6" id="T_7ceb9_row2_col6">True</td>
+<td class="data row2 col7" id="T_7ceb9_row2_col7">CHECK</td>
+<td class="data row2 col8" id="T_7ceb9_row2_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row2 col9" id="T_7ceb9_row2_col9">3</td>
+<td class="data row2 col10" id="T_7ceb9_row2_col10">True</td>
+<td class="data row2 col11" id="T_7ceb9_row2_col11">추가확인 유지</td>
+</tr>
+<tr>
+<td class="data row3 col0" id="T_7ceb9_row3_col0">2022Q4</td>
+<td class="data row3 col1" id="T_7ceb9_row3_col1">기타</td>
+<td class="data row3 col2" id="T_7ceb9_row3_col2">추가확인</td>
+<td class="data row3 col3" id="T_7ceb9_row3_col3">E|R</td>
+<td class="data row3 col4" id="T_7ceb9_row3_col4">생산</td>
+<td class="data row3 col5" id="T_7ceb9_row3_col5">고용감소 19.4%(상위경계 10% 통과) · 산단평균 대비 16.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 158인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row3 col6" id="T_7ceb9_row3_col6">True</td>
+<td class="data row3 col7" id="T_7ceb9_row3_col7">PRIORITY</td>
+<td class="data row3 col8" id="T_7ceb9_row3_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row3 col9" id="T_7ceb9_row3_col9">3</td>
+<td class="data row3 col10" id="T_7ceb9_row3_col10">True</td>
+<td class="data row3 col11" id="T_7ceb9_row3_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row4 col0" id="T_7ceb9_row4_col0">2023Q1</td>
+<td class="data row4 col1" id="T_7ceb9_row4_col1">기타</td>
+<td class="data row4 col2" id="T_7ceb9_row4_col2">추가확인</td>
+<td class="data row4 col3" id="T_7ceb9_row4_col3">E|R</td>
+<td class="data row4 col4" id="T_7ceb9_row4_col4">생산|반복</td>
+<td class="data row4 col5" id="T_7ceb9_row4_col5">고용감소 24.6%(상위경계 10% 통과) · 산단평균 대비 21.6%p 열위(상위경계 통과) [상위경계 통과했으나 고용 147인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row4 col6" id="T_7ceb9_row4_col6">True</td>
+<td class="data row4 col7" id="T_7ceb9_row4_col7">PRIORITY</td>
+<td class="data row4 col8" id="T_7ceb9_row4_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row4 col9" id="T_7ceb9_row4_col9">3</td>
+<td class="data row4 col10" id="T_7ceb9_row4_col10">True</td>
+<td class="data row4 col11" id="T_7ceb9_row4_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row5 col0" id="T_7ceb9_row5_col0">2023Q2</td>
+<td class="data row5 col1" id="T_7ceb9_row5_col1">기타</td>
+<td class="data row5 col2" id="T_7ceb9_row5_col2">추가확인</td>
+<td class="data row5 col3" id="T_7ceb9_row5_col3">E|R</td>
+<td class="data row5 col4" id="T_7ceb9_row5_col4">생산|반복</td>
+<td class="data row5 col5" id="T_7ceb9_row5_col5">고용감소 18.6%(상위경계 10% 통과) · 산단평균 대비 15.6%p 열위(상위경계 통과) [상위경계 통과했으나 고용 158인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row5 col6" id="T_7ceb9_row5_col6">True</td>
+<td class="data row5 col7" id="T_7ceb9_row5_col7">PRIORITY</td>
+<td class="data row5 col8" id="T_7ceb9_row5_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row5 col9" id="T_7ceb9_row5_col9">3</td>
+<td class="data row5 col10" id="T_7ceb9_row5_col10">True</td>
+<td class="data row5 col11" id="T_7ceb9_row5_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row6 col0" id="T_7ceb9_row6_col0">2023Q3</td>
+<td class="data row6 col1" id="T_7ceb9_row6_col1">기타</td>
+<td class="data row6 col2" id="T_7ceb9_row6_col2">추가확인</td>
+<td class="data row6 col3" id="T_7ceb9_row6_col3">E|R</td>
+<td class="data row6 col4" id="T_7ceb9_row6_col4">생산|반복</td>
+<td class="data row6 col5" id="T_7ceb9_row6_col5">고용감소 12.4%(상위경계 10% 통과) · 산단평균 대비 10.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 170인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row6 col6" id="T_7ceb9_row6_col6">True</td>
+<td class="data row6 col7" id="T_7ceb9_row6_col7">PRIORITY</td>
+<td class="data row6 col8" id="T_7ceb9_row6_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row6 col9" id="T_7ceb9_row6_col9">3</td>
+<td class="data row6 col10" id="T_7ceb9_row6_col10">True</td>
+<td class="data row6 col11" id="T_7ceb9_row6_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row7 col0" id="T_7ceb9_row7_col0">2023Q3</td>
+<td class="data row7 col1" id="T_7ceb9_row7_col1">목재종이</td>
+<td class="data row7 col2" id="T_7ceb9_row7_col2">추가확인</td>
+<td class="data row7 col3" id="T_7ceb9_row7_col3">E</td>
+<td class="data row7 col4" id="T_7ceb9_row7_col4">생산</td>
+<td class="data row7 col5" id="T_7ceb9_row7_col5">고용감소 5.6%(진입경계 5% 통과)</td>
+<td class="data row7 col6" id="T_7ceb9_row7_col6">True</td>
+<td class="data row7 col7" id="T_7ceb9_row7_col7">PRIORITY</td>
+<td class="data row7 col8" id="T_7ceb9_row7_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row7 col9" id="T_7ceb9_row7_col9">3</td>
+<td class="data row7 col10" id="T_7ceb9_row7_col10">True</td>
+<td class="data row7 col11" id="T_7ceb9_row7_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row8 col0" id="T_7ceb9_row8_col0">2023Q4</td>
+<td class="data row8 col1" id="T_7ceb9_row8_col1">목재종이</td>
+<td class="data row8 col2" id="T_7ceb9_row8_col2">추가확인</td>
+<td class="data row8 col3" id="T_7ceb9_row8_col3">E|R</td>
+<td class="data row8 col4" id="T_7ceb9_row8_col4">반복</td>
+<td class="data row8 col5" id="T_7ceb9_row8_col5">고용감소 9.1%(진입경계 5% 통과) · 산단평균 대비 10.2%p 열위(상위경계 통과) [상위경계 통과했으나 고용 239인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
+<td class="data row8 col6" id="T_7ceb9_row8_col6">True</td>
+<td class="data row8 col7" id="T_7ceb9_row8_col7">UNDETERMINED</td>
+<td class="data row8 col8" id="T_7ceb9_row8_col8">UNDETERMINED</td>
+<td class="data row8 col9" id="T_7ceb9_row8_col9">1</td>
+<td class="data row8 col10" id="T_7ceb9_row8_col10">False</td>
+<td class="data row8 col11" id="T_7ceb9_row8_col11">자료·모형 불확실성 우선 확인</td>
+</tr>
+<tr>
+<td class="data row9 col0" id="T_7ceb9_row9_col0">2023Q4</td>
+<td class="data row9 col1" id="T_7ceb9_row9_col1">섬유의복</td>
+<td class="data row9 col2" id="T_7ceb9_row9_col2">추가확인</td>
+<td class="data row9 col3" id="T_7ceb9_row9_col3">E|R</td>
+<td class="data row9 col4" id="T_7ceb9_row9_col4">확인된 보강 없음</td>
+<td class="data row9 col5" id="T_7ceb9_row9_col5">고용감소 40.6%(상위경계 10% 통과) · 산단평균 대비 41.7%p 열위(상위경계 통과) [상위경계 통과했으나 고용 38인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
+<td class="data row9 col6" id="T_7ceb9_row9_col6">True</td>
+<td class="data row9 col7" id="T_7ceb9_row9_col7">UNDETERMINED</td>
+<td class="data row9 col8" id="T_7ceb9_row9_col8">UNDETERMINED</td>
+<td class="data row9 col9" id="T_7ceb9_row9_col9">1</td>
+<td class="data row9 col10" id="T_7ceb9_row9_col10">False</td>
+<td class="data row9 col11" id="T_7ceb9_row9_col11">자료·모형 불확실성 우선 확인</td>
+</tr>
+<tr>
+<td class="data row10 col0" id="T_7ceb9_row10_col0">2024Q1</td>
+<td class="data row10 col1" id="T_7ceb9_row10_col1">목재종이</td>
+<td class="data row10 col2" id="T_7ceb9_row10_col2">추가확인</td>
+<td class="data row10 col3" id="T_7ceb9_row10_col3">E|R</td>
+<td class="data row10 col4" id="T_7ceb9_row10_col4">반복</td>
+<td class="data row10 col5" id="T_7ceb9_row10_col5">고용감소 7.4%(진입경계 5% 통과) · 산단평균 대비 7.6%p 열위(진입경계 통과)</td>
+<td class="data row10 col6" id="T_7ceb9_row10_col6">True</td>
+<td class="data row10 col7" id="T_7ceb9_row10_col7">PRIORITY</td>
+<td class="data row10 col8" id="T_7ceb9_row10_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row10 col9" id="T_7ceb9_row10_col9">3</td>
+<td class="data row10 col10" id="T_7ceb9_row10_col10">True</td>
+<td class="data row10 col11" id="T_7ceb9_row10_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row11 col0" id="T_7ceb9_row11_col0">2024Q1</td>
+<td class="data row11 col1" id="T_7ceb9_row11_col1">섬유의복</td>
+<td class="data row11 col2" id="T_7ceb9_row11_col2">추가확인</td>
+<td class="data row11 col3" id="T_7ceb9_row11_col3">E|R</td>
+<td class="data row11 col4" id="T_7ceb9_row11_col4">반복</td>
+<td class="data row11 col5" id="T_7ceb9_row11_col5">고용감소 28.3%(상위경계 10% 통과) · 산단평균 대비 28.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 38인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row11 col6" id="T_7ceb9_row11_col6">True</td>
+<td class="data row11 col7" id="T_7ceb9_row11_col7">CHECK</td>
+<td class="data row11 col8" id="T_7ceb9_row11_col8">OBSERVE|CHECK</td>
+<td class="data row11 col9" id="T_7ceb9_row11_col9">2</td>
+<td class="data row11 col10" id="T_7ceb9_row11_col10">True</td>
+<td class="data row11 col11" id="T_7ceb9_row11_col11">추가확인 유지</td>
+</tr>
+<tr>
+<td class="data row12 col0" id="T_7ceb9_row12_col0">2024Q2</td>
+<td class="data row12 col1" id="T_7ceb9_row12_col1">목재종이</td>
+<td class="data row12 col2" id="T_7ceb9_row12_col2">추가확인</td>
+<td class="data row12 col3" id="T_7ceb9_row12_col3">E|R</td>
+<td class="data row12 col4" id="T_7ceb9_row12_col4">반복</td>
+<td class="data row12 col5" id="T_7ceb9_row12_col5">고용감소 8.1%(진입경계 5% 통과) · 산단평균 대비 10.7%p 열위(상위경계 통과) [상위경계 통과했으나 고용 237인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row12 col6" id="T_7ceb9_row12_col6">True</td>
+<td class="data row12 col7" id="T_7ceb9_row12_col7">PRIORITY</td>
+<td class="data row12 col8" id="T_7ceb9_row12_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row12 col9" id="T_7ceb9_row12_col9">3</td>
+<td class="data row12 col10" id="T_7ceb9_row12_col10">True</td>
+<td class="data row12 col11" id="T_7ceb9_row12_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row13 col0" id="T_7ceb9_row13_col0">2024Q2</td>
+<td class="data row13 col1" id="T_7ceb9_row13_col1">비금속</td>
+<td class="data row13 col2" id="T_7ceb9_row13_col2">추가확인</td>
+<td class="data row13 col3" id="T_7ceb9_row13_col3">E|R</td>
+<td class="data row13 col4" id="T_7ceb9_row13_col4">확인된 보강 없음</td>
+<td class="data row13 col5" id="T_7ceb9_row13_col5">고용감소 7.2%(진입경계 5% 통과) · 산단평균 대비 9.8%p 열위(진입경계 통과)</td>
+<td class="data row13 col6" id="T_7ceb9_row13_col6">True</td>
+<td class="data row13 col7" id="T_7ceb9_row13_col7">PRIORITY</td>
+<td class="data row13 col8" id="T_7ceb9_row13_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row13 col9" id="T_7ceb9_row13_col9">3</td>
+<td class="data row13 col10" id="T_7ceb9_row13_col10">True</td>
+<td class="data row13 col11" id="T_7ceb9_row13_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row14 col0" id="T_7ceb9_row14_col0">2024Q2</td>
+<td class="data row14 col1" id="T_7ceb9_row14_col1">섬유의복</td>
+<td class="data row14 col2" id="T_7ceb9_row14_col2">추가확인</td>
+<td class="data row14 col3" id="T_7ceb9_row14_col3">E|R</td>
+<td class="data row14 col4" id="T_7ceb9_row14_col4">생산|반복</td>
+<td class="data row14 col5" id="T_7ceb9_row14_col5">고용감소 13.6%(상위경계 10% 통과) · 산단평균 대비 16.2%p 열위(상위경계 통과) [상위경계 통과했으나 고용 38인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row14 col6" id="T_7ceb9_row14_col6">True</td>
+<td class="data row14 col7" id="T_7ceb9_row14_col7">CHECK</td>
+<td class="data row14 col8" id="T_7ceb9_row14_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row14 col9" id="T_7ceb9_row14_col9">3</td>
+<td class="data row14 col10" id="T_7ceb9_row14_col10">True</td>
+<td class="data row14 col11" id="T_7ceb9_row14_col11">추가확인 유지</td>
+</tr>
+<tr>
+<td class="data row15 col0" id="T_7ceb9_row15_col0">2024Q3</td>
+<td class="data row15 col1" id="T_7ceb9_row15_col1">목재종이</td>
+<td class="data row15 col2" id="T_7ceb9_row15_col2">추가확인</td>
+<td class="data row15 col3" id="T_7ceb9_row15_col3">E|R</td>
+<td class="data row15 col4" id="T_7ceb9_row15_col4">반복</td>
+<td class="data row15 col5" id="T_7ceb9_row15_col5">고용감소 16.3%(상위경계 10% 통과) · 산단평균 대비 18.9%p 열위(상위경계 통과) [상위경계 통과했으나 고용 211인 &lt; 300인으로 우선점검 제외]</td>
+<td class="data row15 col6" id="T_7ceb9_row15_col6">True</td>
+<td class="data row15 col7" id="T_7ceb9_row15_col7">PRIORITY</td>
+<td class="data row15 col8" id="T_7ceb9_row15_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row15 col9" id="T_7ceb9_row15_col9">3</td>
+<td class="data row15 col10" id="T_7ceb9_row15_col10">True</td>
+<td class="data row15 col11" id="T_7ceb9_row15_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row16 col0" id="T_7ceb9_row16_col0">2024Q3</td>
+<td class="data row16 col1" id="T_7ceb9_row16_col1">비금속</td>
+<td class="data row16 col2" id="T_7ceb9_row16_col2">추가확인</td>
+<td class="data row16 col3" id="T_7ceb9_row16_col3">E|R</td>
+<td class="data row16 col4" id="T_7ceb9_row16_col4">생산|반복</td>
+<td class="data row16 col5" id="T_7ceb9_row16_col5">고용감소 6.0%(진입경계 5% 통과) · 산단평균 대비 8.6%p 열위(진입경계 통과)</td>
+<td class="data row16 col6" id="T_7ceb9_row16_col6">True</td>
+<td class="data row16 col7" id="T_7ceb9_row16_col7">PRIORITY</td>
+<td class="data row16 col8" id="T_7ceb9_row16_col8">OBSERVE|CHECK|PRIORITY</td>
+<td class="data row16 col9" id="T_7ceb9_row16_col9">3</td>
+<td class="data row16 col10" id="T_7ceb9_row16_col10">True</td>
+<td class="data row16 col11" id="T_7ceb9_row16_col11">추가확인군 내 우선 검토(우선점검으로 자동 승격하지 않음)</td>
+</tr>
+<tr>
+<td class="data row17 col0" id="T_7ceb9_row17_col0">2024Q3</td>
+<td class="data row17 col1" id="T_7ceb9_row17_col1">섬유의복</td>
+<td class="data row17 col2" id="T_7ceb9_row17_col2">추가확인</td>
+<td class="data row17 col3" id="T_7ceb9_row17_col3">R</td>
+<td class="data row17 col4" id="T_7ceb9_row17_col4">반복</td>
+<td class="data row17 col5" id="T_7ceb9_row17_col5">산단평균 대비 5.2%p 열위(진입경계 통과)</td>
+<td class="data row17 col6" id="T_7ceb9_row17_col6">True</td>
+<td class="data row17 col7" id="T_7ceb9_row17_col7">CHECK</td>
+<td class="data row17 col8" id="T_7ceb9_row17_col8">OBSERVE|CHECK</td>
+<td class="data row17 col9" id="T_7ceb9_row17_col9">2</td>
+<td class="data row17 col10" id="T_7ceb9_row17_col10">True</td>
+<td class="data row17 col11" id="T_7ceb9_row17_col11">추가확인 유지</td>
+</tr>
+<tr>
+<td class="data row18 col0" id="T_7ceb9_row18_col0">2024Q4</td>
+<td class="data row18 col1" id="T_7ceb9_row18_col1">목재종이</td>
+<td class="data row18 col2" id="T_7ceb9_row18_col2">추가확인</td>
+<td class="data row18 col3" id="T_7ceb9_row18_col3">E|R</td>
+<td class="data row18 col4" id="T_7ceb9_row18_col4">반복</td>
+<td class="data row18 col5" id="T_7ceb9_row18_col5">고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 11.4%p 열위(상위경계 통과) [상위경계 통과했으나 고용 214인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
+<td class="data row18 col6" id="T_7ceb9_row18_col6">True</td>
+<td class="data row18 col7" id="T_7ceb9_row18_col7">UNDETERMINED</td>
+<td class="data row18 col8" id="T_7ceb9_row18_col8">UNDETERMINED</td>
+<td class="data row18 col9" id="T_7ceb9_row18_col9">1</td>
+<td class="data row18 col10" id="T_7ceb9_row18_col10">False</td>
+<td class="data row18 col11" id="T_7ceb9_row18_col11">자료·모형 불확실성 우선 확인</td>
+</tr>
+<tr>
+<td class="data row19 col0" id="T_7ceb9_row19_col0">2024Q4</td>
+<td class="data row19 col1" id="T_7ceb9_row19_col1">섬유의복</td>
+<td class="data row19 col2" id="T_7ceb9_row19_col2">추가확인</td>
+<td class="data row19 col3" id="T_7ceb9_row19_col3">E|R</td>
+<td class="data row19 col4" id="T_7ceb9_row19_col4">반복</td>
+<td class="data row19 col5" id="T_7ceb9_row19_col5">고용감소 10.5%(상위경계 10% 통과) · 산단평균 대비 11.5%p 열위(상위경계 통과) [상위경계 통과했으나 고용 34인 &lt; 300인으로 우선점검 제외] [생산자료 미확인; 확인 가능한 신호에 따른 최소판정]</td>
+<td class="data row19 col6" id="T_7ceb9_row19_col6">True</td>
+<td class="data row19 col7" id="T_7ceb9_row19_col7">UNDETERMINED</td>
+<td class="data row19 col8" id="T_7ceb9_row19_col8">UNDETERMINED</td>
+<td class="data row19 col9" id="T_7ceb9_row19_col9">1</td>
+<td class="data row19 col10" id="T_7ceb9_row19_col10">False</td>
+<td class="data row19 col11" id="T_7ceb9_row19_col11">자료·모형 불확실성 우선 확인</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Triage 추가확인: 35 | ELECTRE 결과: {'PRIORITY': 20, 'CHECK': 9, 'UNDETERMINED': 4, 'OBSERVE': 2} | SMAA 파라미터 민감: 29
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=edc0d27b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="%EA%B4%80%EC%B0%B0">관찰<a class="anchor-link" href="#%EA%B4%80%EC%B0%B0">¶</a></h3><ul>
+<li>추가확인 35건과 선택적 재검토 35건의 <code>(quarter, industry)</code> 키가 정확히 일치한다.</li>
+<li>ELECTRE 결과와 SMAA 수용도·가능단계가 저장되어 있으며 <code>triage_stage_preserved</code>는 모두 추가확인이다.</li>
+</ul>
+<h3 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h3><ul>
+<li>ELECTRE/SMAA는 추가확인군 내부의 불일치·민감성·검토순서를 설명한다.</li>
+</ul>
+<h3 id="%EC%A3%BC%EC%9D%98">주의<a class="anchor-link" href="#%EC%A3%BC%EC%9D%98">¶</a></h3><ul>
+<li>ELECTRE의 OBSERVE는 관찰로 자동 하향하지 않고 PRIORITY는 우선점검으로 자동 승격하지 않는다.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f9d23559">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="%EB%8B%A8%EA%B3%84-%EA%B2%B0%EB%A1%A0">단계 결론<a class="anchor-link" href="#%EB%8B%A8%EA%B3%84-%EA%B2%B0%EB%A1%A0">¶</a></h1><h2 id="%ED%99%95%EC%9D%B8%EB%90%9C-%EC%82%AC%EC%8B%A4">확인된 사실<a class="anchor-link" href="#%ED%99%95%EC%9D%B8%EB%90%9C-%EC%82%AC%EC%8B%A4">¶</a></h2><p>E/R/A/P, 반복신호, 300인 gate의 실제 산식과 출처 성격을 확인했고, 180건을 관찰 128·추가확인 35·우선점검 17건으로 선별했다. 추가확인 35건만 선택적 ELECTRE/SMAA 입력과 정확히 일치한다.</p>
+<h2 id="%ED%95%B4%EC%84%9D">해석<a class="anchor-link" href="#%ED%95%B4%EC%84%9D">¶</a></h2><p>Triage는 설명 가능한 1차 선별이며, 추가확인은 경계·상충·불확실성을 사람이 다시 보기 위한 큐다. 우선점검은 핵심 신호가 충분히 명확해 외부근거와 담당자 확인으로 바로 이동한다.</p>
+<h2 id="%EC%9D%B4-%EB%8B%A8%EA%B3%84%EB%A7%8C%EC%9C%BC%EB%A1%9C-%EB%A7%90%ED%95%A0-%EC%88%98-%EC%97%86%EB%8A%94-%EA%B2%83">이 단계만으로 말할 수 없는 것<a class="anchor-link" href="#%EC%9D%B4-%EB%8B%A8%EA%B3%84%EB%A7%8C%EC%9C%BC%EB%A1%9C-%EB%A7%90%ED%95%A0-%EC%88%98-%EC%97%86%EB%8A%94-%EA%B2%83">¶</a></h2><p>운영 threshold는 법정 지정기준이나 최적 cut-off가 아니며, 단계는 위기확률·정답라벨·정책대상 선정이 아니다.</p>
+<h2 id="%EB%8B%A4%EC%9D%8C-%EB%8B%A8%EA%B3%84%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0">다음 단계가 필요한 이유<a class="anchor-link" href="#%EB%8B%A4%EC%9D%8C-%EB%8B%A8%EA%B3%84%EA%B0%80-%ED%95%84%EC%9A%94%ED%95%9C-%EC%9D%B4%EC%9C%A0">¶</a></h2><p>Triage에도 운영 threshold가 있고 초기에는 ELECTRE TRI-B를 전체 주모형 후보로 검토했으므로, 실제 후보모형·SMAA·민감도·PPI 실험을 통해 현재 역할분담의 근거를 확인해야 한다.</p>
+<p>→ 다음: <code>03_model_evolution_and_experiments.ipynb</code></p>
 </div>
 </div>
 </div>
