@@ -59,6 +59,9 @@ def test_recruitment_snapshot_is_actual_and_never_headcount(backend):
     assert result["latest_registration_date"] == "2026-09-18"
     assert result["headcount"] is None and result["model_input_allowed"] is False
     assert result["quarter"] == "2026Q3" and result["quarter_aligned_with_core"] is False
+    assert [level["count"] for level in result["evidence_levels"]] == [380, 161, 137, 3]
+    assert result["detail_needed_count"] == 136
+    assert result["job_relevance_distribution"] == {"CORE_INDUSTRIAL": 3}
 
 
 def test_keyword_ranking_is_deterministic_and_real(backend):

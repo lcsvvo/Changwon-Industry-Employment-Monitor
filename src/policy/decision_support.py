@@ -5,11 +5,15 @@
 """
 from __future__ import annotations
 
+import csv
 import re
 from datetime import datetime, timezone
+from functools import lru_cache
+from pathlib import Path
 
 from sqlalchemy import desc, func, select
 
+from evidence.collection.kicox_factory import normalize_company
 from export.snapshot import Snapshot
 from policy.rag import PolicyRAG, rebuild_policy_index
 from workflow import catalog as C
@@ -55,6 +59,32 @@ def _normal(value: str) -> str:
 
 def _plain_datetime(value):
     return value.isoformat() if isinstance(value, datetime) else value
+
+
+def _true(value: object) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y"}
+
+
+@lru_cache(maxsize=4)
+def _read_recruitment_layer(path_text: str, modified_ns: int) -> tuple[dict, ...]:
+    """Read the canonical layer once per file revision.
+
+    The policy service, rather than the Streamlit app, owns this adapter so the
+    UI continues to consume a stable backend contract. ``modified_ns`` is part
+    of the cache key, allowing later detail enrichment to appear automatically.
+    """
+    del modified_ns
+    with Path(path_text).open("r", encoding="utf-8-sig", newline="") as handle:
+        return tuple(csv.DictReader(handle))
+
+
+def _canonical_recruitment_rows() -> tuple[dict, ...]:
+    root = Path(__file__).resolve().parents[2]
+    files = sorted((root / "data" / "processed" / "work24").glob("work24_recruitment_layer_*.csv"))
+    if not files:
+        return ()
+    latest = files[-1]
+    return _read_recruitment_layer(str(latest), latest.stat().st_mtime_ns)
 
 
 class DecisionSupportService:
@@ -110,11 +140,13 @@ class DecisionSupportService:
                 M.Work24EvidenceSnapshot.industry == industry
             ).order_by(desc(M.Work24EvidenceSnapshot.collected_at),
                        desc(M.Work24EvidenceSnapshot.snapshot_id)).limit(1))
-        if row is None:
+        canonical = [item for item in _canonical_recruitment_rows()
+                     if item.get("kicox_industry") == industry]
+        if row is None and not canonical:
             return {"status": "NO_DATA", "industry": industry, "headcount": None,
                     "model_input_allowed": False,
                     "caveat": ["해당 업종으로 매핑된 Work24 공고가 없습니다."]}
-        return {
+        base = ({
             "status": "FOUND", "snapshot_id": row.snapshot_id, "quarter": row.quarter,
             "industry": row.industry, "posting_count": row.posting_count,
             "unique_company_count": row.unique_company_count, "headcount": row.headcount,
@@ -130,7 +162,84 @@ class DecisionSupportService:
                 "공고 수는 모집인원이나 전체 노동수요가 아닙니다.",
                 f"Work24 {row.quarter}는 CORE {self.snapshot.quarter} 판정 입력으로 사용하지 않습니다.",
             ],
-        }
+        } if row is not None else {
+            "status": "FOUND", "quarter": None, "industry": industry, "headcount": None,
+            "model_input_allowed": False, "core_quarter": self.snapshot.quarter,
+            "quarter_aligned_with_core": False, "caveat": [],
+        })
+        if not canonical:
+            return base
+
+        unique = lambda rows: len({item.get("wanted_auth_no") for item in rows
+                                   if item.get("wanted_auth_no")})
+        companies = lambda rows: len({normalize_company(item.get("company_name")) for item in rows
+                                      if normalize_company(item.get("company_name"))})
+        confirmed = [item for item in canonical
+                     if item.get("industrial_complex_match_status") == "CONFIRMED"]
+        active_confirmed = [item for item in confirmed
+                            if item.get("posting_activity_status") == "ACTIVE"]
+        detail = [item for item in canonical if _true(item.get("detail_verified"))]
+        nested_detail = [item for item in active_confirmed if _true(item.get("detail_verified"))]
+        detail_needed = [item for item in canonical if _true(item.get("detail_needed"))]
+        relevance = {}
+        for item in detail:
+            key = item.get("job_relevance_class") or "UNKNOWN"
+            relevance[key] = relevance.get(key, 0) + 1
+        detail_records = [{
+            "wanted_auth_no": item.get("wanted_auth_no"),
+            "company_name": item.get("company_name"),
+            "posting_title": item.get("posting_title"),
+            "occupation": item.get("occupation_raw") or None,
+            "occupation_keywords": item.get("occupation_keywords") or None,
+            "job_description": item.get("job_description_clean") or None,
+            "certificate": item.get("certificate_raw") or None,
+            "career": item.get("career") or None,
+            "education": item.get("education") or None,
+            "employment_type": item.get("employment_type") or None,
+            "wage": item.get("wage") or None,
+            "job_relevance_class": item.get("job_relevance_class") or "UNKNOWN",
+            "industrial_complex_match_status": item.get("industrial_complex_match_status") or "UNKNOWN",
+        } for item in detail]
+        activity_text = next((item.get("posting_activity_basis") for item in canonical
+                              if item.get("posting_activity_basis")), "")
+        activity_date = re.search(r"\d{4}-\d{2}-\d{2}", activity_text or "")
+        list_company_count = companies(canonical)
+        base.update({
+            "posting_count": unique(canonical),
+            "unique_company_count": list_company_count,
+            "official_confirmed_posting_count": unique(confirmed),
+            "official_confirmed_company_count": companies(confirmed),
+            "active_confirmed_posting_count": unique(active_confirmed),
+            "active_confirmed_company_count": companies(active_confirmed),
+            "detail_verified_posting_count": unique(detail),
+            "confirmed_active_detail_verified_posting_count": unique(nested_detail),
+            "detail_needed_count": unique(detail_needed),
+            "detail_records": detail_records,
+            "job_relevance_distribution": relevance,
+            "evidence_levels": [
+                {"level": 1, "key": "LIST", "label": "목록 데이터",
+                 "count": unique(canonical), "company_count": list_company_count},
+                {"level": 2, "key": "FACTORYON_CONFIRMED", "label": "공식 FactoryOn 확인",
+                 "count": unique(confirmed), "company_count": companies(confirmed)},
+                {"level": 3, "key": "ACTIVE_CONFIRMED", "label": "현재 유효",
+                 "count": unique(active_confirmed), "company_count": companies(active_confirmed)},
+                {"level": 4, "key": "DETAIL_VERIFIED", "label": "상세 검증",
+                 "count": unique(detail), "company_count": companies(detail)},
+            ],
+            "canonical_layer_available": True,
+            "activity_as_of": activity_date.group(0) if activity_date else None,
+            "activity_basis": "저장된 Work24 목록 마감일 기준",
+            "detail_coverage_pct": round(unique(detail) / unique(canonical) * 100, 2) if canonical else None,
+        })
+        base["caveat"] = list(dict.fromkeys([
+            *base.get("caveat", []),
+            "FactoryOn 확인은 창원국가산업단지 공식 공장등록 확인이며 현재 입주계약 상태를 뜻하지 않습니다.",
+            (f"현재 유효는 {activity_date.group(0)}에 저장된 목록 마감일 기준이며 Work24 서버의 실시간 상태가 아닙니다."
+             if activity_date else "현재 유효는 저장된 목록 마감일 기준이며 Work24 서버의 실시간 상태가 아닙니다."),
+            f"직무·자격·임금 등 상세 항목은 상세 검증 {unique(detail)}건에서만 설명할 수 있습니다.",
+            "POSSIBLE·UNKNOWN은 비입주기업 판정이 아닙니다.",
+        ]))
+        return base
 
     def recruitment_keywords(self, industry: str, top_n: int = 15) -> dict:
         with self.Session() as s:
@@ -250,7 +359,8 @@ class DecisionSupportService:
         return questions
 
     def context(self, quarter: str, industry: str, question: str | None = None,
-                comparison_industry: str | None = None, case_id: int | None = None) -> dict:
+                comparison_industry: str | None = None, case_id: int | None = None,
+                field_context: dict | None = None) -> dict:
         diagnostic = self.diagnosis(quarter, industry)
         recruitment = self.recruitment_snapshot(industry)
         keywords = self.recruitment_keywords(industry)
@@ -265,12 +375,13 @@ class DecisionSupportService:
             "recruitment_snapshot": recruitment, "recruitment_keywords": keywords,
             "support_function_candidates": functions, "requirement_cards": cards,
             "official_rag": official_rag, "field_questions": self.field_questions(quarter, industry),
-            "workflow": workflow,
+            "workflow": workflow, "session_field_context": field_context or {},
         }
 
     def answer(self, question: str, quarter: str, industry: str,
-               comparison_industry: str | None = None, case_id: int | None = None) -> dict:
-        ctx = self.context(quarter, industry, question, comparison_industry, case_id)
+               comparison_industry: str | None = None, case_id: int | None = None,
+               field_context: dict | None = None) -> dict:
+        ctx = self.context(quarter, industry, question, comparison_industry, case_id, field_context)
         q = _normal(question)
         evidence, policy_sources, caveats = [], [], [
             "통계로 인과관계를 단정하지 않습니다.",
@@ -288,23 +399,37 @@ class DecisionSupportService:
                           "같은 단계라도 Q1 상태와 고용 증감이 다를 수 있어 원인은 별도로 확인해야 합니다.")
                 answer_type = "INDUSTRY_COMPARISON"
                 evidence = [a, b]
-        elif any(term in q for term in ("d10", "d11", "지원제도", "지원금", "공식정책", "관련사업")):
+        elif any(term in q for term in ("d10", "d11", "지원제도", "지원금", "공식정책", "공식지원", "관련사업")):
             rag = ctx["official_rag"]
-            answer = rag["message"]
+            if rag.get("hits"):
+                answer = rag["message"]
+            elif ctx["requirement_cards"]:
+                titles = ", ".join(card["title"] for card in ctx["requirement_cards"][:5])
+                answer = (f"현재 확인된 지원 기능 후보와 연결되는 공식 요건 카드는 {titles}입니다. "
+                          "이는 연계 검토 후보이며 개별 적격·신청·승인·지급을 자동 판정하지 않습니다.")
+            else:
+                answer = rag["message"]
             answer_type = "OFFICIAL_POLICY_RAG"
             policy_sources = rag.get("hits", [])
             evidence = ctx["requirement_cards"]
-        elif any(term in q for term in ("채용시장", "기술", "키워드", "직무", "자격")):
+        elif any(term in q for term in ("채용시장", "채용신호", "기술", "키워드", "직무", "자격")):
             jobs, kws = ctx["recruitment_snapshot"], ctx["recruitment_keywords"]["keywords"]
             terms = ", ".join(item["term"] for item in kws[:8]) or "확인된 키워드 없음"
-            answer = (f"{jobs.get('quarter') or '자료 없음'} Work24 공개공고에서 공고 "
-                      f"{jobs.get('posting_count', 0)}건·기업 {jobs.get('unique_company_count', 0)}개가 확인됐고, "
-                      f"상위 텍스트 키워드는 {terms}입니다. 공고 수는 모집인원이 아닙니다.")
+            answer = (f"창원 지역 {industry} 관련 목록 공고는 {jobs.get('posting_count', 0)}건이고, "
+                      f"이 중 FactoryOn 공식 공장등록 확인 공고는 "
+                      f"{jobs.get('official_confirmed_posting_count', '미확인')}건, 저장된 마감일 기준 "
+                      f"현재 유효한 확인 공고는 {jobs.get('active_confirmed_posting_count', '미확인')}건입니다. "
+                      f"상세 검증은 {jobs.get('detail_verified_posting_count', 0)}건에 한정되며, "
+                      f"목록 텍스트 상위 키워드는 {terms}입니다. 공고 수는 모집인원이 아닙니다.")
             answer_type = "RECRUITMENT_CONTEXT"
             evidence = [jobs, *kws[:8]]
             caveats.extend(jobs.get("caveat", []))
         elif any(term in q for term in ("현장", "무엇을확인", "질문", "체크리스트")):
-            answer = "현장 확인용 질문 후보를 생성했습니다. 답은 담당자가 조사 후 기록해야 합니다."
+            answered = sum(bool(item.get("answer") or item.get("checked"))
+                           for item in (field_context or {}).get("responses", []))
+            answer = ("현장 확인용 질문 후보를 생성했습니다. "
+                      f"현재 세션에서 응답된 항목은 {answered}건입니다. "
+                      "세션 입력은 영구 저장되지 않으므로 담당자가 확인 후 업무 기록으로 남겨야 합니다.")
             answer_type = "FIELD_CHECKLIST"
             evidence = ctx["field_questions"]
         elif any(term in q for term in ("지원기능", "검토가능", "지원필요")):
@@ -312,6 +437,31 @@ class DecisionSupportService:
             answer_type = "SUPPORT_FUNCTION_CANDIDATES"
             evidence = ctx["support_function_candidates"]
             policy_sources = ctx["requirement_cards"]
+        elif any(term in q for term in ("최근판정", "판정변화", "왜바뀌", "변경")):
+            history = ctx["history"]
+            current = next((item for item in history if item["is_current"]), history[-1] if history else None)
+            previous = history[history.index(current) - 1] if current in history and history.index(current) > 0 else None
+            if current and previous:
+                changed = current["stage"] != previous["stage"] or current["q1_state"] != previous["q1_state"]
+                answer = (f"직전 {previous['quarter']}은 {previous['stage']}·Q1 {previous['q1_state']}, "
+                          f"선택한 {current['quarter']}은 {current['stage']}·Q1 {current['q1_state']}입니다. "
+                          + ("등록 판정 또는 상태가 바뀌었습니다. 변화의 원인은 통계만으로 확정할 수 없어 현장 확인이 필요합니다."
+                             if changed else "등록된 단계와 Q1 상태에는 변화가 없습니다."))
+                evidence = [previous, current]
+                answer_type = "RECENT_DIAGNOSTIC_CHANGE"
+            else:
+                answer = "비교할 직전 분기 판정이 없습니다."
+                answer_type = "INSUFFICIENT_HISTORY"
+        elif any(term in q for term in ("데이터부족", "부족한부분", "미확인", "한계")):
+            jobs = ctx["recruitment_snapshot"]
+            answer = (f"진단 통계는 원인을 확정하지 않으며 현장 확인이 필요합니다. "
+                      f"{industry}의 Work24 상세 검증은 {jobs.get('detail_verified_posting_count', 0)}건으로, "
+                      "직무·임금·경력의 업종 전체 분포로 일반화할 수 없습니다. "
+                      "FactoryOn은 공식 공장등록 확인이지 현재 입주계약 확인이 아니며, "
+                      "현재 유효 표시는 저장된 목록 마감일 기준입니다.")
+            answer_type = "EVIDENCE_GAPS"
+            evidence = [ctx["diagnostic"], jobs]
+            caveats.extend(jobs.get("caveat", []))
         else:
             d = ctx["diagnostic"]
             if d["status"] != "FOUND":
@@ -327,8 +477,9 @@ class DecisionSupportService:
                 "policy_sources": policy_sources, "caveats": list(dict.fromkeys(caveats)),
                 "context": ctx}
 
-    def report_payload(self, quarter: str, industry: str, case_id: int | None = None) -> dict:
-        ctx = self.context(quarter, industry, case_id=case_id)
+    def report_payload(self, quarter: str, industry: str, case_id: int | None = None,
+                       field_context: dict | None = None) -> dict:
+        ctx = self.context(quarter, industry, case_id=case_id, field_context=field_context)
         with self.Session() as s:
             proposals = list(s.scalars(select(M.TeamProposal).order_by(M.TeamProposal.priority,
                                                                        M.TeamProposal.proposal_id)))
@@ -350,7 +501,9 @@ class DecisionSupportService:
             "recruitment_snapshot": ctx["recruitment_snapshot"],
             "recruitment_keywords": ctx["recruitment_keywords"],
             "field_checks": {"questions": ctx["field_questions"],
-                             "workflow": ctx["workflow"]},
+                              "workflow": ctx["workflow"],
+                              "session_context": ctx["session_field_context"],
+                              "session_persistence": "CURRENT_SESSION_ONLY"},
             "support_functions": ctx["support_function_candidates"],
             "requirement_cards": ctx["requirement_cards"],
             "official_sources": list(official_sources.values()),
