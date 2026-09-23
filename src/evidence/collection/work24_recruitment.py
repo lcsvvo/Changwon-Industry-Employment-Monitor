@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
+import hashlib
 import json
 import re
 from collections import Counter, defaultdict
@@ -19,6 +20,8 @@ from . import work24_current as current
 ROOT = Path(__file__).resolve().parents[3]
 FACTORY_METADATA = (ROOT / "data/raw/changwon_factory_registry/_metadata/"
                     "changwon_factory_registry_20241231.json")
+DIAGNOSTIC_SNAPSHOT = (ROOT / "outputs/final_model/02_triage/tables/"
+                       "triage_latest_full.csv")
 
 JOB_CLASSES = ("CORE_INDUSTRIAL", "INDUSTRIAL_SUPPORT",
                "GENERAL_NONCORE", "UNKNOWN")
@@ -45,6 +48,118 @@ JOB_RULES = {
 }
 FIELD_WEIGHTS = {"occupation_raw": 5, "occupation_keywords": 4,
                  "job_description_clean": 2, "title": 2, "certificate_raw": 1}
+JOB_KEYWORD_RULES = {
+    "생산": r"생산|제조", "가공": r"가공|절삭|선반|밀링|연삭|사상",
+    "조립": r"조립", "용접": r"용접|취부", "품질·검사": r"품질|검사|검수",
+    "설비·정비": r"설비|정비|보전", "설계": r"설계|캐드|CAD",
+    "물류·납품": r"물류|출하|납품|배송", "자재": r"자재|구매|창고",
+    "사무": r"사무|총무|행정", "회계": r"회계|경리", "홍보·마케팅": r"홍보|마케팅|광고",
+}
+SKILL_KEYWORD_RULES = {
+    "H-MCT": r"H\s*[- ]?MCT", "MCT": r"(?<!H)(?<!H-)(?<!H )MCT", "CNC": r"CNC",
+    "CAD/CAM": r"CAD\s*/\s*CAM|CAD|CAM", "PLC": r"PLC",
+    "지게차": r"지게차", "전기": r"전기|전장", "도면": r"도면|제도",
+    "프레스": r"프레스", "선반": r"선반", "밀링": r"밀링", "용접": r"용접",
+}
+
+
+def _matched_keywords(value: str | None, rules: dict[str, str]) -> str:
+    text = value or ""
+    return "|".join(label for label, pattern in rules.items()
+                    if re.search(pattern, text, re.I))
+
+
+def _qualification_keywords(value: str | None) -> str:
+    text = value or ""
+    terms = {match.group(0).strip() for match in re.finditer(
+        r"[가-힣A-Za-z0-9·]{0,24}(?:기능사|산업기사|기사|면허|자격증)[가-힣0-9]{0,12}",
+        text,
+    )}
+    return "|".join(sorted(term for term in terms if term))
+
+
+def _detail_access_state(detail: dict[str, str] | None) -> tuple[str, str]:
+    if not detail:
+        return "list_only", "NO_DETAIL_REQUEST_RECORDED"
+    request_status = str(detail.get("request_status") or "").upper()
+    http_status = str(detail.get("http_status") or "").strip()
+    if request_status == "SUCCESS":
+        expected = (
+            "recruitment_count_raw", "occupation_raw", "job_description_raw", "career",
+            "education", "employment_type", "wage", "certificate_raw", "work_hours_raw",
+            "work_pattern_raw", "workplace_address",
+        )
+        missing = [field for field in expected if not str(detail.get(field) or "").strip()]
+        if missing:
+            return "partial", "DETAIL_PARSED_FIELDS_MISSING:" + "|".join(missing)
+        return "success", "DETAIL_ID_COMPANY_TITLE_AND_REQUESTED_FIELDS_PARSED"
+    if http_status in {"401", "403", "429"}:
+        return "blocked", detail.get("error") or f"HTTP_{http_status}"
+    if http_status in {"404", "410"}:
+        return "removed", detail.get("error") or f"HTTP_{http_status}"
+    if http_status == "200" and detail.get("error"):
+        return "parse_failed", detail["error"]
+    if request_status == "FAILED":
+        return "unknown", detail.get("error") or "DETAIL_REQUEST_FAILED"
+    return "unknown", detail.get("error") or f"UNRECOGNIZED_DETAIL_STATUS:{request_status}"
+
+
+FIELD_PROVENANCE = {
+    "wanted_auth_no": "list",
+    "company_name": "list",
+    "posting_title": "list",
+    "list_district": "list",
+    "registration_date": "list",
+    "due_date": "list",
+    "posting_activity_status": "derived:list_due_date_and_snapshot_date",
+    "ksic_code": "derived:company_master_match",
+    "kicox_industry": "derived:ksic_kicox_crosswalk",
+    "industrial_complex_match_status": "derived:factoryon_official_match",
+    "diagnostic_q1_state": "derived:saved_2026Q2_diagnostic_join",
+    "diagnostic_q2_employment_delta": "derived:saved_2026Q2_diagnostic_join",
+    "diagnostic_q3_repeat": "derived:saved_2026Q2_diagnostic_join",
+    "diagnostic_q3_state_run": "derived:saved_2026Q2_diagnostic_join",
+    "diagnostic_q3_transition": "derived:saved_2026Q2_diagnostic_join",
+    "recruitment_count_raw": "detail",
+    "recruitment_count": "derived:detail_recruitment_count_raw",
+    "occupation_raw": "detail",
+    "related_occupation": "detail",
+    "occupation_keywords": "detail",
+    "job_description_raw": "detail",
+    "job_description_clean": "derived:detail_job_description_raw_contact_redaction",
+    "career": "detail",
+    "education": "detail",
+    "employment_type": "detail",
+    "wage": "detail",
+    "work_hours_raw": "detail",
+    "work_pattern_raw": "detail",
+    "workplace_address": "detail",
+    "certificate_raw": "detail",
+    "preference_raw": "detail",
+    "other_preference_raw": "detail",
+    "computer_skill_raw": "detail",
+    "title_job_keyword": "derived:list_posting_title",
+    "title_skill_keyword": "derived:list_posting_title",
+    "occupation_job_keyword": "derived:list_occupation",
+    "detail_job_keyword": "derived:detail_occupation_and_job_description",
+    "detail_skill_keyword": "derived:detail_occupation_and_job_description",
+    "detail_qualification_keyword": "derived:detail_certificate_raw",
+    "list_source_url": "list",
+    "detail_source_url": "detail",
+    "detail_http_status": "detail",
+    "detail_checked_at": "detail",
+}
+
+
+def _diagnostic_index(reference_period: str) -> dict[str, dict[str, str]]:
+    if not DIAGNOSTIC_SNAPSHOT.exists():
+        raise FileNotFoundError(f"saved final diagnostic snapshot missing: {DIAGNOSTIC_SNAPSHOT}")
+    rows = [row for row in _read_csv(DIAGNOSTIC_SNAPSHOT)
+            if row.get("quarter") == reference_period]
+    indexed = {row["industry"]: row for row in rows}
+    if len(indexed) != len(rows):
+        raise RuntimeError(f"duplicate industry in saved diagnostic period: {reference_period}")
+    return indexed
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
@@ -189,30 +304,45 @@ def aggregate_industries(rows: list[dict]) -> dict[str, dict[str, int]]:
     return result
 
 
-def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
+def build_recruitment_layer(
+    date_stamp: str = "20260923", *, shared_raw_root: Path | None = None,
+) -> dict:
     if not re.fullmatch(r"\d{8}", date_stamp):
         raise ValueError("date_stamp must use YYYYMMDD")
     as_of = dt.datetime.strptime(date_stamp, "%Y%m%d").date()
     base_path = current.EXISTING_DATA
-    detail_path = current.RAW_WORK24_DIR / f"work24_priority_industry_detail_{date_stamp}.csv"
-    official_path = (ROOT / "data/raw/kicox/datagokr" /
+    raw_root = Path(shared_raw_root) if shared_raw_root else ROOT / "data/raw"
+    detail_path = (raw_root / "work24" /
+                   f"work24_priority_industry_detail_{date_stamp}.csv")
+    official_path = (raw_root / "kicox/datagokr" /
                      f"kicox_factory_changwon_national_{date_stamp}.csv")
     official_meta_path = (official_path.parent / "_metadata" /
                           f"kicox_factory_changwon_national_{date_stamp}.json")
     output_path = current.PROCESSED_WORK24_DIR / f"work24_recruitment_layer_{date_stamp}.csv"
     queue_path = current.PROCESSED_WORK24_DIR / f"work24_detail_collection_queue_{date_stamp}.csv"
     quality_path = current.PROCESSED_WORK24_DIR / f"work24_recruitment_layer_quality_{date_stamp}.json"
+    saved_target_ids = set()
+    if queue_path.exists():
+        saved_target_ids = {
+            row.get("wanted_auth_no", "") for row in _read_csv(queue_path)
+            if str(row.get("detailed_validation_target", "")).strip().lower() == "true"
+        }
+        if saved_target_ids and len(saved_target_ids) != 140:
+            raise RuntimeError(
+                f"saved detailed-validation queue must retain M=140, found {len(saved_target_ids)}")
     if not official_path.exists():
         raise FileNotFoundError(f"official KICOX snapshot missing: {official_path}")
 
     base_rows = _read_csv(base_path)
     detail_rows = _read_csv(detail_path) if detail_path.exists() else []
     official_rows = _read_csv(official_path)
+    # Raw snapshots may contain repeated attempts. Keep the complete history in
+    # raw, but let canonical rows use the latest attempt for each posting.
     detail_by_id = {row["wanted_auth_no"]: row for row in detail_rows}
-    if len(detail_by_id) != len(detail_rows):
-        raise RuntimeError("detail snapshot contains duplicate wanted_auth_no")
     company_matches = _official_company_matches(base_rows, official_rows)
     priority_industries = set(_priority_industries())
+    diagnostic_quarter = "2026Q2"
+    diagnostic_by_industry = _diagnostic_index(diagnostic_quarter)
 
     rows: list[dict] = []
     base_by_id = {row["wanted_auth_no"]: row for row in base_rows}
@@ -229,12 +359,20 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
         relevance = classify_job_relevance(detail)
         detail_status = detail.get("request_status") if detail else "NOT_REQUESTED"
         detail_verified = detail_status == "SUCCESS"
+        detail_access_status, detail_access_reason = _detail_access_state(detail)
         activity_status, activity_basis = posting_activity(base, as_of)
         priority_industry = bool(mapped and base.get("kicox_industry") in priority_industries)
+        industry = base.get("kicox_industry") if mapped else ""
+        diagnostic = diagnostic_by_industry.get(industry, {}) if mapped else {}
         row = {
             "wanted_auth_no": wanted,
             "company_name": base.get("company_raw"),
+            "company_official_name": base.get("company_official"),
+            "company_match_status": base.get("company_match_status"),
             "posting_title": base.get("title_raw"),
+            "source_snapshot_id": base.get("snapshot_id"),
+            "source_snapshot_date": (base.get("crawl_timestamp", "")[:10]
+                                     if base.get("crawl_timestamp") else ""),
             "registration_date": base.get("reg_date"),
             "due_date": base.get("due_date"),
             "posting_activity_status": activity_status,
@@ -247,6 +385,22 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             "kicox_industry": base.get("kicox_industry"),
             "industry_mapping_status": "MAPPED" if mapped else "UNMAPPED",
             "industry_mapping_source": industry_mapping_source(base),
+            "ksic_code": base.get("ksic_code"),
+            "ksic_name": base.get("ksic_name"),
+            "ksic_revision": base.get("ksic_revision"),
+            "ksic_resolution_method": base.get("ksic_resolution_method"),
+            "diagnostic_quarter": diagnostic_quarter if mapped else "",
+            "diagnostic_industry": industry,
+            "diagnostic_q1_state": diagnostic.get("q1_state", ""),
+            "diagnostic_q2_employment_delta": diagnostic.get("q2_employment_delta", ""),
+            "diagnostic_q2_employment_yoy": diagnostic.get("q2_employment_yoy", ""),
+            "diagnostic_q2_employment_share": diagnostic.get("q2_employment_share", ""),
+            "diagnostic_q3_repeat": diagnostic.get("q3_repeated_signal", ""),
+            "diagnostic_q3_state_run": diagnostic.get("q3_state_run_length", ""),
+            "diagnostic_q3_transition": diagnostic.get("q3_transition", ""),
+            "diagnostic_previous_state": diagnostic.get("previous_state", ""),
+            "diagnostic_stage": diagnostic.get("stage", ""),
+            "diagnostic_stage_reason": diagnostic.get("stage_reason", ""),
             "priority_industry": priority_industry,
             "industrial_complex_proxy_status": proxy_status,
             "industrial_complex_proxy_basis": proxy_basis,
@@ -262,6 +416,11 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             **relevance,
             "detail_collection_status": detail_status,
             "detail_verified": detail_verified,
+            "detailed_validation_target": False,
+            "detail_access_status": detail_access_status,
+            "detail_access_reason": detail_access_reason,
+            "detail_http_status": detail.get("http_status") if detail else None,
+            "detail_checked_at": detail.get("collected_at") if detail else None,
             "source_duplicate_group_id": base.get("duplicate_group_id"),
             "source_repost_candidate": base.get("repost_candidate"),
             "source_repost_reason": base.get("repost_reason"),
@@ -275,14 +434,33 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             "recruitment_count_raw": detail.get("recruitment_count_raw") if detail else None,
             "recruitment_count": detail.get("recruitment_count") if detail else None,
             "occupation_raw": detail.get("occupation_raw") if detail else None,
+            "related_occupation": detail.get("related_occupation") if detail else None,
+            "list_occupation_raw": base.get("occupation"),
+            "list_cert_marker": base.get("cert_raw"),
             "occupation_keywords": detail.get("occupation_keywords") if detail else None,
+            "title_job_keyword": _matched_keywords(base.get("title_raw"), JOB_KEYWORD_RULES),
+            "title_skill_keyword": _matched_keywords(base.get("title_raw"), SKILL_KEYWORD_RULES),
+            "occupation_job_keyword": _matched_keywords(base.get("occupation"), JOB_KEYWORD_RULES),
+            "detail_job_keyword": _matched_keywords(
+                " ".join((detail.get("occupation_raw") or "", detail.get("job_description_clean") or ""))
+                if detail else "", JOB_KEYWORD_RULES),
+            "detail_skill_keyword": _matched_keywords(
+                " ".join((detail.get("occupation_raw") or "", detail.get("job_description_clean") or ""))
+                if detail else "", SKILL_KEYWORD_RULES),
+            "detail_qualification_keyword": _qualification_keywords(
+                detail.get("certificate_raw") if detail else ""),
             "job_description_raw": detail.get("job_description_raw") if detail else None,
             "job_description_clean": detail.get("job_description_clean") if detail else None,
             "career": detail.get("career") if detail else None,
             "education": detail.get("education") if detail else None,
             "certificate_raw": detail.get("certificate_raw") if detail else None,
+            "preference_raw": detail.get("preference_raw") if detail else None,
+            "other_preference_raw": detail.get("other_preference_raw") if detail else None,
+            "computer_skill_raw": detail.get("computer_skill_raw") if detail else None,
             "employment_type": detail.get("employment_type") if detail else None,
             "wage": detail.get("wage") if detail else None,
+            "work_hours_raw": detail.get("work_hours_raw") if detail else None,
+            "work_pattern_raw": detail.get("work_pattern_raw") if detail else None,
             "workplace_address": detail.get("workplace_address") if detail else None,
             "detail_district": detail.get("district") if detail else None,
             "detail_registered_at": detail.get("registered_at") if detail else None,
@@ -291,6 +469,8 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             "detail_source_url": (detail.get("source_url") if detail else
                                   current.current_detail_url(wanted)),
         }
+        row["field_provenance_json"] = json.dumps(FIELD_PROVENANCE, ensure_ascii=False,
+                                                  sort_keys=True)
         rows.append(row)
 
     # Exact same company/title/registration-date만 중복으로 접고, repost 후보는 접지 않는다.
@@ -316,10 +496,19 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             exact_duplicate_rows_removed += len(group) - 1
         if verified:
             for row in group:
-                row["detail_needed_reason"] = "EXACT_NATURAL_KEY_ALREADY_DETAIL_VERIFIED"
+                row["detailed_validation_target"] = row["wanted_auth_no"] in saved_target_ids
+                row["detail_needed_reason"] = (
+                    "SAVED_M_TARGET_DETAIL_VALIDATION_COMPLETE"
+                    if row["detailed_validation_target"] else
+                    "EXACT_NATURAL_KEY_ALREADY_DETAIL_VERIFIED")
             continue
         representative = sorted(group, key=lambda row: row["wanted_auth_no"])[0]
         representative["detail_needed"] = True
+        representative["detailed_validation_target"] = (
+            representative["wanted_auth_no"] in saved_target_ids or not saved_target_ids)
+        if representative["detail_collection_status"] == "NOT_REQUESTED":
+            representative["detail_access_status"] = "list_only"
+            representative["detail_access_reason"] = "NO_DETAIL_REQUEST_RECORDED"
         representative["detail_needed_reason"] = "CONFIRMED_PRIORITY_ACTIVE_MINIMUM_CANDIDATE"
         for row in group[1:]:
             row["detail_needed_reason"] = "EXACT_NATURAL_KEY_DUPLICATE_OF_MINIMUM_CANDIDATE"
@@ -350,12 +539,19 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             "posting_activity_status": row["posting_activity_status"],
             "job_relevance_class": row["job_relevance_class"],
             "detail_collection_status": row["detail_collection_status"],
+            "detailed_validation_target": row["detailed_validation_target"],
+            "detail_access_status": row["detail_access_status"],
+            "detail_access_reason": row["detail_access_reason"],
+            "detail_http_status": row["detail_http_status"],
+            "detail_checked_at": row["detail_checked_at"],
+            "detail_collection_success": row["detail_verified"],
+            "request_scope_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION"
+            if row["detailed_validation_target"] else "NOT_IN_M_140_SCOPE",
             "detail_needed": row["detail_needed"],
             "detail_priority": priority,
             "duplicate_group_id": row["source_duplicate_group_id"],
             "repost_candidate": row["source_repost_candidate"],
             "reason": reason,
-            "http_collection_authorized": False,
         })
     order = {name: index for index, name in enumerate(current.KICOX_INDUSTRIES)}
     queue_rows.sort(key=lambda row: (
@@ -369,6 +565,88 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
     confirmed_priority_active = [row for row in confirmed_priority
                                  if row["posting_activity_status"] == "ACTIVE"]
     detail_needed = [row for row in rows if row["detail_needed"]]
+    validation_targets = [row for row in rows if row["detailed_validation_target"]]
+    company_identifiable = [row for row in base_rows
+                            if row.get("company_match_status") in {"MATCH", "MULTI"}]
+    ksic_resolved = [row for row in base_rows
+                     if row.get("ksic_resolution_method") == "COMPANY_MASTER_EXACT"]
+    diagnostic_joined = [row for row in mapped_rows
+                         if row.get("diagnostic_stage")]
+    detail_sample = [row for row in mapped_rows if row["detail_verified"]]
+    access_status_order = (
+        "success", "partial", "list_only", "expired", "removed", "blocked",
+        "parse_failed", "unknown",
+    )
+    detail_status_counts = Counter(row["detail_access_status"] for row in validation_targets)
+    detail_industry_counts = {}
+    for industry in sorted({row["kicox_industry"] for row in validation_targets}):
+        subset = [row for row in validation_targets if row["kicox_industry"] == industry]
+        by_status = Counter(row["detail_access_status"] for row in subset)
+        detail_industry_counts[industry] = {
+            "target_count": len(subset),
+            "success": by_status.get("success", 0),
+            "partial": by_status.get("partial", 0),
+            "partial_or_failed": len(subset) - by_status.get("success", 0),
+            "status_counts": {status: by_status.get(status, 0) for status in access_status_order},
+        }
+    detail_observed = [row for row in validation_targets
+                       if row["detail_access_status"] in {"success", "partial"}]
+    detail_coverage_fields = {
+        "occupation": "occupation_raw",
+        "recruitment_count": "recruitment_count_raw",
+        "job_description": "job_description_raw",
+        "career": "career",
+        "education": "education",
+        "employment_type": "employment_type",
+        "wage": "wage",
+        "certificate": "certificate_raw",
+        "preference": "preference_raw",
+        "work_hours": "work_hours_raw",
+        "work_pattern": "work_pattern_raw",
+        "computer_skill": "computer_skill_raw",
+        "related_occupation": "related_occupation",
+        "occupation_keywords": "occupation_keywords",
+    }
+    detail_field_coverage = {
+        label: {
+            "count": sum(bool(str((row.get(field) or row.get("other_preference_raw"))
+                                   if label == "preference" else row.get(field) or "").strip())
+                         for row in detail_observed),
+            "denominator_success_or_partial": len(detail_observed),
+            "target_count": len(validation_targets),
+            "coverage_pct_of_success_or_partial": round(
+                sum(bool(str((row.get(field) or row.get("other_preference_raw"))
+                             if label == "preference" else row.get(field) or "").strip())
+                    for row in detail_observed)
+                / len(detail_observed) * 100, 2) if detail_observed else 0,
+            "coverage_pct_of_M": round(
+                sum(bool(str((row.get(field) or row.get("other_preference_raw"))
+                             if label == "preference" else row.get(field) or "").strip())
+                    for row in detail_observed)
+                / len(validation_targets) * 100, 2) if validation_targets else 0,
+        }
+        for label, field in detail_coverage_fields.items()
+    }
+
+    def terms_count(records: list[dict], field: str) -> dict[str, int]:
+        counts: Counter[str] = Counter()
+        for record in records:
+            counts.update({term for term in (record.get(field) or "").split("|") if term})
+        return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0])))
+
+    detail_observations = {}
+    for industry in current.KICOX_INDUSTRIES:
+        sample = [row for row in detail_sample if row["kicox_industry"] == industry]
+        detail_observations[industry] = {
+            "verified_postings": len(sample),
+            "job_relevance_classes": dict(Counter(row["job_relevance_class"] for row in sample)),
+            "detail_job_keywords": terms_count(sample, "detail_job_keyword"),
+            "detail_skill_keywords": terms_count(sample, "detail_skill_keyword"),
+            "detail_qualification_keywords": terms_count(sample, "detail_qualification_keyword"),
+            "career_observed": sum(bool(row.get("career")) for row in sample),
+            "wage_observed": sum(bool(row.get("wage")) for row in sample),
+            "recruitment_count_observed": sum(bool(row.get("recruitment_count")) for row in sample),
+        }
     complex_counts = Counter(row["industrial_complex_match_status"] for row in mapped_rows)
     complex_status_summary = {
         status: {
@@ -411,12 +689,29 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
     }
     serialized = "\n".join(str(value) for row in rows for value in row.values()
                            if value not in (None, ""))
+    validation_target_ids = {row["wanted_auth_no"] for row in validation_targets}
+    target_attempt_rows = [row for row in detail_rows
+                           if row.get("wanted_auth_no") in validation_target_ids]
+    target_attempt_counts = Counter(row["wanted_auth_no"] for row in target_attempt_rows)
+    target_attempt_times = sorted(
+        row["collected_at"] for row in target_attempt_rows if row.get("collected_at"))
+    target_failed_ids = sorted(
+        row["wanted_auth_no"] for row in validation_targets
+        if row["detail_access_status"] == "parse_failed")
+    raw_detail_bytes = detail_path.read_bytes() if detail_path.exists() else b""
+    raw_detail_sha256 = hashlib.sha256(raw_detail_bytes).hexdigest() if raw_detail_bytes else None
     official_meta = json.loads(official_meta_path.read_text(encoding="utf-8"))
     quality = {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-        "inputs": {"list_dataset": str(base_path), "detail_snapshot": str(detail_path),
-                   "official_factory_snapshot": str(official_path),
-                   "official_factory_metadata": str(official_meta_path)},
+        "inputs": {
+            "list_dataset": base_path.relative_to(ROOT).as_posix(),
+            "detail_snapshot": f"data/raw/work24/{detail_path.name}",
+            "official_factory_snapshot": f"data/raw/kicox/datagokr/{official_path.name}",
+            "official_factory_metadata": (
+                f"data/raw/kicox/datagokr/_metadata/{official_meta_path.name}"),
+            "final_diagnostic_snapshot": "outputs/final_model/02_triage/tables/triage_latest_full.csv",
+            "shared_raw_root_used": bool(shared_raw_root),
+        },
         "priority_industries": sorted(priority_industries),
         "priority_industry_summary": priority_summary,
         "industry_counts": industry_stats,
@@ -426,6 +721,8 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             "all_ten_industries_present_in_axis": len(industry_stats) == 10,
             "wanted_auth_no_duplicates": len(rows) - len({r["wanted_auth_no"] for r in rows}),
             "detail_verified_total": sum(row["detail_verified"] for row in rows),
+            "detail_snapshot_attempt_rows": len(detail_rows),
+            "detail_snapshot_unique_postings": len(detail_by_id),
             "privacy_phone_hits": len(current.PHONE_RE.findall(serialized)),
             "privacy_email_hits": len(current.EMAIL_RE.findall(serialized)),
             "work24_detail_http_requests_this_run": 0,
@@ -435,6 +732,60 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
                 r["industrial_complex_name"] == factory.OFFICIAL_COMPLEX_NAME
                 for r in official_rows),
             "api_key_exposed": False,
+        },
+        "detail_collection_M": {
+            "target_count": len(validation_targets),
+            "request_count_in_saved_detail_snapshot": sum(
+                bool(detail_by_id.get(row["wanted_auth_no"])) for row in validation_targets),
+            "access_status_counts": {
+                status: detail_status_counts.get(status, 0) for status in access_status_order
+            },
+            "access_status_counts_sum_to_target": sum(detail_status_counts.values()) == len(validation_targets),
+            "industry_counts": detail_industry_counts,
+            "field_coverage": detail_field_coverage,
+            "privacy_phone_hits_in_M": len(current.PHONE_RE.findall("\n".join(
+                str(value) for row in validation_targets for value in row.values()
+                if value not in (None, "")))),
+            "privacy_email_hits_in_M": len(current.EMAIL_RE.findall("\n".join(
+                str(value) for row in validation_targets for value in row.values()
+                if value not in (None, "")))),
+        },
+        "raw_detail_provenance": {
+            "source_filename": detail_path.name,
+            "source_path": f"data/raw/work24/{detail_path.name}",
+            "sha256": raw_detail_sha256,
+            "size_bytes": len(raw_detail_bytes) if raw_detail_bytes else None,
+            "attempt_rows_for_M": len(target_attempt_rows),
+            "unique_M_postings_with_attempts": len(target_attempt_counts),
+            "initial_requests_for_M": len(target_attempt_counts),
+            "retry_requests_for_M": sum(max(count - 1, 0)
+                                         for count in target_attempt_counts.values()),
+            "max_attempts_per_M_posting": max(target_attempt_counts.values(), default=0),
+            "collection_started_at_utc": target_attempt_times[0] if target_attempt_times else None,
+            "collection_last_attempt_at_utc": target_attempt_times[-1] if target_attempt_times else None,
+            "latest_status_counts": {
+                status: detail_status_counts.get(status, 0) for status in access_status_order
+            },
+            "failed_posting_ids": target_failed_ids,
+            "request_policy": {
+                "sequential_concurrency": 1,
+                "minimum_delay_seconds": 3,
+                "initial_batching": "10-posting pilot, then remaining 130",
+                "retry_limit": "initial request plus at most 2 retries for retryable failures",
+                "403_429": "stop without retry",
+                "raw_html_saved": False,
+            },
+        },
+        "canonical_generation_basis": {
+            "output": output_path.relative_to(ROOT).as_posix(),
+            "as_of_date": as_of.isoformat(),
+            "list_source": base_path.relative_to(ROOT).as_posix(),
+            "raw_detail_source": f"data/raw/work24/{detail_path.name}",
+            "saved_target_queue": queue_path.relative_to(ROOT).as_posix(),
+            "saved_target_count": len(saved_target_ids),
+            "target_selection": "reuse saved M=140 IDs; no reselection",
+            "diagnostic_join": "existing 2026Q2 saved diagnostics; no Q1/Q2/Q3 recomputation",
+            "mapping_basis": "existing company-master KSIC/KICOX mapping and official FactoryOn snapshot",
         },
         "industrial_complex_gate": {
             "status_counts_mapped_only": {name: complex_counts.get(name, 0)
@@ -461,29 +812,127 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
             "basis": "stored Work24 list due_date only; no additional detail request",
         },
         "detail_target_funnel": {
+            "M_definition": (
+                "공식 국가산단 매칭 + KICOX 매핑 + 최신 우선점검 업종 + "
+                "기준일 유효 조건을 모두 충족한 고신뢰 상세검증 대상"),
+            "population_note": "창원국가산단 전체 채용공고가 아님",
             "A_kicox_mapped": len(mapped_rows),
             "B_official_complex_confirmed": len(confirmed),
             "C_latest_priority_industries": len(confirmed_priority),
             "D_currently_active": len(confirmed_priority_active),
-            "E_final_detail_needed": len(detail_needed),
+            "M_final_validation_targets": len(validation_targets),
+            "E_remaining_detail_needed": len(detail_needed),
+            "already_detail_verified_excluded_from_M": sum(
+                row["detail_verified"] and row["wanted_auth_no"] not in saved_target_ids
+                for row in confirmed_priority_active),
             "exact_natural_key_duplicate_groups": exact_duplicate_groups,
             "exact_natural_key_rows_removed": exact_duplicate_rows_removed,
             "existing_detail_success_removed": sum(
-                row["detail_collection_status"] == "SUCCESS"
+                row["detail_collection_status"] == "SUCCESS" and
+                row["wanted_auth_no"] not in saved_target_ids
                 for row in confirmed_priority_active),
             "repost_candidate_not_auto_collapsed": sum(
                 str(row["source_repost_candidate"]).lower() == "true"
                 for row in confirmed_priority_active),
         },
+        "data_funnel": [
+            {"stage": "all_changwon_list_postings", "start": len(base_rows),
+             "remain": len(base_rows), "excluded": 0, "reason": "기존 5개 구 processed 목록"},
+            {"stage": "company_identifiable", "start": len(base_rows),
+             "remain": len(company_identifiable),
+             "excluded": len(base_rows) - len(company_identifiable),
+             "reason": "회사 마스터 MATCH/MULTI 외 NO_MATCH"},
+            {"stage": "exact_ksic", "start": len(company_identifiable),
+             "remain": len(ksic_resolved),
+             "excluded": len(company_identifiable) - len(ksic_resolved),
+             "reason": "사업체 마스터 COMPANY_MASTER_EXACT만 포함"},
+            {"stage": "kicox_industry_mapped", "start": len(ksic_resolved),
+             "remain": len(mapped_rows), "excluded": len(ksic_resolved) - len(mapped_rows),
+             "reason": "KSIC→KICOX 공식 crosswalk 미연결"},
+            {"stage": "official_national_complex_confirmed", "start": len(mapped_rows),
+             "remain": len(confirmed), "excluded": len(mapped_rows) - len(confirmed),
+             "reason": "POSSIBLE 79, UNKNOWN 327; 공식 일치 근거만 CONFIRMED"},
+            {"stage": "saved_diagnostic_join_2026Q2", "start": len(mapped_rows),
+             "remain": len(diagnostic_joined), "excluded": len(mapped_rows) - len(diagnostic_joined),
+             "reason": "기존 진단 stage를 산업코드로 조인; 판정 재계산 없음"},
+            {"stage": "latest_priority_industries", "start": len(confirmed),
+             "remain": len(confirmed_priority),
+             "excluded": len(confirmed) - len(confirmed_priority),
+             "reason": "최신 저장 진단의 기계·목재종이만"},
+            {"stage": "active_as_of_snapshot", "start": len(confirmed_priority),
+             "remain": len(confirmed_priority_active),
+             "excluded": len(confirmed_priority) - len(confirmed_priority_active),
+             "reason": "목록 마감일이 2026-09-23 이후인 공고"},
+            {"stage": "final_validation_targets_M", "start": len(confirmed_priority_active),
+             "remain": len(validation_targets),
+             "excluded": len(confirmed_priority_active) - len(validation_targets),
+             "reason": "이미 상세검증된 1건 제외; 중복 0건, 재공고 후보 자동병합 없음"},
+        ],
+        "diagnostic_join": {
+            "calendar_reference_period": diagnostic_quarter,
+            "axis_semantics": "Q1=state; Q2=scale; Q3=time (persistence, repetition, transition)",
+            "industry_joined_postings": len(diagnostic_joined),
+            "stage_counts": dict(Counter(row["diagnostic_stage"] for row in diagnostic_joined)),
+            "priority_industries": sorted(priority_industries),
+            "q1_state_attached": sum(bool(row.get("diagnostic_q1_state")) for row in diagnostic_joined),
+            "q2_scale_attached": sum(bool(row.get("diagnostic_q2_employment_delta"))
+                                      for row in diagnostic_joined),
+            "q3_time_axis_attached": sum(bool(row.get("diagnostic_q3_state_run"))
+                                          for row in diagnostic_joined),
+            "q3_repeat_true": sum(
+                str(row.get("diagnostic_q3_repeat", "")).lower() == "true"
+                for row in diagnostic_joined),
+            "q3_repeat_false": sum(
+                str(row.get("diagnostic_q3_repeat", "")).lower() == "false"
+                for row in diagnostic_joined),
+            "q3_state_run_value_counts": dict(Counter(
+                row.get("diagnostic_q3_state_run", "") for row in diagnostic_joined)),
+            "q3_transition_value_counts": dict(Counter(
+                row.get("diagnostic_q3_transition", "") for row in diagnostic_joined)),
+            "calendar_2026Q3_available_in_final_diagnostic": any(
+                row.get("quarter") == "2026Q3"
+                for row in _read_csv(ROOT / "outputs/final_model/02_triage/tables/triage_panel.csv")),
+        },
+        "detail_access_status_in_M": dict(Counter(
+            row["detail_access_status"] for row in validation_targets)),
+        "detail_request_gate": {
+            "requests_made_for_M": len(target_attempt_rows),
+            "unique_postings_requested_in_M": len(target_attempt_counts),
+            "scope_confirmation_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
+            "collection_authority": "explicit_user_request_for_saved_M_140_queue",
+            "reason": ("저장된 M=140 queue에 대한 사용자 명시 요청에 따라 공개 상세를 "
+                       "순차 확인했다. 140건 요청이 대량이용에 해당하는지는 별도로 확인되지 "
+                       "않았으며 이번 실행은 수집금지 또는 별도 계약 필요 판정이 아니다."),
+        },
+        "keyword_provenance": {
+            "title_job_skill_source": "title_raw only",
+            "occupation_job_source": "list occupation only; null when absent",
+            "detail_job_skill_source": "verified detail occupation_raw + job_description_clean only",
+            "detail_qualification_source": "verified detail certificate_raw only",
+            "list_cert_raw_semantics": "[인증] listing marker; not qualification text",
+            "detail_sample_size": len(detail_sample),
+            "title_job_keyword_counts": terms_count(rows, "title_job_keyword"),
+            "title_skill_keyword_counts": terms_count(rows, "title_skill_keyword"),
+            "occupation_job_keyword_counts": terms_count(rows, "occupation_job_keyword"),
+        },
+        "detail_sample_observations_by_industry": detail_observations,
         "queue": {
             "rows": len(queue_rows),
             "detail_needed": len(detail_needed),
             "priority_counts": dict(Counter(r["detail_priority"] for r in queue_rows)),
-            "http_collection_authorized": False,
-            "note": "detail_priority is analysis ordering, not HTTP permission",
+            "request_scope_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
+            "detail_status_counts_in_M": {
+                status: detail_status_counts.get(status, 0) for status in access_status_order
+            },
+            "note": ("The saved M=140 queue was collected at the user's explicit request. "
+                    "Whether 140 requests qualify as bulk use remains unconfirmed; this run "
+                    "does not determine that collection is prohibited or a separate contract is required."),
         },
-        "artifacts": {"recruitment_layer": str(output_path),
-                      "detail_queue": str(queue_path), "quality": str(quality_path)},
+        "artifacts": {
+            "recruitment_layer": output_path.relative_to(ROOT).as_posix(),
+            "detail_queue": queue_path.relative_to(ROOT).as_posix(),
+            "quality": quality_path.relative_to(ROOT).as_posix(),
+        },
     }
     quality_path.write_text(json.dumps(quality, ensure_ascii=False, indent=2) + "\n",
                             encoding="utf-8")
@@ -493,8 +942,11 @@ def build_recruitment_layer(date_stamp: str = "20260923") -> dict:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--date-stamp", default="20260923")
+    parser.add_argument("--shared-raw-root", type=Path,
+                        help="기존 저장소의 data/raw 경로를 읽기 전용으로 재사용")
     args = parser.parse_args(argv)
-    print(json.dumps(build_recruitment_layer(args.date_stamp),
+    print(json.dumps(build_recruitment_layer(args.date_stamp,
+                                             shared_raw_root=args.shared_raw_root),
                      ensure_ascii=False, indent=2))
     return 0
 
