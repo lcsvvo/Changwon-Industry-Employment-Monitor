@@ -18,7 +18,9 @@ import re
 from pathlib import Path
 
 ENV_FILES = (".env.txt", ".env")
-KNOWN_KEYS = ("KOSIS_API_KEY", "DATA_GO_KR_SERVICE_KEY", "KEPCO_API_KEY", "ECOS_API_KEY")
+KNOWN_KEYS = ("KOSIS_API_KEY", "DATA_GO_KR_SERVICE_KEY", "KEPCO_API_KEY", "ECOS_API_KEY",
+              "WORK24_COMMON_CODE_API_KEY", "WORK24_JOB_API_KEY",
+              "KICOX_FACTORY_API_KEY")
 
 _loaded_from: list[str] = []
 # 마스킹 대상 값. load_env() 가 채운다.

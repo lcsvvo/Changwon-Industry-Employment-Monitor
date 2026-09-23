@@ -1,0 +1,207 @@
+{
+  "generated_at": "2026-09-23T07:52:21+00:00",
+  "inputs": {
+    "list_dataset": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_analysis_ready.csv",
+    "detail_snapshot": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\raw\\work24\\work24_priority_industry_detail_20260923.csv",
+    "official_factory_snapshot": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\raw\\kicox\\datagokr\\kicox_factory_changwon_national_20260923.csv",
+    "official_factory_metadata": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\raw\\kicox\\datagokr\\_metadata\\kicox_factory_changwon_national_20260923.json"
+  },
+  "priority_industries": [
+    "기계",
+    "목재종이"
+  ],
+  "priority_industry_summary": {
+    "기계": {
+      "mapped_postings": 380,
+      "unique_companies": 228,
+      "official_confirmed_postings": 161,
+      "official_confirmed_companies": 98,
+      "official_confirmed_active_postings": 137,
+      "final_detail_needed": 136
+    },
+    "목재종이": {
+      "mapped_postings": 15,
+      "unique_companies": 11,
+      "official_confirmed_postings": 5,
+      "official_confirmed_companies": 4,
+      "official_confirmed_active_postings": 4,
+      "final_detail_needed": 4
+    }
+  },
+  "industry_counts": {
+    "음식료": {
+      "mapped_postings": 17,
+      "unique_companies": 15,
+      "official_confirmed_postings": 1,
+      "official_confirmed_companies": 1
+    },
+    "섬유의복": {
+      "mapped_postings": 0,
+      "unique_companies": 0,
+      "official_confirmed_postings": 0,
+      "official_confirmed_companies": 0
+    },
+    "목재종이": {
+      "mapped_postings": 15,
+      "unique_companies": 11,
+      "official_confirmed_postings": 5,
+      "official_confirmed_companies": 4
+    },
+    "석유화학": {
+      "mapped_postings": 13,
+      "unique_companies": 11,
+      "official_confirmed_postings": 3,
+      "official_confirmed_companies": 3
+    },
+    "비금속": {
+      "mapped_postings": 7,
+      "unique_companies": 5,
+      "official_confirmed_postings": 0,
+      "official_confirmed_companies": 0
+    },
+    "철강": {
+      "mapped_postings": 22,
+      "unique_companies": 16,
+      "official_confirmed_postings": 5,
+      "official_confirmed_companies": 5
+    },
+    "기계": {
+      "mapped_postings": 380,
+      "unique_companies": 228,
+      "official_confirmed_postings": 161,
+      "official_confirmed_companies": 98
+    },
+    "전기전자": {
+      "mapped_postings": 101,
+      "unique_companies": 60,
+      "official_confirmed_postings": 48,
+      "official_confirmed_companies": 31
+    },
+    "운송장비": {
+      "mapped_postings": 101,
+      "unique_companies": 63,
+      "official_confirmed_postings": 34,
+      "official_confirmed_companies": 22
+    },
+    "기타": {
+      "mapped_postings": 7,
+      "unique_companies": 4,
+      "official_confirmed_postings": 0,
+      "official_confirmed_companies": 0
+    }
+  },
+  "validation": {
+    "list_total": 2045,
+    "mapped_total": 663,
+    "industry_count_sum": 663,
+    "all_ten_industries_present_in_axis": true,
+    "wanted_auth_no_duplicates": 0,
+    "detail_verified_total": 6,
+    "privacy_phone_hits": 0,
+    "privacy_email_hits": 0,
+    "work24_detail_http_requests_this_run": 0,
+    "official_factory_rows": 3553,
+    "official_factory_unique_ids": 3553,
+    "official_factory_exact_complex_rows": 3553,
+    "api_key_exposed": false
+  },
+  "industrial_complex_gate": {
+    "status_counts_mapped_only": {
+      "CONFIRMED": 257,
+      "POSSIBLE": 79,
+      "UNKNOWN": 327,
+      "NOT_MATCHED": 0
+    },
+    "status_summary_mapped_only": {
+      "CONFIRMED": {
+        "postings": 257,
+        "unique_companies": 164
+      },
+      "POSSIBLE": {
+        "postings": 79,
+        "unique_companies": 49
+      },
+      "UNKNOWN": {
+        "postings": 327,
+        "unique_companies": 200
+      },
+      "NOT_MATCHED": {
+        "postings": 0,
+        "unique_companies": 0
+      }
+    },
+    "confirmed_definition": "official factory registration in Changwon National Industrial Complex",
+    "official_source": "kicox_factoryon_public_api",
+    "official_snapshot": {
+      "collected_at": "2026-09-23T07:34:15+00:00",
+      "api_total_count": 3553,
+      "rows": 3553,
+      "unique_factories": 3553,
+      "unique_companies": 3143,
+      "operation": "getFctryListInIrsttService_v2",
+      "query_parameter": "irsttNm",
+      "query_value": "창원국가산업단지"
+    },
+    "proxy_crosstab": {
+      "POSSIBLE": {
+        "official_confirmed": 1,
+        "official_unconfirmed": 170
+      },
+      "UNKNOWN": {
+        "official_confirmed": 0,
+        "official_unconfirmed": 74
+      },
+      "NOT_MATCHED": {
+        "official_confirmed": 256,
+        "official_unconfirmed": 162
+      }
+    }
+  },
+  "job_relevance_gate": {
+    "status_counts_mapped_only": {
+      "UNKNOWN": 657,
+      "CORE_INDUSTRIAL": 4,
+      "GENERAL_NONCORE": 1,
+      "INDUSTRIAL_SUPPORT": 1
+    },
+    "classified_detail_only": true,
+    "list_title_only_classification_disabled": true
+  },
+  "posting_activity": {
+    "as_of": "2026-09-23",
+    "status_counts_mapped_only": {
+      "ACTIVE": 582,
+      "EXPIRED": 81
+    },
+    "basis": "stored Work24 list due_date only; no additional detail request"
+  },
+  "detail_target_funnel": {
+    "A_kicox_mapped": 663,
+    "B_official_complex_confirmed": 257,
+    "C_latest_priority_industries": 166,
+    "D_currently_active": 141,
+    "E_final_detail_needed": 140,
+    "exact_natural_key_duplicate_groups": 0,
+    "exact_natural_key_rows_removed": 0,
+    "existing_detail_success_removed": 1,
+    "repost_candidate_not_auto_collapsed": 0
+  },
+  "queue": {
+    "rows": 663,
+    "detail_needed": 140,
+    "priority_counts": {
+      "P1": 140,
+      "P2": 1,
+      "P3": 25,
+      "P4": 229,
+      "P5": 268
+    },
+    "http_collection_authorized": false,
+    "note": "detail_priority is analysis ordering, not HTTP permission"
+  },
+  "artifacts": {
+    "recruitment_layer": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_recruitment_layer_20260923.csv",
+    "detail_queue": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_detail_collection_queue_20260923.csv",
+    "quality": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_recruitment_layer_quality_20260923.json"
+  }
+}

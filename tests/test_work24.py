@@ -13,9 +13,9 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src/evidence/collection"))
+sys.path.insert(0, str(ROOT / "src"))
 
-import work24 as w  # noqa: E402
+from evidence.collection import work24 as w  # noqa: E402
 
 RAW_5GU = sorted(w.RAW_DIR.glob("work24_5gu_*.csv"))
 HAS_SNAPSHOT = bool(RAW_5GU)

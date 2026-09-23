@@ -1,0 +1,181 @@
+{
+  "generated_at": "2026-09-23T13:41:15+09:00",
+  "scope": "latest-diagnosis priority industries using existing KICOX mapping only",
+  "target": {
+    "existing_total": 2045,
+    "priority_industries": [
+      "기계",
+      "목재종이"
+    ],
+    "industry_counts": {
+      "기계": 380,
+      "목재종이": 15
+    },
+    "priority_target_count": 395,
+    "unique_wanted_auth_no": 395,
+    "request_reduction_pct": 80.68
+  },
+  "collection": {
+    "request_target": 395,
+    "success": 6,
+    "failed": 4,
+    "not_requested": 385,
+    "access_gate": {
+      "robots": {
+        "url": "https://www.work24.go.kr/robots.txt",
+        "checked_at": "2026-09-23T13:41:02+09:00",
+        "relevant_rules": [
+          "Allow: /",
+          "User-Agent: *",
+          "disallow: /cm/common/",
+          "disallow: /sa/",
+          "disallow: /ei/",
+          "disallow: /cm/f/c/0100/selectUnifySearchPost.do"
+        ],
+        "paths": {
+          "search_prefix": true,
+          "detail_prefix": true,
+          "search_page": true,
+          "detail_page": true
+        }
+      },
+      "terms": {
+        "url": "https://www.work24.go.kr/cm/c/d/0130/retrieveUtzeStpt.do",
+        "checked_at": "2026-09-23T13:41:04+09:00",
+        "sha256": "6858a5fd27dd74877e3876783be66a97ae7d112209439d634dd927ab9de36dcd",
+        "separate_contract_for_bulk_or_special_use": true,
+        "automated_personal_data_restriction_detected": true
+      }
+    },
+    "max_requests_this_run": 5,
+    "selected_this_run": 5,
+    "attempted_this_run": 5,
+    "stopped_reason": null,
+    "http_status_counts_including_gate": {
+      "200": 7
+    },
+    "http_status_counts_detail_this_run": {
+      "200": 5
+    },
+    "network_errors": 0,
+    "http_status_counts_snapshot": {
+      "200": 10
+    }
+  },
+  "join": {
+    "wanted_auth_no_duplicates": 0,
+    "detail_id_match_count": 6,
+    "detail_id_match_pct": 100.0,
+    "existing_target_join_pct": 100.0,
+    "failed_ids": [
+      "K131112609070060",
+      "K131112607230045",
+      "K131112607230044",
+      "K131112607230031"
+    ],
+    "target_enrichment_coverage_pct": 1.52
+  },
+  "field_coverage": {
+    "recruitment_count": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "occupation": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "job_description": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "employment_type": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "wage": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "career": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "education": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "certificate": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "workplace_address": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "registration_date": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "closing_date": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "work_hours": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "work_pattern": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    },
+    "preference": {
+      "count": 0,
+      "target_count": 395,
+      "coverage_pct": 0.0,
+      "success_denominator_pct": 0.0
+    },
+    "district": {
+      "count": 6,
+      "target_count": 395,
+      "coverage_pct": 1.52,
+      "success_denominator_pct": 100.0
+    }
+  },
+  "privacy": {
+    "phone_regex_hits": 0,
+    "email_regex_hits": 0,
+    "contact_schema_fields_collected": 0
+  },
+  "parsing_failure_count": 4,
+  "artifacts": {
+    "raw_detail_snapshot": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\raw\\work24\\work24_priority_industry_detail_20260923.csv",
+    "enriched_dataset": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_priority_industry_enriched_20260923.csv",
+    "quality_report": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_priority_industry_quality_20260923.json"
+  }
+}
