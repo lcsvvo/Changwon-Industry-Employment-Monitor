@@ -30,6 +30,7 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[3]
 EXISTING_DATA = ROOT / "data/processed/work24/work24_analysis_ready.csv"
+VALIDATION_QUEUE = ROOT / "data/processed/work24/work24_detail_collection_queue_20260923.csv"
 LATEST_TRIAGE = ROOT / "outputs/final_model/02_triage/tables/triage_latest.csv"
 RAW_WORK24_DIR = ROOT / "data/raw/work24"
 PROCESSED_WORK24_DIR = ROOT / "data/processed/work24"
@@ -53,7 +54,7 @@ USER_AGENT = (
     "Changwon-Industry-Employment-Monitor/1.1 "
     "(academic research; public non-personal job information)"
 )
-REQUEST_DELAY_SEC = 2.0
+REQUEST_DELAY_SEC = 3.0
 REQUEST_TIMEOUT_SEC = 30
 MAX_RETRIES = 3
 SAMPLE_MAX = 10
@@ -69,6 +70,10 @@ PHONE_RE = re.compile(r"(?<!\d)(?:01[016789]|0\d{1,2})[- )]?\d{3,4}[- ]?\d{4}(?!
 
 class Work24AccessStop(RuntimeError):
     """robots 또는 HTTP 차단 신호로 안전하게 중단됨."""
+
+    def __init__(self, message: str, *, status_code: int | None = None):
+        self.status_code = status_code
+        super().__init__(message)
 
 
 class Work24HTTPError(RuntimeError):
@@ -155,8 +160,11 @@ class SafeSession:
                 self.status_counts[response.status_code] += 1
                 if response.status_code in (403, 429):
                     self.stopped = True
+                    retry_after = response.headers.get("Retry-After")
+                    suffix = f"; Retry-After={retry_after}" if retry_after else ""
                     raise Work24AccessStop(
-                        f"HTTP {response.status_code}; no retry and all collection stopped")
+                        f"HTTP {response.status_code}{suffix}; no retry and all collection stopped",
+                        status_code=response.status_code)
                 if response.status_code == 200:
                     if not response.encoding or response.encoding.lower() in {"iso-8859-1", "ascii"}:
                         response.encoding = response.apparent_encoding or "utf-8"
@@ -446,6 +454,36 @@ def priority_targets(
     }
 
 
+def validation_queue_targets(
+    queue_path: Path = VALIDATION_QUEUE,
+    source_path: Path = EXISTING_DATA,
+    expected_count: int = 140,
+) -> tuple[list[dict[str, str]], dict]:
+    """Load the previously approved M cohort by ID; never reselect it by industry."""
+    queue_rows = read_csv_rows(queue_path)
+    selected = [row for row in queue_rows
+                if str(row.get("detailed_validation_target", "")).strip().lower() == "true"]
+    ids = [row.get("wanted_auth_no", "").strip() for row in selected]
+    if len(selected) != expected_count:
+        raise RuntimeError(
+            f"validation queue expected {expected_count} targets, found {len(selected)}")
+    if not all(ids) or len(ids) != len(set(ids)):
+        raise RuntimeError("validation queue IDs must be present and unique")
+    base_rows = read_csv_rows(source_path)
+    base_by_id = {row.get("wanted_auth_no", "").strip(): row for row in base_rows}
+    missing = [wanted for wanted in ids if wanted not in base_by_id]
+    if missing:
+        raise RuntimeError(f"validation queue IDs missing from source list: {missing[:5]}")
+    targets = [base_by_id[wanted] for wanted in ids]
+    return targets, {
+        "queue_path": str(queue_path),
+        "queue_target_count": len(selected),
+        "unique_wanted_auth_no": len(set(ids)),
+        "industry_counts": dict(Counter(row.get("kicox_industry", "") for row in targets)),
+        "target_definition": "saved M=140 queue IDs; no reselection or diagnostic recalculation",
+    }
+
+
 def industry_targets(
     industry: str = "all",
     source_path: Path = EXISTING_DATA,
@@ -549,8 +587,7 @@ def detail_rows_by_id(path: Path) -> dict[str, dict[str, str]]:
     result: dict[str, dict[str, str]] = {}
     for row in read_csv_rows(path):
         wanted = row.get("wanted_auth_no", "")
-        if wanted in result:
-            raise RuntimeError(f"duplicate wanted_auth_no in detail snapshot: {wanted}")
+        # Raw rows form an append-only attempt history; last row is current state.
         result[wanted] = row
     return result
 
@@ -561,31 +598,46 @@ def collect_priority_details(
     *,
     max_requests: int = 5,
     scope_confirmed: bool = False,
+    explicit_user_request: bool = False,
 ) -> tuple[dict, dict]:
     if max_requests < 0:
         raise ValueError("max_requests must be non-negative")
-    if not scope_confirmed and max_requests > SAMPLE_MAX:
+    if not scope_confirmed and not explicit_user_request and max_requests > SAMPLE_MAX:
         raise ValueError(
             f"without confirmation that this request fits the permitted use scope, "
             f"max_requests cannot exceed the sample safety cap ({SAMPLE_MAX})")
+    if explicit_user_request and max_requests > len(targets):
+        raise ValueError("max_requests cannot exceed the exact queued target count")
 
     client = SafeSession()
     gate = current_access_gate(client)
     prior = detail_rows_by_id(snapshot_path)
-    if not scope_confirmed and len(prior) >= SAMPLE_MAX and max_requests:
+    attempts_by_id = Counter(
+        row.get("wanted_auth_no", "") for row in read_csv_rows(snapshot_path)
+    ) if snapshot_path.exists() else Counter()
+    if not scope_confirmed and not explicit_user_request and len(prior) >= SAMPLE_MAX and max_requests:
         raise Work24AccessStop(
             f"sample safety cap reached ({SAMPLE_MAX} requests); "
             "the use-scope status of the planned 140 requests is unclear, "
             "so automated requests remain paused pending KEIS confirmation")
     queue = []
     for target in interleaved_targets(targets):
-        previous = prior.get(target["wanted_auth_no"])
+        wanted = target["wanted_auth_no"]
+        previous = prior.get(wanted)
         if previous and previous.get("request_status") == "SUCCESS":
             continue
-        if previous:
+        retryable_parse_failure = (
+            previous
+            and previous.get("http_status") == "200"
+            and "detail content did not contain company and title" in previous.get("error", "")
+        )
+        if previous and not retryable_parse_failure:
+            continue
+        # At most two retries per target, counting its original attempt.
+        if retryable_parse_failure and attempts_by_id[wanted] >= 3:
             continue
         queue.append(target)
-    remaining_cap = max_requests if scope_confirmed else min(
+    remaining_cap = max_requests if scope_confirmed or explicit_user_request else min(
         max_requests, SAMPLE_MAX - len(prior))
     selected = queue[:remaining_cap]
     stopped_reason = None
@@ -606,6 +658,11 @@ def collect_priority_details(
         try:
             attempted += 1
             response = client.get(url)
+            requested_url = urlparse(url)
+            final_url = urlparse(response.url)
+            if (final_url.hostname != requested_url.hostname
+                    or final_url.path != requested_url.path):
+                raise ValueError("unexpected redirect away from the public detail endpoint")
             parsed = parse_current_detail(response.text, url)
             if not parsed.get("company") or not parsed.get("title"):
                 raise ValueError("detail content did not contain company and title")
@@ -613,6 +670,10 @@ def collect_priority_details(
             append_detail_row(snapshot_path, row)
         except Work24AccessStop as exc:
             stopped_reason = str(exc)
+            append_detail_row(snapshot_path, {
+                **base, "request_status": "FAILED", "http_status": exc.status_code,
+                "error": str(exc),
+            })
             break
         except Work24HTTPError as exc:
             append_detail_row(snapshot_path, {
@@ -630,6 +691,9 @@ def collect_priority_details(
     return latest, {
         "access_gate": gate,
         "max_requests_this_run": max_requests,
+        "request_delay_seconds": client.delay,
+        "request_scope_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION" if not scope_confirmed else "CONFIRMED",
+        "explicit_user_request": explicit_user_request,
         "selected_this_run": len(selected),
         "attempted_this_run": attempted,
         "stopped_reason": stopped_reason,
@@ -650,7 +714,20 @@ def write_enriched_dataset(
     details: dict[str, dict[str, str]],
     output_path: Path,
 ) -> list[dict]:
+    rows = build_enriched_rows(targets, details)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=tuple(rows[0].keys()), extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+    return rows
+
+
+def build_enriched_rows(
+    targets: list[dict[str, str]],
+    details: dict[str, dict[str, str]],
+) -> list[dict]:
+    """Build in-memory field joins for QA; canonical layer is the only processed data input."""
     base_fields = (
         "snapshot_id", "crawl_timestamp", "wanted_auth_no", "kicox_industry",
         "kicox_mapping_status", "kicox_mapping_confidence", "ksic_code", "ksic_name",
@@ -674,10 +751,6 @@ def write_enriched_dataset(
             row[field] = detail.get(field)
         row["request_status"] = detail.get("request_status") or "NOT_REQUESTED"
         rows.append(row)
-    with output_path.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(rows)
     return rows
 
 
@@ -796,6 +869,40 @@ def run_priority_enrichment(
     return quality
 
 
+def run_validation_queue_enrichment(
+    *,
+    max_requests: int = 10,
+    date_stamp: str = "20260923",
+    explicit_user_request: bool = False,
+) -> dict:
+    """Enrich exactly the saved M=140 queue; only the owner-requested action may lift sample cap."""
+    if not explicit_user_request:
+        raise ValueError("the exact-queue collection command requires an explicit user request")
+    targets, target_stats = validation_queue_targets()
+    if not 1 <= max_requests <= len(targets):
+        raise ValueError(f"max_requests must be between 1 and {len(targets)}")
+    if not re.fullmatch(r"\d{8}", date_stamp):
+        raise ValueError("date_stamp must use YYYYMMDD")
+    raw_path = RAW_WORK24_DIR / f"work24_priority_industry_detail_{date_stamp}.csv"
+    quality_path = PROCESSED_WORK24_DIR / f"work24_priority_industry_quality_{date_stamp}.json"
+    details, run_stats = collect_priority_details(
+        targets, raw_path, max_requests=max_requests, explicit_user_request=True)
+    enriched_rows = build_enriched_rows(targets, details)
+    quality = build_quality_report(
+        target_stats, enriched_rows, run_stats, raw_path, raw_path)
+    quality["collection"]["request_scope_status"] = "UNCLEAR_PENDING_KEIS_CONFIRMATION"
+    quality["collection"]["collection_basis"] = "explicit user request for the saved M=140 queue"
+    quality["collection"]["additional_requests_made"] = run_stats["attempted_this_run"]
+    quality["artifacts"].pop("enriched_dataset", None)
+    quality["artifacts"]["canonical_recruitment_layer"] = (
+        f"data/processed/work24/work24_recruitment_layer_{date_stamp}.csv")
+    quality["artifacts"]["quality_report"] = str(quality_path)
+    with quality_path.open("w", encoding="utf-8") as handle:
+        json.dump(quality, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    return quality
+
+
 def collect_detail(
     industry: str,
     *,
@@ -869,17 +976,26 @@ def audit_sample(limit: int = 5) -> dict:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("command", choices=("audit", "enrich-priority", "enrich-industry"))
+    parser.add_argument("command", choices=("audit", "enrich-priority", "enrich-industry",
+                                             "enrich-validation-queue"))
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--date-stamp")
     parser.add_argument("--industry", choices=("all",) + KICOX_INDUSTRIES, default="all")
     parser.add_argument("--scope-confirmed", "--terms-authorized", dest="scope_confirmed",
                         action="store_true",
                         help="한국고용정보원에 예정된 자동요청의 이용범위를 확인한 경우에만 사용")
+    parser.add_argument("--explicit-user-request", action="store_true",
+                        help="명시적으로 승인된 M=140 queue 수집 실행에만 사용")
     args = parser.parse_args(argv)
     try:
         if args.command == "audit":
             result = audit_sample(args.limit)
+        elif args.command == "enrich-validation-queue":
+            result = run_validation_queue_enrichment(
+                max_requests=args.limit,
+                date_stamp=args.date_stamp or "20260923",
+                explicit_user_request=args.explicit_user_request,
+            )
         elif args.command == "enrich-priority":
             result = run_priority_enrichment(
                 max_requests=args.limit,
