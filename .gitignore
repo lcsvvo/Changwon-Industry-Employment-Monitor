@@ -83,3 +83,9 @@ outputs/runs/
 outputs/final_model/06_report_assets/qa/jupyter/
 outputs/final_model/06_report_assets/qa/jupyter_runtime/
 logs/validation/final_qa/*tests.xml
+
+# 점검 업무 기록 로컬 DB(사용자가 화면에서 만든 기록만 저장)
+app_state/
+
+# Tests are kept locally only (not published to GitHub)
+tests/
