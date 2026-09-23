@@ -76,3 +76,81 @@ def test_electre_is_selective_advisory_and_preserves_triage():
     assert boundary.triage_stage_preserved.eq("추가확인").all()
     assert not boundary.external_data_used_as_electre_criterion.any()
     assert set(boundary.electre_stage) <= {"OBSERVE", "CHECK", "PRIORITY", "UNDETERMINED"}
+
+
+def _key_index(frame):
+    return frame.set_index(["industry", "quarter"])
+
+
+def test_check_questions_context_panel_exports_existing_context_for_180_rows():
+    """맥락 기반 추가 확인질문 180행: 해석층 값을 그대로 내보내며 판정을 바꾸지 않는다."""
+    panel = pd.read_csv(final.HANDOFF_TABLES / "check_questions_context_panel.csv")
+    decision = _key_index(pd.read_csv(final.DECISION))
+    context = _key_index(pd.read_csv(final.CONTEXT))
+    assert len(panel) == 180
+    assert not panel.duplicated(["industry", "quarter"]).any()
+    assert list(panel.columns) == final.CONTEXT_QUESTION_COLS
+    p = _key_index(panel)
+    assert p["stage"].eq(decision.loc[p.index, "stage"]).all()
+    assert p["check_question"].eq(decision.loc[p.index, "check_question"]).all()
+    assert panel["check_questions_context"].fillna("").str.strip().ne("").all()
+    # 새로 계산하지 않음: 중간 산출물 값과 180건 전부 동일(provenance 열 포함)
+    for col in final.CONTEXT_QUESTION_COLS[2:]:
+        left, right = p[col], context.loc[p.index, col]
+        assert (left.eq(right) | (left.isna() & right.isna())).all(), col
+
+
+def test_check_questions_context_panel_matches_existing_final_subsets():
+    panel = _key_index(pd.read_csv(final.HANDOFF_TABLES / "check_questions_context_panel.csv"))
+    trace = _key_index(pd.read_csv(final.HANDOFF_TABLES / "explanation_trace.csv"))
+    electre = _key_index(pd.read_csv(final.ELECTRE_TABLES / "electre_smaa_review_cases.csv"))
+    assert len(trace) == 10 and len(electre) == 35
+    for subset in (trace, electre):
+        assert subset["check_questions_context"].eq(panel.loc[subset.index, "check_questions_context"]).all()
+        assert subset["handoff_review_functions"].eq(panel.loc[subset.index, "handoff_review_functions"]).all()
+
+
+def test_context_provenance_components_compose_context():
+    """provenance 열(해석신호·외부 수집자료·자료품질)을 이어 붙이면 context 와 같다."""
+    panel = pd.read_csv(final.HANDOFF_TABLES / "check_questions_context_panel.csv")
+    norm = lambda s: s.fillna("").str.replace("\r\n", "\n")
+    joined = (norm(panel.signal_questions) + "\n" + norm(panel.external_questions) + "\n"
+              + norm(panel.quality_questions)).str.replace(r"\n+", "\n", regex=True).str.strip()
+    assert joined.eq(norm(panel.check_questions_context)).all()
+
+
+def test_external_evidence_panel_exports_context_values_for_180_rows():
+    """분기별 외부자료 패널: 해석층 값을 그대로 180행 export, 판정 불변."""
+    panel = pd.read_csv(final.EVIDENCE_DIR / "external_evidence_panel.csv")
+    decision = _key_index(pd.read_csv(final.DECISION))
+    context = _key_index(pd.read_csv(final.CONTEXT))
+    assert len(panel) == 180 and not panel.duplicated(["industry", "quarter"]).any()
+    assert set(zip(panel.industry, panel.quarter)) == set(decision.index)
+    assert list(panel.columns) == final.EXTERNAL_PANEL_COLS
+    p = _key_index(panel)
+    assert p["stage"].eq(decision.loc[p.index, "stage"]).all()
+    for col in final.EXTERNAL_PANEL_COLS[2:]:
+        left, right = p[col], context.loc[p.index, col]
+        same = left.eq(right) | (left.isna() & right.isna())
+        if pd.api.types.is_float_dtype(left) and pd.api.types.is_float_dtype(right):
+            same |= (left - right).abs().le(1e-9)  # CSV 파서 반올림(1e-14 수준)만 허용
+        assert same.all(), col
+
+
+def test_external_evidence_panel_latest_quarter_equals_existing_summary():
+    panel = _key_index(pd.read_csv(final.EVIDENCE_DIR / "external_evidence_panel.csv"))
+    summary = _key_index(pd.read_csv(final.EVIDENCE_DIR / "external_evidence_summary.csv"))
+    shared = [c for c in summary.columns if c in panel.columns]
+    assert len(shared) >= 15
+    for col in shared:
+        a, b = summary[col], panel.loc[summary.index, col]
+        assert (a.eq(b) | (a.isna() & b.isna())).all(), col
+
+
+def test_external_panel_groups_are_registered_roles():
+    roles = pd.read_csv(final.EVIDENCE_DIR / "data_role_table.csv").set_index("dataset_id")
+    assert set(final.EXTERNAL_PANEL_GROUPS) <= set(roles.index)
+    assert roles.loc["ppi", "role"] == roles.loc["eis_cci", "role"] == "VALIDATION"
+    for ds in ("customs_trade", "kepco_business_type", "ecos_bsi", "kosis_labor_flow", "changwon_jobs",
+               "kepco_legal_dong_ksic"):
+        assert roles.loc[ds, "role"] == "CONTEXT"

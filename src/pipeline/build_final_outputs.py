@@ -169,6 +169,69 @@ def explanation_trace(decision: pd.DataFrame, evidence: pd.DataFrame) -> pd.Data
     return trace.assign(_order=trace["stage"].map(order)).sort_values(["_order", "industry"]).drop(columns="_order")
 
 
+# 분기별 외부자료 패널: data_role_table 의 dataset_id 별로 해석층이 이미 분기에 정렬한 열을 그대로 묶는다.
+# (KEPCO 업종별 businessType 전력·KEPCO 법정동 수치·고용24 는 해석층 분기 열이 없어 포함하지 않는다.)
+EXTERNAL_PANEL_GROUPS = {
+    "ppi": [
+        "nominal_production_yoy", "ppi_mapping_grade", "ppi_mapping_uncertainty", "n_ppi_candidates",
+        "ppi_candidate_items", "ppi_adjusted_production_yoy", "ppi_adjusted_low", "ppi_adjusted_high",
+        "ppi_adjusted_band_only", "sign_agreement",
+    ],
+    "eis_cci": [
+        "eis_manufacturing_yoy", "mfg_emp_yoy", "aggregate_direction", "aggregate_yoy_gap_pp",
+        "source_category", "insured_level", "insured_yoy", "industry_direction", "industry_yoy_gap_pp",
+        "mapping_confidence", "cross_source_available", "cross_source_population_note",
+    ],
+    "customs_trade": [
+        "trade_export_usd", "trade_export_yoy", "trade_import_yoy", "trade_n_items", "trade_mapping_grade",
+        "trade_coverage_flag", "trade_data_available", "trade_coverage_status", "trade_unavailable_reason",
+        "trade_scope",
+    ],
+    "kepco_business_type": [
+        "power_usage_kwh", "power_usage_yoy", "power_customers", "power_customers_yoy",
+        "power_data_available", "power_scope",
+    ],
+    "ecos_bsi": [
+        "bsi_region_business", "bsi_region_production", "bsi_region_new_orders", "bsi_region_operation",
+        "bsi_region_labor", "bsi_industry_business", "bsi_industry_mapping_grade", "bsi_data_available",
+        "bsi_region_scope", "bsi_industry_scope",
+    ],
+    "kosis_labor_flow": [
+        "mfg_flow_period", "mfg_flow_workers", "mfg_flow_workers_yoy", "mfg_flow_acquisitions",
+        "mfg_flow_acquisition_yoy", "mfg_flow_losses", "mfg_flow_loss_yoy", "mfg_flow_net",
+        "mfg_flow_job_openings", "mfg_flow_data_available", "mfg_flow_scope",
+    ],
+}
+EXTERNAL_PANEL_COLS = ["industry", "quarter", "stage"] + [
+    c for cols in EXTERNAL_PANEL_GROUPS.values() for c in cols
+]
+
+
+def external_evidence_panel(context: pd.DataFrame) -> pd.DataFrame:
+    """2022Q1~2026Q2 전체 업종×분기의 외부자료(해석층이 해당 분기에 정렬한 값)를 그대로 내보낸다.
+
+    새로 계산·보간·소급하지 않는다. 최신분기 카드(external_evidence_summary)는 그대로 둔다.
+    """
+    return context[EXTERNAL_PANEL_COLS].sort_values(["quarter", "industry"]).reset_index(drop=True)
+
+
+CONTEXT_QUESTION_COLS = [
+    "industry", "quarter", "stage", "check_question", "check_questions_context",
+    "handoff_review_functions",
+    # provenance: 해석층이 이미 만든 구성요소 그대로(check_questions_context = 세 열의 결합)
+    "signal_questions", "external_questions", "quality_questions",
+    "signal_profile", "quality_flag_list",
+]
+
+
+def check_questions_context_panel(context: pd.DataFrame) -> pd.DataFrame:
+    """해석층이 분기별로 만든 맥락 기반 추가 확인질문을 180행 그대로 내보낸다.
+
+    새로 계산하지 않는다. 외부근거 카드(external_evidence_summary, 최신분기)와는 다른 자료다.
+    """
+    return context[CONTEXT_QUESTION_COLS].sort_values(["quarter", "industry"]).reset_index(drop=True)
+
+
 def boundary_review(decision: pd.DataFrame, context: pd.DataFrame, electre: pd.DataFrame, smaa: pd.DataFrame) -> pd.DataFrame:
     """Second-look panel for Triage '추가확인' only.
 
@@ -229,8 +292,15 @@ def boundary_review(decision: pd.DataFrame, context: pd.DataFrame, electre: pd.D
     return selected[keep].sort_values(["review_queue_group", "quarter", "industry"]).reset_index(drop=True)
 
 
-def qa(decision: pd.DataFrame, context: pd.DataFrame, roles: pd.DataFrame, evidence: pd.DataFrame, boundary: pd.DataFrame, jobs: pd.DataFrame, legal_month: pd.DataFrame, legal_quarter: pd.DataFrame, legal_coverage: pd.DataFrame) -> dict:
+def qa(decision: pd.DataFrame, context: pd.DataFrame, roles: pd.DataFrame, evidence: pd.DataFrame, boundary: pd.DataFrame, jobs: pd.DataFrame, legal_month: pd.DataFrame, legal_quarter: pd.DataFrame, legal_coverage: pd.DataFrame, questions: pd.DataFrame, ext_panel: pd.DataFrame) -> dict:
     stages = decision["stage"].value_counts().to_dict()
+    dq = decision.set_index(["industry", "quarter"])
+    qq = questions.set_index(["industry", "quarter"])
+    ep = ext_panel.set_index(["industry", "quarter"])
+    ev = evidence.set_index(["industry", "quarter"])
+    shared = [c for c in ev.columns if c in ep.columns]
+    latest_equal = all(
+        (ev[c].eq(ep.loc[ev.index, c]) | (ev[c].isna() & ep.loc[ev.index, c].isna())).all() for c in shared)
     period = legal_month["period"].astype(str)
     checks = {
         "decision_rows_180": len(decision) == 180,
@@ -258,6 +328,14 @@ def qa(decision: pd.DataFrame, context: pd.DataFrame, roles: pd.DataFrame, evide
         "selective_electre_rows_equal_triage_additional_check": len(boundary) == int(decision["stage"].eq("추가확인").sum()) == 35,
         "selective_electre_does_not_overwrite_triage": boundary["triage_stage_preserved"].eq("추가확인").all(),
         "external_data_not_used_as_electre_criteria": boundary["external_data_used_as_electre_criterion"].eq(False).all(),
+        "context_questions_rows_180_unique": len(questions) == 180 and not questions.duplicated(["industry", "quarter"]).any(),
+        "context_questions_stage_and_base_question_match_triage": (
+            qq["stage"].eq(dq.loc[qq.index, "stage"]).all()
+            and qq["check_question"].eq(dq.loc[qq.index, "check_question"]).all()),
+        "context_questions_never_empty": questions["check_questions_context"].fillna("").str.strip().ne("").all(),
+        "external_panel_rows_180_unique": len(ext_panel) == 180 and not ext_panel.duplicated(["industry", "quarter"]).any(),
+        "external_panel_stage_matches_triage": ep["stage"].eq(dq.loc[ep.index, "stage"]).all(),
+        "external_panel_latest_equals_summary": latest_equal,
     }
     checks = {name: bool(passed) for name, passed in checks.items()}
     if not all(checks.values()):
@@ -298,6 +376,8 @@ def main() -> None:
     evidence = external_evidence(context, decision, jobs, legal_month, legal_coverage)
     trace = explanation_trace(decision, evidence)
     boundary = build_selective_review(decision, context, electre_smaa)
+    questions = check_questions_context_panel(context)
+    ext_panel = external_evidence_panel(context)
     latest = decision.loc[decision["quarter"].eq(decision["quarter"].max())].copy()
     latest = latest.sort_values(["stage", "rank_in_stage"])
 
@@ -305,8 +385,10 @@ def main() -> None:
     save_csv(core, CORE_TABLES / "core_panel.csv")
     save_csv(latest, TRIAGE_TABLES / "triage_latest.csv")
     save_csv(evidence, EVIDENCE_DIR / "external_evidence_summary.csv")
+    save_csv(ext_panel, EVIDENCE_DIR / "external_evidence_panel.csv")
     save_csv(trace, HANDOFF_TABLES / "explanation_trace.csv")
-    save_csv(boundary, ELECTRE_TABLES / "electre_smaa_review_cases.csv")
+    save_csv(questions, HANDOFF_TABLES / "check_questions_context_panel.csv")
+    save_csv(boundary,ELECTRE_TABLES / "electre_smaa_review_cases.csv")
     boundary_summary = (
         boundary.groupby(["review_queue_group", "electre_stage", "smaa_parameter_sensitive"], dropna=False)
         .size().rename("case_count").reset_index()
@@ -330,10 +412,12 @@ def main() -> None:
         (10, "최종 방법론", "reports/final_methodology.md"),
         (11, "QA 결과", "outputs/final_model/qa_summary.json"),
         (12, "최종 실행방법", "outputs/final_model/RUNBOOK.md"),
+        (13, "분기별 맥락 기반 추가 확인질문", "outputs/final_model/05_handoff/tables/check_questions_context_panel.csv"),
+        (14, "분기별 외부자료 패널", "outputs/final_model/04_external_evidence/external_evidence_panel.csv"),
     ], columns=["number", "deliverable", "path"])
     save_csv(deliverables, OUT / "deliverables_index.csv")
 
-    report = qa(decision, context, roles, evidence, boundary, jobs, legal_month, legal_quarter, legal_coverage)
+    report = qa(decision, context, roles, evidence, boundary, jobs, legal_month, legal_quarter, legal_coverage, questions, ext_panel)
     OUT.mkdir(parents=True, exist_ok=True)
     protocol = {
         "version": "1.0",
