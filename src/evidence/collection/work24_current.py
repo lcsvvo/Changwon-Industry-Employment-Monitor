@@ -3,8 +3,9 @@
 레거시 ``work.go.kr`` 센터 목록 수집기는 보존한다. 이 모듈은 현행
 ``/wk/a/b/1200`` 검색과 ``/wk/a/b/1500`` 상세만 별도로 다루며, 실행할 때마다
 도메인별 robots.txt를 다시 확인한다. ``enrich-priority`` 명령은 최신 진단에서
-우선점검으로 확정된 산업의 기존 매핑 공고만 대상으로 하며, 이용조건상 별도 협의
-전에는 최대 10건의 검증 요청만 허용한다.
+우선점검으로 확정된 산업의 기존 매핑 공고만 대상으로 한다. 한 번의 실행에 적용하는
+10건 한도는 샘플 수집 안전장치이며, 140건 요청의 이용범위 해당 여부를 뜻하지 않는다.
+140건 자동 요청은 한국고용정보원 이용범위 확인 전 보류한다.
 
 연락 담당자 이름·전화·이메일 영역은 파싱하지 않는다. 직무내용 안에 섞인
 전화·이메일도 저장 전에 제거한다.
@@ -559,21 +560,23 @@ def collect_priority_details(
     snapshot_path: Path,
     *,
     max_requests: int = 5,
-    terms_authorized: bool = False,
+    scope_confirmed: bool = False,
 ) -> tuple[dict, dict]:
     if max_requests < 0:
         raise ValueError("max_requests must be non-negative")
-    if not terms_authorized and max_requests > SAMPLE_MAX:
+    if not scope_confirmed and max_requests > SAMPLE_MAX:
         raise ValueError(
-            f"without documented terms authorization, max_requests cannot exceed {SAMPLE_MAX}")
+            f"without confirmation that this request fits the permitted use scope, "
+            f"max_requests cannot exceed the sample safety cap ({SAMPLE_MAX})")
 
     client = SafeSession()
     gate = current_access_gate(client)
     prior = detail_rows_by_id(snapshot_path)
-    if not terms_authorized and len(prior) >= SAMPLE_MAX and max_requests:
+    if not scope_confirmed and len(prior) >= SAMPLE_MAX and max_requests:
         raise Work24AccessStop(
-            f"small-validation lifetime cap reached ({SAMPLE_MAX} requests); "
-            "documented terms authorization is required")
+            f"sample safety cap reached ({SAMPLE_MAX} requests); "
+            "the use-scope status of the planned 140 requests is unclear, "
+            "so automated requests remain paused pending KEIS confirmation")
     queue = []
     for target in interleaved_targets(targets):
         previous = prior.get(target["wanted_auth_no"])
@@ -582,7 +585,7 @@ def collect_priority_details(
         if previous:
             continue
         queue.append(target)
-    remaining_cap = max_requests if terms_authorized else min(
+    remaining_cap = max_requests if scope_confirmed else min(
         max_requests, SAMPLE_MAX - len(prior))
     selected = queue[:remaining_cap]
     stopped_reason = None
@@ -771,7 +774,7 @@ def run_priority_enrichment(
     *,
     max_requests: int = 5,
     date_stamp: str | None = None,
-    terms_authorized: bool = False,
+    scope_confirmed: bool = False,
 ) -> dict:
     targets, target_stats = priority_targets()
     stamp = date_stamp or dt.datetime.now().strftime("%Y%m%d")
@@ -782,7 +785,7 @@ def run_priority_enrichment(
     quality_path = PROCESSED_WORK24_DIR / f"work24_priority_industry_quality_{stamp}.json"
     details, run_stats = collect_priority_details(
         targets, raw_path, max_requests=max_requests,
-        terms_authorized=terms_authorized)
+        scope_confirmed=scope_confirmed)
     enriched_rows = write_enriched_dataset(targets, details, enriched_path)
     quality = build_quality_report(
         target_stats, enriched_rows, run_stats, raw_path, enriched_path)
@@ -798,7 +801,7 @@ def collect_detail(
     *,
     max_requests: int = 5,
     date_stamp: str | None = None,
-    terms_authorized: bool = False,
+    scope_confirmed: bool = False,
 ) -> dict:
     """산업별 상세수집 진입점.
 
@@ -814,7 +817,7 @@ def collect_detail(
         targets,
         snapshot_path,
         max_requests=max_requests,
-        terms_authorized=terms_authorized,
+        scope_confirmed=scope_confirmed,
     )
     selected_ids = {row["wanted_auth_no"] for row in targets}
     selected_details = {key: value for key, value in details.items() if key in selected_ids}
@@ -870,8 +873,9 @@ def main(argv=None) -> int:
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--date-stamp")
     parser.add_argument("--industry", choices=("all",) + KICOX_INDUSTRIES, default="all")
-    parser.add_argument("--terms-authorized", action="store_true",
-                        help="별도 대량 이용 협의를 문서로 확보한 경우에만 사용")
+    parser.add_argument("--scope-confirmed", "--terms-authorized", dest="scope_confirmed",
+                        action="store_true",
+                        help="한국고용정보원에 예정된 자동요청의 이용범위를 확인한 경우에만 사용")
     args = parser.parse_args(argv)
     try:
         if args.command == "audit":
@@ -880,14 +884,14 @@ def main(argv=None) -> int:
             result = run_priority_enrichment(
                 max_requests=args.limit,
                 date_stamp=args.date_stamp,
-                terms_authorized=args.terms_authorized,
+                scope_confirmed=args.scope_confirmed,
             )
         else:
             result = collect_detail(
                 args.industry,
                 max_requests=args.limit,
                 date_stamp=args.date_stamp,
-                terms_authorized=args.terms_authorized,
+                scope_confirmed=args.scope_confirmed,
             )
     except Work24AccessStop as exc:
         result = {"status": "STOPPED", "reason": str(exc),

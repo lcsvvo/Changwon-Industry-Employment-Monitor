@@ -19,8 +19,8 @@ from . import work24_current as current
 ROOT = Path(__file__).resolve().parents[3]
 FACTORY_METADATA = (ROOT / "data/raw/changwon_factory_registry/_metadata/"
                     "changwon_factory_registry_20241231.json")
-DIAGNOSTIC_HISTORY = (ROOT / "data/processed/final_model/reference/triage_history/"
-                      "original_v3_stages.csv")
+DIAGNOSTIC_SNAPSHOT = (ROOT / "outputs/final_model/02_triage/tables/"
+                       "triage_latest_full.csv")
 
 JOB_CLASSES = ("CORE_INDUSTRIAL", "INDUSTRIAL_SUPPORT",
                "GENERAL_NONCORE", "UNKNOWN")
@@ -77,11 +77,15 @@ def _qualification_keywords(value: str | None) -> str:
     return "|".join(sorted(term for term in terms if term))
 
 
-def _diagnostic_index() -> dict[tuple[str, str], str]:
-    if not DIAGNOSTIC_HISTORY.exists():
-        raise FileNotFoundError(f"saved diagnostic history missing: {DIAGNOSTIC_HISTORY}")
-    rows = _read_csv(DIAGNOSTIC_HISTORY)
-    return {(row["industry"], row["quarter"]): row["stage"] for row in rows}
+def _diagnostic_index(reference_period: str) -> dict[str, dict[str, str]]:
+    if not DIAGNOSTIC_SNAPSHOT.exists():
+        raise FileNotFoundError(f"saved final diagnostic snapshot missing: {DIAGNOSTIC_SNAPSHOT}")
+    rows = [row for row in _read_csv(DIAGNOSTIC_SNAPSHOT)
+            if row.get("quarter") == reference_period]
+    indexed = {row["industry"]: row for row in rows}
+    if len(indexed) != len(rows):
+        raise RuntimeError(f"duplicate industry in saved diagnostic period: {reference_period}")
+    return indexed
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
@@ -254,8 +258,8 @@ def build_recruitment_layer(
         raise RuntimeError("detail snapshot contains duplicate wanted_auth_no")
     company_matches = _official_company_matches(base_rows, official_rows)
     priority_industries = set(_priority_industries())
-    diagnostic_stages = _diagnostic_index()
     diagnostic_quarter = "2026Q2"
+    diagnostic_by_industry = _diagnostic_index(diagnostic_quarter)
 
     rows: list[dict] = []
     base_by_id = {row["wanted_auth_no"]: row for row in base_rows}
@@ -281,6 +285,7 @@ def build_recruitment_layer(
         activity_status, activity_basis = posting_activity(base, as_of)
         priority_industry = bool(mapped and base.get("kicox_industry") in priority_industries)
         industry = base.get("kicox_industry") if mapped else ""
+        diagnostic = diagnostic_by_industry.get(industry, {}) if mapped else {}
         row = {
             "wanted_auth_no": wanted,
             "company_name": base.get("company_raw"),
@@ -308,10 +313,16 @@ def build_recruitment_layer(
             "ksic_resolution_method": base.get("ksic_resolution_method"),
             "diagnostic_quarter": diagnostic_quarter if mapped else "",
             "diagnostic_industry": industry,
-            "diagnostic_stage": diagnostic_stages.get((industry, diagnostic_quarter), ""),
-            "diagnostic_q1_stage": diagnostic_stages.get((industry, "2026Q1"), ""),
-            "diagnostic_q2_stage": diagnostic_stages.get((industry, "2026Q2"), ""),
-            "diagnostic_q3_stage": diagnostic_stages.get((industry, "2026Q3"), ""),
+            "diagnostic_q1_state": diagnostic.get("q1_state", ""),
+            "diagnostic_q2_employment_delta": diagnostic.get("q2_employment_delta", ""),
+            "diagnostic_q2_employment_yoy": diagnostic.get("q2_employment_yoy", ""),
+            "diagnostic_q2_employment_share": diagnostic.get("q2_employment_share", ""),
+            "diagnostic_q3_repeat": diagnostic.get("q3_repeated_signal", ""),
+            "diagnostic_q3_state_run": diagnostic.get("q3_state_run_length", ""),
+            "diagnostic_q3_transition": diagnostic.get("q3_transition", ""),
+            "diagnostic_previous_state": diagnostic.get("previous_state", ""),
+            "diagnostic_stage": diagnostic.get("stage", ""),
+            "diagnostic_stage_reason": diagnostic.get("stage_reason", ""),
             "priority_industry": priority_industry,
             "industrial_complex_proxy_status": proxy_status,
             "industrial_complex_proxy_basis": proxy_basis,
@@ -404,7 +415,7 @@ def build_recruitment_layer(
         representative["detailed_validation_target"] = True
         representative["detail_access_status"] = "list_only"
         representative["detail_access_reason"] = (
-            "NOT_REQUESTED_PENDING_KEIS_COORDINATION_FOR_BULK_OR_SPECIAL_USE")
+            "NOT_REQUESTED_PENDING_KEIS_SCOPE_CLARIFICATION_140_BULK_STATUS_UNCLEAR")
         representative["detail_needed_reason"] = "CONFIRMED_PRIORITY_ACTIVE_MINIMUM_CANDIDATE"
         for row in group[1:]:
             row["detail_needed_reason"] = "EXACT_NATURAL_KEY_DUPLICATE_OF_MINIMUM_CANDIDATE"
@@ -536,6 +547,7 @@ def build_recruitment_layer(
             "official_factory_snapshot": f"data/raw/kicox/datagokr/{official_path.name}",
             "official_factory_metadata": (
                 f"data/raw/kicox/datagokr/_metadata/{official_meta_path.name}"),
+            "final_diagnostic_snapshot": "outputs/final_model/02_triage/tables/triage_latest_full.csv",
             "shared_raw_root_used": bool(shared_raw_root),
         },
         "priority_industries": sorted(priority_industries),
@@ -582,6 +594,10 @@ def build_recruitment_layer(
             "basis": "stored Work24 list due_date only; no additional detail request",
         },
         "detail_target_funnel": {
+            "M_definition": (
+                "공식 국가산단 매칭 + KICOX 매핑 + 최신 우선점검 업종 + "
+                "기준일 유효 조건을 모두 충족한 고신뢰 상세검증 대상"),
+            "population_note": "창원국가산단 전체 채용공고가 아님",
             "A_kicox_mapped": len(mapped_rows),
             "B_official_complex_confirmed": len(confirmed),
             "C_latest_priority_industries": len(confirmed_priority),
@@ -633,21 +649,40 @@ def build_recruitment_layer(
              "reason": "이미 상세검증된 1건 제외; 중복 0건, 재공고 후보 자동병합 없음"},
         ],
         "diagnostic_join": {
-            "quarter": diagnostic_quarter,
+            "calendar_reference_period": diagnostic_quarter,
+            "axis_semantics": "Q1=state; Q2=scale; Q3=time (persistence, repetition, transition)",
             "industry_joined_postings": len(diagnostic_joined),
             "stage_counts": dict(Counter(row["diagnostic_stage"] for row in diagnostic_joined)),
             "priority_industries": sorted(priority_industries),
-            "q1_q2_states_attached": True,
-            "q3_state_available": any(row.get("diagnostic_q3_stage") for row in mapped_rows),
+            "q1_state_attached": sum(bool(row.get("diagnostic_q1_state")) for row in diagnostic_joined),
+            "q2_scale_attached": sum(bool(row.get("diagnostic_q2_employment_delta"))
+                                      for row in diagnostic_joined),
+            "q3_time_axis_attached": sum(bool(row.get("diagnostic_q3_state_run"))
+                                          for row in diagnostic_joined),
+            "q3_repeat_true": sum(
+                str(row.get("diagnostic_q3_repeat", "")).lower() == "true"
+                for row in diagnostic_joined),
+            "q3_repeat_false": sum(
+                str(row.get("diagnostic_q3_repeat", "")).lower() == "false"
+                for row in diagnostic_joined),
+            "q3_state_run_value_counts": dict(Counter(
+                row.get("diagnostic_q3_state_run", "") for row in diagnostic_joined)),
+            "q3_transition_value_counts": dict(Counter(
+                row.get("diagnostic_q3_transition", "") for row in diagnostic_joined)),
+            "calendar_2026Q3_available_in_final_diagnostic": any(
+                row.get("quarter") == "2026Q3"
+                for row in _read_csv(ROOT / "outputs/final_model/02_triage/tables/triage_panel.csv")),
         },
         "detail_access_status_in_M": dict(Counter(
             row["detail_access_status"] for row in validation_targets)),
         "detail_request_gate": {
             "additional_requests_made": 0,
-            "additional_requests_authorized": False,
-            "reason": ("Existing official terms reserve mass/special use for separate agreement; "
-                       "clarify KEIS coordination before making further automated detail requests. "
-                       "list_only means not requested, not a server denial."),
+            "automatic_requests_deferred": True,
+            "scope_confirmation_status": "UNCLEAR",
+            "reason": ("140건 자동 상세 요청이 대량이용에 해당하는지 명확하지 않아 "
+                       "한국고용정보원의 이용범위 확인 전 자동 요청을 보류. "
+                       "수집 금지 또는 별도 계약 필요를 확정한 것이 아니다. "
+                       "list_only는 미요청 상태이며 서버 차단을 뜻하지 않는다."),
         },
         "keyword_provenance": {
             "title_job_skill_source": "title_raw only",
@@ -666,7 +701,10 @@ def build_recruitment_layer(
             "detail_needed": len(detail_needed),
             "priority_counts": dict(Counter(r["detail_priority"] for r in queue_rows)),
             "http_collection_authorized": False,
-            "note": "detail_priority is analysis ordering, not HTTP permission",
+            "request_scope_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
+            "note": ("The 140-request use-scope status is unclear; HTTP requests are paused pending "
+                    "KEIS confirmation. This is not a finding that collection is prohibited or "
+                    "that a separate contract is required."),
         },
         "artifacts": {
             "recruitment_layer": output_path.relative_to(ROOT).as_posix(),

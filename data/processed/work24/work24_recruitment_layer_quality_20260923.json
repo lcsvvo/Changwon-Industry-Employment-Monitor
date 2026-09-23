@@ -1,10 +1,11 @@
 {
-  "generated_at": "2026-09-23T11:10:05+00:00",
+  "generated_at": "2026-09-23T11:26:33+00:00",
   "inputs": {
     "list_dataset": "data/processed/work24/work24_analysis_ready.csv",
     "detail_snapshot": "data/raw/work24/work24_priority_industry_detail_20260923.csv",
     "official_factory_snapshot": "data/raw/kicox/datagokr/kicox_factory_changwon_national_20260923.csv",
     "official_factory_metadata": "data/raw/kicox/datagokr/_metadata/kicox_factory_changwon_national_20260923.json",
+    "final_diagnostic_snapshot": "outputs/final_model/02_triage/tables/triage_latest_full.csv",
     "shared_raw_root_used": true
   },
   "priority_industries": [
@@ -177,6 +178,8 @@
     "basis": "stored Work24 list due_date only; no additional detail request"
   },
   "detail_target_funnel": {
+    "M_definition": "공식 국가산단 매칭 + KICOX 매핑 + 최신 우선점검 업종 + 기준일 유효 조건을 모두 충족한 고신뢰 상세검증 대상",
+    "population_note": "창원국가산단 전체 채용공고가 아님",
     "A_kicox_mapped": 663,
     "B_official_complex_confirmed": 257,
     "C_latest_priority_industries": 166,
@@ -255,7 +258,8 @@
     }
   ],
   "diagnostic_join": {
-    "quarter": "2026Q2",
+    "calendar_reference_period": "2026Q2",
+    "axis_semantics": "Q1=state; Q2=scale; Q3=time (persistence, repetition, transition)",
     "industry_joined_postings": 663,
     "stage_counts": {
       "관찰": 268,
@@ -265,16 +269,34 @@
       "기계",
       "목재종이"
     ],
-    "q1_q2_states_attached": true,
-    "q3_state_available": false
+    "q1_state_attached": 663,
+    "q2_scale_attached": 663,
+    "q3_time_axis_attached": 663,
+    "q3_repeat_true": 15,
+    "q3_repeat_false": 648,
+    "q3_state_run_value_counts": {
+      "1.0": 114,
+      "2.0": 520,
+      "4.0": 22,
+      "3.0": 7
+    },
+    "q3_transition_value_counts": {
+      "S4 → S2": 101,
+      "S4 → S4": 395,
+      "S2 → S2": 147,
+      "S4 → S3": 13,
+      "S1 → S1": 7
+    },
+    "calendar_2026Q3_available_in_final_diagnostic": false
   },
   "detail_access_status_in_M": {
     "list_only": 140
   },
   "detail_request_gate": {
     "additional_requests_made": 0,
-    "additional_requests_authorized": false,
-    "reason": "Existing official terms reserve mass/special use for separate agreement; clarify KEIS coordination before making further automated detail requests. list_only means not requested, not a server denial."
+    "automatic_requests_deferred": true,
+    "scope_confirmation_status": "UNCLEAR",
+    "reason": "140건 자동 상세 요청이 대량이용에 해당하는지 명확하지 않아 한국고용정보원의 이용범위 확인 전 자동 요청을 보류. 수집 금지 또는 별도 계약 필요를 확정한 것이 아니다. list_only는 미요청 상태이며 서버 차단을 뜻하지 않는다."
   },
   "keyword_provenance": {
     "title_job_skill_source": "title_raw only",
@@ -453,7 +475,8 @@
       "P5": 268
     },
     "http_collection_authorized": false,
-    "note": "detail_priority is analysis ordering, not HTTP permission"
+    "request_scope_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
+    "note": "The 140-request use-scope status is unclear; HTTP requests are paused pending KEIS confirmation. This is not a finding that collection is prohibited or that a separate contract is required."
   },
   "artifacts": {
     "recruitment_layer": "data/processed/work24/work24_recruitment_layer_20260923.csv",
