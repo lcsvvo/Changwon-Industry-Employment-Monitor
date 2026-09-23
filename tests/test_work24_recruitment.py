@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import sys
+import csv
+import json
+from collections import Counter
 from pathlib import Path
 import datetime as dt
 
@@ -87,35 +90,71 @@ def test_all_industry_targets_are_existing_mappings_only():
     assert all(row["kicox_mapping_status"] == "MAPPED" for row in targets)
 
 
-def test_canonical_layer_validation_and_six_detail_reclassifications():
-    quality = recruitment.build_recruitment_layer("20260923")
+def test_canonical_layer_validation_and_m140_detail_contract():
+    quality_path = (ROOT / "data/processed/work24/"
+                    "work24_recruitment_layer_quality_20260923.json")
+    layer_path = (ROOT / "data/processed/work24/"
+                  "work24_recruitment_layer_20260923.csv")
+    quality = json.loads(quality_path.read_text(encoding="utf-8"))
+    with layer_path.open(encoding="utf-8-sig", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    target_rows = [row for row in rows
+                   if row["detailed_validation_target"].strip().lower() == "true"]
+    target_status_counts = Counter(row["detail_access_status"] for row in target_rows)
+
+    assert len(rows) == 2045
     assert quality["validation"]["list_total"] == 2045
     assert quality["validation"]["mapped_total"] == 663
     assert quality["validation"]["industry_count_sum"] == 663
     assert quality["validation"]["wanted_auth_no_duplicates"] == 0
-    assert quality["validation"]["detail_verified_total"] == 6
+    assert quality["validation"]["detail_verified_total"] == 141
     assert quality["validation"]["privacy_phone_hits"] == 0
     assert quality["validation"]["privacy_email_hits"] == 0
     assert quality["industrial_complex_gate"]["status_counts_mapped_only"] == {
         "CONFIRMED": 257, "POSSIBLE": 79, "UNKNOWN": 327, "NOT_MATCHED": 0}
     assert quality["job_relevance_gate"]["status_counts_mapped_only"] == {
-        "CORE_INDUSTRIAL": 4, "INDUSTRIAL_SUPPORT": 1,
-        "GENERAL_NONCORE": 1, "UNKNOWN": 657}
+        "UNKNOWN": 530, "CORE_INDUSTRIAL": 113,
+        "INDUSTRIAL_SUPPORT": 9, "GENERAL_NONCORE": 11}
     assert quality["priority_industries"] == ["기계", "목재종이"]
-    assert quality["detail_target_funnel"] == {
-        "A_kicox_mapped": 663,
-        "B_official_complex_confirmed": 257,
-        "C_latest_priority_industries": 166,
-        "D_currently_active": 141,
-        "E_final_detail_needed": 140,
-        "exact_natural_key_duplicate_groups": 0,
-        "exact_natural_key_rows_removed": 0,
-        "existing_detail_success_removed": 1,
-        "repost_candidate_not_auto_collapsed": 0,
+    funnel = quality["detail_target_funnel"]
+    assert [funnel[key] for key in (
+        "A_kicox_mapped", "B_official_complex_confirmed",
+        "C_latest_priority_industries", "D_currently_active",
+        "M_final_validation_targets",
+    )] == [663, 257, 166, 141, 140]
+    assert funnel["E_remaining_detail_needed"] == 5
+    assert funnel["existing_detail_success_removed"] == 1
+    assert funnel["exact_natural_key_duplicate_groups"] == 0
+    assert funnel["exact_natural_key_rows_removed"] == 0
+    assert funnel["repost_candidate_not_auto_collapsed"] == 0
+    assert len(target_rows) == 140
+    assert target_status_counts == {"success": 135, "parse_failed": 5}
+    assert quality["detail_collection_M"]["access_status_counts"] == {
+        "success": 135, "partial": 0, "list_only": 0, "expired": 0,
+        "removed": 0, "blocked": 0, "parse_failed": 5, "unknown": 0,
     }
-    assert quality["queue"]["detail_needed"] == 140
-    assert quality["queue"]["http_collection_authorized"] is False
+    assert quality["detail_collection_M"]["access_status_counts_sum_to_target"] is True
+    assert quality["queue"]["detail_needed"] == 5
+    assert quality["queue"]["request_scope_status"] == "UNCLEAR_PENDING_KEIS_CONFIRMATION"
     assert quality["validation"]["work24_detail_http_requests_this_run"] == 0
     assert quality["validation"]["official_factory_exact_complex_rows"] == 3553
     assert quality["industry_counts"]["기계"]["mapped_postings"] == 380
     assert quality["industry_counts"]["기계"]["official_confirmed_postings"] == 161
+    assert quality["raw_detail_provenance"]["unique_M_postings_with_attempts"] == 140
+    assert quality["raw_detail_provenance"]["latest_status_counts"]["success"] == 135
+    assert quality["raw_detail_provenance"]["latest_status_counts"]["parse_failed"] == 5
+    assert quality["raw_detail_provenance"]["source_filename"] == (
+        "work24_priority_industry_detail_20260923.csv")
+    assert quality["raw_detail_provenance"]["initial_requests_for_M"] == 140
+    assert quality["raw_detail_provenance"]["retry_requests_for_M"] == 10
+    assert quality["raw_detail_provenance"]["max_attempts_per_M_posting"] == 3
+    assert len(quality["raw_detail_provenance"]["sha256"]) == 64
+    assert quality["raw_detail_provenance"]["failed_posting_ids"] == [
+        "K131112609090004", "K131132609080016", "K131132609090043",
+        "K131132609100036", "K131132609140059",
+    ]
+    assert quality["raw_detail_provenance"]["collection_started_at_utc"]
+    assert quality["raw_detail_provenance"]["collection_last_attempt_at_utc"]
+    assert quality["canonical_generation_basis"]["saved_target_count"] == 140
+    assert quality["canonical_generation_basis"]["target_selection"] == (
+        "reuse saved M=140 IDs; no reselection")

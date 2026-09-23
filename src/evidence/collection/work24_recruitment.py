@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
+import hashlib
 import json
 import re
 from collections import Counter, defaultdict
@@ -688,6 +689,17 @@ def build_recruitment_layer(
     }
     serialized = "\n".join(str(value) for row in rows for value in row.values()
                            if value not in (None, ""))
+    validation_target_ids = {row["wanted_auth_no"] for row in validation_targets}
+    target_attempt_rows = [row for row in detail_rows
+                           if row.get("wanted_auth_no") in validation_target_ids]
+    target_attempt_counts = Counter(row["wanted_auth_no"] for row in target_attempt_rows)
+    target_attempt_times = sorted(
+        row["collected_at"] for row in target_attempt_rows if row.get("collected_at"))
+    target_failed_ids = sorted(
+        row["wanted_auth_no"] for row in validation_targets
+        if row["detail_access_status"] == "parse_failed")
+    raw_detail_bytes = detail_path.read_bytes() if detail_path.exists() else b""
+    raw_detail_sha256 = hashlib.sha256(raw_detail_bytes).hexdigest() if raw_detail_bytes else None
     official_meta = json.loads(official_meta_path.read_text(encoding="utf-8"))
     quality = {
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
@@ -737,6 +749,43 @@ def build_recruitment_layer(
             "privacy_email_hits_in_M": len(current.EMAIL_RE.findall("\n".join(
                 str(value) for row in validation_targets for value in row.values()
                 if value not in (None, "")))),
+        },
+        "raw_detail_provenance": {
+            "source_filename": detail_path.name,
+            "source_path": f"data/raw/work24/{detail_path.name}",
+            "sha256": raw_detail_sha256,
+            "size_bytes": len(raw_detail_bytes) if raw_detail_bytes else None,
+            "attempt_rows_for_M": len(target_attempt_rows),
+            "unique_M_postings_with_attempts": len(target_attempt_counts),
+            "initial_requests_for_M": len(target_attempt_counts),
+            "retry_requests_for_M": sum(max(count - 1, 0)
+                                         for count in target_attempt_counts.values()),
+            "max_attempts_per_M_posting": max(target_attempt_counts.values(), default=0),
+            "collection_started_at_utc": target_attempt_times[0] if target_attempt_times else None,
+            "collection_last_attempt_at_utc": target_attempt_times[-1] if target_attempt_times else None,
+            "latest_status_counts": {
+                status: detail_status_counts.get(status, 0) for status in access_status_order
+            },
+            "failed_posting_ids": target_failed_ids,
+            "request_policy": {
+                "sequential_concurrency": 1,
+                "minimum_delay_seconds": 3,
+                "initial_batching": "10-posting pilot, then remaining 130",
+                "retry_limit": "initial request plus at most 2 retries for retryable failures",
+                "403_429": "stop without retry",
+                "raw_html_saved": False,
+            },
+        },
+        "canonical_generation_basis": {
+            "output": output_path.relative_to(ROOT).as_posix(),
+            "as_of_date": as_of.isoformat(),
+            "list_source": base_path.relative_to(ROOT).as_posix(),
+            "raw_detail_source": f"data/raw/work24/{detail_path.name}",
+            "saved_target_queue": queue_path.relative_to(ROOT).as_posix(),
+            "saved_target_count": len(saved_target_ids),
+            "target_selection": "reuse saved M=140 IDs; no reselection",
+            "diagnostic_join": "existing 2026Q2 saved diagnostics; no Q1/Q2/Q3 recomputation",
+            "mapping_basis": "existing company-master KSIC/KICOX mapping and official FactoryOn snapshot",
         },
         "industrial_complex_gate": {
             "status_counts_mapped_only": {name: complex_counts.get(name, 0)
@@ -847,8 +896,8 @@ def build_recruitment_layer(
         "detail_access_status_in_M": dict(Counter(
             row["detail_access_status"] for row in validation_targets)),
         "detail_request_gate": {
-            "requests_made_for_M": sum(
-                bool(detail_by_id.get(row["wanted_auth_no"])) for row in validation_targets),
+            "requests_made_for_M": len(target_attempt_rows),
+            "unique_postings_requested_in_M": len(target_attempt_counts),
             "scope_confirmation_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
             "collection_authority": "explicit_user_request_for_saved_M_140_queue",
             "reason": ("저장된 M=140 queue에 대한 사용자 명시 요청에 따라 공개 상세를 "

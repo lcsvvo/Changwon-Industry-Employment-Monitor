@@ -160,7 +160,7 @@ def test_small_validation_cap_is_shared_across_industry_runs(tmp_path, monkeypat
             "error": "expired",
         })
     monkeypatch.setattr(current, "current_access_gate", lambda client: {"checked": True})
-    with pytest.raises(current.Work24AccessStop, match="lifetime cap"):
+    with pytest.raises(current.Work24AccessStop, match="sample safety cap"):
         current.collect_priority_details(
             [{"wanted_auth_no": "NEW", "kicox_industry": "전기전자"}],
             snapshot,
