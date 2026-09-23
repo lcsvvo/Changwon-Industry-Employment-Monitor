@@ -1,10 +1,11 @@
 {
-  "generated_at": "2026-09-23T07:52:21+00:00",
+  "generated_at": "2026-09-23T11:10:05+00:00",
   "inputs": {
-    "list_dataset": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_analysis_ready.csv",
-    "detail_snapshot": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\raw\\work24\\work24_priority_industry_detail_20260923.csv",
-    "official_factory_snapshot": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\raw\\kicox\\datagokr\\kicox_factory_changwon_national_20260923.csv",
-    "official_factory_metadata": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\raw\\kicox\\datagokr\\_metadata\\kicox_factory_changwon_national_20260923.json"
+    "list_dataset": "data/processed/work24/work24_analysis_ready.csv",
+    "detail_snapshot": "data/raw/work24/work24_priority_industry_detail_20260923.csv",
+    "official_factory_snapshot": "data/raw/kicox/datagokr/kicox_factory_changwon_national_20260923.csv",
+    "official_factory_metadata": "data/raw/kicox/datagokr/_metadata/kicox_factory_changwon_national_20260923.json",
+    "shared_raw_root_used": true
   },
   "priority_industries": [
     "기계",
@@ -180,11 +181,266 @@
     "B_official_complex_confirmed": 257,
     "C_latest_priority_industries": 166,
     "D_currently_active": 141,
-    "E_final_detail_needed": 140,
+    "M_final_validation_targets_requiring_detail_check": 140,
+    "E_remaining_detail_needed": 140,
+    "already_detail_verified_excluded_from_M": 1,
     "exact_natural_key_duplicate_groups": 0,
     "exact_natural_key_rows_removed": 0,
     "existing_detail_success_removed": 1,
     "repost_candidate_not_auto_collapsed": 0
+  },
+  "data_funnel": [
+    {
+      "stage": "all_changwon_list_postings",
+      "start": 2045,
+      "remain": 2045,
+      "excluded": 0,
+      "reason": "기존 5개 구 processed 목록"
+    },
+    {
+      "stage": "company_identifiable",
+      "start": 2045,
+      "remain": 813,
+      "excluded": 1232,
+      "reason": "회사 마스터 MATCH/MULTI 외 NO_MATCH"
+    },
+    {
+      "stage": "exact_ksic",
+      "start": 813,
+      "remain": 679,
+      "excluded": 134,
+      "reason": "사업체 마스터 COMPANY_MASTER_EXACT만 포함"
+    },
+    {
+      "stage": "kicox_industry_mapped",
+      "start": 679,
+      "remain": 663,
+      "excluded": 16,
+      "reason": "KSIC→KICOX 공식 crosswalk 미연결"
+    },
+    {
+      "stage": "official_national_complex_confirmed",
+      "start": 663,
+      "remain": 257,
+      "excluded": 406,
+      "reason": "POSSIBLE 79, UNKNOWN 327; 공식 일치 근거만 CONFIRMED"
+    },
+    {
+      "stage": "saved_diagnostic_join_2026Q2",
+      "start": 663,
+      "remain": 663,
+      "excluded": 0,
+      "reason": "기존 진단 stage를 산업코드로 조인; 판정 재계산 없음"
+    },
+    {
+      "stage": "latest_priority_industries",
+      "start": 257,
+      "remain": 166,
+      "excluded": 91,
+      "reason": "최신 저장 진단의 기계·목재종이만"
+    },
+    {
+      "stage": "active_as_of_snapshot",
+      "start": 166,
+      "remain": 141,
+      "excluded": 25,
+      "reason": "목록 마감일이 2026-09-23 이후인 공고"
+    },
+    {
+      "stage": "final_validation_targets_M",
+      "start": 141,
+      "remain": 140,
+      "excluded": 1,
+      "reason": "이미 상세검증된 1건 제외; 중복 0건, 재공고 후보 자동병합 없음"
+    }
+  ],
+  "diagnostic_join": {
+    "quarter": "2026Q2",
+    "industry_joined_postings": 663,
+    "stage_counts": {
+      "관찰": 268,
+      "우선점검": 395
+    },
+    "priority_industries": [
+      "기계",
+      "목재종이"
+    ],
+    "q1_q2_states_attached": true,
+    "q3_state_available": false
+  },
+  "detail_access_status_in_M": {
+    "list_only": 140
+  },
+  "detail_request_gate": {
+    "additional_requests_made": 0,
+    "additional_requests_authorized": false,
+    "reason": "Existing official terms reserve mass/special use for separate agreement; clarify KEIS coordination before making further automated detail requests. list_only means not requested, not a server denial."
+  },
+  "keyword_provenance": {
+    "title_job_skill_source": "title_raw only",
+    "occupation_job_source": "list occupation only; null when absent",
+    "detail_job_skill_source": "verified detail occupation_raw + job_description_clean only",
+    "detail_qualification_source": "verified detail certificate_raw only",
+    "list_cert_raw_semantics": "[인증] listing marker; not qualification text",
+    "detail_sample_size": 6,
+    "title_job_keyword_counts": {
+      "생산": 269,
+      "가공": 185,
+      "품질·검사": 156,
+      "사무": 119,
+      "물류·납품": 95,
+      "조립": 71,
+      "설계": 61,
+      "자재": 59,
+      "회계": 57,
+      "설비·정비": 50,
+      "용접": 32,
+      "홍보·마케팅": 15
+    },
+    "title_skill_keyword_counts": {
+      "MCT": 99,
+      "CNC": 82,
+      "전기": 58,
+      "선반": 57,
+      "용접": 27,
+      "지게차": 23,
+      "프레스": 17,
+      "CAD/CAM": 10,
+      "밀링": 9,
+      "도면": 8,
+      "PLC": 6,
+      "H-MCT": 2
+    },
+    "occupation_job_keyword_counts": {}
+  },
+  "detail_sample_observations_by_industry": {
+    "음식료": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "섬유의복": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "목재종이": {
+      "verified_postings": 3,
+      "job_relevance_classes": {
+        "GENERAL_NONCORE": 1,
+        "INDUSTRIAL_SUPPORT": 1,
+        "CORE_INDUSTRIAL": 1
+      },
+      "detail_job_keywords": {
+        "물류·납품": 1,
+        "생산": 1,
+        "홍보·마케팅": 1
+      },
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {
+        "자동차운전면허": 1,
+        "자동차운전면허1종보통": 1
+      },
+      "career_observed": 3,
+      "wage_observed": 3,
+      "recruitment_count_observed": 3
+    },
+    "석유화학": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "비금속": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "철강": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "기계": {
+      "verified_postings": 3,
+      "job_relevance_classes": {
+        "CORE_INDUSTRIAL": 3
+      },
+      "detail_job_keywords": {
+        "가공": 2,
+        "생산": 2,
+        "품질·검사": 2,
+        "물류·납품": 1,
+        "설계": 1,
+        "용접": 1
+      },
+      "detail_skill_keywords": {
+        "CNC": 1,
+        "H-MCT": 1,
+        "MCT": 1,
+        "도면": 1,
+        "선반": 1,
+        "용접": 1
+      },
+      "detail_qualification_keywords": {},
+      "career_observed": 3,
+      "wage_observed": 3,
+      "recruitment_count_observed": 3
+    },
+    "전기전자": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "운송장비": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "기타": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    }
   },
   "queue": {
     "rows": 663,
@@ -200,8 +456,8 @@
     "note": "detail_priority is analysis ordering, not HTTP permission"
   },
   "artifacts": {
-    "recruitment_layer": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_recruitment_layer_20260923.csv",
-    "detail_queue": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_detail_collection_queue_20260923.csv",
-    "quality": "C:\\Users\\jiwoo\\Desktop\\GitHub\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_recruitment_layer_quality_20260923.json"
+    "recruitment_layer": "data/processed/work24/work24_recruitment_layer_20260923.csv",
+    "detail_queue": "data/processed/work24/work24_detail_collection_queue_20260923.csv",
+    "quality": "data/processed/work24/work24_recruitment_layer_quality_20260923.json"
   }
 }
