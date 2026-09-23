@@ -27,6 +27,9 @@ from app.view_models import (  # noqa: E402
     quick_prompts, report_download, rule_evidence_rows, session_scope, stage_code, stage_counts,
     with_session_context,
 )
+from copilot import Copilot  # noqa: E402
+from copilot.audit import JsonlAuditSink, audit_path_for  # noqa: E402
+from copilot.contracts import SOURCE_LABEL as ANSWER_SOURCE_LABEL  # noqa: E402
 from policy.decision_support import DecisionSupportService  # noqa: E402
 from policy.rag import PolicyRAG, rebuild_policy_index  # noqa: E402
 from policy.work24_evidence import register_work24_snapshot  # noqa: E402
@@ -192,6 +195,10 @@ except M.DatabaseScopeError as e:
 svc = service(database_url, RT.demo)
 policy = PolicyRAG(svc.Session)
 decision_support = DecisionSupportService(svc.Session, snap, svc)
+# Copilot = 기존 backend를 감싸는 계층(등록 진단 → 공식 RAG → 외부 공식 도메인 → 일반 LLM). provider는 환경변수로만 설정.
+copilot = Copilot.from_env(decision_support, audit=JsonlAuditSink(audit_path_for(database_url)))
+SOURCE_BADGE_COLOR = {"INTERNAL_DIAGNOSTIC": "blue", "INTERNAL_RAG": "green", "EXTERNAL_WEB": "orange",
+                      "GENERAL_LLM": "violet", "SYSTEM": "gray"}
 
 
 # ------------------------------------------------------------------ 공통 조각
@@ -525,7 +532,7 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
             history.clear()
             st.rerun()
     st.html(f'<div class="dx-copilot-sub">컨텍스트 · <b>{html.escape(industry)}</b> · {html.escape(quarter)} · '
-            f'{html.escape(stage or "판정 없음")} — 진단·판정 이력·Work24·현장입력·정책 RAG를 Python 객체로 직접 전달</div>')
+            f'{html.escape(stage or "판정 없음")} — 답변마다 근거 수준(등록 진단·공식문서·외부·일반 AI)을 표시</div>')
     other_options = ["(선택 안 함)"] + [i for i in industries if i != industry]
     other = st.selectbox("비교 업종(선택)", other_options, key=f"cmp::{scope}")
     quick = quick_prompts(stage)
@@ -541,11 +548,16 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
             st.caption(f"{industry} · {quarter} 진단·현장확인·정책 연계에 대해 무엇이든 물어보세요.")
         for message in history:
             with st.chat_message(message["role"]):
+                if message["role"] == "assistant" and message.get("source_type"):
+                    st.badge(ANSWER_SOURCE_LABEL.get(message["source_type"], message["source_type"]),
+                             color=SOURCE_BADGE_COLOR.get(message["source_type"], "gray"))
                 st.write(message["content"])
-                for src in message.get("policy_sources") or []:
-                    if src.get("source_url"):
-                        st.caption(f"근거: {src.get('document_id', '')} · {src.get('title', '')}")
-                        st.markdown(f"[원문 보기]({src['source_url']})")
+                for cite in message.get("citations") or []:
+                    detail = " · ".join(x for x in (cite.get("institution"), cite.get("locator"),
+                                                     f"확인 {cite['checked_at']}" if cite.get("checked_at") else None) if x)
+                    st.caption(f"근거: [{cite['title']}]({cite['url']})" + (f" · {detail}" if detail else ""))
+                if (message.get("meta") or {}).get("search_entry_point"):
+                    st.html(message["meta"]["search_entry_point"])  # Google 검색 제안(grounding 사용 시 표시)
                 if message.get("caveats"):
                     with st.expander("근거 한계"):
                         for caveat in message["caveats"]:
@@ -553,12 +565,14 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
     typed = st.chat_input("업종 진단 및 정책 연계에 대해 질문하세요", key=f"chat::{scope}")
     prompt = selected or typed
     if prompt:
-        result = decision_support.answer(prompt, quarter, industry, comparison_industry=comparison_industry,
-                                         field_context=field_ctx)
+        # 세션 입력(field_ctx)은 등록 진단 backend에만 쓰이며 외부 provider로 보내지 않는다(Copilot 계약)
+        result = copilot.ask(prompt, quarter, industry, comparison_industry=comparison_industry,
+                             field_context=field_ctx)
         history.extend([
             {"role": "user", "content": prompt},
             {"role": "assistant", "content": result["answer"], "caveats": result.get("caveats", []),
-             "policy_sources": result.get("policy_sources", [])},
+             "source_type": result["source_type"], "citations": result.get("citations", []),
+             "route": result["route"], "intent": result["intent"], "meta": result.get("meta") or {}},
         ])
         st.rerun()
 
