@@ -17,7 +17,10 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # 화면 모듈(app.*): 코드가 바뀐 뒤(예: Streamlit Cloud에 새로 push) 서버가 새 main.py를 다시 실행하면서도 이미 import된
-# 옛 모듈을 그대로 쓰면, 새 이름을 찾지 못해 ImportError가 난다. 파일이 바뀐 경우에만 의존 순서대로 다시 읽는다.
+# 옛 모듈을 그대로 쓰면, 새 이름·새 인자를 찾지 못해 ImportError/TypeError가 난다.
+# 옛 모듈은 sys.modules에도, 'app' 패키지 속성(app.ui 등)에도 남을 수 있다 — Streamlit이 sys.modules에서만 지워도
+# 'from app import ui'는 패키지 속성의 옛 모듈을 돌려준다. 그래서 둘 다 확인하고, 하나라도 파일보다 오래됐으면
+# 세 모듈을 모두 비워 아래 import 문이 의존 순서대로 새로 읽게 한다.
 UI_MODULES = ("app.view_models", "app.ui", "app.team_copilot")
 
 
@@ -29,12 +32,16 @@ def _ui_module_mtime(module) -> float | None:
 
 
 def _refresh_ui_modules():
-    import importlib
-    loaded = [sys.modules.get(name) for name in UI_MODULES]
-    if any(m is not None and getattr(m, "_dx_mtime", None) != _ui_module_mtime(m) for m in loaded):
-        for m in loaded:
-            if m is not None:
-                importlib.reload(m)
+    pkg = sys.modules.get("app")
+    loaded = []
+    for name in UI_MODULES:
+        loaded += [sys.modules.get(name), getattr(pkg, name.rsplit(".", 1)[1], None) if pkg else None]
+    loaded = [m for m in loaded if m is not None]
+    if any(getattr(m, "_dx_mtime", None) != _ui_module_mtime(m) for m in loaded):
+        for name in UI_MODULES:
+            sys.modules.pop(name, None)
+            if pkg is not None and hasattr(pkg, name.rsplit(".", 1)[1]):
+                delattr(pkg, name.rsplit(".", 1)[1])
 
 
 def _stamp_ui_modules():
