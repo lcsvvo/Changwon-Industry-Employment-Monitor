@@ -217,10 +217,10 @@ body, [data-testid="stAppViewContainer"] { background: var(--dx-bg); }
 /* 1600px 이하: 좌·우 패널을 조금 좁혀 중앙 보고서 폭 확보 */
 @media (max-width: 1600px) {
   .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-leftpanel) {
-    flex: 0 0 340px !important; width: 340px !important; max-width: 340px !important;  /* = 행정 AI 비서 */
+    flex: 0 0 310px !important; width: 310px !important; max-width: 310px !important;  /* = 행정 AI 비서 */
   }
   .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilot) {
-    flex: 0 0 340px !important; width: 340px !important; max-width: 340px !important;
+    flex: 0 0 310px !important; width: 310px !important; max-width: 310px !important;  /* = 왼쪽 패널 */
   }
 }
 
@@ -649,10 +649,10 @@ details.dx-more div { padding: 0.12rem 0 0 0.4rem; line-height: 1.45; }
 /* 1280px 이하: 여전히 한 줄 유지 — 좌·우 패널을 1600px보다 더 좁혀 중앙 폭을 확보한다(쌓지 않음) */
 @media (max-width: 1280px) {
   .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-leftpanel) {
-    flex: 0 0 320px !important; width: 320px !important; max-width: 320px !important;  /* = 행정 AI 비서 */
+    flex: 0 0 290px !important; width: 290px !important; max-width: 290px !important;  /* = 행정 AI 비서 */
   }
   .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilot) {
-    flex: 0 0 320px !important; width: 320px !important; max-width: 320px !important;
+    flex: 0 0 290px !important; width: 290px !important; max-width: 290px !important;  /* = 왼쪽 패널 */
   }
 }
 /* 900px 미만에서만 세로로 쌓는다 */

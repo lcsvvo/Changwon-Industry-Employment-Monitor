@@ -576,7 +576,7 @@ def copilot_panel(render):
         with st.container(key="copilotrail", width=64):
             st.button("‹ AI", key="copilot_expand", help="행정 AI 비서 펼치기", on_click=set_copilot, args=(False,))
     else:
-        with st.container(key="copilot", width=380):
+        with st.container(key="copilot", width=345):  # 좌·우 같은 너비(가운데 폭은 그대로)
             render()
 
 
@@ -1148,7 +1148,7 @@ def page_diagnosis():
                       if base else None)
 
     with st.container(key="shell", horizontal=True, gap="small"):
-        with st.container(key="leftpanel", width=380):  # 행정 AI 비서(copilot)와 같은 너비
+        with st.container(key="leftpanel", width=345):  # 행정 AI 비서(copilot)와 같은 너비
             left_panel(industries, quarters, latest_quarter, ind, q, rec, report_payload)
         with st.container(key="center", width="stretch"):
             if rec is None:
@@ -1850,7 +1850,7 @@ def inspection_copilot(quarter: str, view: str):
 def page_inspection():
     ensure_dx_defaults()
     with st.container(key="shell", horizontal=True, gap="small"):
-        with st.container(key="leftpanel", width=380):  # 행정 AI 비서(copilot)와 같은 너비
+        with st.container(key="leftpanel", width=345):  # 행정 AI 비서(copilot)와 같은 너비
             quarter = inspection_left_panel()
         with st.container(key="center", width="stretch"):
             st.html(ui.page_header_html("점검 관리", "점검 후보 → 검토·개설 → 현장 확인 → 지원 필요 기능 → 결정·인계 → 재점검"))
@@ -1979,7 +1979,7 @@ def page_policy():
     selected = None
 
     with st.container(key="shell", horizontal=True, gap="small"):
-        with st.container(key="leftpanel", width=380):  # 행정 AI 비서(copilot)와 같은 너비
+        with st.container(key="leftpanel", width=345):  # 행정 AI 비서(copilot)와 같은 너비
             st.markdown("**현재 선택**")
             # policy_industry·policy_quarter는 dx_industry·dx_quarter의 거울 위젯 — 매 실행 공용 선택값으로 맞춘 뒤 만든다.
             st.session_state.policy_industry = ind
