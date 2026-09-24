@@ -725,12 +725,13 @@ details.dx-prog-more[open] { flex-basis: 100%; order: 2; }
   border-radius: .45rem; padding: .18rem .7rem; background: #fff; }
 .dx-prog-empty { font-size: .82rem; color: var(--dx-muted); padding: .6rem 0; }
 
-.dx-biz { margin: 0; padding: 0; }
-.dx-biz-item { padding: .45rem 0; border-top: 1px solid #F1F5F9; }
-.dx-biz-item:first-child { border-top: none; }
-.dx-biz-title { font-size: .86rem; font-weight: 600; color: var(--dx-text); }
-.dx-biz-meta { font-size: .76rem; color: var(--dx-muted); display: inline; }
-.dx-biz-item .dx-link { font-size: .76rem; }
+/* 현재 모집 중인 관련 공고 — 지원제도 카드와 같은 모양. 출처(기업마당)는 작은 메타데이터로만 */
+.dx-notice-badges { display: flex; gap: .3rem; flex-wrap: wrap; }
+.dx-notice-src { font-size: .72rem; color: var(--dx-muted); background: #F1F5F9; border-radius: 999px; padding: .02rem .45rem; }
+.dx-notice-why { margin-top: .5rem; font-size: .78rem; }
+.dx-notice-why-h { color: var(--dx-muted); font-size: .72rem; font-weight: 650; }
+.dx-notice-why ul { margin: .15rem 0 0 1rem; padding: 0; }
+.dx-notice-why li { font-size: .78rem !important; line-height: 1.45; color: var(--dx-text-2); margin: 0; }
 
 .dx-team-intro { font-size: .82rem; color: var(--dx-text-2); background: var(--dx-violet-bg); border-left: 3px solid #C4B5FD;
   border-radius: 6px; padding: .55rem .75rem; margin-bottom: var(--dx-space-sm); line-height: 1.5; }

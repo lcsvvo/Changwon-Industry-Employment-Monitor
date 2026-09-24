@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import html
+import logging
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -56,8 +57,8 @@ from app.view_models import (  # noqa: E402
     COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
     TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, chip_label, clarification, comparison_view,
     copilot_suggestions, data_quality_flags, evidence_level, evidence_level_value, field_context, filter_official_cards,
-    function_card_counts, function_name, function_ui_label, next_quarters, quarter_label, quarter_text,
-    recruitment_observations,
+    collect_related_notices, function_card_counts, function_name, function_ui_label, next_quarters, notice_reasons,
+    quarter_label, quarter_text, recruitment_observations,
     report_download,
     rule_evidence_rows, session_scope,
     signal_explanation, stage_code, stage_counts, stage_display, structure_answer, supporting_fact_items,
@@ -667,7 +668,7 @@ def assistant_message_view(message: dict, scope: str, is_last: bool) -> str | No
         st.caption(" ".join(used))
     biz = (message.get("meta") or {}).get("bizinfo")
     if biz and biz.get("status") != "UNAVAILABLE":
-        st.caption("최신 기업지원 공고 · 업종 적합성 및 신청자격은 추가 확인 필요")
+        st.caption("모집 중 공고(출처 · 기업마당) · 지원대상·신청자격은 공고문과 담당기관 확인 필요")
     clarify = message.get("clarify")
     view = None
     if message.get("compare"):
@@ -709,8 +710,8 @@ def provider_usage_marks(message: dict) -> list[str]:
         marks.append(f":violet-badge[{name} 문장 생성 사용]")
     biz = (message.get("meta") or {}).get("bizinfo")
     if biz:
-        marks.append({"OK": ":green-badge[기업마당 최신 공고 검색]",
-                      "NO_MATCH": ":gray-badge[기업마당 최신 공고 검색 · 접수 중 공고 없음]"}.get(
+        marks.append({"OK": ":green-badge[모집 중 공고 조회 · 출처 기업마당]",
+                      "NO_MATCH": ":gray-badge[모집 중 공고 조회 · 접수 중 공고 없음]"}.get(
                           biz.get("status"), ":orange-badge[기업마당 조회 실패]"))
     return marks
 
@@ -1110,7 +1111,7 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         st.html(ui.support_summary_html(t.get("first_owner"), report_payload.get("support_functions") or [],
                                         report_payload.get("requirement_cards") or [], title=None,
                                         label_of=fn_name))
-        st.button("관련 지원사업 자세히 보기 →", key="dx_to_policy", type="tertiary", on_click=go,
+        st.button("관련 지원제도 자세히 보기 →", key="dx_to_policy", type="tertiary", on_click=go,
                  args=("정책·지원 연계", ind, q))
 
     case_status_bar(ind, q, t)
@@ -1866,32 +1867,41 @@ def page_inspection():
 
 
 # ------------------------------------------------------------------ 정책·지원 연계
+NOTICE_LIMIT = 5
+NOTICE_LOG = logging.getLogger("app.policy_notices")
+
+
 @st.cache_data(ttl=1800, show_spinner=False)
-def bizinfo_latest(day: str, _api) -> dict:
-    """기업마당 최신 공고(접수 중, 지역 필터는 provider 기본값). 업종어는 넘기지 않는다 — 업종 적합성을 판정하지 않음."""
-    try:
-        result = _api.search("최신 기업지원 공고", terms=[], today=date.fromisoformat(day), max_results=5)
-    except Exception as e:  # 외부 API 장애가 화면을 멈추지 않게
-        return {"status": "UNAVAILABLE", "items": [], "error": type(e).__name__}
-    status = "OK" if result.ok else ("NO_MATCH" if result.error in ("NO_MATCHING_OPEN_ITEMS", "EMPTY") else "UNAVAILABLE")
-    return {"status": status, "items": (result.meta or {}).get("items") or [], "error": result.error}
+def related_notices(day: str, industry: str, fn_tags: tuple[str, ...], _api) -> dict:
+    """현재 모집 중인 관련 공고(출처: 기업마당). 접수 중(OPEN)·다른 지역 제외는 provider 규칙 그대로.
+
+    선택 업종의 지원 기능별 표현(NOTICE_TERMS)이나 업종명이 공고에 있는 것만 '관련 가능 공고'로 모으고
+    rank_notices()로 정렬한다. 지원대상 적합성·신청 가능 여부는 판정하지 않는다.
+    """
+    try:  # provider가 하루 조회분을 재사용하므로 기능별 검색이 API를 여러 번 부르지 않는다
+        items = collect_related_notices(_api, industry, fn_tags, date.fromisoformat(day))
+    except Exception as e:  # 외부 API 장애는 화면을 멈추지 않고 로그로만 남긴다(키·URL은 기록하지 않음)
+        NOTICE_LOG.warning("related notices unavailable: %s", e if isinstance(e, RuntimeError) else type(e).__name__)
+        return {"status": "UNAVAILABLE", "items": [], "checked_at": day}
+    return {"status": "OK", "items": items[:NOTICE_LIMIT], "checked_at": day}
 
 
-def bizinfo_view():
-    section("기업마당 최신 공고", "최신 기업지원 공고 · 업종 적합성 및 신청자격은 추가 확인 필요")
+def notices_view(industry: str, fn_tags: list[str]) -> None:
+    """[3] 현재 모집 중인 관련 공고. 조회가 설정되지 않았거나 관련 공고가 0건이면 섹션을 그리지 않는다(사유는 로그)."""
     api = next((a for a in copilot.official_apis if getattr(a, "available", False)), None)
     if api is None:
-        st.caption("기업마당 공고 조회가 설정되지 않았습니다(설정·정보 → AI 연결 설정).")
-    else:
-        with st.spinner("기업마당 공고를 불러오는 중입니다."):
-            biz = bizinfo_latest(date.today().isoformat(), api)
-        if biz["items"]:
-            st.html(ui.bizinfo_list_html(biz["items"][:5]))
-        elif biz["status"] == "NO_MATCH":
-            st.caption("현재 접수 중인 공고를 찾지 못했습니다.")
-        else:
-            st.caption("기업마당 공고를 지금 불러오지 못했습니다. 잠시 후 다시 확인하세요.")
-    st.caption("행정 AI 비서에 \"현재 신청 가능한 지원사업은?\"으로 물으면 같은 기업마당 조회로 답합니다.")
+        NOTICE_LOG.info("related notices hidden: official notice API not configured")
+        return
+    with st.spinner("현재 모집 중인 공고를 확인하는 중입니다."):
+        notices = related_notices(date.today().isoformat(), industry, tuple(fn_tags), api)
+    if not notices["items"]:
+        NOTICE_LOG.info("related notices hidden: status=%s, no related open notice", notices["status"])
+        return
+    with st.container(key="dxsec-policy-biz"):
+        section("현재 모집 중인 관련 공고", "선택한 업종·진단 결과와 관련 가능한, 지금 접수 중인 공고입니다.")
+        st.html(ui.notice_cards_html(notices["items"], lambda tag: function_ui_label(tag, C.label(tag)), notice_reasons))
+        st.caption(f"출처 · 기업마당 공고({notices['checked_at']} 확인) · 공고 표현이 일치한 것만 표시하며 지원대상·신청자격은 "
+                   "공고문과 담당기관에서 확인해야 합니다. 더 궁금한 점은 행정 AI 비서에 물어보세요.")
 
 
 def policy_search_view() -> str | None:
@@ -2009,7 +2019,8 @@ def page_policy():
                     selected = None if pick in (None, "*") else pick
                     intake = st.session_state.get(f"policy_intake::{ind}::{q}") or "*"
                     shown = filter_official_cards(all_cards, selected, None if intake == "*" else intake)
-                    st.html(ui.section_count_html("공식 지원사업", f"관련 사업 {len(shown)}건"))
+                    st.html(ui.section_count_html("연결 가능한 지원제도", f"관련 제도 {len(shown)}건"))
+                    st.caption("현재 진단 결과로 검토할 수 있는 기존 공식 지원제도입니다. 지원 여부는 담당기관 확인이 필요합니다.")
                     with st.container(key="proghead"):
                         st.pills("진행 상태", ("*", *INTAKE_UI), selection_mode="single", default="*", required=True,
                                  format_func=lambda k: "진행 상태 전체" if k == "*" else INTAKE_UI[k],
@@ -2017,7 +2028,7 @@ def page_policy():
                     fn_label = lambda tag: function_ui_label(tag, C.label(tag) if tag else None)  # noqa: E731
                     st.html(ui.official_programs_html(shown[:4], fn_label))
                     if len(shown) > 4:
-                        with st.expander(f"더 많은 지원사업 보기 ({len(shown) - 4}건)"):
+                        with st.expander(f"더 많은 지원제도 보기 ({len(shown) - 4}건)"):
                             st.html(ui.official_programs_html(shown[4:], fn_label))
                 else:
                     st.html(ui.team_intro_html())
@@ -2030,9 +2041,9 @@ def page_policy():
                     st.html(ui.team_cards_html(shown, team_kpis, team_principles))
 
             if tab == tabs[0]:
-                # 시각 위계: 공식 지원사업 > 기업마당 최신 공고 > 참고 기관·검토 경로 > 직접 검색 도구(관리자)
-                with st.container(key="dxsec-policy-biz"):
-                    bizinfo_view()
+                # 흐름: [1] 현재 진단 요약 → [2] 연결 가능한 지원제도(위) → [3] 현재 모집 중인 관련 공고
+                #       → [4] 참고 기관·검토 경로(+ 관리자용 공식 근거 직접 검색)
+                notices_view(ind, fn_tags)
                 with st.container(key="dxsec-policy-more"):
                     with st.expander("참고 기관 · 검토 경로"):
                         institutions = list(snap.reference.get("institution_routing_map") or [])

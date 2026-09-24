@@ -523,7 +523,7 @@ def comparison_html(view: dict) -> str:
 
 # ------------------------------------------------------------------ 공모전 팀 제안(정본 자료)
 # ------------------------------------------------------------------ 정책·지원 연계(공식 지원 연계 / 공모전 팀 제안)
-POLICY_TABS = (("공식 지원 연계", "현재 업종·분기와 연결 가능한 기존 지원사업", ""),
+POLICY_TABS = (("공식 지원 연계", "검토 가능한 지원제도·모집 중 공고·담당기관", ""),
                ("공모전 팀 제안", "분석 기반 정책 개선·신규 제안", "전 업종 공통"))
 
 
@@ -573,22 +573,38 @@ def official_programs_html(cards: list[dict], fn_label) -> str:
             f'{_link(c.get("source_url"), "공식 근거").replace("dx-link", "dx-link dx-prog-src")}'
             '</div></div>')
     if not cards:
-        return '<div class="dx-prog-empty">조건에 맞는 등록 공식 지원사업이 없습니다.</div>'
+        return '<div class="dx-prog-empty">조건에 맞는 등록 지원제도가 없습니다.</div>'
     return f'<div class="dx-prog-grid">{"".join(card(c) for c in cards)}</div>'
 
 
-def bizinfo_list_html(items: list[dict]) -> str:
-    """기업마당 최신 공고(공고명·기관·접수기간/상태·공고 보기만). 업종 적합성·신청자격은 표시하지 않는다."""
-    status = {"OPEN": "접수 중"}
-    rows = "".join(
-        '<div class="dx-biz-item">'
-        f'<div class="dx-biz-title">{_e(i.get("title"))}</div>'
-        f'<div class="dx-biz-meta">{_e(i.get("agency") or i.get("executor"))} · '
-        f'{_e(i.get("period_text") or " ~ ".join(x for x in (i.get("start"), i.get("end")) if x))} · '
-        f'{_e(status.get(i.get("recruitment_status"), i.get("recruitment_status")))}</div>'
-        f'{_link(i.get("detail_url"), "공고 보기")}</div>'
-        for i in items)
-    return f'<div class="dx-biz">{rows}</div>'
+def notice_cards_html(items: list[dict], fn_label, reasons_of) -> str:
+    """현재 모집 중인 관련 공고 카드(공식 지원제도 카드와 같은 모양, 출처는 작은 메타데이터로만).
+
+    fn_label(tag) = 지원 기능 표시명, reasons_of(item) = 연결 사유 목록(공고 표현이 실제로 일치한 것만).
+    지원대상 적합성·신청 가능 여부는 판정하지 않는다 — 항상 '지원대상 추가 확인 필요'.
+    """
+    def card(i: dict) -> str:
+        badges = [fn_label(t) for t in (i.get("function_tags") or [])][:2] or ([i["category"].split(" > ")[0]]
+                                                                               if i.get("category") else [])
+        badge_html = "".join(f'<span class="dx-prog-fn">{_e(b)}</span>' for b in badges)
+        agency = i.get("agency") or i.get("executor")
+        period = " ~ ".join(x for x in (i.get("start"), i.get("end")) if x) or i.get("period_text")
+        reasons = "".join(f"<li>{_e(r)}</li>" for r in reasons_of(i))
+        return (
+            '<div class="dx-prog dx-notice">'
+            f'<div class="dx-prog-top"><span class="dx-notice-badges">{badge_html}</span>'
+            '<span class="dx-prog-status is-open">접수 중</span></div>'
+            f'<div class="dx-prog-title">{_e(i.get("title"))}</div>'
+            f'<div class="dx-prog-inst">{_e(agency)} · <span class="dx-notice-src">출처 · 기업마당</span></div>'
+            '<dl class="dx-prog-rows">'
+            f'<dt>접수기간</dt><dd>{_e(period)}</dd>'
+            f'<dt>지원대상</dt><dd>{_e(i.get("target") or "공고문 확인")} · <span class="dx-muted">추가 확인 필요</span></dd>'
+            '</dl>'
+            + (f'<div class="dx-notice-why"><div class="dx-notice-why-h">현재 진단과의 연결 사유</div><ul>{reasons}</ul></div>'
+               if reasons else "")
+            + f'<div class="dx-prog-actions">{_link(i.get("detail_url"), "공고 보기").replace("dx-link", "dx-link dx-prog-src")}</div>'
+            '</div>')
+    return f'<div class="dx-prog-grid">{"".join(card(i) for i in items)}</div>'
 
 
 def team_flow_html(steps) -> str:
@@ -637,7 +653,7 @@ def team_cards_html(proposals, kpis, principles) -> str:
 
 
 POLICY_TAB_HELP = {
-    "공식 지원 연계": "현재 업종·분기와 연계 가능한 기존 공식 지원사업과 관련 기관을 확인합니다.",
+    "공식 지원 연계": "현재 진단 결과로 검토할 수 있는 지원제도, 지금 모집 중인 관련 공고, 담당기관을 차례로 확인합니다.",
     "공모전 팀 제안": "분석 결과를 기반으로 제안하는 정책 개선·신규 제안입니다. 지금 활용 가능한 기존 제도는 [공식 지원 연계]에서 확인합니다.",
 }
 

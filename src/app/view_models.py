@@ -320,8 +320,8 @@ COPILOT_STAGE_QUESTION = {"우선점검": "왜 우선점검 후보인가요?", "
 CHIP_LABELS = {
     "왜 우선점검 후보인가요?": "우선점검 이유", "왜 추가확인 상태인가요?": "추가확인 이유", "왜 관찰 상태인가요?": "관찰 판정 이유",
     "이 업종의 판정 근거는?": "판정 근거", "현장에서 무엇을 확인해야 하나요?": "현장 확인 사항",
-    "최근 채용 신호는 어떤가요?": "최근 채용 신호", "연결 가능한 공식 지원은?": "연결 가능 지원",
-    "현재 신청 가능한 지원사업은?": "신청 가능 사업", "직전 분기 대비 최근 판정 변화는?": "분기 대비 변화",
+    "최근 채용 신호는 어떤가요?": "최근 채용 신호", "연결 가능한 공식 지원은?": "지원제도 검토",
+    "현재 신청 가능한 지원사업은?": "모집 중 공고", "직전 분기 대비 최근 판정 변화는?": "분기 대비 변화",
     "검토 가능한 지원 기능 후보는?": "지원 기능 후보", "이 판정의 한계는?": "판정의 한계",
     "공모전 팀 제안에는 어떤 내용이 있어?": "팀 제안 요약", "조기경보 제안은 어떻게 작동해?": "조기경보 작동",
     "기업 조기진단의 기대효과는?": "조기진단 효과", "정책 성과는 어떤 지표로 확인해?": "정책 성과 지표",
@@ -696,3 +696,87 @@ def filter_official_cards(cards: list[dict], function_tag: str | None, intake: s
     """공식 요건 카드 필터(화면 필터만 — 카드 자체·순서는 backend 그대로)."""
     return [c for c in cards if (not function_tag or c.get("function_tag") == function_tag)
             and (not intake or c.get("current_intake_status") == intake)]
+
+
+# ------------------------------------------------------------------ 현재 모집 중인 관련 공고(출처: 기업마당)
+# 지원 기능별로 공고 개요·제목·대상에 이 표현이 있으면 '관련 가능 공고'로 본다(표현 일치만 — 지원대상·적격은 판정하지 않음).
+NOTICE_TERMS = {
+    "employment_retention": ("고용유지", "고용안정", "고용 유지", "근로환경"),
+    "vocational_training": ("직업훈련", "교육훈련", "인력양성", "재직자 교육", "훈련"),
+    "reemployment": ("재취업", "전직", "구직"),
+    "recruitment_matching": ("채용", "구인", "인력 매칭", "일자리 매칭"),
+    "business_difficulty": ("경영안정", "경영개선", "경영 애로", "컨설팅", "자금"),
+    "technology_transition": ("스마트공장", "스마트제조", "자동화", "디지털 전환", "공정개선", "기술개발"),
+    "crisis_response": ("위기", "긴급", "재도약"),
+}
+# 기업이 아니라 사업을 운영할 기관을 뽑는 공고(공고명 표현 기준)
+OPERATOR_CALL_WORDS = ("주관기관 모집", "운영기관 모집", "수행기관 모집", "전문기관 모집", "위탁기관 모집", "주관기관 공모",
+                       "운영기관 공모", "수행기관 공모")
+_NOTICE_INDUSTRY_RANK = {"DIRECT": 0, "MANUFACTURING": 1, "BUSINESS_TYPE_ONLY": 2, "NOT_STATED": 3}
+_NOTICE_REGION_RANK = {"CHANGWON": 0, "GYEONGNAM": 1, "NATIONWIDE": 2, "NOT_STATED": 3}
+
+
+def rank_notices(items: list[dict]) -> list[dict]:
+    """관련 가능 공고 정렬: ① 업종 표현(업종명 > 제조 > 무관) ② 지원 기능 표현 있음 ③ 지역(창원 > 경남 > 전국) ④ 최근 접수 시작.
+
+    접수 중 여부·다른 지역 제외는 provider가 이미 걸렀다. 지원대상 적합성은 판정하지 않는다(항상 '추가 확인 필요').
+    """
+    newest_first = sorted(items, key=lambda it: it.get("start") or "", reverse=True)
+    return sorted(newest_first, key=lambda it: (
+        _NOTICE_INDUSTRY_RANK.get((it.get("industry_match") or {}).get("level"), 9),
+        0 if it.get("function_tags") else 1,
+        _NOTICE_REGION_RANK.get((it.get("region_match") or {}).get("level"), 9)))
+
+
+def collect_related_notices(api, industry: str, fn_tags, today) -> list[dict]:
+    """접수 중 공고(provider가 OPEN·지역 조건을 이미 적용) 중 '관련 가능 공고'만 모아 정렬한다.
+
+    - 선택 업종의 지원 기능별 표현(NOTICE_TERMS)이 공고에 있으면 그 기능을 연결 사유로 붙인다.
+    - 기능 표현이 없어도 업종명이 공고에 직접 적힌 것(DIRECT)은 포함한다.
+    - 조회 장애는 RuntimeError로 올려 호출부가 로그로 남기게 한다(화면에는 개발용 메시지를 띄우지 않음).
+    - 여러 시도 태그로 '전국'이 된 공고라도 공고명·소관기관이 경남 밖 시도를 가리키면(예: '전북 …', 전북특별자치도) 뺀다.
+    - 공고명이 사업을 운영할 기관을 모집하는 공고(주관기관·운영기관 모집 등)면 기업 대상이 아니므로 뺀다.
+    - 남는 공고는 업종명·'제조'가 적혀 있거나 창원·경남 공고여야 한다.
+    """
+    from copilot.providers.official import SIDO
+    found: dict[str, dict] = {}
+
+    def not_for_changwon_firms(item: dict) -> bool:
+        title, agency = item.get("title") or "", item.get("agency") or ""
+        other_sido = any(s != "경남" and (s in title or agency.startswith(s)) for s in SIDO)
+        return other_sido or any(w in title for w in OPERATOR_CALL_WORDS)
+
+    def collect(result, tag: str | None):
+        if not result.ok and result.error not in ("NO_MATCHING_OPEN_ITEMS", "EMPTY"):
+            raise RuntimeError(result.error or "UNAVAILABLE")
+        for item in (result.meta or {}).get("items") or []:
+            if not_for_changwon_firms(item):
+                continue
+            if tag is None and (item.get("industry_match") or {}).get("level") != "DIRECT":
+                continue
+            entry = found.setdefault(item["detail_url"], {**item, "function_tags": []})
+            if tag and tag not in entry["function_tags"]:
+                entry["function_tags"].append(tag)
+
+    for tag in fn_tags:
+        if NOTICE_TERMS.get(tag):
+            collect(api.search(f"{industry} {function_name(tag)} 공고", terms=list(NOTICE_TERMS[tag]), today=today,
+                               max_results=100, industry_terms=(industry,)), tag)
+    collect(api.search(f"{industry} 공고", terms=[], today=today, max_results=100, industry_terms=(industry,)), None)
+    # 업종명·'제조' 언급도 없고 지역도 전국(또는 미표기)인 공고는 연결이 약해 뺀다(표현 한 단어만 겹친 경우)
+    kept = [it for it in found.values()
+            if (it.get("industry_match") or {}).get("level") in ("DIRECT", "MANUFACTURING")
+            or (it.get("region_match") or {}).get("level") in ("CHANGWON", "GYEONGNAM")]
+    return rank_notices(kept)
+
+
+def notice_reasons(item: dict) -> list[str]:
+    """'현재 진단과의 연결 사유' — 공고문 표현이 실제로 일치한 근거만 적는다."""
+    reasons = [f"{function_name(tag)} 관련 표현이 공고에 있음" for tag in item.get("function_tags") or []]
+    level = (item.get("industry_match") or {}).get("level")
+    if level in ("DIRECT", "MANUFACTURING"):
+        reasons.append(item["industry_match"]["evidence"])
+    region = item.get("region_match") or {}
+    if region.get("level") in ("CHANGWON", "GYEONGNAM", "NATIONWIDE"):
+        reasons.append(region["evidence"])
+    return reasons
