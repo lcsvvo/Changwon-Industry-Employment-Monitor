@@ -54,7 +54,7 @@ from export.snapshot import (  # noqa: E402
 from app import team_copilot, ui  # noqa: E402
 from app.view_models import (  # noqa: E402
     COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
-    TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, clarification, comparison_view,
+    TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, chip_label, clarification, comparison_view,
     copilot_suggestions, data_quality_flags, evidence_level, evidence_level_value, field_context, filter_official_cards,
     function_card_counts, function_name, function_ui_label, next_quarters, quarter_label, quarter_text,
     recruitment_observations,
@@ -575,7 +575,7 @@ def copilot_panel(render):
         with st.container(key="copilotrail", width=64):
             st.button("‹ AI", key="copilot_expand", help="행정 AI 비서 펼치기", on_click=set_copilot, args=(False,))
     else:
-        with st.container(key="copilot", width=440):
+        with st.container(key="copilot", width=380):
             render()
 
 
@@ -602,14 +602,16 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
         primary, more = (TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE) if team else copilot_suggestions(stage)
         with st.container(key="chips", horizontal=True, gap="small"):
             for index, (icon, question) in enumerate(zip(COPILOT_ICONS, primary)):
-                if st.button(f"{icon} {question}", key=f"chip-{index}::{scope}"):  # 아이콘은 라벨에만, 보내는 질문은 원문
+                # 버튼에는 아이콘 + 짧은 표시명, 마우스를 올리면 원문. 보내는 질문은 원문 그대로
+                if st.button(f"{icon} {chip_label(question)}", key=f"chip-{index}::{scope}", help=question):
                     selected = question
-            if other != "(선택 안 함)" and st.button(f"{industry}와 {other} 비교", key=f"chip-cmp::{scope}"):
+            if other != "(선택 안 함)" and st.button(f"{other}와 비교", key=f"chip-cmp::{scope}",
+                                                   help=f"{industry}와 {other} 비교"):
                 selected, comparison_industry = f"{industry}와 {other} 비교", other
         with st.expander("질문 더보기"):
             with st.container(key="chipsmore", horizontal=True, gap="small"):
                 for offset, question in enumerate(more, start=len(primary)):
-                    if st.button(question, key=f"chip-{offset}::{scope}"):
+                    if st.button(chip_label(question), key=f"chip-{offset}::{scope}", help=question):
                         selected = question
     # 'AI 비서 안내'(근거 유형 표시·세션 입력 비전송)는 설정·정보 → AI 연결 설정으로 옮겼다 — 대화 영역을 넓게 쓰기 위해
     if history:  # 대화가 생겼을 때만 대화 영역을 만든다(높이는 CSS가 패널 남은 높이로 맞춘다)
