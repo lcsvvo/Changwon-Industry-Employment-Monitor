@@ -54,7 +54,7 @@ from export.snapshot import (  # noqa: E402
 )
 from app import team_copilot, ui  # noqa: E402
 from app.view_models import (  # noqa: E402
-    COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
+    COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, q1_kpi_value, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
     TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, chip_label, clarification, comparison_view,
     copilot_suggestions, data_quality_flags, evidence_level, evidence_level_value, field_context, filter_official_cards,
     collect_related_notices, function_card_counts, function_name, function_ui_label, next_quarters, notice_reasons,
@@ -1038,16 +1038,18 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
                 f"적용 분석기준: {quarter_label(snap.quarter)} 버전", tone="violet"))
 
         kpi_cards = [
-            {"label": "Q1 상태 (국면)", "value": " · ".join(x for x in (q1["state"], q1["state_label"]) if x) or "자료 없음",
+            {"label": "Q1 상태 (국면)", "value": q1_kpi_value(q1["state"], q1["state_label"]),
              "sub": ("생산 미확인" if q1.get("production_yoy") is None
                     else f"생산 {fmt(q1['production_yoy'], 1, '%')}")},
             {"label": "Q2 고용증감 (규모)", "value": fmt(q2["emp_delta"], suffix="명"),
              "tone": "rose" if (q2["emp_delta"] or 0) < 0 else "emerald",
              "sub": f"YoY {fmt(q2['employment_yoy'], 2, '%')}"},
-            {"label": "Q3 지속", "value": f"동일 상태 {fmt(q3['state_run_length'])}분기",
-             "sub": ("반복 신호 미확인" if q3["repeated_signal"] is None
-                    else ("반복 진입신호 있음" if q3["repeated_signal"] else "반복 진입신호 없음"))
-                    + (f" · {q3['transition']}" if q3.get("transition") else "")},
+            {"label": "Q3 지속", "value": ("자료 없음" if q3["state_run_length"] is None
+                                          else f"동일 상태 {fmt(q3['state_run_length'])}분기"),
+             # KPI 한 줄 유지: '반복 진입신호 없음 · S4 → S4' → '반복신호 없음 · S4→S4'
+             "sub": ("반복신호 미확인" if q3["repeated_signal"] is None
+                    else ("반복신호 있음" if q3["repeated_signal"] else "반복신호 없음"))
+                    + (f" · {q3['transition'].replace(' → ', '→')}" if q3.get("transition") else "")},
             {"label": "산단 고용 비중 (규모)", "value": fmt(q2["employment_share_pct"], 2, "%"),
              "sub": f"고용 {fmt(q2['employment'], suffix='명')}"},
         ]

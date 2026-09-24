@@ -140,7 +140,9 @@ def reason_cards_html(title: str, items: list[dict], empty_text: str) -> str:
             f'<div class="dx-reason dx-tone-{_e(it.get("tone") or "amber")}">'
             f'<div class="dx-reason-no">{_CIRCLED[i]}</div>'
             f'<div class="dx-reason-title">{_e(it.get("title"))}</div>'
-            f'<div class="dx-reason-value">{_e(it.get("value"))}</div>'
+            # 숫자가 없는 문장형 값(예: '직전 분기에도 진입신호')은 카드 폭에 맞춘 작은 글씨로 한 줄에
+            f'<div class="dx-reason-value{"" if any(ch.isdigit() for ch in str(it.get("value") or "")) else " dx-reason-value--text"}">'
+            f'{_e(it.get("value"))}</div>'
             f'<div class="dx-reason-rule">{_e(it.get("rule"))}</div>'
             '</div>'
             for i, it in enumerate(items[:4])

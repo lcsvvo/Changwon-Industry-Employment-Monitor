@@ -54,6 +54,17 @@ def next_quarters(quarter: str, count: int = 8) -> list[str]:
     return out
 
 
+# KPI 칸에 한 줄로 들어가도록 줄인 Q1 상태 설명(표시만 — 저장된 상태 코드·설명은 그대로)
+Q1_KPI_SHORT = {"N": "N · 증감 0 포함", "INVALID": "분류 불가"}
+
+
+def q1_kpi_value(state: str | None, label: str | None) -> str:
+    """'S4 · 생산↓·고용↓'처럼 짧은 것은 그대로, 긴 설명(N·INVALID)은 짧은 표기로."""
+    if state in Q1_KPI_SHORT:
+        return Q1_KPI_SHORT[state]
+    return " · ".join(x for x in (state, label) if x) or "자료 없음"
+
+
 def quarter_label(quarter: str | None) -> str:
     """분기 값 하나의 표시명. 없으면 '—'."""
     return "—" if quarter in (None, "") else quarter_text(str(quarter))
@@ -374,7 +385,7 @@ def signal_explanation(rows: list[dict], signals: dict) -> dict:
                       "rule": f"보강 기준 {p_row.get('entry_threshold')} 충족", "tone": "amber"})
     rep_row = next((r for r in rows if (r.get("signal") or "").startswith("반복 진입신호")), None)
     if rep_row and rep_row.get("verdict") == "충족":
-        items.append({"title": "지속성 (보강)", "value": "직전 분기에도 진입신호",
+        items.append({"title": "지속성 (보강)", "value": "연속 진입신호",
                       "rule": "반복 진입신호 충족", "tone": "amber"})
     summary = f"진입신호 {_num(signals.get('n_entry'))}건 · 상위신호 {_num(signals.get('n_up'))}건"
     return {"items": items[:5], "summary": summary}
