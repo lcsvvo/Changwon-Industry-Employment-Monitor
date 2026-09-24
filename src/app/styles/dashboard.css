@@ -340,6 +340,10 @@ body, [data-testid="stAppViewContainer"] { background: var(--dx-bg); }
 }
 .dx-rule-table td { border-bottom: 1px solid #F1F5F9; padding: 0.35rem 0.6rem; color: var(--dx-text-2); }
 .dx-rule-table td:nth-child(2) { font-weight: 650; color: var(--dx-text); }
+/* 세부 판정규칙 현재값 — 판정 색과 맞춤(진단 판정 근거 카드와 같은 빨강·주황) */
+.dx-rule-table td.dx-cur--rose { color: var(--dx-rose); }
+.dx-rule-table td.dx-cur--amber { color: #D97706; }
+.dx-rule-table td.dx-cur--emerald { color: var(--dx-emerald); }
 .dx-verdict { display: inline-block; padding: 0.05rem 0.5rem; border-radius: 999px; font-weight: 700; font-size: 0.74rem; }
 .dx-verdict.dx-tone-rose { background: var(--dx-rose-bg); color: var(--dx-rose); }
 .dx-verdict.dx-tone-amber { background: var(--dx-amber-bg); color: var(--dx-amber); }

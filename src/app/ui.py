@@ -78,10 +78,11 @@ def kpi_cards_html(cards: Iterable[dict]) -> str:
 
 
 def rule_table_html(rows: list[dict], footnote: str) -> str:
+    # 현재값 숫자는 판정 배지와 같은 색(상위=빨강, 진입·충족=주황, 통과=초록, 미달·미확인=기본)
     body = "".join(
         "<tr>"
         f'<td>{_e(r.get("signal"))}</td>'
-        f'<td>{_e(r.get("current"))}</td>'
+        f'<td class="dx-cur dx-cur--{VERDICT_TONE.get(r.get("verdict"), "muted")}">{_e(r.get("current"))}</td>'
         f'<td>{_e(r.get("entry_threshold"))}</td>'
         f'<td>{_e(r.get("upper_threshold"))}</td>'
         f'<td><span class="dx-verdict dx-tone-{VERDICT_TONE.get(r.get("verdict"), "muted")}">'
