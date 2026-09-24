@@ -499,6 +499,7 @@ details.dx-more div { padding: 0.12rem 0 0 0.4rem; line-height: 1.45; }
 .dx-reason-title { font-size: 0.9rem; color: var(--dx-text-2); font-weight: 600; }
 .dx-reason-value { font-size: 1.4rem; font-weight: 700; color: var(--dx-text); margin: 0.1rem 0; }
 .dx-reason.dx-tone-rose .dx-reason-value { color: var(--dx-rose); }
+.dx-reason.dx-tone-amber .dx-reason-value { color: #D97706; }  /* 주황 테두리 카드는 값도 주황(테두리 #F59E0B보다 한 단계 진하게 — 흰 바탕 가독성) */
 .dx-reason-rule { font-size: 0.78rem; color: var(--dx-muted); }
 .dx-reason.dx-tone-muted { border-left-color: #CBD5E1; }
 .dx-reason.dx-tone-muted .dx-reason-value { color: var(--dx-text-2); }
