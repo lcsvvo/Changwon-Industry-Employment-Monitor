@@ -30,8 +30,8 @@ URLS = {
     "D13": "https://www.gntp.or.kr/biz/applyInfo/3817",
 }
 
-PDF09 = "2026년_중소기업_밀집지역_위기대응_체계_구축사업_상반기_Stand-up_맞춤지원_공고.pdf"
-PDF11 = "2026년 산업일자리전환 지원금 시행지침.pdf"
+PDF09 = "LLM/sources/2026년_중소기업_밀집지역_위기대응_체계_구축사업_상반기_Stand-up_맞춤지원_공고.pdf"
+PDF11 = "LLM/sources/2026년 산업일자리전환 지원금 시행지침.pdf"
 
 
 def _hash(path: str | None) -> str | None:

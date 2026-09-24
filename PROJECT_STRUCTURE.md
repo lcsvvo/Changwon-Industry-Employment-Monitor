@@ -26,7 +26,7 @@ outputs/
     ├── 05_handoff/
     └── 06_report_assets/
 snapshots/<기준분기>/v<n>/        # 판정 당시 분석본(추가만, 덮어쓰기 없음)
-LLM/sources/official/             # 공식 HTML 원문 corpus(PDF 원문은 루트 파일을 중복 없이 참조)
+LLM/sources/                      # 공식 원문 corpus: official/ HTML + PDF 원문 2건
 reports/                         # 최종 문서만
 logs/
 ├── experiments/                 # 후보모형·과거 실험
