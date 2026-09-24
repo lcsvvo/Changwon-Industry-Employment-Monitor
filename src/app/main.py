@@ -15,6 +15,36 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+# 화면 모듈(app.*): 코드가 바뀐 뒤(예: Streamlit Cloud에 새로 push) 서버가 새 main.py를 다시 실행하면서도 이미 import된
+# 옛 모듈을 그대로 쓰면, 새 이름을 찾지 못해 ImportError가 난다. 파일이 바뀐 경우에만 의존 순서대로 다시 읽는다.
+UI_MODULES = ("app.view_models", "app.ui", "app.team_copilot")
+
+
+def _ui_module_mtime(module) -> float | None:
+    try:
+        return Path(module.__file__).stat().st_mtime
+    except (AttributeError, OSError, TypeError):
+        return None
+
+
+def _refresh_ui_modules():
+    import importlib
+    loaded = [sys.modules.get(name) for name in UI_MODULES]
+    if any(m is not None and getattr(m, "_dx_mtime", None) != _ui_module_mtime(m) for m in loaded):
+        for m in loaded:
+            if m is not None:
+                importlib.reload(m)
+
+
+def _stamp_ui_modules():
+    for name in UI_MODULES:
+        m = sys.modules.get(name)
+        if m is not None:
+            m._dx_mtime = _ui_module_mtime(m)
+
+
+_refresh_ui_modules()
+
 from export import schema as S  # noqa: E402
 from export.diff import THRESHOLD_STATUS, record_diff, snapshot_diff  # noqa: E402
 from export.documents import registered_document  # noqa: E402
@@ -33,6 +63,7 @@ from app.view_models import (  # noqa: E402
     signal_explanation, stage_code, stage_counts, stage_display, structure_answer, supporting_fact_items,
     team_kpis, team_principles, top_questions, with_session_context,
 )
+_stamp_ui_modules()
 from copilot import Copilot  # noqa: E402
 from copilot import router as R  # noqa: E402  (읽기 전용: 비교·되묻기 표시에 쓸 업종명만 본다 — 라우팅은 바꾸지 않음)
 from copilot.audit import JsonlAuditSink, audit_path_for  # noqa: E402
