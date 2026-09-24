@@ -11,3 +11,5 @@
 10,최종 방법론,reports/final_methodology.md
 11,QA 결과,outputs/final_model/qa_summary.json
 12,최종 실행방법,outputs/final_model/RUNBOOK.md
+13,분기별 맥락 기반 추가 확인질문,outputs/final_model/05_handoff/tables/check_questions_context_panel.csv
+14,분기별 외부자료 패널,outputs/final_model/04_external_evidence/external_evidence_panel.csv

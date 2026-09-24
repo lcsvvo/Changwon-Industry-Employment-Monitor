@@ -1,0 +1,183 @@
+{
+  "generated_at": "2026-09-23T12:14:03+00:00",
+  "scope": "latest-diagnosis priority industries using existing KICOX mapping only",
+  "target": {
+    "queue_path": "C:\\Users\\jiwoo\\.codex\\worktrees\\work24-detail-enrichment\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_detail_collection_queue_20260923.csv",
+    "queue_target_count": 140,
+    "unique_wanted_auth_no": 140,
+    "industry_counts": {
+      "기계": 136,
+      "목재종이": 4
+    },
+    "target_definition": "saved M=140 queue IDs; no reselection or diagnostic recalculation"
+  },
+  "collection": {
+    "request_target": 140,
+    "success": 135,
+    "failed": 5,
+    "not_requested": 0,
+    "http_status_counts_snapshot": {
+      "200": 140
+    },
+    "access_gate": {
+      "robots": {
+        "url": "https://www.work24.go.kr/robots.txt",
+        "checked_at": "2026-09-23T12:13:47+00:00",
+        "relevant_rules": [
+          "Allow: /",
+          "User-Agent: *",
+          "disallow: /cm/common/",
+          "disallow: /sa/",
+          "disallow: /ei/",
+          "disallow: /cm/f/c/0100/selectUnifySearchPost.do"
+        ],
+        "paths": {
+          "search_prefix": true,
+          "detail_prefix": true,
+          "search_page": true,
+          "detail_page": true
+        }
+      },
+      "terms": {
+        "url": "https://www.work24.go.kr/cm/c/d/0130/retrieveUtzeStpt.do",
+        "checked_at": "2026-09-23T12:13:50+00:00",
+        "sha256": "6858a5fd27dd74877e3876783be66a97ae7d112209439d634dd927ab9de36dcd",
+        "separate_contract_for_bulk_or_special_use": true,
+        "automated_personal_data_restriction_detected": true
+      }
+    },
+    "max_requests_this_run": 5,
+    "request_delay_seconds": 3.0,
+    "request_scope_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
+    "explicit_user_request": true,
+    "selected_this_run": 4,
+    "attempted_this_run": 4,
+    "stopped_reason": null,
+    "http_status_counts_including_gate": {
+      "200": 6
+    },
+    "http_status_counts_detail_this_run": {
+      "200": 4
+    },
+    "network_errors": 0,
+    "collection_basis": "explicit user request for the saved M=140 queue",
+    "additional_requests_made": 4
+  },
+  "join": {
+    "wanted_auth_no_duplicates": 0,
+    "detail_id_match_count": 135,
+    "detail_id_match_pct": 100.0,
+    "existing_target_join_pct": 100.0,
+    "target_enrichment_coverage_pct": 96.43,
+    "failed_ids": [
+      "K131112609090004",
+      "K131132609080016",
+      "K131132609090043",
+      "K131132609100036",
+      "K131132609140059"
+    ]
+  },
+  "field_coverage": {
+    "recruitment_count": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "occupation": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "job_description": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "employment_type": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "wage": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "career": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "education": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "certificate": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "workplace_address": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "registration_date": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "closing_date": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "work_hours": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "work_pattern": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    },
+    "preference": {
+      "count": 0,
+      "target_count": 140,
+      "coverage_pct": 0.0,
+      "success_denominator_pct": 0.0
+    },
+    "district": {
+      "count": 135,
+      "target_count": 140,
+      "coverage_pct": 96.43,
+      "success_denominator_pct": 100.0
+    }
+  },
+  "privacy": {
+    "phone_regex_hits": 0,
+    "email_regex_hits": 0,
+    "contact_schema_fields_collected": 0
+  },
+  "parsing_failure_count": 4,
+  "artifacts": {
+    "raw_detail_snapshot": "C:\\Users\\jiwoo\\.codex\\worktrees\\work24-detail-enrichment\\Changwon-Industry-Employment-Monitor\\data\\raw\\work24\\work24_priority_industry_detail_20260923.csv",
+    "canonical_recruitment_layer": "data/processed/work24/work24_recruitment_layer_20260923.csv",
+    "quality_report": "C:\\Users\\jiwoo\\.codex\\worktrees\\work24-detail-enrichment\\Changwon-Industry-Employment-Monitor\\data\\processed\\work24\\work24_priority_industry_quality_20260923.json"
+  }
+}

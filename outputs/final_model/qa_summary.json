@@ -25,7 +25,13 @@
     "jobs_not_used_as_industry_signal": true,
     "selective_electre_rows_equal_triage_additional_check": true,
     "selective_electre_does_not_overwrite_triage": true,
-    "external_data_not_used_as_electre_criteria": true
+    "external_data_not_used_as_electre_criteria": true,
+    "context_questions_rows_180_unique": true,
+    "context_questions_stage_and_base_question_match_triage": true,
+    "context_questions_never_empty": true,
+    "external_panel_rows_180_unique": true,
+    "external_panel_stage_matches_triage": true,
+    "external_panel_latest_equals_summary": true
   },
   "decision_panel_sha256": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a",
   "stage_counts": {

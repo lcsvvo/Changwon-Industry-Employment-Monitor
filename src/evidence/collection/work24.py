@@ -14,10 +14,11 @@
       공개 요청구조(GET)만 이용한다.
 
 수집 범위와 정책
-    robots.txt 는 `/empInfo/` 를 모든 UA 에 Disallow 한다. 따라서 **상세페이지는
-    수집하지 않는다.** 센터 목록경로(`/changwon|masan/infoPlace/empInfo/`)는
-    그 접두사가 아니므로 `Allow: /` 가 적용된다. 목록에 없는 필드
-    (모집인원·상세주소·KSIC·직종)는 만들어내지 않고 상태값으로 남긴다.
+    이 모듈이 사용한 레거시 work.go.kr 의 `/empInfo/` 상세경로는 robots.txt 에서
+    차단되어 수집하지 않는다. 센터 목록경로(`/changwon|masan/infoPlace/empInfo/`)
+    는 그 접두사가 아니므로 허용된다. 현행 work24.go.kr 검색·상세 경로는 별도
+    모듈 ``work24_current.py``에서 도메인별 robots를 다시 확인하고 다룬다.
+    목록에 없는 필드는 이 원자료에 만들어 넣지 않는다.
 
 실행:
     python src/evidence/collection/work24.py freeze    # 기존 1,504건 동결 metadata
@@ -86,13 +87,17 @@ OUT_OF_SCOPE_GU = ("의령군",)
 BASE_URL = "https://www.work.go.kr/{center}/infoPlace/empInfo/empInfoList.do"
 ROBOTS_URL = "https://www.work.go.kr/robots.txt"
 PAGE_UNIT = 10          # 50 은 6페이지 이후 조용히 0건을 돌려준다(2026-09-19 확인).
-REQUEST_DELAY_SEC = 1.2
+REQUEST_DELAY_SEC = 2.0
 REQUEST_TIMEOUT_SEC = 30
 MAX_RETRIES = 3
 USER_AGENT = (
     "Changwon-Industry-Employment-Monitor/1.0 (academic research; "
     "public job posting list pages; contact via repository)"
 )
+
+
+class AccessPolicyStop(RuntimeError):
+    """403/429 등 명시적 차단 신호를 받으면 전체 수집을 즉시 중단한다."""
 BASE_PARAMS = {
     "sortField": "DATE", "sortOrderBy": "DESC", "subNaviMenuCd": "10200",
     "s": "1", "m": "1", "mode": "search", "menuId": "M200800001",
@@ -148,6 +153,15 @@ EXTERNAL_SOURCE_INVESTIGATION = {
          "result": "robots.txt 가 모든 UA 에 Disallow. 수집하지 않는다",
          "would_solve": "모집인원·직종·담당업무·요구기술·자격요건",
          "status": "BLOCKED_BY_ACCESS_POLICY"},
+        {"source": "현행 고용24 공개 채용정보 상세",
+         "endpoint": "https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do",
+         "auth": "비로그인 공개",
+         "tested": True,
+         "result": ("2026-09-23 robots.txt에서 /wk/a/b/1200·1500 허용 확인 후 "
+                    "기존 구인인증번호 5건을 비로그인 검증. 모집인원·직종·직무내용·"
+                    "자격면허·고용형태·근무예정지 확보, 5/5 ID join 성공. 전체 수집은 미실행"),
+         "would_solve": "현행 공개 공고의 모집인원·직종·직무내용·자격요건 보강",
+         "status": "SAMPLE_VALIDATED"},
         {"source": "창원시 공장등록현황 (data.go.kr 3066436)",
          "endpoint": "공공데이터포털 파일데이터",
          "auth": "불필요", "tested": True,
@@ -161,9 +175,12 @@ EXTERNAL_SOURCE_INVESTIGATION = {
          "would_solve": "KSIC 코드화·KICOX 매핑",
          "status": "IN_USE"},
     ],
-    "conclusion": ("모집인원·직종코드·과거 공고이력을 제공하는 사용 가능한 공식 경로는 "
-                   "현재 없다. 워크넷 API 는 별도 인증키가 필요하고, 확보하더라도 "
-                   "게시 중 공고 기반이라 2021~2026 과거 분기 복원과는 별개 문제다."),
+    "conclusion": ("개인회원 OPEN-API는 사용할 수 없지만 현행 work24.go.kr 공개 상세는 "
+                   "robots 허용·비로그인 접근을 5건 검증했다. 전체 요청 전 대량 이용 범위를 "
+                   "확인해야 한다. 140건 자동 상세 요청이 대량이용에 해당하는지는 명확하지 않아 "
+                   "한국고용정보원의 이용범위 확인 전 자동 요청을 보류한다. 이는 수집 금지나 "
+                   "별도 계약 필요를 확정한 것이 아니다. 게시 중 공고라 2021~2026 과거 분기 "
+                   "복원과는 별개다."),
 }
 
 
@@ -240,17 +257,21 @@ def fetch_page(session: requests.Session, center: str, page_index: int,
         try:
             r = session.get(url, params=params, timeout=REQUEST_TIMEOUT_SEC)
             if r.status_code == 200:
-                r.encoding = "utf-8"
+                # 같은 화면이 시점에 따라 UTF-8/EUC-KR 선언을 사용한다. 강제 UTF-8은
+                # 한글을 훼손하므로 응답 선언과 requests 감지를 존중한다.
+                if not r.encoding or r.encoding.lower() in {"iso-8859-1", "ascii"}:
+                    r.encoding = r.apparent_encoding or "utf-8"
                 return r.text
             if r.status_code in (403, 429):        # 접근통제는 재시도하지 않는다
                 failures.append({"center": center, "page_index": page_index,
                                  "status": r.status_code, "kind": "access_denied"})
-                return None
+                raise AccessPolicyStop(
+                    f"work.go.kr access signal {r.status_code}; collection stopped")
             last = {"status": r.status_code, "kind": "http_error"}
         except requests.RequestException as e:
             last = {"status": 0, "kind": type(e).__name__}
         if attempt < MAX_RETRIES - 1:
-            time.sleep(2.0 * (attempt + 1))        # exponential backoff
+            time.sleep(2.0 ** (attempt + 1))       # 2초, 4초 exponential backoff
     failures.append({"center": center, "page_index": page_index, **last})
     return None
 
@@ -429,8 +450,9 @@ def collect(max_extra_pages: int = 3) -> Path:
         "limitations": [
             "현재 게시 중인 공고 위주의 단면(snapshot)이며 생존편향이 있다.",
             "공개 채용공고만 포함한다. 전체 채용시장·노동수요가 아니다.",
-            "모집인원·사업장 상세주소·KSIC·직종은 목록에 없고 상세페이지는 "
-            "robots.txt 에서 수집이 허용되지 않는다.",
+            "이 레거시 센터 목록에는 모집인원·사업장 상세주소·KSIC·직종이 없다. "
+            "work.go.kr 레거시 상세는 robots 비허용이며, 현행 work24.go.kr 상세 "
+            "보강은 이 2026-09-19 snapshot에 적용하지 않았다.",
         ],
         "metadata_schema": "changwon-external-collection/1.0.0",
     }, ensure_ascii=False, indent=2))
@@ -884,7 +906,7 @@ FIELD_INVENTORY: tuple[tuple[str, str, str | None, str], ...] = (
     # 기업
     ("company_name", "DIRECT", "company_raw", ""),
     ("company_identifier", "UNAVAILABLE", None,
-     "사업자등록번호는 목록 미제공. 상세는 robots 비허용"),
+     "이 레거시 목록 snapshot에는 사업자등록번호가 없다"),
     ("workplace_name", "UNAVAILABLE", None, "목록은 기업명만 준다"),
     ("workplace_address", "OFFICIAL_EXTERNAL_MATCH", "workplace_address_enriched",
      "공장등록현황 공장주소. 공고의 실제 근무지와 같다고 가정하지 않는다"),
@@ -906,7 +928,7 @@ FIELD_INVENTORY: tuple[tuple[str, str, str | None, str], ...] = (
     ("kicox_industry", "DERIVED", "kicox_industry", "ksic_to_kicox.csv 재사용"),
     # 채용량
     ("recruitment_count", "UNAVAILABLE", "recruitment_count",
-     "목록 미제공 + 상세 robots 비허용 + 공개 결합경로 없음. 전 행 NULL"),
+     "2026-09-19 레거시 목록 미제공. 전 행 NULL; 현행 work24 상세 보강은 별도 snapshot"),
     # 직무
     ("occupation_code", "UNAVAILABLE", None, "목록 미제공"),
     ("occupation_name", "UNAVAILABLE", None, "공고제목은 직종명이 아니다"),
@@ -953,6 +975,15 @@ def field_inventory_report(a: pd.DataFrame) -> dict:
 # ═══════════════════════════════════════════════════════════════════════════
 # 10. 스냅샷 간 공고 상태 추적 (§22·§23)
 # ═══════════════════════════════════════════════════════════════════════════
+def _center_list_snapshots() -> list[Path]:
+    """레거시 센터 목록 스냅샷만 반환하고 상세 보강 CSV는 제외한다."""
+    candidates = list(RAW_DIR.glob("work24_5gu_*.csv"))
+    historical = RAW_DIR / "20260918_partial_3gu.csv"
+    if historical.exists():
+        candidates.append(historical)
+    return sorted(set(candidates))
+
+
 def _snapshot_ids(path: Path) -> tuple[set[str], set[str]]:
     """(공고 ID 집합, 포함된 구 집합). 구 스키마(20260918)도 함께 읽는다."""
     df = pd.read_csv(path, encoding="utf-8-sig", dtype=str)
@@ -968,7 +999,7 @@ def snapshot_transitions() -> dict:
     마산 2개 구가 통째로 NEW 로 잡혀 '신규 채용 급증'처럼 보인다.
     스냅샷이 하나뿐이면 과거 상태를 추정하지 않고 그대로 비워 둔다.
     """
-    snaps = sorted(RAW_DIR.glob("*.csv"))
+    snaps = _center_list_snapshots()
     if len(snaps) < 2:
         return {"available": False,
                 "reason": "스냅샷이 1개뿐이다. 과거 상태를 역산하지 않는다.",
@@ -1008,7 +1039,7 @@ def snapshot_transitions() -> dict:
 
 def assign_posting_status(a: pd.DataFrame) -> pd.Series:
     """직전 스냅샷에 있던 공고면 CONTINUING, 없으면 NEW. 1회 수집이면 판정하지 않는다."""
-    snaps = sorted(RAW_DIR.glob("*.csv"))
+    snaps = _center_list_snapshots()
     if len(snaps) < 2:
         return pd.Series("UNKNOWN_SINGLE_SNAPSHOT", index=a.index, dtype="object")
     prev_ids, prev_gu = _snapshot_ids(snaps[-2])
@@ -1076,7 +1107,7 @@ def build(stages: tuple[str, ...] = GATE_STAGES_DEFAULT) -> dict:
         lambda v: "ENRICHED_FROM_FACTORY_REGISTER" if v == "COMPANY_MASTER_EXACT"
         else "NOT_COLLECTED_ACCESS_POLICY")
 
-    # 목록에 없고 상세는 robots 비허용 → 만들지 않고 상태로 남긴다
+    # 이 레거시 목록 snapshot에 없던 값은 소급 생성하지 않고 상태로 남긴다.
     df["workplace_address_raw"] = None
     df["address_source"] = df["workplace_address_enriched"].map(
         lambda v: "ENRICHED_FROM_FACTORY_REGISTER" if isinstance(v, str) and v.strip()
@@ -1235,7 +1266,7 @@ def model_feasibility_report(a: pd.DataFrame, gate_quarter: str | None) -> dict:
     quarters = sorted(reg.dropna().dt.to_period("Q").astype(str).unique())
     months = reg.dropna().dt.to_period("M").value_counts().sort_index()
     duration = (due - reg).dt.days
-    n_snapshots = len(sorted(RAW_DIR.glob("*.csv")))
+    n_snapshots = len(_center_list_snapshots())
 
     mapped = a[a["kicox_mapping_status"].eq("MAPPED")]
     by_ind = mapped.groupby("kicox_industry").size()
@@ -1420,8 +1451,9 @@ def build_quality_summary(snap, raw, df, analysis, ev, targets, gate_quarter,
             "recruitment_count": {
                 "direct": {"n": 0, "pct": 0.0}, "enriched": {"n": 0, "pct": 0.0},
                 "status": "NOT_COLLECTED_ACCESS_POLICY",
-                "note": ("목록페이지에 모집인원이 없고 상세페이지는 robots.txt 에서 "
-                         "수집이 허용되지 않는다. 미확보 행을 0명으로 처리하지 않는다."),
+                "note": ("2026-09-19 레거시 목록에 모집인원이 없어 전 행 NULL이다. "
+                         "2026-09-23 현행 work24 상세 5건에서 확보 가능성을 검증했지만 "
+                         "이 snapshot을 소급 변경하지 않는다."),
             },
             "workplace_address": {
                 "direct": {"n": 0, "pct": 0.0},
@@ -1492,8 +1524,9 @@ def build_quality_summary(snap, raw, df, analysis, ev, targets, gate_quarter,
             "recruitment_count_coverage_pct": 0.0,
             "level_a_available": True,
             "level_b_available": False,
-            "level_b_blocked_reason": ("모집인원을 허용된 경로에서 확보할 수 없다. "
-                                       "공고 수는 모집인원이 아니므로 Level B 집계를 하지 않는다."),
+            "level_b_blocked_reason": ("이 snapshot에는 모집인원이 없다. 현행 공개 상세 "
+                                       "보강을 전체 범위에 검증·승인하기 전까지 공고 수를 "
+                                       "모집인원으로 대체하지 않고 Level B를 계산하지 않는다."),
         },
         "field_inventory": field_inventory_report(analysis),
         "snapshot_transitions": snapshot_transitions(),

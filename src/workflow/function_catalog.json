@@ -1,0 +1,175 @@
+{
+  "catalog_version": "function-catalog/1.1.0",
+  "reviewed_at": "2026-09-21",
+  "scope_note": "지원 필요 기능은 담당자가 현장확인 결과를 보고 직접 선택한다. 업종·Triage·외부자료로 기능이나 기관을 자동 선택하지 않는다. 기관 정보는 기존 최종 산출물 institution_routing_map 의 행만 사용하며, 새 기관을 추가하지 않는다.",
+  "functions": [
+    {
+      "tag": "employment_retention",
+      "label": "고용유지",
+      "referable": true
+    },
+    {
+      "tag": "vocational_training",
+      "label": "직업훈련",
+      "referable": true
+    },
+    {
+      "tag": "reemployment",
+      "label": "전직·재취업",
+      "referable": true
+    },
+    {
+      "tag": "recruitment_matching",
+      "label": "채용매칭",
+      "referable": true
+    },
+    {
+      "tag": "business_difficulty",
+      "label": "기업 경영·기술 애로",
+      "referable": true
+    },
+    {
+      "tag": "technology_transition",
+      "label": "기술전환",
+      "referable": true
+    },
+    {
+      "tag": "crisis_response",
+      "label": "위기대응",
+      "referable": true
+    },
+    {
+      "tag": "further_observation",
+      "label": "추가관찰",
+      "referable": false,
+      "not_referable_label": "내부 관찰 기능 — 기관 인계 대상 아님"
+    }
+  ],
+  "routing_audit": [
+    {
+      "routing_role": "산업·경제동향",
+      "institution": "창원상공회의소",
+      "unit": "지역·산단·업종",
+      "function": "정기 경제동향",
+      "source_url": "https://changwoncci.korcham.net/front/board/boardContentsView.do?boardId=11175&contId=130203&menuId=3992",
+      "audit_class": "B",
+      "status": "rejected",
+      "function_tags": [],
+      "candidate_tags_for_review": [],
+      "verified": false,
+      "verified_at": null,
+      "verification_basis": "기능(정기 경제동향 자료 제공)은 확인되나 지원 기능이 아니라 동향자료 원천이다. 어떤 지원 필요 기능에도 연결하지 않는다.",
+      "followup": null,
+      "function_verified": false,
+      "intake_route_verified": false,
+      "intake_route": null
+    },
+    {
+      "routing_role": "산업·고용동향",
+      "institution": "창원산업진흥원",
+      "unit": "지역·산업",
+      "function": "산업·경제동향 및 고용동향 자료",
+      "source_url": "https://www.cwip.or.kr/",
+      "audit_class": "C",
+      "status": "rejected",
+      "function_tags": [],
+      "candidate_tags_for_review": [],
+      "verified": false,
+      "verified_at": null,
+      "verification_basis": "공식 출처가 기관 홈페이지 첫 화면뿐이고 기능도 동향자료 제공이다. 지원 필요 기능에 연결하지 않는다.",
+      "followup": "동향자료 담당 부서·게시 위치 확인(인계 대상 아님)",
+      "function_verified": false,
+      "intake_route_verified": false,
+      "intake_route": null
+    },
+    {
+      "routing_role": "지역 위기진단",
+      "institution": "경남TP 위기지원센터",
+      "unit": "중소기업 밀집지역·기업",
+      "function": "모니터링·심층현장조사·맞춤지원",
+      "source_url": "https://www.gntp.or.kr/introduce/staff",
+      "audit_class": "A",
+      "status": "verified",
+      "function_tags": [
+        "crisis_response"
+      ],
+      "candidate_tags_for_review": [],
+      "verified": true,
+      "verified_at": "2026-09-21",
+      "verification_basis": "기존 산출물에 기관 조직 소개 페이지가 공식 출처로 기록되어 있고, 기록된 기능(지역 위기진단·모니터링·심층현장조사·맞춤지원)이 '위기대응'과 직접 대응한다. 저장소 기록 기준 확인이며 기관 합의·접수 가능 여부는 확인하지 않았다.",
+      "followup": "접수 창구·연락 경로 확인",
+      "function_verified": true,
+      "intake_route_verified": false,
+      "intake_route": null
+    },
+    {
+      "routing_role": "기업 진단·고용지원",
+      "institution": "창원고용복지+센터",
+      "unit": "기업·구직자",
+      "function": "기업 도약보장 패키지 등 진단·연계(운영 공지 시점 확인 필요)",
+      "source_url": "https://www.moel.go.kr/local/changwon/news/reportexplan/view.do?bbs_seq=20240901144",
+      "audit_class": "B",
+      "status": "proposed",
+      "function_tags": [],
+      "candidate_tags_for_review": [
+        "employment_retention",
+        "reemployment",
+        "recruitment_matching"
+      ],
+      "verified": false,
+      "verified_at": null,
+      "verification_basis": "공식 출처는 2024년 보도·설명 게시물이며 기존 기록 자체가 '운영 공지 시점 확인 필요'로 표시되어 있다. 고용 관련 기능은 알 수 있으나 어느 지원 필요 기능을 현재 담당하는지는 확인되지 않았다.",
+      "followup": "현재 운영 중인 사업·담당 부서와 고용유지/전직·재취업/채용매칭 중 담당 범위 확인",
+      "function_verified": false,
+      "intake_route_verified": false,
+      "intake_route": null
+    },
+    {
+      "routing_role": "기업 현장지원",
+      "institution": "창원산업진흥원 기업지원 기능·마이스터센터",
+      "unit": "기업",
+      "function": "현장애로 컨설팅·기술지원",
+      "source_url": "https://www.cwip.or.kr/",
+      "audit_class": "B",
+      "status": "proposed",
+      "function_tags": [],
+      "candidate_tags_for_review": [
+        "business_difficulty"
+      ],
+      "verified": false,
+      "verified_at": null,
+      "verification_basis": "기능 설명(현장애로 컨설팅·기술지원)은 '기업 경영·기술 애로'와 가깝지만, 공식 출처가 기관 홈페이지 첫 화면이고 담당 단위가 '기업지원 기능·마이스터센터'로 복합 표기되어 있다.",
+      "followup": "담당 부서·센터 단위와 해당 기능을 설명하는 공식 페이지 확인",
+      "function_verified": false,
+      "intake_route_verified": false,
+      "intake_route": null
+    },
+    {
+      "routing_role": "인력·훈련 연계",
+      "institution": "경남지역인적자원개발위원회",
+      "unit": "산업·기업 인력수요",
+      "function": "수요조사·맞춤형 훈련 연계",
+      "source_url": "https://gnhrd.or.kr/",
+      "audit_class": "A",
+      "status": "verified",
+      "function_tags": [
+        "vocational_training"
+      ],
+      "candidate_tags_for_review": [],
+      "verified": true,
+      "verified_at": "2026-09-21",
+      "verification_basis": "기존 산출물에 기관 공식 홈페이지가 출처로 기록되어 있고, 기록된 기능(인력·훈련 연계, 맞춤형 훈련 연계)이 '직업훈련'과 직접 대응한다. 저장소 기록 기준 확인이며 기관 합의·접수 가능 여부는 확인하지 않았다.",
+      "followup": "훈련 연계 접수 창구·연락 경로 확인",
+      "function_verified": true,
+      "intake_route_verified": false,
+      "intake_route": null
+    }
+  ],
+  "research_needed": [
+    "고용유지·전직·재취업·채용매칭: 창원고용복지+센터의 현재 담당 범위와 공식 근거 확인",
+    "기업 경영·기술 애로: 창원산업진흥원 기업지원 기능·마이스터센터의 담당 부서와 공식 기능 페이지 확인",
+    "기술전환: 저장소에 이 기능을 담당하는 기관 기록 없음 — 공식 근거 확보 전까지 담당기관 미확정",
+    "A 등급 2건(경남TP 위기지원센터, 경남지역인적자원개발위원회)은 기관 기능만 확인됨 — 실제 접수 창구·연락 경로는 미확인(intake_route_verified=false)"
+  ],
+  "status_note": "status: verified = 인계 대상으로 노출(기관 기능 확인) / proposed = 검토 중(인계 불가) / rejected = 인계 대상 아님. 기관 기능 확인과 실제 접수경로 확인은 따로 기록한다."
+}

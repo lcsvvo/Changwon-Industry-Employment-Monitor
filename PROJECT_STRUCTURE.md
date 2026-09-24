@@ -11,6 +11,10 @@ src/
 ├── evidence/                    # 외부자료 처리·수집
 ├── handoff/                     # 설명·진단카드·routing
 ├── pipeline/                    # 전체 실행과 최종 산출
+├── policy/                      # 정책 원장 bootstrap, PDF/HTML 추출·검색, Work24 append-only 외부근거
+├── export/                      # 최종 산출물 → 불변 Snapshot (재계산 없음) · 분석본 버전 비교(diff) · 등록 문서 인용
+├── workflow/                    # 점검 후보·점검 건·점검 시점(최초/재점검)·현장확인·지원 기능·인계·사후검토·감사 (PostgreSQL 기준 ORM, Alembic migrations/, identity 경계, function_catalog.json)
+├── app/                         # Streamlit 점검연계 화면
 └── utils/
 notebooks/                       # 최종 데이터 준비·CORE·결과
 outputs/
@@ -21,6 +25,8 @@ outputs/
     ├── 04_external_evidence/
     ├── 05_handoff/
     └── 06_report_assets/
+snapshots/<기준분기>/v<n>/        # 판정 당시 분석본(추가만, 덮어쓰기 없음)
+LLM/sources/                      # 공식 원문 corpus: official/ HTML + PDF 원문 2건
 reports/                         # 최종 문서만
 logs/
 ├── experiments/                 # 후보모형·과거 실험

@@ -1,0 +1,735 @@
+{
+  "generated_at": "2026-09-23T12:31:37+00:00",
+  "inputs": {
+    "list_dataset": "data/processed/work24/work24_analysis_ready.csv",
+    "detail_snapshot": "data/raw/work24/work24_priority_industry_detail_20260923.csv",
+    "official_factory_snapshot": "data/raw/kicox/datagokr/kicox_factory_changwon_national_20260923.csv",
+    "official_factory_metadata": "data/raw/kicox/datagokr/_metadata/kicox_factory_changwon_national_20260923.json",
+    "final_diagnostic_snapshot": "outputs/final_model/02_triage/tables/triage_latest_full.csv",
+    "shared_raw_root_used": true
+  },
+  "priority_industries": [
+    "기계",
+    "목재종이"
+  ],
+  "priority_industry_summary": {
+    "기계": {
+      "mapped_postings": 380,
+      "unique_companies": 228,
+      "official_confirmed_postings": 161,
+      "official_confirmed_companies": 98,
+      "official_confirmed_active_postings": 137,
+      "final_detail_needed": 5
+    },
+    "목재종이": {
+      "mapped_postings": 15,
+      "unique_companies": 11,
+      "official_confirmed_postings": 5,
+      "official_confirmed_companies": 4,
+      "official_confirmed_active_postings": 4,
+      "final_detail_needed": 0
+    }
+  },
+  "industry_counts": {
+    "음식료": {
+      "mapped_postings": 17,
+      "unique_companies": 15,
+      "official_confirmed_postings": 1,
+      "official_confirmed_companies": 1
+    },
+    "섬유의복": {
+      "mapped_postings": 0,
+      "unique_companies": 0,
+      "official_confirmed_postings": 0,
+      "official_confirmed_companies": 0
+    },
+    "목재종이": {
+      "mapped_postings": 15,
+      "unique_companies": 11,
+      "official_confirmed_postings": 5,
+      "official_confirmed_companies": 4
+    },
+    "석유화학": {
+      "mapped_postings": 13,
+      "unique_companies": 11,
+      "official_confirmed_postings": 3,
+      "official_confirmed_companies": 3
+    },
+    "비금속": {
+      "mapped_postings": 7,
+      "unique_companies": 5,
+      "official_confirmed_postings": 0,
+      "official_confirmed_companies": 0
+    },
+    "철강": {
+      "mapped_postings": 22,
+      "unique_companies": 16,
+      "official_confirmed_postings": 5,
+      "official_confirmed_companies": 5
+    },
+    "기계": {
+      "mapped_postings": 380,
+      "unique_companies": 228,
+      "official_confirmed_postings": 161,
+      "official_confirmed_companies": 98
+    },
+    "전기전자": {
+      "mapped_postings": 101,
+      "unique_companies": 60,
+      "official_confirmed_postings": 48,
+      "official_confirmed_companies": 31
+    },
+    "운송장비": {
+      "mapped_postings": 101,
+      "unique_companies": 63,
+      "official_confirmed_postings": 34,
+      "official_confirmed_companies": 22
+    },
+    "기타": {
+      "mapped_postings": 7,
+      "unique_companies": 4,
+      "official_confirmed_postings": 0,
+      "official_confirmed_companies": 0
+    }
+  },
+  "validation": {
+    "list_total": 2045,
+    "mapped_total": 663,
+    "industry_count_sum": 663,
+    "all_ten_industries_present_in_axis": true,
+    "wanted_auth_no_duplicates": 0,
+    "detail_verified_total": 141,
+    "detail_snapshot_attempt_rows": 160,
+    "detail_snapshot_unique_postings": 150,
+    "privacy_phone_hits": 0,
+    "privacy_email_hits": 0,
+    "work24_detail_http_requests_this_run": 0,
+    "official_factory_rows": 3553,
+    "official_factory_unique_ids": 3553,
+    "official_factory_exact_complex_rows": 3553,
+    "api_key_exposed": false
+  },
+  "detail_collection_M": {
+    "target_count": 140,
+    "request_count_in_saved_detail_snapshot": 140,
+    "access_status_counts": {
+      "success": 135,
+      "partial": 0,
+      "list_only": 0,
+      "expired": 0,
+      "removed": 0,
+      "blocked": 0,
+      "parse_failed": 5,
+      "unknown": 0
+    },
+    "access_status_counts_sum_to_target": true,
+    "industry_counts": {
+      "기계": {
+        "target_count": 136,
+        "success": 131,
+        "partial": 0,
+        "partial_or_failed": 5,
+        "status_counts": {
+          "success": 131,
+          "partial": 0,
+          "list_only": 0,
+          "expired": 0,
+          "removed": 0,
+          "blocked": 0,
+          "parse_failed": 5,
+          "unknown": 0
+        }
+      },
+      "목재종이": {
+        "target_count": 4,
+        "success": 4,
+        "partial": 0,
+        "partial_or_failed": 0,
+        "status_counts": {
+          "success": 4,
+          "partial": 0,
+          "list_only": 0,
+          "expired": 0,
+          "removed": 0,
+          "blocked": 0,
+          "parse_failed": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "field_coverage": {
+      "occupation": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "recruitment_count": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "job_description": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "career": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "education": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "employment_type": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "wage": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "certificate": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "preference": {
+        "count": 0,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 0.0,
+        "coverage_pct_of_M": 0.0
+      },
+      "work_hours": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "work_pattern": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "computer_skill": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "related_occupation": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      },
+      "occupation_keywords": {
+        "count": 135,
+        "denominator_success_or_partial": 135,
+        "target_count": 140,
+        "coverage_pct_of_success_or_partial": 100.0,
+        "coverage_pct_of_M": 96.43
+      }
+    },
+    "privacy_phone_hits_in_M": 0,
+    "privacy_email_hits_in_M": 0
+  },
+  "raw_detail_provenance": {
+    "source_filename": "work24_priority_industry_detail_20260923.csv",
+    "source_path": "data/raw/work24/work24_priority_industry_detail_20260923.csv",
+    "sha256": "043c8251b65e6e10a3645b01523e6afec7471bb20971cadd8c9789f966723bbf",
+    "size_bytes": 238847,
+    "attempt_rows_for_M": 150,
+    "unique_M_postings_with_attempts": 140,
+    "initial_requests_for_M": 140,
+    "retry_requests_for_M": 10,
+    "max_attempts_per_M_posting": 3,
+    "collection_started_at_utc": "2026-09-23T11:44:23+00:00",
+    "collection_last_attempt_at_utc": "2026-09-23T12:14:00+00:00",
+    "latest_status_counts": {
+      "success": 135,
+      "partial": 0,
+      "list_only": 0,
+      "expired": 0,
+      "removed": 0,
+      "blocked": 0,
+      "parse_failed": 5,
+      "unknown": 0
+    },
+    "failed_posting_ids": [
+      "K131112609090004",
+      "K131132609080016",
+      "K131132609090043",
+      "K131132609100036",
+      "K131132609140059"
+    ],
+    "request_policy": {
+      "sequential_concurrency": 1,
+      "minimum_delay_seconds": 3,
+      "initial_batching": "10-posting pilot, then remaining 130",
+      "retry_limit": "initial request plus at most 2 retries for retryable failures",
+      "403_429": "stop without retry",
+      "raw_html_saved": false
+    }
+  },
+  "canonical_generation_basis": {
+    "output": "data/processed/work24/work24_recruitment_layer_20260923.csv",
+    "as_of_date": "2026-09-23",
+    "list_source": "data/processed/work24/work24_analysis_ready.csv",
+    "raw_detail_source": "data/raw/work24/work24_priority_industry_detail_20260923.csv",
+    "saved_target_queue": "data/processed/work24/work24_detail_collection_queue_20260923.csv",
+    "saved_target_count": 140,
+    "target_selection": "reuse saved M=140 IDs; no reselection",
+    "diagnostic_join": "existing 2026Q2 saved diagnostics; no Q1/Q2/Q3 recomputation",
+    "mapping_basis": "existing company-master KSIC/KICOX mapping and official FactoryOn snapshot"
+  },
+  "industrial_complex_gate": {
+    "status_counts_mapped_only": {
+      "CONFIRMED": 257,
+      "POSSIBLE": 79,
+      "UNKNOWN": 327,
+      "NOT_MATCHED": 0
+    },
+    "status_summary_mapped_only": {
+      "CONFIRMED": {
+        "postings": 257,
+        "unique_companies": 164
+      },
+      "POSSIBLE": {
+        "postings": 79,
+        "unique_companies": 49
+      },
+      "UNKNOWN": {
+        "postings": 327,
+        "unique_companies": 200
+      },
+      "NOT_MATCHED": {
+        "postings": 0,
+        "unique_companies": 0
+      }
+    },
+    "confirmed_definition": "official factory registration in Changwon National Industrial Complex",
+    "official_source": "kicox_factoryon_public_api",
+    "official_snapshot": {
+      "collected_at": "2026-09-23T07:34:15+00:00",
+      "api_total_count": 3553,
+      "rows": 3553,
+      "unique_factories": 3553,
+      "unique_companies": 3143,
+      "operation": "getFctryListInIrsttService_v2",
+      "query_parameter": "irsttNm",
+      "query_value": "창원국가산업단지"
+    },
+    "proxy_crosstab": {
+      "POSSIBLE": {
+        "official_confirmed": 1,
+        "official_unconfirmed": 170
+      },
+      "UNKNOWN": {
+        "official_confirmed": 0,
+        "official_unconfirmed": 74
+      },
+      "NOT_MATCHED": {
+        "official_confirmed": 256,
+        "official_unconfirmed": 162
+      }
+    }
+  },
+  "job_relevance_gate": {
+    "status_counts_mapped_only": {
+      "UNKNOWN": 530,
+      "CORE_INDUSTRIAL": 113,
+      "INDUSTRIAL_SUPPORT": 9,
+      "GENERAL_NONCORE": 11
+    },
+    "classified_detail_only": true,
+    "list_title_only_classification_disabled": true
+  },
+  "posting_activity": {
+    "as_of": "2026-09-23",
+    "status_counts_mapped_only": {
+      "ACTIVE": 582,
+      "EXPIRED": 81
+    },
+    "basis": "stored Work24 list due_date only; no additional detail request"
+  },
+  "detail_target_funnel": {
+    "M_definition": "공식 국가산단 매칭 + KICOX 매핑 + 최신 우선점검 업종 + 기준일 유효 조건을 모두 충족한 고신뢰 상세검증 대상",
+    "population_note": "창원국가산단 전체 채용공고가 아님",
+    "A_kicox_mapped": 663,
+    "B_official_complex_confirmed": 257,
+    "C_latest_priority_industries": 166,
+    "D_currently_active": 141,
+    "M_final_validation_targets": 140,
+    "E_remaining_detail_needed": 5,
+    "already_detail_verified_excluded_from_M": 1,
+    "exact_natural_key_duplicate_groups": 0,
+    "exact_natural_key_rows_removed": 0,
+    "existing_detail_success_removed": 1,
+    "repost_candidate_not_auto_collapsed": 0
+  },
+  "data_funnel": [
+    {
+      "stage": "all_changwon_list_postings",
+      "start": 2045,
+      "remain": 2045,
+      "excluded": 0,
+      "reason": "기존 5개 구 processed 목록"
+    },
+    {
+      "stage": "company_identifiable",
+      "start": 2045,
+      "remain": 813,
+      "excluded": 1232,
+      "reason": "회사 마스터 MATCH/MULTI 외 NO_MATCH"
+    },
+    {
+      "stage": "exact_ksic",
+      "start": 813,
+      "remain": 679,
+      "excluded": 134,
+      "reason": "사업체 마스터 COMPANY_MASTER_EXACT만 포함"
+    },
+    {
+      "stage": "kicox_industry_mapped",
+      "start": 679,
+      "remain": 663,
+      "excluded": 16,
+      "reason": "KSIC→KICOX 공식 crosswalk 미연결"
+    },
+    {
+      "stage": "official_national_complex_confirmed",
+      "start": 663,
+      "remain": 257,
+      "excluded": 406,
+      "reason": "POSSIBLE 79, UNKNOWN 327; 공식 일치 근거만 CONFIRMED"
+    },
+    {
+      "stage": "saved_diagnostic_join_2026Q2",
+      "start": 663,
+      "remain": 663,
+      "excluded": 0,
+      "reason": "기존 진단 stage를 산업코드로 조인; 판정 재계산 없음"
+    },
+    {
+      "stage": "latest_priority_industries",
+      "start": 257,
+      "remain": 166,
+      "excluded": 91,
+      "reason": "최신 저장 진단의 기계·목재종이만"
+    },
+    {
+      "stage": "active_as_of_snapshot",
+      "start": 166,
+      "remain": 141,
+      "excluded": 25,
+      "reason": "목록 마감일이 2026-09-23 이후인 공고"
+    },
+    {
+      "stage": "final_validation_targets_M",
+      "start": 141,
+      "remain": 140,
+      "excluded": 1,
+      "reason": "이미 상세검증된 1건 제외; 중복 0건, 재공고 후보 자동병합 없음"
+    }
+  ],
+  "diagnostic_join": {
+    "calendar_reference_period": "2026Q2",
+    "axis_semantics": "Q1=state; Q2=scale; Q3=time (persistence, repetition, transition)",
+    "industry_joined_postings": 663,
+    "stage_counts": {
+      "관찰": 268,
+      "우선점검": 395
+    },
+    "priority_industries": [
+      "기계",
+      "목재종이"
+    ],
+    "q1_state_attached": 663,
+    "q2_scale_attached": 663,
+    "q3_time_axis_attached": 663,
+    "q3_repeat_true": 15,
+    "q3_repeat_false": 648,
+    "q3_state_run_value_counts": {
+      "1.0": 114,
+      "2.0": 520,
+      "4.0": 22,
+      "3.0": 7
+    },
+    "q3_transition_value_counts": {
+      "S4 → S2": 101,
+      "S4 → S4": 395,
+      "S2 → S2": 147,
+      "S4 → S3": 13,
+      "S1 → S1": 7
+    },
+    "calendar_2026Q3_available_in_final_diagnostic": false
+  },
+  "detail_access_status_in_M": {
+    "success": 135,
+    "parse_failed": 5
+  },
+  "detail_request_gate": {
+    "requests_made_for_M": 150,
+    "unique_postings_requested_in_M": 140,
+    "scope_confirmation_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
+    "collection_authority": "explicit_user_request_for_saved_M_140_queue",
+    "reason": "저장된 M=140 queue에 대한 사용자 명시 요청에 따라 공개 상세를 순차 확인했다. 140건 요청이 대량이용에 해당하는지는 별도로 확인되지 않았으며 이번 실행은 수집금지 또는 별도 계약 필요 판정이 아니다."
+  },
+  "keyword_provenance": {
+    "title_job_skill_source": "title_raw only",
+    "occupation_job_source": "list occupation only; null when absent",
+    "detail_job_skill_source": "verified detail occupation_raw + job_description_clean only",
+    "detail_qualification_source": "verified detail certificate_raw only",
+    "list_cert_raw_semantics": "[인증] listing marker; not qualification text",
+    "detail_sample_size": 141,
+    "title_job_keyword_counts": {
+      "생산": 269,
+      "가공": 185,
+      "품질·검사": 156,
+      "사무": 119,
+      "물류·납품": 95,
+      "조립": 71,
+      "설계": 61,
+      "자재": 59,
+      "회계": 57,
+      "설비·정비": 50,
+      "용접": 32,
+      "홍보·마케팅": 15
+    },
+    "title_skill_keyword_counts": {
+      "MCT": 99,
+      "CNC": 82,
+      "전기": 58,
+      "선반": 57,
+      "용접": 27,
+      "지게차": 23,
+      "프레스": 17,
+      "CAD/CAM": 10,
+      "밀링": 9,
+      "도면": 8,
+      "PLC": 6,
+      "H-MCT": 2
+    },
+    "occupation_job_keyword_counts": {}
+  },
+  "detail_sample_observations_by_industry": {
+    "음식료": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "섬유의복": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "목재종이": {
+      "verified_postings": 7,
+      "job_relevance_classes": {
+        "GENERAL_NONCORE": 3,
+        "CORE_INDUSTRIAL": 3,
+        "INDUSTRIAL_SUPPORT": 1
+      },
+      "detail_job_keywords": {
+        "생산": 4,
+        "홍보·마케팅": 3,
+        "물류·납품": 2,
+        "사무": 1,
+        "품질·검사": 1
+      },
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {
+        "자동차운전면허1종보통": 2,
+        "자동차운전면허": 1
+      },
+      "career_observed": 7,
+      "wage_observed": 7,
+      "recruitment_count_observed": 7
+    },
+    "석유화학": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "비금속": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "철강": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "기계": {
+      "verified_postings": 134,
+      "job_relevance_classes": {
+        "CORE_INDUSTRIAL": 110,
+        "UNKNOWN": 8,
+        "INDUSTRIAL_SUPPORT": 8,
+        "GENERAL_NONCORE": 8
+      },
+      "detail_job_keywords": {
+        "가공": 69,
+        "생산": 36,
+        "품질·검사": 36,
+        "사무": 31,
+        "설계": 18,
+        "물류·납품": 15,
+        "조립": 14,
+        "설비·정비": 8,
+        "용접": 8,
+        "자재": 6,
+        "회계": 5
+      },
+      "detail_skill_keywords": {
+        "CNC": 25,
+        "선반": 23,
+        "도면": 19,
+        "MCT": 16,
+        "CAD/CAM": 12,
+        "전기": 11,
+        "용접": 7,
+        "밀링": 6,
+        "프레스": 4,
+        "지게차": 2,
+        "H-MCT": 1
+      },
+      "detail_qualification_keywords": {
+        "자동차운전면허1종보통": 3,
+        "자동차운전면허2종보통": 3,
+        "산업안전산업기사": 2,
+        "자동차운전면허": 2,
+        "가스기사": 1,
+        "건설기계조종사면허": 1,
+        "기계설계기사": 1,
+        "대기환경산업기사": 1,
+        "산업안전기사": 1,
+        "산업위생관리산업기사": 1,
+        "전기기능사": 1,
+        "전산응용기계제도기능사": 1,
+        "전자캐드기능사": 1,
+        "지게차운전기능사": 1,
+        "컴퓨터응용가공산업기사": 1,
+        "컴퓨터응용밀링기능사": 1,
+        "콘크리트기사": 1,
+        "토목기사": 1,
+        "품질경영기사": 1,
+        "품질경영산업기사": 1
+      },
+      "career_observed": 134,
+      "wage_observed": 134,
+      "recruitment_count_observed": 134
+    },
+    "전기전자": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "운송장비": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    },
+    "기타": {
+      "verified_postings": 0,
+      "job_relevance_classes": {},
+      "detail_job_keywords": {},
+      "detail_skill_keywords": {},
+      "detail_qualification_keywords": {},
+      "career_observed": 0,
+      "wage_observed": 0,
+      "recruitment_count_observed": 0
+    }
+  },
+  "queue": {
+    "rows": 663,
+    "detail_needed": 5,
+    "priority_counts": {
+      "P1": 5,
+      "P2": 136,
+      "P3": 25,
+      "P4": 229,
+      "P5": 268
+    },
+    "request_scope_status": "UNCLEAR_PENDING_KEIS_CONFIRMATION",
+    "detail_status_counts_in_M": {
+      "success": 135,
+      "partial": 0,
+      "list_only": 0,
+      "expired": 0,
+      "removed": 0,
+      "blocked": 0,
+      "parse_failed": 5,
+      "unknown": 0
+    },
+    "note": "The saved M=140 queue was collected at the user's explicit request. Whether 140 requests qualify as bulk use remains unconfirmed; this run does not determine that collection is prohibited or a separate contract is required."
+  },
+  "artifacts": {
+    "recruitment_layer": "data/processed/work24/work24_recruitment_layer_20260923.csv",
+    "detail_queue": "data/processed/work24/work24_detail_collection_queue_20260923.csv",
+    "quality": "data/processed/work24/work24_recruitment_layer_quality_20260923.json"
+  }
+}
