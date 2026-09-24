@@ -26,7 +26,8 @@ from app.view_models import (  # noqa: E402
     COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
     TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, clarification, comparison_view,
     copilot_suggestions, data_quality_flags, evidence_level, evidence_level_value, field_context, filter_official_cards,
-    function_card_counts, function_name, function_ui_label, recruitment_observations, report_download, rule_evidence_rows, session_scope,
+    function_card_counts, function_name, function_ui_label, quarter_label, recruitment_observations, report_download,
+    rule_evidence_rows, session_scope,
     signal_explanation, stage_code, stage_counts, stage_display, structure_answer, supporting_fact_items,
     team_kpis, team_principles, top_questions, with_session_context,
 )
@@ -777,7 +778,7 @@ def left_panel(industries: list[str], quarters: list[str], latest_quarter: str,
               ind: str, q: str, rec: dict | None, report_payload: dict | None = None):
     st.markdown("**진단 기준 분기**")
     st.selectbox("분기", quarters, key="dx_quarter", label_visibility="collapsed",
-                format_func=lambda qq: f"{qq} (최신)" if qq == latest_quarter else qq)
+                format_func=lambda qq: f"{quarter_label(qq)} (최신)" if qq == latest_quarter else quarter_label(qq))
     st.html(ui.distribution_pills_html(stage_counts(snap.by_quarter(q))))
 
     st.markdown(f"**진단 대상 업종 ({len(industries)})**")
@@ -1928,7 +1929,8 @@ def page_policy():
             st.session_state.policy_industry = ind
             st.selectbox("업종", snap.industries, key="policy_industry", on_change=sync_dx_industry_from_policy)
             st.session_state.policy_quarter = q
-            st.selectbox("분기", snap.quarters[::-1], key="policy_quarter", on_change=sync_dx_quarter_from_policy)
+            st.selectbox("분기", snap.quarters[::-1], key="policy_quarter", on_change=sync_dx_quarter_from_policy,
+                         format_func=lambda qq: f"{quarter_label(qq)} (최신)" if qq == snap.quarters[-1] else quarter_label(qq))
             st.html(ui.labeled_badge_html("현재 판정", badge))
             st.caption(nature_line(q))
             st.html(ui.policy_guide_html(tab))  # 위치 안내만 — 탭 전환은 중앙의 탭으로 한다

@@ -35,6 +35,12 @@ WORK24_BASIS = {
 }
 
 
+def quarter_label(quarter: str) -> str:
+    """분기 선택 목록 표시용 — '2026Q2' → '2026년 2분기'. 저장·조회 값은 '2026Q2' 그대로."""
+    year, sep, number = str(quarter).partition("Q")
+    return f"{year}년 {number}분기" if sep and year.isdigit() and number.isdigit() else str(quarter)
+
+
 def stage_display(stage: str | None) -> str:
     """Triage 단계 표시명. 등록되지 않은 값은 원문을 그대로, None이면 '판정 없음'."""
     if stage is None:
