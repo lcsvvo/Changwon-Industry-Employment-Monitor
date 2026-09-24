@@ -288,6 +288,9 @@ with ai_status_slot:
     st.caption(f"기업마당(BIZINFO): "
               f"{'설정됨' if any(getattr(a, 'available', False) for a in copilot.official_apis) else '미설정'}")
     st.caption("설정됨은 키·옵션이 켜져 있다는 뜻이며 실제 호출 성공 여부는 각 답변의 근거 표시·한계에서 확인합니다.")
+    st.caption("행정 AI 비서는 답변마다 근거 유형(등록 진단·공식문서·외부 최신정보·일반 AI)을 구분해 표시합니다.")
+    # 기존 Copilot 계약: 세션 입력(field_ctx)은 등록 진단 backend에만 쓰이며 외부 provider로 보내지 않는다
+    st.caption("현장 메모 등 세션 입력은 외부 AI로 전달하지 않습니다.")
 
 
 # ------------------------------------------------------------------ 공통 조각
@@ -497,7 +500,8 @@ def timeline_chips(industry: str, current_quarter: str, rows: list[dict]):
     with st.container(key="timeline", horizontal=True, gap="small"):
         for row in rows:
             qq = row["quarter"]
-            st.button(f"{qq[2:4]}년 {qq[5:]}분기", key=f"tl-{qq}", on_click=set_quarter, args=(qq,),
+            # 18개 분기를 한 줄에 — 칩은 짧은 표기(22Q1), 전체 표기(2022년 1분기)는 마우스를 올리면 보인다
+            st.button(f"{qq[2:4]}Q{qq[5:]}", key=f"tl-{qq}", on_click=set_quarter, args=(qq,),
                       help=f"{quarter_label(qq)} · {stage_display(row['stage'])}")
 
 
@@ -571,7 +575,7 @@ def copilot_panel(render):
         with st.container(key="copilotrail", width=64):
             st.button("‹ AI", key="copilot_expand", help="행정 AI 비서 펼치기", on_click=set_copilot, args=(False,))
     else:
-        with st.container(key="copilot", width=380):
+        with st.container(key="copilot", width=440):
             render()
 
 
@@ -607,10 +611,7 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
                 for offset, question in enumerate(more, start=len(primary)):
                     if st.button(question, key=f"chip-{offset}::{scope}"):
                         selected = question
-        with st.expander("AI 비서 안내"):
-            st.caption("답변마다 근거 유형(등록 진단·공식문서·외부 최신정보·일반 AI)을 구분해 표시합니다.")
-            # 기존 Copilot 계약: 세션 입력(field_ctx)은 등록 진단 backend에만 쓰이며 외부 provider로 보내지 않는다
-            st.caption("현장 메모 등 세션 입력은 외부 AI로 전달하지 않습니다.")
+    # 'AI 비서 안내'(근거 유형 표시·세션 입력 비전송)는 설정·정보 → AI 연결 설정으로 옮겼다 — 대화 영역을 넓게 쓰기 위해
     if history:  # 대화가 생겼을 때만 대화 영역을 만든다(높이는 CSS가 패널 남은 높이로 맞춘다)
         with st.container(key="chatlog", height=420):
             last = len(history) - 1
@@ -803,12 +804,11 @@ def report_body(payload: dict, rec: dict | None) -> str:
 
 
 def report_card(payload: dict, rec: dict):
-    """왼쪽 패널 하단 — 담당자 인계용 진단서. 진단서 기능의 유일한 진입점(HTML 저장·JSON 원본은 발급 dialog 안)."""
-    ind, q, t = payload["industry"], payload["quarter"], rec["triage"]
+    """왼쪽 패널 하단 — 진단서 발급 버튼(진단서 기능의 유일한 진입점, HTML 저장·JSON 원본은 발급 dialog 안).
+    업종·분기·판정은 바로 위 '선택 업종' 카드와 같아 따로 반복하지 않는다."""
     with st.container(key="reportcard"):
-        st.html(ui.metric_list_html("담당자 인계용 진단서", [("업종 · 분기", f"{ind} · {quarter_label(q)}")],
-                                    badge_html=ui.stage_badge_html(t["stage"], stage_display(t["stage"]))))
-        if st.button("진단서 발급", key="left_report", type="primary", width="stretch"):
+        if st.button("진단서 발급", key="left_report", type="primary", width="stretch",
+                     help="담당자 인계용 진단서를 엽니다(HTML 저장·JSON 원본 포함)."):
             report_dialog(payload, rec)
 
 
