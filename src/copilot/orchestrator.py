@@ -5,6 +5,9 @@ User Query → Router → ① INTERNAL_DIAGNOSTIC ② INTERNAL_RAG → (부족 �
 - 등록 진단(Snapshot)·판정·RAG 로직은 바꾸지 않고 읽기만 한다.
 - 세션 입력(체크리스트 답변·메모)은 기존 backend(answer())에만 전달하고 외부 provider로 보내지 않는다.
 - 어느 경로에도 해당하지 않으면 현재 업종 진단으로 대신 답하지 않는다.
+- Gemini 작성 모드(compose_with_llm, 앱 기본 켜짐): 정책 RAG·기업마당을 뺀 답변을 LLM이 쓴다. 등록 진단 답변은
+  원문을 근거로 다시 쓰고, 범위 밖·짧은 질문은 등록 진단 요약만 근거로 답한다. 둘 다 수치·판정 보존 검증을 통과해야
+  쓰며, 실패하면 원래 답변을 그대로 돌려준다. LLM 입력에 세션 입력·담당자 정보는 넣지 않는다.
 """
 from __future__ import annotations
 
@@ -60,6 +63,19 @@ REPHRASE_SYSTEM = (
     "원인을 단정하는 표현('~때문입니다', '원인은 ~입니다')과 지원 대상·선정·확정·추천·'받을 수 있습니다' 같은 "
     "표현을 쓰지 마세요. 판정 이유는 원문처럼 '판정 근거는 ~입니다'로 쓰세요.\n"
     "원문의 의미를 바꾸지 말고, 문장을 짧게 하며 어려운 표현만 쉬운 표현으로 바꾸세요. 5문장 이내.")
+GROUNDED_SYSTEM = (
+    "당신은 창원국가산단 산업·고용 전환진단 시스템의 행정 AI 비서입니다. 아래 '등록 진단 요약'만을 이 업종·분기에 관한 "
+    "사실 근거로 쓰세요.\n"
+    "- 질문이 이 업종·분기와 관련되면 요약에 있는 사실만으로 2~4문장으로 답하세요. 요약에 없는 숫자·비율·순위·판정·원인은 "
+    "만들지 마세요.\n"
+    "- 숫자와 분기 표기는 요약에 있는 그대로 쓰고 반올림하거나 풀어쓰지 마세요. 단계명(우선점검/추가확인/관찰)은 요약 그대로 쓰세요.\n"
+    "- 지원사업·지원금·신청 가능 여부를 물으면 구체적인 사업명·금액은 말하지 말고, 완전한 문장으로 이렇게 안내하세요: "
+    "'기존 공식 지원체계는 \"연결 가능한 공식 지원은?\"으로, 지금 모집 중인 공고는 \"현재 신청 가능한 지원사업은?\"으로 "
+    "물어보시면 공식 근거로 확인해 드립니다.'\n"
+    "- 질문이 모호하면 진단 결과·최근 채용 신호·현장 확인사항·연결 가능한 공식 지원 중 무엇을 확인할지 한 문장으로 되물으세요.\n"
+    "- 질문이 산업·고용 진단과 무관하면(예: 날씨) 이 비서가 창원국가산단의 산업·고용 진단과 정책 연계를 지원한다고 "
+    "한 문장으로 알려 주세요.\n"
+    "- 원인을 단정하거나('~때문입니다') 지원 대상·선정·적격·추천을 확정하는 표현을 쓰지 마세요.")
 RAG_SYSTEM = (
     "공식 문서 발췌만 근거로 질문에 답하세요. 발췌에 없는 금액·기간·대상은 쓰지 마세요. "
     "개별 기업의 적격·승인·지급을 확정하지 말고, 담당기관 확인이 필요하다고 덧붙이세요.")
@@ -78,8 +94,11 @@ CAPABILITY_TEXT = (
 class Copilot:
     def __init__(self, service, llm: LLMProvider | None = None, web: WebSearchProvider | None = None,
                  audit: AuditSink | None = None, today=None, *, summarize_rag: bool = False,
-                 official_apis: list | None = None):
+                 official_apis: list | None = None, compose_with_llm: bool = False):
         self.service = service
+        # 정책 RAG·기업마당을 뺀 나머지 답변을 LLM(Gemini)이 등록 진단 근거로 작성한다(수치·판정 보존 검증, 실패 시 원문).
+        # 생성자 기본은 꺼짐 — 앱은 from_env(COPILOT_LLM_COMPOSE, 기본 all)로 켠다.
+        self.compose_with_llm = compose_with_llm
         self.official_apis = list(official_apis or [])  # 공식 구조화 API(예: 기업마당) — 최신 공고 1순위
         self.internal = InternalDiagnostics(service)
         self.llm = llm or NullLLMProvider()
@@ -94,7 +113,8 @@ class Copilot:
         llm, web = providers_from_env(env)
         env = os.environ if env is None else env
         return cls(service, llm, web, audit, summarize_rag=env.get("COPILOT_LLM_RAG_SUMMARY") == "1",
-                   official_apis=official_apis_from_env(None if env is os.environ else env))
+                   official_apis=official_apis_from_env(None if env is os.environ else env),
+                   compose_with_llm=env.get("COPILOT_LLM_COMPOSE", "all").strip().lower() != "off")
 
     # ------------------------------------------------------------ 진입점
     def ask(self, question: str, quarter: str, industry: str, *, comparison_industry: str | None = None,
@@ -112,10 +132,14 @@ class Copilot:
             ans = self._policy(decision, question, target_quarter, target_industry, trace, usage)
         elif decision.route == EXTERNAL_WEB:
             ans = self._web_only(decision, question, target_quarter, target_industry, trace, usage)
+            if ans.source_type == SYSTEM and self._composing():  # 외부 검색 결과가 없으면 등록 진단 근거로 Gemini가 답한다
+                ans = self._grounded(decision, question, target_quarter, target_industry, ans, trace, usage)
         elif decision.route == GENERAL_LLM:
             ans = self._general(decision, question, trace, usage)
         else:
             ans = self._system(decision)
+            if self._composing():  # 인사·범위 밖·짧은 질문 → 등록 진단 요약 근거의 Gemini 답변
+                ans = self._grounded(decision, question, target_quarter, target_industry, ans, trace, usage)
         ans.route_trace = trace + ans.route_trace
         ans = guardrails.finalize(ans)
         self._record(question, decision, ans, usage, started)
@@ -137,14 +161,25 @@ class Copilot:
         trace.append({"stage": INTERNAL_DIAGNOSTIC, "status": ans.answer_type})
         if decision.intent == R.REPHRASE:
             ans = self._rephrase(ans, quarter, industry, trace, usage)
+        elif self._composing() and decision.intent != R.COMPARE:
+            # 비교는 화면이 등록 수치로 구조화해 보여주므로 제외. 나머지 등록 진단 답변은 Gemini가 같은 근거로 다시 쓴다.
+            ans = self._rephrase(ans, quarter, industry, trace, usage, compose=True)
         return ans
 
-    def _rephrase(self, base: CopilotAnswer, quarter, industry, trace, usage) -> CopilotAnswer:
-        """명시적 쉬운 설명 요청만. 등록 답변(read-only)을 LLM이 바꿔 쓰고, 수치·단계 보존 검증 통과분만 쓴다."""
+    def _composing(self) -> bool:
+        return self.compose_with_llm and self.llm.available
+
+    def _rephrase(self, base: CopilotAnswer, quarter, industry, trace, usage, compose: bool = False) -> CopilotAnswer:
+        """등록 답변(read-only)을 LLM이 바꿔 쓰고, 수치·단계 보존 검증 통과분만 쓴다.
+
+        compose=False: 사용자가 쉬운 설명을 명시적으로 요청한 경우. compose=True: Gemini 작성 모드(COPILOT_LLM_COMPOSE)에서
+        모든 등록 진단 답변에 적용. 검증 실패·호출 실패 시 두 경우 모두 등록 원문을 그대로 쓴다.
+        """
         if base.source_type != INTERNAL_DIAGNOSTIC:
             return base
+        stage_name = "COMPOSE_LLM" if compose else "REPHRASE_LLM"
         if not self.llm.available:
-            trace.append({"stage": "REPHRASE_LLM", "status": "NOT_CONFIGURED"})
+            trace.append({"stage": stage_name, "status": "NOT_CONFIGURED"})
             base.caveats = [*base.caveats, "쉬운 설명(LLM) 기능이 설정되지 않아 등록 답변을 그대로 표시합니다."]
             return base
         rec = self.service.snapshot.get(industry, quarter)
@@ -153,19 +188,23 @@ class Copilot:
         result = self.llm.generate(base.answer, system=REPHRASE_SYSTEM)  # 입력 = 등록 답변 문장뿐
         if not result.ok:
             usage["error"] = result.error
-            trace.append({"stage": "REPHRASE_LLM", "status": "FAILED", "error": result.error})
-            base.caveats = [*base.caveats, "쉬운 설명을 만들지 못해 등록 답변을 그대로 표시합니다."]
+            trace.append({"stage": stage_name, "status": "FAILED", "error": result.error})
+            base.caveats = [*base.caveats, ("Gemini 답변 작성에 실패해 등록 답변을 그대로 표시합니다." if compose
+                                            else "쉬운 설명을 만들지 못해 등록 답변을 그대로 표시합니다.")]
             return base
         ok, why = guardrails.check_rewrite(base.answer, result.text, stage)
-        trace.append({"stage": "REPHRASE_LLM", "status": "ACCEPTED" if ok else "REJECTED", "check": why,
+        trace.append({"stage": stage_name, "status": "ACCEPTED" if ok else "REJECTED", "check": why,
                       **({"matched": guardrails.assertive(result.text)[:3]} if why == "ASSERTIVE" else {})})
         if not ok:
-            base.caveats = [*base.caveats, "AI 쉬운 설명이 수치·판정 보존 검증을 통과하지 못해 등록 답변을 그대로 표시합니다."]
-            base.guardrail = f"REPHRASE_REJECTED:{why}"
+            base.caveats = [*base.caveats, "AI 문장이 수치·판정 보존 검증을 통과하지 못해 등록 답변을 그대로 표시합니다."
+                            if compose else "AI 쉬운 설명이 수치·판정 보존 검증을 통과하지 못해 등록 답변을 그대로 표시합니다."]
+            base.guardrail = f"{'COMPOSE' if compose else 'REPHRASE'}_REJECTED:{why}"
             return base
         base.evidence = [*base.evidence, {"registered_answer": base.answer}]
-        base.caveats = [*base.caveats, "AI가 등록 답변을 쉬운 말로 바꾼 것입니다. 수치·판정이 원문과 같은지 자동 검증했으며, "
-                                       "원문은 근거(evidence)에 남아 있습니다."]
+        base.caveats = [*base.caveats, ("Gemini가 등록 진단 답변을 근거로 작성했습니다. 수치·판정이 원문과 같은지 자동 검증했으며, "
+                                        "원문은 근거(evidence)에 남아 있습니다." if compose else
+                                        "AI가 등록 답변을 쉬운 말로 바꾼 것입니다. 수치·판정이 원문과 같은지 자동 검증했으며, "
+                                        "원문은 근거(evidence)에 남아 있습니다.")]
         base.answer, base.composer = result.text, "LLM"
         base.official_evidence_sufficient = True  # 등록 진단 원문이 근거
         return base
@@ -438,6 +477,44 @@ class Copilot:
         trace.append({"stage": GENERAL_LLM, "status": "ACCEPTED"})
         return CopilotAnswer(answer=result.text, source_type=GENERAL_LLM, route=decision.route,
                              intent=decision.intent, answer_type="GENERAL_CONCEPT", composer="LLM")
+
+    # ------------------------------------------------------------ ④-2 등록 진단 요약 근거의 LLM 답변(Gemini 작성 모드)
+    def _diagnosis_summary(self, quarter: str, industry: str) -> tuple[str, str | None]:
+        """LLM에 줄 근거 = 등록 진단 값만(세션 입력·담당자 정보 없음). (요약문, 등록 단계)"""
+        d = self.service.diagnosis(quarter, industry)
+        if d.get("status") != "FOUND":
+            return f"업종 {industry} · 분기 {quarter} · 등록 진단 없음", None
+        num = lambda v, digits=2: "자료 없음" if v is None else (f"{v:,}" if isinstance(v, int) else f"{v:.{digits}f}")
+        q1, q2, q3, t = d["q1"], d["q2"], d["q3"], d["triage"]
+        summary = (f"업종 {industry} · 분기 {quarter} · 등록 판정 {t['stage']} · 판정 근거: {t['reason']} · "
+                   f"Q1 상태 {q1['state']}({q1['state_label']}) · 생산 YoY {num(q1['production_yoy'], 1)}% · "
+                   f"고용 증감 {num(q2['employment_change'])}명 · 고용 YoY {num(q2['employment_yoy'])}% · "
+                   f"동일 상태 지속 {num(q3['duration'])}분기 · 자료 기준 {d['data_cutoff']} · "
+                   "통계 신호는 원인을 확정하지 않으며 현장 확인이 필요함")
+        return summary, t["stage"]
+
+    def _grounded(self, decision, question, quarter, industry, fallback: CopilotAnswer, trace, usage) -> CopilotAnswer:
+        """범위 밖·짧은 질문(과 외부검색 미설정)도 Gemini가 답하되, 등록 진단 요약만 근거로 쓰고 수치 보존을 검증한다.
+
+        호출·검증 실패 시 원래 답변(fallback)을 그대로 돌려준다 — 화면은 그때 되묻기/범위 안내를 보여준다.
+        """
+        summary, stage = self._diagnosis_summary(quarter, industry)
+        usage["llm"] = True
+        result = self.llm.generate(f"[등록 진단 요약]\n{summary}\n\n[질문]\n{question}", system=GROUNDED_SYSTEM)
+        if not result.ok:
+            usage["error"] = result.error
+            trace.append({"stage": "GROUNDED_LLM", "status": "FAILED", "error": result.error})
+            return fallback
+        ok, why = guardrails.check_rewrite(f"{summary} {question}", result.text, stage)
+        trace.append({"stage": "GROUNDED_LLM", "status": "ACCEPTED" if ok else "REJECTED", "check": why})
+        if not ok:
+            fallback.guardrail = f"GROUNDED_REJECTED:{why}"
+            return fallback
+        return CopilotAnswer(
+            answer=result.text, source_type=INTERNAL_DIAGNOSTIC, route=decision.route, intent=decision.intent,
+            answer_type="LLM_GROUNDED", composer="LLM", evidence=[{"registered_summary": summary}],
+            caveats=["Gemini가 등록 진단 요약만 근거로 작성했습니다. 수치·판정이 등록값과 같은지 자동 검증했습니다."],
+            official_evidence_sufficient=False, target={"industry": industry, "quarter": quarter})
 
     # ------------------------------------------------------------ 인사·안내·미지원
     def _system(self, decision) -> CopilotAnswer:
