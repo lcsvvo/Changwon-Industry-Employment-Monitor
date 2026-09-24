@@ -257,10 +257,36 @@ def _link(url: str | None, label: str) -> str:
     return f'<a class="dx-link" href="{_e(url)}" target="_blank" rel="noopener">{_e(label)}</a>'
 
 
-def context_tags_html(title: str, tags: list[str]) -> str:
-    """Copilot 헤더 아래 컨텍스트 한 줄 — 굵은 제목 + 태그 칩(dx-chip--sky)."""
-    chips = "".join(f'<span class="dx-chip dx-chip--sky">{_e(t)}</span>' for t in tags)
-    return f'<div class="dx-copilot-sub"><b>{_e(title)}</b> {chips}</div>'
+def _text_units(text: str) -> float:
+    """글자 폭 추정(em 단위): 한글 1.0 · 숫자/영문/기호 0.6 · 공백 0.3 · 이모지 1.2."""
+    units = 0.0
+    for ch in str(text):
+        if "가" <= ch <= "힣":
+            units += 1.0
+        elif ch == " ":
+            units += 0.3
+        elif ord(ch) > 0x2600:
+            units += 1.2
+        else:
+            units += 0.6
+    return units
+
+
+def context_tags_html(title: str, tags: list[str], optional_tags: bool = False) -> str:
+    """Copilot 헤더 아래 컨텍스트 한 줄 — 굵은 제목 + 태그 칩(dx-chip--sky).
+
+    업종명 길이(예: 전기전자)나 태그 수와 관계없이 항상 한 줄: 문구 폭(--ctx-units, em 단위 추정)을 넘겨
+    CSS가 '패널 폭 ÷ 문구 폭'으로 글씨 크기를 정한다(짧으면 기본 크기 그대로).
+    optional_tags=True(모든 업종에 같은 일반 태그)면 패널이 좁을 때 태그를 숨기고 제목 폭(--ctx-units-min)으로 맞춘다.
+    """
+    title_units = _text_units(title) * 1.06 + 0.4  # 굵은 제목 가산
+    units = title_units + sum(_text_units(t) + 1.25 for t in tags)  # 칩 여백·간격
+    chip_cls = "dx-chip dx-chip--sky" + (" dx-chip--opt" if optional_tags else "")
+    chips = "".join(f'<span class="{chip_cls}">{_e(t)}</span>' for t in tags)
+    line_cls = "dx-copilot-sub dx-ctx-line" + (" dx-ctx-line--opt" if optional_tags else "")
+    return (f'<div class="dx-ctx-wrap"><div class="{line_cls}" '
+            f'style="--ctx-units:{units * 1.04:.2f};--ctx-units-min:{title_units * 1.04:.2f}">'
+            f'<b>{_e(title)}</b> {chips}</div></div>')
 
 
 def brand_html(rule_version: str) -> str:

@@ -570,6 +570,10 @@ def set_copilot(collapsed: bool):
     st.session_state.copilot_collapsed = collapsed
 
 
+# 업종 진단 화면의 AI 비서 맥락 태그 — 모든 업종에 같은 일반 태그라 패널이 좁으면 숨긴다(업종·분기 제목 우선)
+DIAG_CONTEXT_TAGS = ("진단", "현장", "정책")
+
+
 def copilot_panel(render):
     """Copilot 패널 — 접힘(좁은 레일) / 펼침(카드) 두 모양을 감싼다."""
     if st.session_state.copilot_collapsed:
@@ -595,7 +599,8 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
         st.button("»", key="copilot_collapse", help="AI 비서 접기", on_click=set_copilot, args=(True,))
     selected, comparison_industry = None, None
     with st.container(key="copilothead"):
-        st.html(ui.context_tags_html(context_title, context_tags))
+        st.html(ui.context_tags_html(context_title, context_tags,
+                                     optional_tags=tuple(context_tags) == DIAG_CONTEXT_TAGS))
         other = "(선택 안 함)"
         if not team:  # 팀 제안은 전 업종 공통 — 업종 비교는 두지 않는다
             other_options = ["(선택 안 함)"] + [i for i in industries if i != industry]
@@ -1159,7 +1164,7 @@ def page_diagnosis():
                 center_card(ind, q, rec, latest_quarter, jobs, field_questions_all, report_payload)
         if rec is not None:
             copilot_panel(lambda: copilot_view(ind, q, current_field_context, rec["triage"]["stage"], industries,
-                                               f"{ind} · {quarter_label(q)}", ["진단", "현장확인", "정책연계"]))
+                                               f"{ind} · {quarter_label(q)}", list(DIAG_CONTEXT_TAGS)))
 
 
 # ------------------------------------------------------------------ 점검 관리
@@ -2057,7 +2062,8 @@ def page_policy():
                             policy_search_view()
 
         if tab == tabs[0]:
-            context_tags = ["정책·지원 연계", *([function_ui_label(selected, C.label(selected))] if selected else [])]
+            # 맥락 줄 한 줄 유지: 기능을 고르면 그 기능 태그 하나만(정책 화면임은 페이지로 알 수 있음)
+            context_tags = [fn_name(selected)] if selected else ["정책·지원"]
         else:
             context_tags = [tabs[1]]  # 팀 제안은 전 업종 공통 — 업종 추천처럼 보이지 않게 탭 이름만
         copilot_panel(lambda: copilot_view(ind, q, field_ctx, t["stage"], snap.industries, f"{ind} · {quarter_label(q)}",

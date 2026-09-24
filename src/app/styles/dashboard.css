@@ -579,6 +579,15 @@ details.dx-more div { padding: 0.12rem 0 0 0.4rem; line-height: 1.45; }
 .dx-copilot-title { font-weight: 750; font-size: 0.92rem; color: var(--dx-text); display: flex; align-items: center; gap: 0.45rem; }
 .dx-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dx-sky); display: inline-block; }
 .dx-copilot-sub { font-size: 0.72rem; color: var(--dx-muted); line-height: 1.45; }
+/* AI 비서 맥락 줄(업종 · 분기 + 태그)은 항상 한 줄 — 글씨 크기 = min(기본, 패널 폭 ÷ 문구 폭) */
+.dx-ctx-wrap { container-type: inline-size; }
+.dx-ctx-line { white-space: nowrap; font-size: min(0.72rem, calc(100cqi / var(--ctx-units, 20))); }
+.dx-ctx-line .dx-chip { font-size: 1em; padding: 0.1em 0.4em; margin-left: 0.2em; }
+/* 패널이 좁으면 일반 태그(진단·현장·정책)는 숨기고 업종·분기 제목을 기본 크기로 */
+@container (max-width: 250px) {
+  .dx-chip--opt { display: none; }
+  .dx-ctx-line--opt { font-size: min(0.72rem, calc(100cqi / var(--ctx-units-min, 14))); }
+}
 .st-key-copilot [data-testid="stSelectbox"] label p { font-size: 0.72rem; color: var(--dx-muted); }
 /* 빈 대화 안내문(두 문장) — 기본 16px가 아니라 본문 톤에 맞춘다 */
 .st-key-copilot [data-testid="stMarkdown"] p { font-size: 0.86rem; line-height: 1.55; }
