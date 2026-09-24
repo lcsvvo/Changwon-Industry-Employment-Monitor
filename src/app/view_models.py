@@ -65,6 +65,22 @@ def q1_kpi_value(state: str | None, label: str | None) -> str:
     return " · ".join(x for x in (state, label) if x) or "자료 없음"
 
 
+# Q1 상태의 사용자 언어(README 부록 B의 S1~S4 설명). 화면은 이 표현을 먼저, S코드를 보조로 쓴다(저장값은 그대로).
+Q1_PLAIN = {"S1": "생산·고용 동반확대", "S2": "생산확대·고용감소", "S3": "생산감소·고용증가",
+            "S4": "생산·고용 동반감소", "N": "증감 0 포함", "INVALID": "분류 불가"}
+
+
+def q1_plain(state: str | None) -> str:
+    return Q1_PLAIN.get(state or "", state or "자료 없음")
+
+
+# 생산지표 정의(표시용). Triage의 P·Q1 생산 방향은 KICOX 명목 생산액 YoY다(가격 보정 전).
+PRODUCTION_LABEL = "명목 생산액 YoY"
+YOY_NOTE = "YoY는 전년 동분기 대비 증감률입니다."
+NOMINAL_NOTE = ("현재 점검단계에는 명목 생산액 증감률을 사용합니다. 가격변동 효과가 포함될 수 있으므로 "
+                "실제 생산물량 변화는 추가 확인이 필요합니다.")
+
+
 def quarter_label(quarter: str | None) -> str:
     """분기 값 하나의 표시명. 없으면 '—'."""
     return "—" if quarter in (None, "") else quarter_text(str(quarter))
@@ -129,7 +145,7 @@ def _num(v, digits: int = 1, suffix: str = "") -> str:
     if isinstance(v, int):
         return f"{v:,}{suffix}"
     if isinstance(v, float):
-        return f"{v:,.{digits}f}{suffix}"
+        return "자료 없음" if v != v else f"{v:,.{digits}f}{suffix}"  # NaN은 화면에 노출하지 않는다
     return str(v)
 
 
@@ -270,6 +286,10 @@ def supporting_fact_items(rec: dict) -> list[str]:
     return [_fact_op_rate(rec), _fact_firms(rec), _fact_contribution(rec)]
 
 
+# review_required = 생산 YoY ±40% 또는 고용 YoY ±15% 초과, 또는 업종분류 비교 위험(core 전처리 경고 플래그)
+REVIEW_REQUIRED_LABEL = "원자료 확인 필요(생산·고용 YoY 급변 또는 업종분류 비교 위험 표시)"
+
+
 def data_quality_flags(rec: dict) -> list[str]:
     """자료 품질 표시(caveat_items의 자료 품질 부분만) — 원인 미판정 문구·범위·재구성 메모는 제외."""
     dq = rec["data_quality"]
@@ -283,7 +303,7 @@ def data_quality_flags(rec: dict) -> list[str]:
     if rec["triage"].get("data_quality_minimum_only"):
         items.append("확인 가능한 신호에 따른 최소판정")
     if dq.get("review_required"):
-        items.append("원천 검토 필요 표시")
+        items.append(REVIEW_REQUIRED_LABEL)
     masked = [f for f, v in dq.get("fields", {}).items() if v.get("masked")]
     if masked:
         items.append(f"비공개(마스킹) 항목: {', '.join(masked)}")
@@ -357,11 +377,12 @@ def copilot_suggestions(stage: str | None) -> tuple[list[str], list[str]]:
 SIGNAL_EXPLANATION_TITLE = {"E": "고용 감소율", "R": "산단평균 대비 열위", "A": "산단 대비 감소규모"}
 
 
-def signal_explanation(rows: list[dict], signals: dict) -> dict:
+def signal_explanation(rows: list[dict], signals: dict, p_title: str = "생산 감소 (보강)") -> dict:
     """"왜 {단계}인가?" 카드용 근거. rule_evidence_rows() 값만 재구성하고 새로 계산하지 않는다.
 
     E/R/A는 판정과 무관하게 항상 표시하고(모든 단계에서 같은 구조), P·반복 진입신호는 보강 기준을
     충족했을 때만 덧붙인다. summary는 등록된 n_entry/n_up 신호 개수를 그대로 옮긴다.
+    p_title = P 카드 제목(화면은 '명목 생산 감소 (보강)'으로 생산지표 정의를 드러낸다).
     """
     items: list[dict] = []
     for code in ("E", "R", "A"):
@@ -381,7 +402,7 @@ def signal_explanation(rows: list[dict], signals: dict) -> dict:
                       "rule": rule, "tone": tone})
     p_row = next((r for r in rows if (r.get("signal") or "").startswith("P ")), None)
     if p_row and p_row.get("verdict") == "충족":
-        items.append({"title": "생산 감소 (보강)", "value": p_row.get("current"),
+        items.append({"title": p_title, "value": p_row.get("current"),
                       "rule": f"보강 기준 {p_row.get('entry_threshold')} 충족", "tone": "amber"})
     rep_row = next((r for r in rows if (r.get("signal") or "").startswith("반복 진입신호")), None)
     if rep_row and rep_row.get("verdict") == "충족":
@@ -394,6 +415,176 @@ def signal_explanation(rows: list[dict], signals: dict) -> dict:
 def top_questions(questions: list[dict], n: int = 3) -> list[dict]:
     """앞의 n개만 잘라 보여준다. backend 순서(Q1→Q3→WORK24→SNAPSHOT)를 그대로 쓰며 재정렬하지 않는다."""
     return questions[:n]
+
+
+# ------------------------------------------------------------------ 업종 진단 상단 점검 대기열 · 5초 요약
+# 정렬은 등록 판정 단계와 등록 단계 내 순위(rank_in_stage)만 쓴다 — 새 순위 계산식 없음.
+QUEUE_GROUP = {"우선점검": 0, "추가확인": 1}  # 2 = 진행 중인 점검이 있는 관찰 업종, 3 = 나머지 관찰
+_STAGE_TO = {"우선점검": "우선점검 후보로", "추가확인": "추가확인으로", "관찰": "관찰로"}
+_SIGNAL_SHORT = {"E": "고용 감소율", "R": "산단평균 대비 열위", "A": "산단 대비 감소규모"}
+OBSERVATION_RANK_HELP = "동일 점검단계 안에서의 비교 순위이며 우선점검 대상 순위를 의미하지 않습니다."
+# 진단 → 지원 연계 흐름(업종 진단 지원체계 검토 경로·정책 화면 공용 안내 — 새 라우팅 아님)
+LINK_FLOW = ("진단 신호", "현장 확인질문", "검토 지원기능", "공식 지원사업", "담당기관 검증상태", "공식 문의·접수 경로")
+HANDOVER_NOTICE = "본 문서는 담당자 검토와 인계를 위한 요약자료이며 공식 행정처분 또는 지원대상 확정 문서가 아닙니다."
+
+
+def pick_case(cases: list[dict], industry: str, quarter: str) -> dict | None:
+    """그 업종·분기의 점검 건 — 진행 중(모니터링 포함)을 먼저, 없으면 가장 최근 종결 건(list_cases는 최신순)."""
+    mine = [c for c in cases if c.get("industry") == industry and c.get("quarter") == quarter]
+    active = [c for c in mine if c.get("status") != "종결"]
+    return (active or mine or [None])[0]
+
+
+def case_status_label(candidate: dict | None, case: dict | None) -> str:
+    """점검상태 표시(기록된 값만): 미개설 · 검토 중 · 진행 중 #n · 인계 #n · 모니터링 #n · 종결 #n."""
+    if case:
+        if case.get("status") == "종결":
+            return f"종결 #{case['id']}"
+        if case.get("decision") == "인계":
+            return f"인계 #{case['id']}"
+        return f"{case.get('status') or '진행 중'} #{case['id']}"
+    review = (candidate or {}).get("review") or {}
+    if review.get("status") == "점검 불필요":
+        return "검토 종료(점검 불필요)"
+    return review.get("status") or "미개설"
+
+
+def run_text(q3: dict) -> str:
+    n = q3.get("state_run_length")
+    return "지속기간 자료 없음" if n is None or n != n else f"{int(n)}분기 연속"
+
+
+def reason_sentence(rec: dict, rows: list[dict]) -> str:
+    """판정 이유 한 문장 — rule_evidence_rows()의 등록 판정(상위·진입·충족)만 옮긴다. 원인 해석 없음."""
+    t = rec["triage"]
+    stage = t.get("stage")
+    parts = []
+    for code in ("E", "R", "A"):
+        row = next((r for r in rows if (r.get("signal") or "").startswith(code)), None)
+        if row and row.get("verdict") in ("상위", "진입"):
+            edge, bound = (("상위경계", row.get("upper_threshold")) if row["verdict"] == "상위"
+                           else ("진입경계", row.get("entry_threshold")))
+            parts.append(f"{_SIGNAL_SHORT[code]} {row.get('current')}({edge} {bound} 통과)")
+    extra = []
+    p_row = next((r for r in rows if (r.get("signal") or "").startswith("P ")), None)
+    if p_row and p_row.get("verdict") == "충족":
+        extra.append(f"명목 생산액 감소 {p_row.get('current')}")
+    rep_row = next((r for r in rows if (r.get("signal") or "").startswith("반복 진입신호")), None)
+    if rep_row and rep_row.get("verdict") == "충족":
+        extra.append("직전 분기 반복 진입신호")
+    if not parts:
+        if stage != "관찰":
+            return f"등록 판정 사유: {t.get('stage_reason') or '자료 없음'}"
+        text = "점검단계 진입기준을 충족한 고용 신호가 없어 관찰로 분류됐습니다."
+        if t.get("prod_only_decline") or (p_row and p_row.get("verdict") == "충족"):
+            text += " 명목 생산액 단독 감소는 현장 확인질문에만 반영됐습니다."
+        return text
+    if stage not in ("우선점검", "추가확인"):
+        return f"등록 판정 사유: {t.get('stage_reason') or '자료 없음'}"
+    head = " · ".join(parts)
+    text = (f"{head}에 보강 신호({' · '.join(extra)})가 더해져 {_STAGE_TO[stage]} 분류됐습니다." if extra
+            else f"{head} 신호가 확인되어 {_STAGE_TO[stage]} 분류됐습니다.")
+    if t.get("scale_flag"):
+        text += f" 규모 기준: {t['scale_flag']}."
+    if t.get("data_quality_minimum_only"):
+        text += " 확인 가능한 신호에 따른 최소판정입니다."
+    return text
+
+
+def next_action(stage: str | None, status: str, next_review: str | None) -> str:
+    """다음 조치 한 줄 — 등록 단계와 기록된 점검상태만으로 정한다(새 판단 없음)."""
+    if status.startswith(("진행 중", "인계", "모니터링")):
+        return f"진행 중인 점검 건 확인 · {status}"
+    if status.startswith("종결"):
+        return f"종결된 점검 건 기록 확인 · 다음 검토 {quarter_label(next_review)}"
+    if stage in ("우선점검", "추가확인"):
+        return "점검 개설 · 현재 점검 미개설" if status == "미개설" else f"점검 후보 검토 · {status}"
+    return f"정기 모니터링 · 다음 검토 {quarter_label(next_review)}"
+
+
+def queue_rows(records: list[dict], candidates: list[dict], cases: list[dict], rules: dict[str, dict]) -> list[dict]:
+    """선택 분기의 점검 대기열: 우선점검 후보 → 추가확인 → 진행 중인 점검(관찰) → 관찰, 같은 묶음은 등록 단계 내 순위."""
+    cand = {c["industry"]: c for c in candidates}
+    out = []
+    for r in records:
+        t, q1, q2, q3 = r["triage"], r["q1"], r["q2"], r["q3"]
+        case = pick_case(cases, r["industry"], r["quarter"])
+        status = case_status_label(cand.get(r["industry"]), case)
+        active = case is not None and case.get("status") != "종결"
+        stage = t.get("stage")
+        out.append({
+            "industry": r["industry"], "quarter": r["quarter"], "stage": stage, "display": stage_display(stage),
+            "group": QUEUE_GROUP.get(stage, 2 if active else 3), "rank": t.get("rank_in_stage"),
+            "state": q1.get("state"), "state_plain": q1_plain(q1.get("state")),
+            "emp_delta": _num(q2.get("emp_delta"), suffix="명"), "emp_yoy": _num(q2.get("employment_yoy"), 2, "%"),
+            "share": _num(q2.get("employment_share_pct"), 2, "%"), "run": run_text(q3),
+            "transition": q3.get("transition") or "전환 자료 없음",
+            "reason": reason_sentence(r, rule_evidence_rows(r, rules)), "status": status,
+            "case_id": case["id"] if active else None,
+            "next_review": t.get("next_review_quarter"),
+        })
+    return sorted(out, key=lambda x: (x["group"], x["rank"] if isinstance(x["rank"], int) else 999, x["industry"]))
+
+
+def rank_text(stage: str | None, rank) -> str:
+    """단계 내 순위 표시 — 관찰은 우선점검 순위로 읽히지 않게 '참고 순위'로 쓴다."""
+    if not isinstance(rank, int):
+        return "단계 내 순위 자료 없음"
+    if stage == "관찰":
+        return f"관찰 단계 내 참고 순위 {rank}위"
+    return f"{stage_display(stage)} 단계 내 {rank}순위"
+
+
+# ------------------------------------------------------------------ 정책 근거 위치 · 담당기관 검증상태(등록 값만)
+_GENERIC_SECTION = re.compile(r"^(section-\d+|p\.\s*\d+|본문|첨부파일|회원로그인|로그인)$", re.I)
+PROVENANCE_MISSING = "공식 근거 위치 상세 미등록"
+
+
+def provenance_lines(card: dict, doc_title: str | None = None) -> list[str]:
+    """요건 카드의 근거 위치 — 등록된 쪽·절만 문서명과 함께. 의미 없는 추출 머리글은 쓰지 않고, 없으면 '미등록'."""
+    head = doc_title or (f"공식문서 {card['document_id']}" if card.get("document_id") else "공식문서")
+    lines = []
+    for p in card.get("provenance") or []:
+        section = str(p.get("section") or "").strip()
+        if p.get("page"):
+            lines.append(f"{head} {p['page']}쪽")
+        elif section and not _GENERIC_SECTION.match(section):
+            lines.append(f"{head} · {section}")
+    return list(dict.fromkeys(lines)) or [PROVENANCE_MISSING]
+
+
+def institution_status_text(candidates: list[dict]) -> str:
+    """지원 기능 1개의 담당기관 검증상태. 카탈로그·등록부의 verified 후보만 담당기관으로 적는다(기관을 새로 확정하지 않음)."""
+    if not candidates:
+        return "담당기관 미확정 · 실제 인계 전 담당기관 확인 필요"
+    names = ", ".join(dict.fromkeys(c["institution"] for c in candidates))
+    route = ("접수경로 확인됨" if all(c.get("intake_route_verified") for c in candidates)
+             else "실제 접수경로 미확인")
+    return f"담당기관 확인 · {names} ({route})"
+
+
+INSTITUTION_AUDIT_LABEL = {
+    "verified": "담당기관 확인 · 기관 기능 확인, 실제 접수경로 미확인",
+    "proposed": "관련기관 · 담당기관 추가 확인 필요",
+    "rejected": "관련기관 참고 · 인계 대상 아님",
+}
+
+
+def institution_audit_label(entry: dict | None) -> str:
+    if not entry:
+        return "관련기관 참고 · 실제 인계 전 담당기관 확인 필요"
+    label = INSTITUTION_AUDIT_LABEL.get(entry.get("status"), "관련기관 참고 · 실제 인계 전 담당기관 확인 필요")
+    if entry.get("status") == "verified" and entry.get("intake_route_verified"):
+        label = "담당기관 확인 · 기관 기능·접수경로 확인"
+    return label
+
+
+# ------------------------------------------------------------------ AI 패널 이름(설정 상태와 일치)
+def assistant_labels(llm_available: bool) -> tuple[str, str]:
+    """(패널 이름, 응답 방식). Gemini가 설정되지 않으면 생성형 AI처럼 보이지 않게 '규칙 기반'으로 표시한다."""
+    if llm_available:
+        return "행정 AI 비서", "등록된 진단·정책 근거 기반"
+    return "진단 근거 도우미", "규칙 기반 응답"
 
 
 def function_card_counts(functions: list[dict], cards: list[dict]) -> dict[str, int]:
@@ -508,6 +699,7 @@ def comparison_view(a: str, rec_a: dict, b: str, rec_b: dict, rules: dict[str, d
 
 
 CONTEXT_HINTS = ("상태", "지금", "채용", "지원", "현장", "판정", "왜", "진단", "점검", "업종")
+SCOPE_TEXT = "현재 도우미는 등록된 진단 결과, 현장 확인사항, 채용시장 보조근거와 지원 연계 근거만 설명할 수 있습니다."
 
 
 def clarification(prompt: str, industry: str, stage: str | None, mentioned: tuple[str, ...]) -> dict:
@@ -524,7 +716,7 @@ def clarification(prompt: str, industry: str, stage: str | None, mentioned: tupl
         text = (f"현재 선택된 업종은 {industry}입니다. {target} 업종의 진단 결과, 최근 채용 신호, 현장 확인사항, "
                 "연결 가능한 공식 지원 중 무엇을 확인할까요?")
         return {"kind": "clarify", "text": text, "actions": actions}
-    return {"kind": "scope", "text": "이 비서는 창원국가산단의 산업·고용 진단과 정책 연계를 지원합니다.", "actions": actions}
+    return {"kind": "scope", "text": SCOPE_TEXT, "actions": actions}
 
 
 # ------------------------------------------------------------------ 공모전 팀 제안 — 정본 자료 기준

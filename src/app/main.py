@@ -61,7 +61,7 @@ from export.snapshot import (  # noqa: E402
 )
 from app import team_copilot, ui  # noqa: E402
 from app.view_models import (  # noqa: E402
-    COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, q1_kpi_value, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
+    COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
     TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, chip_label, clarification, comparison_view,
     copilot_suggestions, data_quality_flags, evidence_level, evidence_level_value, field_context, filter_official_cards,
     collect_related_notices, function_card_counts, function_name, function_ui_label, next_quarters, notice_reasons,
@@ -70,6 +70,9 @@ from app.view_models import (  # noqa: E402
     rule_evidence_rows, session_scope,
     signal_explanation, stage_code, stage_counts, stage_display, structure_answer, supporting_fact_items,
     team_kpis, team_principles, top_questions, with_session_context,
+    SIGNAL_EXPLANATION_TITLE, HANDOVER_NOTICE, LINK_FLOW, NOMINAL_NOTE, OBSERVATION_RANK_HELP, PRODUCTION_LABEL, REVIEW_REQUIRED_LABEL, YOY_NOTE,
+    assistant_labels, case_status_label, institution_audit_label, institution_status_text, next_action, pick_case,
+    q1_plain, queue_rows, rank_text, reason_sentence, run_text,
 )
 _stamp_ui_modules()
 from copilot import Copilot  # noqa: E402
@@ -135,7 +138,7 @@ def fmt(v, digits=1, suffix=""):
     if isinstance(v, int):
         return f"{v:,}{suffix}"
     if isinstance(v, float):
-        return f"{v:,.{digits}f}{suffix}"
+        return "자료 없음" if v != v else f"{v:,.{digits}f}{suffix}"  # NaN은 화면에 노출하지 않는다
     return str(v)
 
 
@@ -242,11 +245,24 @@ def ensure_dx_defaults():
         priority = sorted([r for r in latest_recs if r["triage"]["stage"] == "우선점검"],
                           key=lambda r: r["triage"]["rank_in_stage"])
         st.session_state.dx_industry = priority[0]["industry"] if priority else snap.industries[0]
+    # 주소·세션에 남은 업종·분기가 이 분석본에 없으면(잘못된 값) 기본값으로 되돌린다 — 없는 업종 화면을 만들지 않는다
+    if st.session_state.dx_quarter not in snap.quarters:
+        st.session_state.dx_quarter = latest_quarter
+    if st.session_state.dx_industry not in snap.industries:
+        st.session_state.dx_industry = snap.industries[0]
 
+
+policy = PolicyRAG(svc.Session)
+decision_support = DecisionSupportService(svc.Session, snap, svc)
+# Copilot = 기존 backend를 감싸는 계층(등록 진단 → 공식 RAG → 외부 공식 도메인 → 일반 LLM). provider는 환경변수로만 설정.
+copilot = Copilot.from_env(decision_support, audit=JsonlAuditSink(audit_path_for(database_url)))
+# AI 패널 이름은 Gemini 설정 여부와 일치시킨다(미설정이면 생성형 AI처럼 보이지 않게 '규칙 기반 응답')
+ASSISTANT_NAME, ASSISTANT_MODE = assistant_labels(copilot.llm.available)
 
 with st.container(key="topbar"):
     with st.container(horizontal=True, vertical_alignment="center", gap="small"):
-        st.html(ui.brand_html(f"규칙 {meta['rule_version'].split('/')[-1]}"), width="stretch")
+        st.html(ui.brand_html(f"규칙 {meta['rule_version'].split('/')[-1]}",
+                              "AI 코파일럿" if copilot.llm.available else "규칙 기반 도우미"), width="stretch")
         with st.container(key="topactions", horizontal=True, gap="small", width="content",
                           vertical_alignment="center"):
             with st.popover("⚙ 설정·정보", help="담당자 · 분석 버전 · 방법론·변경 기록"):
@@ -281,10 +297,6 @@ with st.container(key="topbar"):
             pills.append(("warn", "시연 모드 — 시연 기록(운영지표 제외)"))
         st.html(ui.status_pills_html(pills), width="content")
 
-policy = PolicyRAG(svc.Session)
-decision_support = DecisionSupportService(svc.Session, snap, svc)
-# Copilot = 기존 backend를 감싸는 계층(등록 진단 → 공식 RAG → 외부 공식 도메인 → 일반 LLM). provider는 환경변수로만 설정.
-copilot = Copilot.from_env(decision_support, audit=JsonlAuditSink(audit_path_for(database_url)))
 SOURCE_BADGE_COLOR = {"INTERNAL_DIAGNOSTIC": "blue", "INTERNAL_RAG": "green", "EXTERNAL_WEB": "orange",
                       "GENERAL_LLM": "violet", "SYSTEM": "gray"}
 
@@ -296,7 +308,9 @@ with ai_status_slot:
     st.caption(f"기업마당(BIZINFO): "
               f"{'설정됨' if any(getattr(a, 'available', False) for a in copilot.official_apis) else '미설정'}")
     st.caption("설정됨은 키·옵션이 켜져 있다는 뜻이며 실제 호출 성공 여부는 각 답변의 근거 표시·한계에서 확인합니다.")
-    st.caption("행정 AI 비서는 답변마다 근거 유형(등록 진단·공식문서·외부 최신정보·일반 AI)을 구분해 표시합니다.")
+    st.caption(f"AI 패널 표시: {ASSISTANT_NAME} · {ASSISTANT_MODE}"
+               + ("" if copilot.llm.available else " — Gemini 미설정이라 등록 진단·공식 문서를 규칙으로 찾아 답합니다."))
+    st.caption(f"{ASSISTANT_NAME}는 답변마다 근거 유형(등록 진단·공식문서·외부 최신정보·일반 AI)을 구분해 표시합니다.")
     # 기존 Copilot 계약: 세션 입력(field_ctx)은 등록 진단 backend에만 쓰이며 외부 provider로 보내지 않는다
     st.caption("현장 메모 등 세션 입력은 외부 AI로 전달하지 않습니다.")
 
@@ -585,7 +599,8 @@ def copilot_panel(render):
     """Copilot 패널 — 접힘(좁은 레일) / 펼침(카드) 두 모양을 감싼다."""
     if st.session_state.copilot_collapsed:
         with st.container(key="copilotrail", width=64):
-            st.button("‹ AI", key="copilot_expand", help="행정 AI 비서 펼치기", on_click=set_copilot, args=(False,))
+            st.button("‹ AI", key="copilot_expand", help=f"{ASSISTANT_NAME} 펼치기 · {ASSISTANT_MODE}",
+                      on_click=set_copilot, args=(False,))
     else:
         with st.container(key="copilot", width=320):  # 왼쪽 패널과 같은 너비
             render()
@@ -599,11 +614,11 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
     history = histories.setdefault(scope, [])
     # 패널 = 고정 높이 세로 3단: 머리(제목·맥락·추천 질문) / 대화(남는 높이 전부, 이것만 스크롤) / 질문 입력(맨 아래 고정)
     with st.container(horizontal=True, vertical_alignment="center"):
-        st.html('<div class="dx-copilot-title"><span class="dx-dot"></span>행정 AI 비서</div>')
+        st.html(ui.copilot_title_html(ASSISTANT_NAME, ASSISTANT_MODE))
         if st.button("↻", key=f"chatreset::{scope}", help="이 업종·분기 대화 초기화"):
             history.clear()
             st.rerun()
-        st.button("»", key="copilot_collapse", help="AI 비서 접기", on_click=set_copilot, args=(True,))
+        st.button("»", key="copilot_collapse", help=f"{ASSISTANT_NAME} 접기", on_click=set_copilot, args=(True,))
     selected, comparison_industry = None, None
     with st.container(key="copilothead"):
         st.html(ui.context_tags_html(context_title, context_tags,
@@ -654,7 +669,9 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
                  "source_type": result["source_type"], "citations": result.get("citations", []),
                  "route": result["route"], "intent": result["intent"], "meta": result.get("meta") or {},
                  "composer": result.get("composer"), "answer_type": result.get("answer_type"),
-                 "llm_provider": getattr(copilot.llm, "name", None) if result.get("composer") == "LLM" else None}
+                 "llm_provider": getattr(copilot.llm, "name", None) if result.get("composer") == "LLM" else None,
+                 # 답변에 쓰인 업종·분기(질문이 다른 업종을 가리키면 그 업종) — 화면에 '답변 기준'으로 표시
+                 "target": {k: v for k, v in (result.get("target") or {}).items() if k in ("industry", "quarter")}}
         # 표시용 보조 정보(라우팅·답변 내용은 그대로): 비교 대상 업종, '지원 범위 밖' 답변의 되묻기
         mentioned = decision.industries
         if result["intent"] == "COMPARE":
@@ -678,6 +695,9 @@ def assistant_message_view(message: dict, scope: str, is_last: bool) -> str | No
     used = provider_usage_marks(message)
     if used:
         st.caption(" ".join(used))
+    target = message.get("target") or {}
+    if target.get("industry") and target.get("quarter"):
+        st.caption(f"답변 기준 · {target['industry']} · {quarter_label(target['quarter'])}")
     biz = (message.get("meta") or {}).get("bizinfo")
     if biz and biz.get("status") != "UNAVAILABLE":
         st.caption("모집 중 공고(출처 · 기업마당) · 지원대상·신청자격은 공고문과 담당기관 확인 필요")
@@ -728,33 +748,54 @@ def provider_usage_marks(message: dict) -> list[str]:
     return marks
 
 
-def handover_sections(payload: dict, rec: dict | None, rows: list[dict]) -> list[str]:
+def handover_status(ind: str, q: str, rec: dict | None, payload: dict) -> dict:
+    """진단서에 덧붙이는 점검·인계 상태(기록된 값만). 없으면 '미배정'·'미확인' — 담당자·기관·기한을 만들지 않는다."""
+    cand = next((c for c in svc.candidates(snap, q) if c["industry"] == ind), None)
+    case = pick_case(svc.list_cases(), ind, q)
+    if case and case.get("next_review_quarter"):
+        review = f"{quarter_label(case['next_review_quarter'])} (점검 건 기록)"
+    elif rec and rec["triage"].get("next_review_quarter"):
+        review = f"{quarter_label(rec['triage']['next_review_quarter'])} (등록 판정 기준)"
+    else:
+        review = "미확인"
+    institutions = [f"{fn_name(f['function_tag'])} — "
+                    f"{institution_status_text(svc.institution_candidates(snap, f['function_tag']))}"
+                    for f in payload.get("support_functions") or []]
+    return {"status": case_status_label(cand, case), "assignee": (case or {}).get("assignee") or "미배정",
+            "review": review, "institutions": institutions or ["검토 지원 기능 후보 없음 · 담당기관 미확인"]}
+
+
+def handover_sections(payload: dict, rec: dict | None, rows: list[dict], handover: dict | None = None) -> list[str]:
     """담당자 인계용 진단 요약 6개 섹션(HTML). 화면·저장 HTML 파일에 동일하게 쓴다."""
     ind, q = payload["industry"], payload["quarter"]
     triage = payload.get("triage") or {}
     q1, q2, q3 = payload.get("q1") or {}, payload.get("q2") or {}, payload.get("q3") or {}
-    sections = []
+    sections = [ui.disclaimer_html(HANDOVER_NOTICE)]
 
     kpi = ui.kpi_cards_html([
         {"label": "업종", "value": ind}, {"label": "기준분기", "value": quarter_label(q)},
         {"label": "현재 판정", "value": stage_display(triage["stage"]) if triage.get("stage") else "자료 없음"},
-        {"label": "Q1 상태", "value": " · ".join(x for x in (q1.get("state"), q1.get("state_label")) if x) or "자료 없음"},
+        {"label": "Q1 산업·고용 상태", "value": q1_plain(q1.get("state")), "sub": q1.get("state") or "—"},
         {"label": "Q2 고용증감", "value": fmt(q2.get("employment_change"), suffix="명"),
          "sub": f"YoY {fmt(q2.get('employment_yoy'), 2, '%')}",
          "tone": "rose" if (q2.get("employment_change") or 0) < 0 else "emerald"},
         {"label": "Q3 지속", "value": fmt(q3.get("duration"), suffix="분기")},
     ])
+    if handover:
+        kpi += ui.metric_list_html("점검·인계 상태", [
+            ("현재 점검상태", handover["status"]), ("담당자", handover["assignee"]), ("다음 검토", handover["review"])])
     sections.append(ui.section_html("1. 진단 요약", kpi))
 
     if rec:
-        explanation = signal_explanation(rows, rec["signals"])
+        explanation = signal_explanation(rows, rec["signals"], p_title="명목 생산 감소 (보강)")
         summary_line = f"{explanation['summary']} → 등록 판정 {stage_display(rec['triage']['stage'])}"
     else:
         explanation, summary_line = {"items": []}, None
     fallback = rec["triage"]["stage_reason"] if rec else "고용 축 진입신호 없음"
-    reason_body = ui.reason_cards_html("", explanation["items"], fallback)
+    reason_body = (ui.snapshot_brief_html([("판정 이유", reason_sentence(rec, rows))]) if rec else "")
+    reason_body += ui.reason_cards_html("", explanation["items"], fallback)
     if summary_line:
-        reason_body += f'<div class="dx-footnote">{html.escape(summary_line)}</div>'
+        reason_body += f'<div class="dx-footnote">{html.escape(summary_line)} · P = {PRODUCTION_LABEL} 감소율</div>'
     sections.append(ui.section_html("2. 왜 점검 대상인가", reason_body))
 
     jobs = payload.get("recruitment_snapshot") or {}
@@ -767,7 +808,7 @@ def handover_sections(payload: dict, rec: dict | None, rows: list[dict]) -> list
     jobs_html = (f'<div class="dx-report-meta">상세 검증 {n} · 기업 {company}</div>'
                 + ui.chip_row_html(kw)
                 + f'<div class="dx-footnote">{html.escape(kw_basis)}</div>'
-                + '<div class="dx-tag-line">현재 채용시장 참고자료 · 선택 분기의 진단 판정 입력 아님</div>')
+                + '<div class="dx-tag-line">현재 채용시장 보조근거 · 선택 분기의 진단 판정 입력 아님</div>')
     sections.append(ui.section_html("3. 채용시장 보조신호", jobs_html))
 
     questions = payload.get("field_checks", {}).get("questions", [])
@@ -783,10 +824,14 @@ def handover_sections(payload: dict, rec: dict | None, rows: list[dict]) -> list
     first_owner = rec["triage"].get("first_owner") if rec else None
     support_html = ui.support_summary_html(first_owner, payload.get("support_functions") or [],
                                            payload.get("requirement_cards") or [], label_of=fn_name)
+    if handover:
+        support_html += ('<div class="dx-sub-title">담당기관 검증상태</div>'
+                         + ui.bullet_list_html(handover["institutions"]))
     sections.append(ui.section_html("5. 지원 검토", support_html))
 
     limits = ["통계 신호는 원인을 자동 판정하지 않습니다(현장 확인 필요).",
               "지원 적격·선정 여부를 자동 판정하지 않습니다(담당기관 확인 필요).",
+              NOMINAL_NOTE, YOY_NOTE,
               nature_line(q), f"자료 기준 {payload.get('basis_date')}"]
     sections.append(ui.section_html("6. 한계", ui.bullet_list_html(limits)))
     return sections
@@ -812,18 +857,19 @@ def report_dialog(payload: dict, rec: dict | None):
 
 
 def report_body(payload: dict, rec: dict | None) -> str:
-    """담당자 인계용 진단 요약 본문(HTML) — 진단서 발급 dialog의 화면 표시와 HTML 저장이 같은 것을 쓴다."""
+    """담당자 인계용 진단 요약 본문(HTML) — 진단서 dialog의 화면 표시와 HTML 저장이 같은 것을 쓴다."""
     rules = {r["rule_name"]: r for r in snap.reference["triage_rules"]}
     rows = rule_evidence_rows(rec, rules) if rec else []
-    return "".join(handover_sections(payload, rec, rows))
+    handover = handover_status(payload["industry"], payload["quarter"], rec, payload)
+    return "".join(handover_sections(payload, rec, rows, handover))
 
 
 def report_card(payload: dict, rec: dict):
-    """왼쪽 패널 하단 — 진단서 발급 버튼(진단서 기능의 유일한 진입점, HTML 저장·JSON 원본은 발급 dialog 안).
-    업종·분기·판정은 바로 위 '선택 업종' 카드와 같아 따로 반복하지 않는다."""
+    """왼쪽 패널 하단 — 진단서 보기·저장 버튼(진단서 기능의 유일한 진입점, HTML 저장·JSON 원본은 dialog 안).
+    업종·분기·판정은 바로 위 '선택 업종' 카드와 같아 따로 반복하지 않는다. 공식 발급 문서가 아니다."""
     with st.container(key="reportcard"):
-        if st.button("진단서 발급", key="left_report", type="primary", width="stretch",
-                     help="담당자 인계용 진단서를 엽니다(HTML 저장·JSON 원본 포함)."):
+        if st.button("진단서 보기·저장", key="left_report", type="primary", width="stretch",
+                     help="담당자 검토·인계용 요약자료를 엽니다(HTML 저장·JSON 원본 포함). 공식 발급 문서가 아닙니다."):
             report_dialog(payload, rec)
 
 
@@ -901,7 +947,7 @@ def aux_evidence_view(rec: dict, q: str):
     if t["data_quality_minimum_only"]:
         items.append("확인 가능한 신호에 따른 최소판정")
     if dq["review_required"]:
-        items.append("원천 검토 필요 표시")
+        items.append(REVIEW_REQUIRED_LABEL)
     masked = [f for f, v in dq["fields"].items() if v["masked"]]
     if masked:
         items.append(f"비공개(마스킹) 항목: {', '.join(masked)}")
@@ -954,7 +1000,7 @@ def recruitment_signal_view(jobs: dict, keywords: list[dict], q: str, latest_qua
                             keyword_posting_count):
     """채용시장 보조 신호 — 요약(항상 렌더) + 대표 공고 + 전체 상세(lazy)."""
     section("채용시장 보조 신호", helper="현재 채용정보이며 선택 분기의 진단 판정에는 사용하지 않습니다.",
-           badge="현재 시점 참고자료")
+           badge="현재 채용시장 보조근거")
     kw = keywords[:8] if jobs.get("status") == "FOUND" else []
     observations = recruitment_observations(jobs, kw)
     st.html(ui.recruitment_summary_html(jobs, kw, q == latest_quarter, q, observations, WORK24_BASIS,
@@ -983,12 +1029,22 @@ def recruitment_signal_view(jobs: dict, keywords: list[dict], q: str, latest_qua
              args=("방법론·데이터 기준",))
 
 
+def to_inspection_candidate(ind: str, q: str):
+    """점검 관리의 '점검 후보' 보기로 이동 — 그 업종을 선택 후보로, 점검 기준 분기를 진단 분기와 같게 맞춘다."""
+    st.session_state.insp_pick = ind
+    st.session_state.queue_quarter = q
+    go("점검 관리", ind, q, None, "점검 후보")
+
+
 def field_summary_view(ind: str, q: str, questions: list[dict]):
     """현장에서 우선 확인할 사항(요약, 읽기 전용) — 체크·입력은 점검 관리로 이동."""
     section("현장에서 우선 확인할 사항", helper="진단 결과를 바탕으로 담당자가 현장에서 추가로 확인할 항목입니다.")
     items = [(item["question"], SOURCE_LABEL.get(item.get("source"), item.get("source") or "출처 미확인"))
              for item in top_questions(questions, 3)]
-    st.html(ui.question_list_html(None, items))
+    if items:
+        st.html(ui.question_list_html(None, items))
+    else:
+        st.html(ui.note_html("등록된 확인질문이 없습니다."))
     st.html(ui.note_html("질문은 원인 판정이 아니라 현장에서 확인할 가설입니다."))
     if len(questions) > 3:
         box = lazy_expander(f"추가 확인사항 보기 · {len(questions) - 3}건", "exp_field_more")
@@ -996,52 +1052,96 @@ def field_summary_view(ind: str, q: str, questions: list[dict]):
             if box.open:
                 for i, item in enumerate(questions[3:], 4):
                     st.markdown(f"{i}. {item['question']}")
-
-    def _to_inspection():
-        st.session_state.insp_pick = ind
-        go("점검 관리", ind, q, None, "점검 후보")
-    st.button("점검 관리에서 체크·기록하기 →", key="dx_to_inspection", type="tertiary", on_click=_to_inspection)
+    st.button("점검 관리에서 체크·기록하기 →", key="dx_to_inspection", type="tertiary",
+              on_click=to_inspection_candidate, args=(ind, q))
 
 
-def case_status_bar(ind: str, q: str, t: dict):
-    """점검 상태 액션 바(한 줄) — reviewer_section은 점검 관리에 있고, 여기는 상태 안내 + 바로가기만 한다."""
-    cand = next((c for c in svc.candidates(snap, q) if c["industry"] == ind), None)
+def case_status_bar(ind: str, q: str, t: dict, cand: dict | None, case: dict | None):
+    """다음 조치 한 줄 + 바로가기 — reviewer_section은 점검 관리에 있고, 여기는 기록된 점검상태 안내만 한다."""
+    status = case_status_label(cand, case)
     with st.container(key="casebar", horizontal=True, vertical_alignment="center"):
-        if cand and cand["open_case_id"]:
-            st.markdown(f"현재 점검 상태: 진행 중 점검 건 #{cand['open_case_id']}")
-            st.space("stretch")
+        st.markdown(f"**다음 조치** · {next_action(t['stage'], status, t.get('next_review_quarter'))}")
+        st.space("stretch")
+        if case and case["status"] != "종결":
             st.button("점검 건 열기 →", key="dx_open_case", type="tertiary", on_click=go,
-                     args=("점검 관리", None, None, cand["open_case_id"], "진행 중"))
-        elif cand and cand["review"]:
-            st.markdown(f"현재 점검 상태: {cand['review']['status']}")
-            st.space("stretch")
-            st.button("점검 관리로 →", key="dx_case_bar", type="tertiary", on_click=go, args=("점검 관리", ind, q))
-        elif t["stage"] in ("우선점검", "추가확인"):
-            st.markdown("현재 점검 상태: 점검 미개설 · 점검 후보")
-            st.space("stretch")
-
-            def _to_inspection_candidate():
-                st.session_state.insp_pick = ind
-                go("점검 관리", ind, q, None, "점검 후보")
-            st.button("점검 시작·관리 →", key="dx_case_bar", type="tertiary", on_click=_to_inspection_candidate)
+                      args=("점검 관리", None, None, case["id"]))
+        elif t["stage"] in ("우선점검", "추가확인") and status == "미개설":
+            st.button("점검 시작·관리 →", key="dx_case_bar", type="tertiary", on_click=to_inspection_candidate,
+                      args=(ind, q))
         else:
-            st.markdown("현재 점검 상태: 점검 미개설 · 관찰 단계")
-            st.space("stretch")
-            st.button("점검 관리로 →", key="dx_case_bar", type="tertiary", on_click=go, args=("점검 관리", ind, q))
+            st.button("점검 관리로 →", key="dx_case_bar", type="tertiary", on_click=to_inspection_candidate,
+                      args=(ind, q))
+
+
+def sync_queue_pick():
+    """점검 대기열의 관찰 업종 선택 → dx_industry(공용 선택 상태). 선택 해제는 무시한다(현재 업종 유지)."""
+    if st.session_state.get("queue_obs_pick"):
+        st.session_state.dx_industry = st.session_state.queue_obs_pick
+
+
+def queue_view(q: str, ind: str, rows: list[dict]):
+    """1. 점검 대기열 — 선택 분기 업종을 등록 판정 단계·등록 단계 내 순위로 정렬(새 순위 계산 없음).
+
+    우선점검 후보·추가확인·진행 중 점검은 카드로, 관찰 업종은 접힌 압축 표로 둔다. 업종을 고르면 dx_industry가 바뀌어
+    왼쪽 업종 버튼·아래 진단카드가 같은 업종을 보여준다.
+    """
+    counts = stage_counts(snap.by_quarter(q))
+    head = [r for r in rows if r["group"] < 3]
+    obs = [r for r in rows if r["group"] == 3]
+    with st.container(key="dxsec-queue"):
+        section(f"{quarter_label(q)} 점검 대기열",
+                helper=f"우선점검 후보 {counts['우선점검']}개 · 추가확인 {counts['추가확인']}개 · 관찰 {counts['관찰']}개"
+                       " — 업종을 고르면 아래 진단카드가 그 업종으로 바뀝니다.")
+        with st.container(key="queue", gap="small"):
+            if not head:
+                st.html(ui.note_html("이번 분기 점검 후보(우선점검 후보·추가확인)와 진행 중인 점검이 없습니다."))
+            for r in head:
+                picked = r["industry"] == ind
+                st.html(ui.queue_card_html(r, picked))
+                with st.container(horizontal=True, gap="small", vertical_alignment="center"):
+                    st.button("상세 보는 중" if picked else "상세 보기", key=f"qv-{r['industry']}",
+                              on_click=set_industry, args=(r["industry"],), disabled=picked,
+                              type="secondary" if picked else "primary")
+                    if r["case_id"]:
+                        st.button(f"점검 건 #{r['case_id']} 열기 →", key=f"qc-{r['industry']}", type="tertiary",
+                                  on_click=go, args=("점검 관리", None, None, r["case_id"]))
+                    else:
+                        st.button("점검 관리로 →", key=f"qc-{r['industry']}", type="tertiary",
+                                  on_click=to_inspection_candidate, args=(r["industry"], q))
+        if obs:
+            picked_obs = ind in {r["industry"] for r in obs}
+            with st.expander(f"관찰 업종 {len(obs)}개 · 관찰 단계 내 참고 순위"
+                             + (f" · 선택: {ind}" if picked_obs else ""), expanded=picked_obs):
+                st.html(ui.queue_table_html(obs, ind, OBSERVATION_RANK_HELP))
+                # 거울 위젯: 매 실행 공용 선택값(dx_industry)으로 맞춘 뒤 만든다 — 왼쪽 업종 버튼과 선택이 어긋나지 않게
+                st.session_state.queue_obs_pick = ind if picked_obs else None
+                st.pills("관찰 업종 선택", [r["industry"] for r in obs], selection_mode="single", key="queue_obs_pick",
+                         on_change=sync_queue_pick, help="선택하면 아래 진단카드가 그 업종으로 바뀝니다.")
 
 
 def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, field_questions_all: list[dict],
                 report_payload: dict):
+    """업종 진단 중앙 — 1 점검 대기열 → 2 5초 요약 → 3 판정 근거 → 4 최근 판정 추이 → 5 현장 확인 → 6 지원체계 검토 경로
+    → 7 채용시장 보조 신호 → 8 데이터 기준·해석 주의. 값은 모두 등록 분석본 그대로(재계산 없음)."""
     t, q1, q2, q3 = rec["triage"], rec["q1"], rec["q2"], rec["q3"]
     cutoff = snap.provenance(q)["data_cutoff"]
+    rules = {r["rule_name"]: r for r in snap.reference["triage_rules"]}
+    rows = rule_evidence_rows(rec, rules)
+    display = stage_display(t["stage"])
+    candidates, cases = svc.candidates(snap, q), svc.list_cases()
+    cand = next((c for c in candidates if c["industry"] == ind), None)
+    case = pick_case(cases, ind, q)
+
+    queue_view(q, ind, queue_rows(snap.by_quarter(q), candidates, cases, rules))
 
     with st.container(key="dxsec-diag"):
-        meta_line = f"자료 기준 {cutoff} · 단계 내 {t['rank_in_stage']}순위 · 다음 검토 {quarter_label(t['next_review_quarter'] or '—')}"
-        st.html(ui.header_html(q, ind, t["stage"], stage_display(t["stage"]), meta_line))
+        meta_line = (f"자료 기준 {cutoff} · {rank_text(t['stage'], t['rank_in_stage'])} · "
+                     f"다음 검토 {quarter_label(t['next_review_quarter'] or '—')}")
+        st.html(ui.header_html(q, ind, t["stage"], display, meta_line))
         # 분석본 성격(당시/후향 재구성)은 항상 텍스트로 드러낸다 — 후향 재구성을 당시 분석본처럼 보이게 하지 않는다
         nat = snapshot_nature(snap.quarter, q)
         if nat == "contemporaneous":
-            st.caption(f":blue-badge[{NATURE_LABEL[nat]}] {nature_text(snap.quarter, q)}")
+            st.caption(f":blue-badge[{nature_text(snap.quarter, q)}]")
         else:
             st.html(ui.notice_html(
                 "과거분기 재계산 결과",
@@ -1049,39 +1149,48 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
                 "이후 수정·보정된 자료가 반영되었을 수 있어 당시 실제 판정과 동일하다고 볼 수 없습니다.",
                 f"적용 분석기준: {quarter_label(snap.quarter)} 버전", tone="violet"))
 
-        kpi_cards = [
-            {"label": "Q1 상태 (국면)", "value": q1_kpi_value(q1["state"], q1["state_label"]),
-             "sub": ("생산 미확인" if q1.get("production_yoy") is None
-                    else f"생산 {fmt(q1['production_yoy'], 1, '%')}")},
-            {"label": "Q2 고용증감 (규모)", "value": fmt(q2["emp_delta"], suffix="명"),
-             "tone": "rose" if (q2["emp_delta"] or 0) < 0 else "emerald",
-             "sub": f"YoY {fmt(q2['employment_yoy'], 2, '%')}"},
-            {"label": "Q3 지속", "value": ("자료 없음" if q3["state_run_length"] is None
-                                          else f"동일 상태 {fmt(q3['state_run_length'])}분기"),
-             # KPI 한 줄 유지: '반복 진입신호 없음 · S4 → S4' → '반복신호 없음 · S4→S4'
-             "sub": ("반복신호 미확인" if q3["repeated_signal"] is None
+        production = ("명목 생산액 미확인" if q1.get("production_yoy") is None
+                      else f"{PRODUCTION_LABEL} {fmt(q1['production_yoy'], 1, '%')}")
+        repeated = ("반복신호 미확인" if q3["repeated_signal"] is None
                     else ("반복신호 있음" if q3["repeated_signal"] else "반복신호 없음"))
-                    + (f" · {q3['transition'].replace(' → ', '→')}" if q3.get("transition") else "")},
-            {"label": "산단 고용 비중 (규모)", "value": fmt(q2["employment_share_pct"], 2, "%"),
+        kpi_cards = [
+            {"label": "Q1 산업·고용 상태", "value": q1_plain(q1["state"]), "sub": f"{q1['state'] or '—'} · {production}"},
+            {"label": "Q2 고용 영향 규모", "value": fmt(q2["emp_delta"], suffix="명"),
+             "tone": "rose" if (q2["emp_delta"] or 0) < 0 else "emerald",
+             "sub": f"고용 YoY {fmt(q2['employment_yoy'], 2, '%')}"},
+            {"label": "Q2 산단 고용 비중", "value": fmt(q2["employment_share_pct"], 2, "%"),
              "sub": f"고용 {fmt(q2['employment'], suffix='명')}"},
+            # KPI 한 줄 유지: 'S4→S4 · 반복신호 없음'
+            {"label": "Q3 지속·전환", "value": run_text(q3),
+             "sub": f"{(q3.get('transition') or '전환 자료 없음').replace(' → ', '→')} · {repeated}"},
         ]
         st.html(ui.kpi_cards_html(kpi_cards))
+        first_check = field_questions_all[0]["question"] if field_questions_all else "등록된 확인질문 없음"
+        st.html(ui.snapshot_brief_html([("판정 이유", reason_sentence(rec, rows)), ("우선 확인", first_check)]))
+        case_status_bar(ind, q, t, cand, case)
 
-        rules = {r["rule_name"]: r for r in snap.reference["triage_rules"]}
-        rows = rule_evidence_rows(rec, rules)
-        display = stage_display(t["stage"])
-        section("진단 판정 근거")  # 상태(우선점검 후보·추가확인·관찰)와 무관하게 같은 명사형 제목
-        explanation = signal_explanation(rows, rec["signals"])
-        st.html(ui.reason_cards_html("", explanation["items"], t["stage_reason"]))
-        summary_line = f"{explanation['summary']} → 등록 판정 {display}"
-        st.html(ui.note_html(summary_line))
+    with st.container(key="dxsec-reason"):
+        section("판정 근거", helper="E 고용감소율 · R 산단평균 대비 열위 · A 산단 대비 감소규모 · "
+                                  f"P {PRODUCTION_LABEL} 감소(보강) — 기준을 넘은 신호를 먼저 표시합니다.")
+        explanation = signal_explanation(rows, rec["signals"], p_title="명목 생산 감소 (보강)")
+        met = [i for i in explanation["items"] if i["tone"] != "muted"]
+        # 고용 진입신호(E/R/A)가 하나라도 넘었을 때만 카드로 — 충족 신호 먼저, 미충족(muted)은 뒤로
+        # (카드 4칸을 넘는 미충족 값은 세부 판정규칙에서 본다)
+        if any(i["title"] in SIGNAL_EXPLANATION_TITLE.values() for i in met):
+            st.html(ui.reason_cards_html("", met + [i for i in explanation["items"] if i["tone"] == "muted"],
+                                         t["stage_reason"]))
+        else:  # 관찰 등 진입신호가 없으면 같은 크기의 0.00%·미달 카드를 반복하지 않고 한 줄로(생산 단독 감소는 판정 문구에)
+            st.html(ui.reason_cards_html("", [], "현재 점검단계 진입기준을 충족한 신호가 없습니다."))
+            st.html(f'<div class="dx-footnote">등록 판정 문구 · {html.escape(t["stage_reason"] or "—")}</div>')
+        st.html(ui.note_html(f"{explanation['summary']} → 등록 판정 {display}"))
 
         box = lazy_expander("세부 판정규칙 보기 · E/R/A/P · 경계값", "exp_rule_detail")
         with box:
             if box.open:
                 st.caption(f"등록 판정 문구 · {t['stage_reason']}")
                 ladder = rules.get("ladder", {})
-                footnote = f"규칙: {ladder.get('definition', '')} · 경계값은 프로젝트 운영규칙이며 법정 기준 또는 최적값이 아닙니다."
+                footnote = (f"규칙: {ladder.get('definition', '')} · 경계값은 프로젝트 운영규칙이며 법정 기준 또는 최적값이 아닙니다."
+                            f" · P = {PRODUCTION_LABEL} 감소율(가격변동 효과 포함 가능)")
                 if t.get("scale_flag"):
                     footnote += f" · {t['scale_flag']}"
                 if t.get("data_quality_minimum_only"):
@@ -1090,21 +1199,13 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
                 st.dataframe(pd.DataFrame([{
                     "분기": quarter_label(h["quarter"]), "Q1 상태": h["q1"]["state_label"], "Triage": h["triage"]["stage"],
                     "E": fmt(h["signals"]["E"], 2), "R": fmt(h["signals"]["R"], 2), "A": fmt(h["signals"]["A"], 2),
-                    "P": fmt(h["signals"]["P"], 2), "고용 증감(명)": h["q2"]["emp_delta"],
-                    "상태 지속(분기)": h["q3"]["state_run_length"],
+                    "P": fmt(h["signals"]["P"], 2), "고용 증감(명)": fmt(h["q2"]["emp_delta"]),
+                    "상태 지속(분기)": fmt(h["q3"]["state_run_length"]),
                 } for h in snap.history(ind, q)]), hide_index=True, width="stretch")
 
-    with st.container(key="dxsec-facts"):
-        st.html(ui.fact_caveat_html(supporting_fact_items(rec), [
-            "이 진단은 산업·고용 변화의 점검 신호입니다.",
-            "감소 원인이나 기업별 지원 필요성을 자동으로 확정하지 않습니다.",
-            *data_quality_flags(rec)[:2],
-        ]))
-        st.button("자세한 방법론·데이터 기준 →", key="dx_to_method_caveat", type="tertiary", on_click=go,
-                 args=("방법론·데이터 기준",))
-
     with st.container(key="dxsec-timeline"):
-        section(f"{ind} 분기별 판정 추이", helper="분기 칸을 선택하면 해당 시점의 진단 결과를 확인할 수 있습니다.")
+        section(f"최근 판정 추이 · {ind}",
+                helper="최근 4개 분기의 판정·Q1 상태를 먼저 보여줍니다. 아래 분기 칸(전체 분기)을 선택하면 그 시점의 진단을 확인할 수 있습니다.")
         rows_all = decision_support.timeline(ind, snap.quarters[-1])
         idx = next((i for i, r in enumerate(rows_all) if r["quarter"] == q), None)
         trail_rows = [{**r, "stage_display": stage_display(r.get("stage"))}
@@ -1113,22 +1214,33 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         st.html(ui.stage_legend_html())
         timeline_chips(ind, q, rows_all)
 
-    with st.container(key="dxsec-jobs"):
-        recruitment_signal_view(jobs, report_payload["recruitment_keywords"]["keywords"], q, latest_quarter,
-                                report_payload["recruitment_keywords"]["posting_count"])
-
     with st.container(key="dxsec-field"):
         field_summary_view(ind, q, field_questions_all)
 
     with st.container(key="dxsec-support"):
-        section("지원체계 검토 경로", helper="현재 진단·채용·현장 확인 신호를 바탕으로 관련 기존 지원 기능을 확인합니다.")
-        st.html(ui.support_summary_html(t.get("first_owner"), report_payload.get("support_functions") or [],
-                                        report_payload.get("requirement_cards") or [], title=None,
-                                        label_of=fn_name))
+        section("지원체계 검토 경로", helper="현재 진단·채용·현장 확인 신호를 바탕으로 관련 기존 지원 기능과 담당기관 검증상태를 확인합니다.")
+        st.html(ui.link_flow_html(LINK_FLOW))
+        st.html(ui.support_summary_html(
+            t.get("first_owner"), report_payload.get("support_functions") or [],
+            report_payload.get("requirement_cards") or [], title=None, label_of=fn_name,
+            status_of=lambda tag: institution_status_text(svc.institution_candidates(snap, tag))))
         st.button("관련 지원제도 자세히 보기 →", key="dx_to_policy", type="tertiary", on_click=go,
                  args=("정책·지원 연계", ind, q))
 
-    case_status_bar(ind, q, t)
+    with st.container(key="dxsec-jobs"):
+        recruitment_signal_view(jobs, report_payload["recruitment_keywords"]["keywords"], q, latest_quarter,
+                                report_payload["recruitment_keywords"]["posting_count"])
+
+    with st.container(key="dxsec-facts"):
+        section("데이터 기준·해석 주의", helper=f"자료 기준 {cutoff} · {YOY_NOTE}")
+        st.html(ui.fact_caveat_html(supporting_fact_items(rec), [
+            "이 진단은 산업·고용 변화의 점검 신호입니다.",
+            "감소 원인이나 기업별 지원 필요성을 자동으로 확정하지 않습니다.",
+            NOMINAL_NOTE,
+            *data_quality_flags(rec)[:2],
+        ]))
+        st.button("자세한 방법론·데이터 기준 →", key="dx_to_method_caveat", type="tertiary", on_click=go,
+                 args=("방법론·데이터 기준",))
     # 판정 경로·규모 gate·선택적 재검토·외부자료·자료 품질(분석 담당자용)은 설정·정보 → 방법론·데이터 기준에서만 본다
 
 
@@ -1900,6 +2012,12 @@ def related_notices(day: str, industry: str, fn_tags: tuple[str, ...], _api) -> 
     return {"status": "OK", "items": items[:NOTICE_LIMIT], "checked_at": day}
 
 
+def document_titles() -> dict[str, str]:
+    """공식문서 ID → 문서명(요건 카드 근거 위치 표시용, DB 색인 그대로)."""
+    with svc.Session() as s:
+        return {d.document_id: d.title for d in s.query(M.DocumentMaster).all() if d.title}
+
+
 def notices_view(industry: str, fn_tags: list[str]) -> None:
     """[3] 현재 모집 중인 관련 공고. 조회가 설정되지 않았거나 관련 공고가 0건이면 섹션을 그리지 않는다(사유는 로그)."""
     api = next((a for a in copilot.official_apis if getattr(a, "available", False)), None)
@@ -2014,6 +2132,7 @@ def page_policy():
                                                label_visibility="collapsed") or tabs[0]
                 if tab == tabs[0]:
                     st.html(ui.policy_context_html(ind, q, badge))
+                    st.html(ui.link_flow_html(LINK_FLOW))
                     section("관련 지원 기능")
                     if not fn_tags:
                         st.caption("채용 키워드와 연결된 지원 기능 후보가 없습니다.")
@@ -2040,10 +2159,15 @@ def page_policy():
                                  format_func=lambda k: "진행 상태 전체" if k == "*" else INTAKE_UI[k],
                                  key=f"policy_intake::{ind}::{q}", label_visibility="collapsed")
                     fn_label = lambda tag: function_ui_label(tag, C.label(tag) if tag else None)  # noqa: E731
-                    st.html(ui.official_programs_html(shown[:4], fn_label))
+                    titles = document_titles()
+                    st.html(ui.official_programs_html(shown[:4], fn_label, titles))
                     if len(shown) > 4:
                         with st.expander(f"더 많은 지원제도 보기 ({len(shown) - 4}건)"):
-                            st.html(ui.official_programs_html(shown[4:], fn_label))
+                            st.html(ui.official_programs_html(shown[4:], fn_label, titles))
+                    if fn_tags:  # 기능별 담당기관 검증상태(등록 매핑 그대로 — 기관을 새로 확정하지 않음)
+                        st.html('<div class="dx-sub-title">담당기관 검증상태</div>' + ui.bullet_list_html([
+                            f"{fn_name(tag)} — {institution_status_text(svc.institution_candidates(snap, tag))}"
+                            for tag in fn_tags]))
                 else:
                     st.html(ui.team_intro_html())
                     st.html(ui.team_flow_html(TEAM_STAGE_FLOW))
@@ -2061,8 +2185,10 @@ def page_policy():
                 with st.container(key="dxsec-policy-more"):
                     with st.expander("참고 기관 · 검토 경로"):
                         institutions = list(snap.reference.get("institution_routing_map") or [])
-                        st.html(ui.route_summary_html(t.get("first_owner"),
-                                                      rec["questions"].get("handoff_review_functions"), institutions))
+                        audit = {e["institution"]: e for e in C.routing_audit()}  # 기관 감사 결과(기존 카탈로그) 재사용
+                        st.html(ui.route_summary_html(
+                            t.get("first_owner"), rec["questions"].get("handoff_review_functions"), institutions,
+                            status_of=lambda i: institution_audit_label(audit.get(i.get("institution")))))
                     box = lazy_expander("공식 근거 직접 검색", "exp_policy_search")
                     with box:
                         if box.open:
@@ -2194,13 +2320,18 @@ def page_methodology():
 
         with st.container(border=True):
             st.markdown("#### 3. 무엇을 말할 수 있는가")
-            st.markdown("- 업종별 산업·고용 변화\n- 점검 우선순위 신호\n- 지속·전환 상태")
+            st.markdown("**데이터가 직접 보여주는 것**\n- 생산(명목 생산액)·고용 증감\n- 고용 증감 인원·산단 고용 비중\n"
+                        "- 동일 상태 지속기간·상태 전환\n- 확보된 채용공고(목록·현재 유효·상세 검증)")
+            st.markdown("**간접적으로 시사하는 것**\n- 추가 점검 필요성(점검 우선순위 신호)\n"
+                        "- 감소가 특정 업종에 집중됐는지\n- 채용 키워드의 반복\n- 현장에서 확인해야 할 가설")
             st.caption(quarter_text(snap.reference.get("scope", "")))
 
         with st.container(border=True):
             st.markdown("#### 4. 무엇을 말할 수 없는가")
-            st.markdown("- 고용감소의 원인 자동판정\n- 기업별 위기 여부 확정\n"
-                        "- 정책 적격 여부 자동판정\n- 예산/선정 여부 자동결정")
+            st.markdown("**판단할 수 없는 것**\n- 자동화가 원인인지(고용감소의 원인 자동판정)\n- 구조조정이 발생했는지\n"
+                        "- 산업위기인지(기업별 위기 여부 확정)\n"
+                        "- 특정 기업이 지원대상인지(정책 적격 자동판정·예산/선정 자동결정)\n"
+                        "- 채용난·기술 미스매치가 실제 발생했는지")
             st.markdown("고용 감소의 원인(수주·자동화·폐업·외주화 등)은 집계자료만으로 판단할 수 없습니다.")
             n_cards = sum(len(svc.requirement_cards(t)) for t in C.function_tags())
             st.markdown(f"지원사업 요건 카드: 공식 원장 {n_cards}건 — 일반 조건 안내용이며 자동 적격·승인 판정 아님")
@@ -2210,6 +2341,7 @@ def page_methodology():
             st.markdown("**KICOX (CORE)**")
             st.caption(f"분석 범위: {quarter_text(meta['record_scope'])}")
             st.caption(f"자료 기준 {snap.provenance(snap.quarter).get('data_cutoff')}")
+            st.caption(f"{NOMINAL_NOTE} {YOY_NOTE} PPI 교차확인은 외부자료(VALIDATION)이며 판정 입력이 아닙니다.")
             st.caption(EIS_POPULATION_NOTE)
 
             st.markdown("**외부자료 (PPI 포함)**")

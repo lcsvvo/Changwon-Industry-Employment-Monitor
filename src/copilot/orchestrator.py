@@ -75,7 +75,8 @@ GROUNDED_SYSTEM = (
     "- 질문이 모호하면 진단 결과·최근 채용 신호·현장 확인사항·연결 가능한 공식 지원 중 무엇을 확인할지 한 문장으로 되물으세요.\n"
     "- 질문이 산업·고용 진단과 무관하면(예: 날씨) 이 비서가 창원국가산단의 산업·고용 진단과 정책 연계를 지원한다고 "
     "한 문장으로 알려 주세요.\n"
-    "- 원인을 단정하거나('~때문입니다') 지원 대상·선정·적격·추천을 확정하는 표현을 쓰지 마세요.")
+    "- 원인을 단정하거나('~때문입니다') 지원 대상·선정·적격·추천을 확정하는 표현을 쓰지 마세요. 구조조정·산업위기·채용난·"
+    "기술 미스매치가 발생했다고 단정하지 마세요.")
 RAG_SYSTEM = (
     "공식 문서 발췌만 근거로 질문에 답하세요. 발췌에 없는 금액·기간·대상은 쓰지 마세요. "
     "개별 기업의 적격·승인·지급을 확정하지 말고, 담당기관 확인이 필요하다고 덧붙이세요.")
@@ -161,8 +162,9 @@ class Copilot:
         trace.append({"stage": INTERNAL_DIAGNOSTIC, "status": ans.answer_type})
         if decision.intent == R.REPHRASE:
             ans = self._rephrase(ans, quarter, industry, trace, usage)
-        elif self._composing() and decision.intent != R.COMPARE:
-            # 비교는 화면이 등록 수치로 구조화해 보여주므로 제외. 나머지 등록 진단 답변은 Gemini가 같은 근거로 다시 쓴다.
+        elif self._composing() and decision.intent not in (R.COMPARE, R.LIMIT):
+            # 비교는 화면이 등록 수치로 구조화해 보여주므로, 단정 여부(LIMIT)는 '아니요' 결론을 그대로 두기 위해 제외.
+            # 나머지 등록 진단 답변은 Gemini가 같은 근거로 다시 쓴다.
             ans = self._rephrase(ans, quarter, industry, trace, usage, compose=True)
         return ans
 
@@ -211,6 +213,11 @@ class Copilot:
 
     # ------------------------------------------------------------ ② 정책 RAG
     def _policy(self, decision, question, quarter, industry, trace, usage) -> CopilotAnswer:
+        if decision.intent in (R.INSTITUTION, R.ELIGIBILITY):
+            # 담당기관 = 등록 기관 매핑·검증상태 그대로 / 적격 요청 = 판단하지 않는다고 답하고 검토 후보만 안내
+            ans = self.internal.answer(decision, quarter, industry)
+            trace.append({"stage": INTERNAL_RAG, "status": ans.answer_type, "citations": len(ans.citations)})
+            return ans
         if decision.intent == R.SUPPORT_FUNCTIONS:
             ans = self.internal.answer(decision, quarter, industry)
             trace.append({"stage": INTERNAL_RAG, "status": "SUPPORT_FUNCTION_CARDS", "cards": len(ans.citations)})
@@ -524,8 +531,8 @@ class Copilot:
         elif decision.route == CAPABILITY:
             text, answer_type = CAPABILITY_TEXT, "CAPABILITY"
         else:
-            text = ("이 질문은 Copilot 지원 범위 밖이라 답하지 않습니다. 현재 업종 진단으로 대신 답하지 않습니다.\n"
-                    "질문 예: " + " · ".join(EXAMPLES))
+            text = ("현재 도우미는 등록된 진단 결과, 현장 확인사항, 채용시장 보조근거와 지원 연계 근거만 설명할 수 있습니다. "
+                    "현재 업종 진단으로 대신 답하지 않습니다.\n질문 예: " + " · ".join(EXAMPLES))
             answer_type = "UNSUPPORTED"
         return CopilotAnswer(answer=text, source_type=SYSTEM, route=decision.route, intent=decision.intent,
                              answer_type=answer_type)

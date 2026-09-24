@@ -18,6 +18,23 @@ STAGE, SIGNAL, Q1, Q2, Q3, CHANGE, COMPARE, RECRUITMENT, FIELD, GAPS, REPHRASE =
     "STAGE", "SIGNAL", "Q1", "Q2", "Q3", "CHANGE", "COMPARE", "RECRUITMENT", "FIELD", "GAPS", "REPHRASE")
 # 정책·외부·일반 세부 의도
 POLICY, SUPPORT_FUNCTIONS, TREND, CONCEPT = "POLICY", "SUPPORT_FUNCTIONS", "TREND", "CONCEPT"
+# 단정 가능 여부(구조조정·산업위기·채용난·원인) · 지원 적격 판단 요청 · 담당기관 · 진단카드 요약
+LIMIT, ELIGIBILITY, INSTITUTION, SUMMARY = "LIMIT", "ELIGIBILITY", "INSTITUTION", "SUMMARY"
+# LIMIT 세부 주제(subintents) — 등록 진단으로 '단정할 수 없다'고 답하는 질문
+LIMIT_TOPICS: dict[str, tuple[str, ...]] = {
+    "RESTRUCTURING": ("구조조정", "정리해고", "고용조정", "대량해고"),
+    "CRISIS": ("산업위기", "위기업종", "위기산업", "위기라고", "위기인가", "위기인지", "위기야", "위기로볼", "위기로판단"),
+    "HIRING": ("채용난", "구인난", "인력난", "인력부족", "미스매치", "미충원"),
+    "CAUSE": ("원인", "때문"),
+}
+# 정책어와 함께 와도 '판단·단정' 질문으로 보는 표지(없으면 '구조조정 지원사업' 같은 정책 질의로 둔다)
+JUDGE_MARKERS = ("볼수", "보면", "인가", "인지", "맞나", "맞아", "맞습", "라고", "단정", "판단", "때문", "원인", "발생")
+ELIGIBILITY_TERMS = ("대상인지", "대상인가", "대상여부", "대상이맞", "대상이될", "적격", "자격이되", "자격이있", "선정될",
+                     "선정여부", "해당되는지", "해당하는지")
+INSTITUTION_TERMS = ("지원기관", "담당기관", "관련기관", "어느기관", "어떤기관", "기관은어디", "기관이어디", "인계기관",
+                     "어디에연락", "어디로연락", "연결기관")
+SUMMARY_TERMS = ("진단카드", "진단결과를설명", "진단결과설명", "진단요약", "진단을설명", "진단내용", "카드를설명",
+                 "현재진단")
 
 STRONG, WEAK = 2, 1
 THRESHOLD = 2
@@ -173,11 +190,30 @@ def route(question: str, industries: list[str], quarters: list[str]) -> RouteDec
         diag_hits = [hit for hit in diag_hits if hit[1] != STAGE] + [hit for hit in diag_hits if hit[1] == STAGE]
     policy_hits = sorted(((v, k) for k, v in policy.items() if v >= THRESHOLD), reverse=True)
 
+    # 개별 기업의 지원 대상·적격 판단 요청 → 판단하지 않는다고 답한다(정책 RAG 검색 결과로 대신하지 않음)
+    if any(term in compact for term in ELIGIBILITY_TERMS):
+        return RouteDecision(INTERNAL_RAG, ELIGIBILITY, signals=signals, scores=scores,
+                             reason="지원 대상·적격 판단 요청 — 자동 판정하지 않음", **common)
+    # 구조조정·산업위기·채용난·원인을 '단정할 수 있는가' — 등록 진단 범위(점검 신호)로만 답한다
+    topics = tuple(k for k, words in LIMIT_TOPICS.items() if any(w in compact for w in words))
+    if topics and (not policy_hits or any(m in compact for m in JUDGE_MARKERS)):
+        return RouteDecision(INTERNAL_DIAGNOSTIC, LIMIT, signals=signals, subintents=topics, scores=scores,
+                             reason="원인·구조조정·위기·채용난 단정 여부 질의", **common)
+    # 담당기관·관련기관 — 등록된 기관 매핑과 검증상태로만 답한다('관할'은 사업장 주소 기준 RAG가 맡는다)
+    if any(term in compact for term in INSTITUTION_TERMS) and "관할" not in compact:
+        return RouteDecision(INTERNAL_RAG, INSTITUTION, signals=signals, scores=scores,
+                             reason="담당기관 검증상태 질의", **common)
+
     # 재표현 요청: 진단 대상을 쉬운 말로(P1: LLM 재작성 + 수치 보존 검증). 개념어만 있으면 일반 설명.
     if rephrase and not (acronym and not diag_hits):
         subs = tuple(k for _, k in diag_hits)
         return RouteDecision(INTERNAL_DIAGNOSTIC, REPHRASE, signals=signals, subintents=subs,
                              scores=scores, reason="명시적 쉬운 설명·요약 요청", **common)
+
+    # 현재 진단카드 설명 요청 → 등록 진단 요약(상태·규모·시간·판정 이유·우선 확인)
+    if any(term in compact for term in SUMMARY_TERMS):
+        return RouteDecision(INTERNAL_DIAGNOSTIC, SUMMARY, signals=signals, scores=scores,
+                             reason="진단카드 요약 요청", **common)
 
     # 정책 질의가 명확하면(지원사업·지원금·훈련·기관…) 진단어는 문맥으로만 본다.
     #   정책이 이기는 경우: 진단어가 없거나, 지원기능 질의이거나, 정책 점수가 강어+보조어(≥4)이면서

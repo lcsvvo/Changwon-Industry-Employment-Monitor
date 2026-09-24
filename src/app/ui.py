@@ -9,7 +9,7 @@ from __future__ import annotations
 import html as _html
 from typing import Iterable
 
-from app.view_models import quarter_text  # 분기 표시 '2026년 2분기'(저장값은 2026Q2)
+from app.view_models import provenance_lines, quarter_text  # 분기 표시 '2026년 2분기'(저장값은 2026Q2)
 
 STAGE_TONE = {"우선점검": "rose", "추가확인": "amber", "관찰": "emerald"}
 VERDICT_TONE = {
@@ -179,9 +179,70 @@ def timeline_trail_html(rows_desc: list[dict]) -> str:
         tone = STAGE_TONE.get(row.get("stage"), "muted")
         label = row.get("stage_display") or row.get("stage")
         prefix = "현재 " if i == 0 else ""
+        state = f' <span class="dx-muted">{_e(row["q1_state"])}</span>' if row.get("q1_state") else ""
         parts.append(f'{prefix}{_e(quarter_text(row.get("quarter")))} '
-                     f'<span class="dx-pill dx-tone-{tone}">{_e(label)}</span>')
+                     f'<span class="dx-pill dx-tone-{tone}">{_e(label)}</span>{state}')
     return '<div class="dx-trail">' + " ← ".join(parts) + '</div>'
+
+
+# ------------------------------------------------------------------ 업종 진단 상단 점검 대기열 · 5초 요약
+def queue_card_html(row: dict, selected: bool) -> str:
+    """점검 대기열의 우선점검 후보·추가확인 카드(값은 view_models.queue_rows가 포맷한 그대로)."""
+    cls = "dx-qcard is-selected" if selected else "dx-qcard"
+    sel = '<span class="dx-qcard-sel">선택됨</span>' if selected else ""
+    return (
+        f'<div class="{cls}">'
+        f'<div class="dx-qcard-head"><span class="dx-qcard-name">{_e(row["industry"])}</span>'
+        f'{stage_badge_html(row["stage"], row["display"])}<span class="dx-qcard-status">점검상태 · {_e(row["status"])}</span>{sel}</div>'
+        f'<div class="dx-qcard-state">{_e(row["state_plain"])} <span class="dx-muted">{_e(row["state"])}</span></div>'
+        '<div class="dx-qcard-metrics">'
+        f'<span>고용 <b>{_e(row["emp_delta"])}</b> (YoY {_e(row["emp_yoy"])})</span>'
+        f'<span>산단 고용 비중 <b>{_e(row["share"])}</b></span>'
+        f'<span>지속 <b>{_e(row["run"])}</b></span></div>'
+        f'<div class="dx-qcard-reason">{_e(row["reason"])}</div>'
+        '</div>'
+    )
+
+
+def queue_table_html(rows: list[dict], selected: str | None, rank_help: str) -> str:
+    """관찰 업종 압축 표(카드 반복 대신). 참고 순위는 관찰 단계 안의 비교 순위다."""
+    body = "".join(
+        f'<tr class="{"is-selected" if r["industry"] == selected else ""}">'
+        f'<td>{_e(r["rank"])}</td><td><b>{_e(r["industry"])}</b>{" ✓" if r["industry"] == selected else ""}</td>'
+        f'<td>{_e(r["state_plain"])} <span class="dx-muted">{_e(r["state"])}</span></td>'
+        f'<td>{_e(r["emp_delta"])} <span class="dx-muted">({_e(r["emp_yoy"])})</span></td>'
+        f'<td>{_e(r["share"])}</td><td>{_e(r["run"])}</td><td>{_e(r["status"])}</td></tr>'
+        for r in rows)
+    return (
+        '<div class="dx-table-wrap"><table class="dx-rule-table dx-queue-table">'
+        f'<thead><tr><th title="{_e(rank_help)}">참고 순위 ⓘ</th><th>업종</th><th>산업·고용 상태</th>'
+        '<th>고용 증감 (YoY)</th><th>산단 고용 비중</th><th>지속</th><th>점검상태</th></tr></thead>'
+        f'<tbody>{body}</tbody></table></div>'
+        f'<div class="dx-footnote">참고 순위 = {_e(rank_help)}</div>'
+    )
+
+
+def snapshot_brief_html(rows: list[tuple[str, str]]) -> str:
+    """5초 요약의 문장 줄(판정 이유·우선 확인). rows = [(라벨, 문장)]."""
+    body = "".join(f'<div class="dx-brief-row"><span class="dx-brief-k">{_e(k)}</span>'
+                   f'<span class="dx-brief-v">{_e(v)}</span></div>' for k, v in rows)
+    return f'<div class="dx-brief">{body}</div>'
+
+
+def link_flow_html(steps: Iterable[str]) -> str:
+    """진단 신호 → … → 공식 문의·접수 경로 한 줄 흐름(좁은 화면에서는 줄바꿈)."""
+    cells = '<span class="dx-lflow-arrow">→</span>'.join(f'<span class="dx-lflow-step">{_e(s)}</span>' for s in steps)
+    return f'<div class="dx-lflow">{cells}</div>'
+
+
+def disclaimer_html(text: str) -> str:
+    return f'<div class="dx-disclaimer">{_e(text)}</div>'
+
+
+def copilot_title_html(name: str, mode: str) -> str:
+    """AI 패널 제목 — 이름 + 응답 방식(Gemini 설정 여부와 일치)."""
+    return (f'<div class="dx-copilot-title"><span class="dx-dot"></span>{_e(name)}'
+            f'<span class="dx-copilot-mode">{_e(mode)}</span></div>')
 
 
 def question_list_html(title: str | None, items: list[tuple[str, str]], caption: str = "") -> str:
@@ -289,12 +350,13 @@ def context_tags_html(title: str, tags: list[str], optional_tags: bool = False) 
             f'<b>{_e(title)}</b> {chips}</div></div>')
 
 
-def brand_html(rule_version: str) -> str:
+def brand_html(rule_version: str, ai_tag: str = "AI 코파일럿") -> str:
+    """ai_tag = AI 기능 표시(Gemini 미설정이면 호출부가 규칙 기반 표기를 넘긴다)."""
     return (
         '<div class="dx-brand">'
         '<div class="dx-brand-icon">◆</div>'
         '<div class="dx-brand-text"><div class="dx-brand-title">창원국가산단 산업·고용 전환진단'
-        '<span class="dx-brand-tag">AI 코파일럿</span>'
+        f'<span class="dx-brand-tag">{_e(ai_tag)}</span>'
         f'<span class="dx-brand-tag">{_e(rule_version)}</span></div>'
         '<div class="dx-brand-sub">산업·고용 통계(KICOX) → Triage 진단 → 현장 확인 → 기존 지원체계 연계 · '
         'Human-in-the-Loop 행정 의사결정지원</div></div>'
@@ -328,7 +390,8 @@ def recruitment_summary_html(jobs: dict, keywords: list[dict], is_latest: bool, 
     """
     if jobs.get("status") != "FOUND":
         caveats = "; ".join(jobs.get("caveat") or ["해당 업종으로 매핑된 Work24 공고가 없습니다."])
-        return f'<div class="dx-empty">현재 확보된 채용공고 없음 · {_e(caveats)}</div>'
+        return (f'<div class="dx-empty">현재 확보된 채용공고 없음 · {_e(caveats)}</div>'
+                '<div class="dx-note">채용공고가 없어 채용수요를 판단할 수 없습니다.</div>')
     collected = (jobs.get("collected_at") or "")[:10] or None
     meta = (f'수집 {_e(collected)} · 유효 기준일 {_e(jobs.get("activity_as_of"))} · '
             f'Work24 {_e(quarter_text(jobs.get("quarter")))} 공고')
@@ -344,13 +407,18 @@ def recruitment_summary_html(jobs: dict, keywords: list[dict], is_latest: bool, 
             + _level_tile("확인 기업", detail.get("company_count"), keyword_basis.get("DETAIL_COMPANY"), unit="개"))
     kw = [(k["term"], k["count"]) for k in keywords]
     kw_helper = f"목록 {_e(keyword_posting_count)}건의 {_e(keyword_basis.get('KEYWORD'))}"
+    # 현재 유효·상세 검증이 모두 0건(또는 미확인)이면 목록 키워드를 채용수요 근거처럼 보이지 않게 한다
+    unverified = not active.get("count") and not detail.get("count")
+    if unverified:
+        warn += ('<div class="dx-warn">현재 검증된 채용공고가 없어 채용수요를 판단할 수 없습니다. '
+                 '아래 키워드는 목록 제목 기준 참고값입니다.</div>')
     return (
         f'<div class="dx-report-meta">{meta}</div>{warn}'
         f'<div class="dx-level-grid">{tiles}</div>'
         '<div class="dx-note">공고 수는 모집인원이나 전체 노동수요가 아닙니다.</div>'
-        '<div class="dx-sub-title">주요 키워드</div>'
+        f'<div class="dx-sub-title">{"목록 키워드 (참고)" if unverified else "주요 키워드"}</div>'
         f'<div class="dx-sub-helper">{kw_helper}</div>'
-        f'{chip_row_html(kw)}'
+        f'{chip_row_html(kw, "muted" if unverified else "sky")}'
         '<div class="dx-sub-title">관찰된 표현</div>'
         f'{bullet_list_html(observations)}'
     )
@@ -426,11 +494,12 @@ def candidate_card_html(industry: str, stage: str, display: str, metrics: str,
 
 
 def support_summary_html(first_owner: str | None, functions: list[dict], cards: list[dict],
-                         title: str | None = "지원체계 검토 경로", label_of=None) -> str:
+                         title: str | None = "지원체계 검토 경로", label_of=None, status_of=None) -> str:
     """"지원체계 검토 경로" 요약 카드 — 기능별 등록 요건 카드 수만 센다(적격 판정 아님).
 
     title=None이면 카드 안 panel-title을 생략한다(화면에서 section()으로 이미 제목을 그릴 때).
     label_of(tag)가 있으면 기능 표시명을 그것으로 쓴다(화면 용어 통일 — backend 라벨·분류값은 그대로).
+    status_of(tag)가 있으면 기능 아래에 담당기관 검증상태 한 줄을 덧붙인다(등록 매핑 그대로).
     """
     counts: dict[str | None, int] = {}
     for card in cards:
@@ -440,8 +509,10 @@ def support_summary_html(first_owner: str | None, functions: list[dict], cards: 
     for f in functions:
         n = counts.get(f.get("function_tag"), 0)
         right = f"관련 공식사업 {n}건" if n else "공식 요건 카드 없음"
+        status = (f'<span class="dx-support-inst">{_e(status_of(f.get("function_tag")))}</span>'
+                  if status_of else "")
         rows.append('<div class="dx-support-row">'
-                    f'<span>✓ {_e(label_of(f.get("function_tag")) if label_of else f.get("function_label"))}</span>'
+                    f'<span>✓ {_e(label_of(f.get("function_tag")) if label_of else f.get("function_label"))}{status}</span>'
                     f'<span class="dx-support-count">{_e(right)}</span>'
                     '</div>')
     body = "".join(rows) or '<div class="dx-support-row dx-muted">확인된 지원 기능 후보 없음</div>'
@@ -457,21 +528,30 @@ def support_summary_html(first_owner: str | None, functions: list[dict], cards: 
     )
 
 
-def route_summary_html(first_owner: str | None, handoff_functions: str | None, institutions: list[dict]) -> str:
-    """정책·지원 연계 화면의 검토 경로 요약(1차/인계 검토 기능 + 참고 기관). 기능별 카드는 support_function_card_html이 맡는다."""
+def route_summary_html(first_owner: str | None, handoff_functions: str | None, institutions: list[dict],
+                       status_of=None) -> str:
+    """정책·지원 연계 화면의 검토 경로 요약(1차/인계 검토 기능 + 참고 기관). 기능별 카드는 support_function_card_html이 맡는다.
+
+    status_of(institution) = 기관 검증상태 표시(기관 감사 결과 그대로). 없으면 '실제 인계 전 담당기관 확인 필요'.
+    """
     # 참고 기관은 공식 지원사업보다 한 단계 낮은 보조정보 — 기관명 semibold, 기능 muted, 출처는 작은 링크
+    def status(i: dict) -> str:
+        label = status_of(i) if status_of else "관련기관 참고 · 실제 인계 전 담당기관 확인 필요"
+        tone = "ok" if label.startswith("담당기관 확인") else "warn"
+        return f'<span class="dx-inst-status is-{tone}">{_e(label)}</span>'
     inst_items = "".join(
-        f'<li><span class="dx-inst-name">{_e(i.get("institution"))}</span>'
+        f'<li><span class="dx-inst-name">{_e(i.get("institution"))}</span>{status(i)}'
         f'<span class="dx-inst-fn">{_e(i.get("role"))} · {_e(i.get("function"))}</span>'
         f'{_link(i.get("source_url"), "기관 출처")}</li>'
         for i in institutions
     ) or "<li>참고 기관 없음</li>"
+    confirmed = sum(1 for i in institutions if status_of and status_of(i).startswith("담당기관 확인"))
     return (
         '<div class="dx-handoff-card">'
         '<div class="dx-handoff-title">기존 지원체계 검토 경로 (참고)</div>'
         f'<div class="dx-handoff-row"><span>1차 검토 기능</span><strong>{_e(first_owner)}</strong></div>'
         f'<div class="dx-handoff-row"><span>인계 검토 기능</span><strong>{_e(handoff_functions)}</strong></div>'
-        f'<div class="dx-inst-head">참고 기관(기능 확인됨) {len(institutions)}곳</div>'
+        f'<div class="dx-inst-head">참고 기관 {len(institutions)}곳 · 담당기관 확인 {confirmed}곳</div>'
         f'<ul class="dx-inst-list">{inst_items}</ul>'
         '<div class="dx-handoff-note">자동 추천·적격 판정이 아니며, 개별 기업의 적격·승인·지급 여부는 담당기관 확인 후, '
         '지원 여부는 담당자 현장 검토 후 결정합니다.</div>'
@@ -495,8 +575,7 @@ def support_function_card_html(function: dict, cards: list[dict]) -> str:
         + f'<div>지원 내용 · {_e(c.get("support_content"))}</div>'
         + f'<div>문의 · {_e(c.get("contact"))}</div>'
         + f'<div>확인일 · {_e(c.get("verified_at"))}</div>'
-        + "".join(f'<div>근거 위치 · {_e(p.get("page") or p.get("section"))}</div>'
-                  for p in (c.get("provenance") or []))
+        + "".join(f'<div>근거 위치 · {_e(x)}</div>' for x in provenance_lines(c))
         + '</details>'
         '</div>'
         for c in cards
@@ -574,17 +653,21 @@ def policy_context_html(industry: str, quarter: str, badge_html: str) -> str:
             '적격·선정 여부를 자동 판정하지 않습니다.</div></div>')
 
 
-def official_programs_html(cards: list[dict], fn_label) -> str:
-    """공식 지원사업 카드(등록 요건 카드 값만 — 없는 대상·내용은 만들지 않는다). fn_label(tag) = 화면 라벨."""
+def official_programs_html(cards: list[dict], fn_label, doc_titles: dict | None = None) -> str:
+    """공식 지원사업 카드(등록 요건 카드 값만 — 없는 대상·내용은 만들지 않는다). fn_label(tag) = 화면 라벨.
+
+    doc_titles = {document_id: 공식문서명}(근거 위치 표시용). 쪽·절이 등록되지 않았으면 '공식 근거 위치 상세 미등록'.
+    """
     intake = {"OPEN": ("접수 중", "open"), "UNKNOWN": ("접수 상태 확인 필요", "unknown")}
 
     def card(c: dict) -> str:
         status, tone = intake.get(c.get("current_intake_status"), (c.get("current_intake_status") or "—", "unknown"))
         more = "".join(f'<div><b>{k}</b> {_e(v)}</div>' for k, v in (
-            ("요건", c.get("eligibility")), ("문의", c.get("contact")), ("확인일", c.get("verified_at"))) if v)
-        more += "".join(f'<div><b>근거 위치</b> {_e(p.get("page") or p.get("section"))}</div>'
-                        for p in (c.get("provenance") or []))
+            ("요건", c.get("eligibility")), ("확인일", c.get("verified_at"))) if v)
+        more += "".join(f'<div><b>근거 위치</b> {_e(x)}</div>'
+                        for x in provenance_lines(c, (doc_titles or {}).get(c.get("document_id"))))
         apply = _link(c.get("intake_url"), "신청 경로")
+        contact = c.get("contact") or "공식 근거·공고문에서 확인"
         return (
             '<div class="dx-prog">'
             f'<div class="dx-prog-top"><span class="dx-prog-fn">{_e(fn_label(c.get("function_tag")))}</span>'
@@ -595,7 +678,8 @@ def official_programs_html(cards: list[dict], fn_label) -> str:
             + '<dl class="dx-prog-rows">'
             f'<dt>지원 대상</dt><dd>{_e(c.get("target"))}</dd>'
             f'<dt>지원 내용</dt><dd>{_e(c.get("support_content"))}</dd>'
-            f'<dt>접수 상태</dt><dd>{_e(status)}</dd></dl>'
+            f'<dt>접수 상태</dt><dd>{_e(status)}</dd>'
+            f'<dt>문의·접수</dt><dd>{_e(contact)}</dd></dl>'
             '<div class="dx-prog-actions">'
             f'<details class="dx-prog-more"><summary>상세 보기</summary><div class="dx-prog-detail">'
             f'{more or "<div>등록된 추가 정보 없음</div>"}{f"<div>{apply}</div>" if apply else ""}</div></details>'

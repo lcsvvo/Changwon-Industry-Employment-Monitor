@@ -787,3 +787,45 @@ details.dx-tmore summary { cursor: pointer; font-size: .78rem; font-weight: 600;
 
 /* 왼쪽 패널 하단 — 담당자 인계용 진단서(선택 패널 카드 안, 그림자·장식 없음) */
 .st-key-reportcard { border-top: 1px solid var(--dx-border); padding-top: var(--dx-space-sm); gap: .45rem !important; }
+
+/* ---------------------------------------------------------------- 업종 진단 상단 점검 대기열 · 5초 요약 */
+.dx-qcard {
+  border: 1px solid var(--dx-border); border-left: 4px solid #CBD5E1; border-radius: 10px;
+  padding: .6rem .8rem; background: #fff; font-size: .82rem; color: var(--dx-text-2);
+}
+.dx-qcard:has(.dx-badge--rose) { border-left-color: var(--dx-rose); }
+.dx-qcard:has(.dx-badge--amber) { border-left-color: #F59E0B; }
+.dx-qcard.is-selected { border-color: var(--dx-sky); box-shadow: 0 0 0 1px var(--dx-sky); }
+.dx-qcard-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.dx-qcard-name { font-size: 1rem; font-weight: 750; color: var(--dx-text); }
+.dx-qcard-status { font-size: .74rem; color: var(--dx-muted); }
+.dx-qcard-sel { margin-left: auto; font-size: .72rem; font-weight: 700; color: var(--dx-sky); }
+.dx-qcard-state { margin-top: .25rem; font-weight: 600; color: var(--dx-text); }
+.dx-qcard-metrics { display: flex; flex-wrap: wrap; gap: .2rem .9rem; margin-top: .2rem; }
+.dx-qcard-metrics b { color: var(--dx-text); font-weight: 700; }
+.dx-qcard-reason { margin-top: .3rem; line-height: 1.5; overflow-wrap: anywhere; }
+.st-key-queue [data-testid="stButton"] button { min-height: 2.25rem; }
+.dx-queue-table { font-size: .76rem; min-width: 640px; }
+.dx-queue-table td, .dx-queue-table th { word-break: keep-all; }
+.dx-queue-table tr.is-selected td { background: var(--dx-sky-bg); }
+.dx-brief { display: grid; gap: .3rem; font-size: .86rem; }
+.dx-brief-row { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: .5rem; line-height: 1.5; }
+.dx-brief-k { color: var(--dx-muted); font-weight: 650; font-size: .8rem; padding-top: .05rem; }
+.dx-brief-v { color: var(--dx-text); overflow-wrap: anywhere; }
+.dx-lflow { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .3rem; font-size: .74rem; color: var(--dx-text-2); }
+.dx-lflow-step { background: #F8FAFC; border: 1px solid var(--dx-border); border-radius: 999px; padding: .08rem .5rem; }
+.dx-lflow-arrow { color: var(--dx-muted); }
+.dx-disclaimer {
+  font-size: .8rem; color: #92400E; background: var(--dx-amber-bg); border: 1px solid #FDE68A;
+  border-radius: 8px; padding: .45rem .65rem; margin-bottom: .5rem; line-height: 1.5;
+}
+.dx-copilot-mode {
+  font-size: .68rem; font-weight: 600; color: var(--dx-muted); background: #F1F5F9;
+  border-radius: 999px; padding: .05rem .45rem;
+}
+.dx-support-inst { display: block; font-size: .74rem; font-weight: 500; color: var(--dx-muted); margin-top: .1rem; }
+.dx-inst-status { display: inline-block; font-size: .7rem; font-weight: 600; border-radius: 999px; padding: .02rem .45rem; margin: .1rem 0; }
+.dx-inst-status.is-ok { background: var(--dx-emerald-bg); color: var(--dx-emerald); }
+.dx-inst-status.is-warn { background: var(--dx-amber-bg); color: var(--dx-amber); }
+.dx-chip--muted { background: #F1F5F9; color: var(--dx-muted); border-color: var(--dx-border); }
+.dx-answer-ctx { font-size: .7rem; color: var(--dx-muted); }
