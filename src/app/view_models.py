@@ -35,10 +35,28 @@ WORK24_BASIS = {
 }
 
 
-def quarter_label(quarter: str) -> str:
-    """분기 선택 목록 표시용 — '2026Q2' → '2026년 2분기'. 저장·조회 값은 '2026Q2' 그대로."""
-    year, sep, number = str(quarter).partition("Q")
-    return f"{year}년 {number}분기" if sep and year.isdigit() and number.isdigit() else str(quarter)
+# 화면 표시용 분기 표기: '2026Q2' → '2026년 2분기'. 저장·조회·위젯 key·파일명은 '2026Q2' 그대로 둔다.
+_QUARTER_RE = re.compile(r"(?<![0-9A-Za-z_])(\d{4})Q([1-4])(?![0-9A-Za-z_])")
+
+
+def quarter_text(text):
+    """문장 안의 분기 코드(2026Q2)를 모두 '2026년 2분기'로 바꾼다(backend 문장·AI 답변 표시용). 문자열이 아니면 그대로."""
+    return _QUARTER_RE.sub(lambda m: f"{m.group(1)}년 {m.group(2)}분기", text) if isinstance(text, str) else text
+
+
+def next_quarters(quarter: str, count: int = 8) -> list[str]:
+    """quarter 다음 분기부터 count개(저장 형식 '2026Q3'). 다음 검토 분기 선택 목록용."""
+    year, _, number = str(quarter).partition("Q")
+    y, n, out = int(year), int(number), []
+    for _ in range(count):
+        y, n = (y + 1, 1) if n == 4 else (y, n + 1)
+        out.append(f"{y}Q{n}")
+    return out
+
+
+def quarter_label(quarter: str | None) -> str:
+    """분기 값 하나의 표시명. 없으면 '—'."""
+    return "—" if quarter in (None, "") else quarter_text(str(quarter))
 
 
 def stage_display(stage: str | None) -> str:

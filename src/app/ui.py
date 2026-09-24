@@ -9,6 +9,8 @@ from __future__ import annotations
 import html as _html
 from typing import Iterable
 
+from app.view_models import quarter_text  # 분기 표시 '2026년 2분기'(저장값은 2026Q2)
+
 STAGE_TONE = {"우선점검": "rose", "추가확인": "amber", "관찰": "emerald"}
 VERDICT_TONE = {
     "상위": "rose", "진입": "amber", "충족": "amber", "통과": "emerald",
@@ -59,7 +61,7 @@ def page_header_html(title: str, subtitle: str, badge_html: str = "") -> str:
 
 def header_html(quarter: str, industry: str, stage: str | None, stage_label: str | None, meta_line: str) -> str:
     """업종 진단 헤더. page_header_html을 업종 진단 문구로 채운다."""
-    title = f"[{quarter}] 창원국가산단 산업·고용 진단카드 : {industry}"
+    title = f"[{quarter_text(quarter)}] 창원국가산단 산업·고용 진단카드 : {industry}"
     return page_header_html(title, meta_line, stage_badge_html(stage, stage_label))
 
 
@@ -174,7 +176,7 @@ def timeline_trail_html(rows_desc: list[dict]) -> str:
         tone = STAGE_TONE.get(row.get("stage"), "muted")
         label = row.get("stage_display") or row.get("stage")
         prefix = "현재 " if i == 0 else ""
-        parts.append(f'{prefix}{_e(row.get("quarter"))} '
+        parts.append(f'{prefix}{_e(quarter_text(row.get("quarter")))} '
                      f'<span class="dx-pill dx-tone-{tone}">{_e(label)}</span>')
     return '<div class="dx-trail">' + " ← ".join(parts) + '</div>'
 
@@ -300,9 +302,9 @@ def recruitment_summary_html(jobs: dict, keywords: list[dict], is_latest: bool, 
         return f'<div class="dx-empty">현재 확보된 채용공고 없음 · {_e(caveats)}</div>'
     collected = (jobs.get("collected_at") or "")[:10] or None
     meta = (f'수집 {_e(collected)} · 유효 기준일 {_e(jobs.get("activity_as_of"))} · '
-            f'Work24 {_e(jobs.get("quarter"))} 공고')
+            f'Work24 {_e(quarter_text(jobs.get("quarter")))} 공고')
     warn = "" if is_latest else (
-        f'<div class="dx-warn">선택 분기 {_e(selected_quarter)}와 다른 시점(Work24 {_e(jobs.get("quarter"))}) '
+        f'<div class="dx-warn">선택 분기 {_e(quarter_text(selected_quarter))}와 다른 시점(Work24 {_e(quarter_text(jobs.get("quarter")))}) '
         '자료입니다. 과거 분기 진단의 근거로 쓰지 마세요.</div>')
     levels = {lv.get("key"): lv for lv in jobs.get("evidence_levels") or []}
     lst, active = levels.get("LIST") or {}, levels.get("ACTIVE_CONFIRMED") or {}
@@ -537,7 +539,7 @@ def policy_guide_html(active: str) -> str:
 
 def policy_context_html(industry: str, quarter: str, badge_html: str) -> str:
     return ('<div class="dx-pctx"><div class="dx-pctx-label">현재 선택 업종 및 진단 결과</div>'
-            f'<div class="dx-pctx-row"><b>{_e(industry)}</b><span class="dx-pctx-sep">|</span><b>{_e(quarter)}</b>'
+            f'<div class="dx-pctx-row"><b>{_e(industry)}</b><span class="dx-pctx-sep">|</span><b>{_e(quarter_text(quarter))}</b>'
             f'<span class="dx-pctx-sep">|</span>{badge_html}</div>'
             '<div class="dx-pctx-help">현재 화면은 선택한 업종과 분기를 기준으로 조회합니다. '
             '적격·선정 여부를 자동 판정하지 않습니다.</div></div>')

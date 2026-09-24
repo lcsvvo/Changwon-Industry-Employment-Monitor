@@ -26,7 +26,9 @@ from app.view_models import (  # noqa: E402
     COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
     TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, clarification, comparison_view,
     copilot_suggestions, data_quality_flags, evidence_level, evidence_level_value, field_context, filter_official_cards,
-    function_card_counts, function_name, function_ui_label, quarter_label, recruitment_observations, report_download,
+    function_card_counts, function_name, function_ui_label, next_quarters, quarter_label, quarter_text,
+    recruitment_observations,
+    report_download,
     rule_evidence_rows, session_scope,
     signal_explanation, stage_code, stage_counts, stage_display, structure_answer, supporting_fact_items,
     team_kpis, team_principles, top_questions, with_session_context,
@@ -77,7 +79,7 @@ def nature_badge(run_quarter: str, target_quarter: str, demo_case: bool = False)
     """분석본 성격 표시. 후향 재구성이면 당시에 저장된 분석본처럼 표기하지 않는다."""
     nat = snapshot_nature(run_quarter, target_quarter)
     st.badge(NATURE_LABEL[nat], color="blue" if nat == "contemporaneous" else "violet")
-    st.caption(nature_note(run_quarter, target_quarter)
+    st.caption(nature_text(run_quarter, target_quarter)
                + (" · 후향 재구성 데이터 기반 시연" if demo_case and nat == "reconstructed" else ""))
 
 
@@ -178,7 +180,7 @@ if "page" not in st.session_state:
 apply_nav()
 
 # 화면 이동은 상단 헤더 탭(go → apply_nav)이 st.session_state.page를 바꾼다. 실행 배너는 헤더 상태 표시에 둔다.
-labels = [f"{m['quarter']} {m['snapshot_version']}" for m in metas]
+labels = [f"{m['quarter']} {m['snapshot_version']}" for m in metas]  # 세션 저장값은 2026Q2 형식 — 표시는 format_func
 st.session_state.setdefault("analysis_version", labels[-1])
 st.session_state.setdefault("actor", "")
 st.session_state.setdefault("copilot_collapsed", False)
@@ -210,10 +212,10 @@ with st.container(key="topbar"):
                           vertical_alignment="center"):
             with st.popover("⚙ 설정·정보", help="담당자 · 분석 버전 · 방법론·변경 기록"):
                 st.text_input("담당자 이름", key="actor", help="모든 검토·개설·결정 기록에 남습니다.")
-                st.selectbox("분석 버전", labels, key="analysis_version",
+                st.selectbox("분석 버전", labels, key="analysis_version", format_func=quarter_text,
                              help="분석 실행 분기별로 보존된 불변 분석본. 실행 분기 이전 분기는 후향 재구성 값입니다.")
                 st.caption("분석 정보")
-                st.caption(f"기준분기 {meta['quarter']} · 분석 버전 {meta['snapshot_version']}")
+                st.caption(f"기준분기 {quarter_label(meta['quarter'])} · 분석 버전 {meta['snapshot_version']}")
                 st.caption(f"규칙 버전 `{meta['rule_version']}`")
                 st.caption(f"분석 실행일 {meta['source_run']['triage_run_at_utc'][:10]}")
                 st.caption(f"등록일 {meta['created_at'][:10]}")
@@ -235,7 +237,7 @@ with st.container(key="topbar"):
         st.space("stretch")
         data_cutoff = snap.provenance(snap.quarter).get("data_cutoff")
         # 사용자용 요약만(분석 버전·등록일은 설정·정보 → 분석 정보, 프로토타입·인증 상태는 설정·정보 → 시스템 상태)
-        pills = [("ok", f"분석기준 {meta['quarter']} · 데이터 기준 {data_cutoff}")]
+        pills = [("ok", f"분석기준 {quarter_label(meta['quarter'])} · 데이터 기준 {data_cutoff}")]
         if RT.demo:  # 시연 기록은 운영지표에서 빠지므로 업무 화면에서도 알린다
             pills.append(("warn", "시연 모드 — 시연 기록(운영지표 제외)"))
         st.html(ui.status_pills_html(pills), width="content")
@@ -262,6 +264,11 @@ def stage_badge(stage: str, label: str | None = None):
     st.badge(label or stage, color=STAGE_COLOR.get(stage, "gray"))
 
 
+def nature_text(run_quarter: str, target_quarter: str) -> str:
+    """분석본 성격 안내문(export.snapshot 원문)의 표시용 — 분기 표기만 '2026년 2분기'로 바꾼다."""
+    return quarter_text(nature_note(run_quarter, target_quarter))
+
+
 def nature_display(q: str) -> str:
     """분석본 성격의 사용자용 이름. 의미(당시 분석본 / 후향 재구성)는 그대로, 용어만 쉽게 쓴다."""
     return NATURE_LABEL["contemporaneous"] if snapshot_nature(snap.quarter, q) == "contemporaneous" else "과거분기 재계산"
@@ -270,8 +277,8 @@ def nature_display(q: str) -> str:
 def nature_line(q: str) -> str:
     """분석본 성격 한 줄(진단서·정책 화면 등). 당시 분석본은 기존 표기, 재계산은 적용 분석기준을 함께 쓴다."""
     if snapshot_nature(snap.quarter, q) == "contemporaneous":
-        return nature_note(snap.quarter, q)
-    return f"과거분기 재계산 결과 · 적용 분석기준 {snap.quarter} 버전"
+        return nature_text(snap.quarter, q)
+    return f"과거분기 재계산 결과 · 적용 분석기준 {quarter_label(snap.quarter)} 버전"
 
 
 def section(title: str, helper: str | None = None, badge: str | None = None):
@@ -289,14 +296,14 @@ def open_case_form(rec: dict, key: str):
     stage = rec["triage"]["stage"]
     title = "점검 건 개설" if stage != "관찰" else "수동 점검 건 개설(관찰 단계)"
     with st.form(f"open_{key}"):
-        st.markdown(f"**{title}** — {rec['industry']} {rec['quarter']} · 분석 버전 {snap.quarter} {snap.version} 기준으로 고정됩니다.")
+        st.markdown(f"**{title}** — {rec['industry']} {quarter_label(rec['quarter'])} · 분석 버전 {quarter_label(snap.quarter)} {snap.version} 기준으로 고정됩니다.")
         reason = st.text_area("개설 사유 (필수)")
         assignee = st.text_input("담당자 (필수)", value=actor.display_name if actor else "")
-        st.caption(nature_note(snap.quarter, rec["quarter"])
+        st.caption(nature_text(snap.quarter, rec["quarter"])
                    + (" · 시연 모드: 시연 기록으로 개설됩니다(운영지표 제외)." if RT.demo else ""))
         if st.form_submit_button("점검 건 개설", type="primary", disabled=not actor):
             cid = run(lambda: svc.open_case(actor, snap, rec["industry"], rec["quarter"], reason, assignee),
-                      f"점검 건을 개설했습니다 — {rec['industry']} {rec['quarter']}.")
+                      f"점검 건을 개설했습니다 — {rec['industry']} {quarter_label(rec['quarter'])}.")
             if cid:
                 go("점검 관리", None, None, cid, "진행 중")
                 st.rerun()
@@ -419,7 +426,7 @@ def source_lines(src: dict) -> list[str]:
 
 
 def external_sources_view(rec: dict, quarter: str):
-    st.markdown(f"#### 외부자료 ({quarter} 기준)")
+    st.markdown(f"#### 외부자료 ({quarter_label(quarter)} 기준)")
     sources = rec.get("external_sources")
     if sources is None:
         st.caption("이 분석 버전에는 분기별 외부자료가 포함되어 있지 않습니다. 최신 분석 버전을 선택하세요.")
@@ -435,7 +442,7 @@ def external_sources_view(rec: dict, quarter: str):
             st.caption(note)
             for src in group:
                 if src["available"]:
-                    st.markdown(f"- **{src['label']}** — {src['source_period']}")
+                    st.markdown(f"- **{src['label']}** — {quarter_text(src['source_period'])}")
                     for line in source_lines(src):
                         st.markdown(f"    - {line}")
                     if src["key"] == "eis_cci":
@@ -444,7 +451,7 @@ def external_sources_view(rec: dict, quarter: str):
                         if src["key"] != "eis_cci":
                             st.caption(n)
                 else:
-                    st.markdown(f"- **{src['label']}** — {src['unavailable_label']}")
+                    st.markdown(f"- **{src['label']}** — {quarter_text(src['unavailable_label'])}")
                     if src.get("quality_only") and src.get("quality"):
                         st.caption("자료 품질·결합 한계")
                         st.json(src["quality"], expanded=False)
@@ -459,8 +466,8 @@ def timeline_chips(industry: str, current_quarter: str, rows: list[dict]):
     with st.container(key="timeline", horizontal=True, gap="small"):
         for row in rows:
             qq = row["quarter"]
-            st.button(f"{qq[2:4]}{qq[4:]}", key=f"tl-{qq}", on_click=set_quarter, args=(qq,),
-                      help=f"{qq} · {stage_display(row['stage'])}")
+            st.button(f"{qq[2:4]}년 {qq[5:]}분기", key=f"tl-{qq}", on_click=set_quarter, args=(qq,),
+                      help=f"{quarter_label(qq)} · {stage_display(row['stage'])}")
 
 
 def sync_field_store(industry: str, quarter: str, questions: list[dict]):
@@ -585,7 +592,7 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
                         st.write(message["content"])
     else:  # 빈 상자 없이 안내 한 줄 → 바로 입력창
         st.caption("질문을 입력하거나 추천 질문을 눌러 보세요.")
-    typed = st.chat_input(f"{industry} · {quarter}에 대해 질문하세요.", key=f"chat::{scope}")
+    typed = st.chat_input(f"{industry} · {quarter_label(quarter)}에 대해 질문하세요.", key=f"chat::{scope}")
     prompt = selected or typed
     if prompt:
         decision = R.route(prompt, list(snap.industries), list(snap.quarters))
@@ -635,11 +642,11 @@ def assistant_message_view(message: dict, scope: str, is_last: bool) -> str | No
         if rec_a and rec_b:
             view = comparison_view(a, rec_a, b, rec_b, {r["rule_name"]: r for r in snap.reference["triage_rules"]})
     if clarify:
-        st.markdown(clarify["text"])
+        st.markdown(quarter_text(clarify["text"]))
     elif view:
         st.html(ui.comparison_html(view))
     else:
-        st.html(ui.answer_html(structure_answer(message["content"])))
+        st.html(ui.answer_html(structure_answer(quarter_text(message["content"]))))  # 답변 원문은 그대로, 표시만 분기 표기 통일
     for cite in message.get("citations") or []:
         detail = " · ".join(x for x in (cite.get("institution"), cite.get("locator"),
                                          f"확인 {cite['checked_at']}" if cite.get("checked_at") else None) if x)
@@ -648,7 +655,7 @@ def assistant_message_view(message: dict, scope: str, is_last: bool) -> str | No
         st.html(message["meta"]["search_entry_point"])  # Google 검색 제안(grounding 사용 시 표시)
     # 별도 '근거 한계' 상자는 두지 않는다 — 일반 AI 답변은 badge로 충분, 그 밖에는 짧은 주의 한 줄만
     if message.get("caveats") and message.get("source_type") != "GENERAL_LLM" and not clarify and not view:
-        st.caption(f"주의 · {message['caveats'][0]}")
+        st.caption(f"주의 · {quarter_text(message['caveats'][0])}")
     if clarify and is_last:
         with st.container(key="clarifyacts", horizontal=True, gap="small"):
             for i, (label, prompt) in enumerate(clarify["actions"]):
@@ -682,7 +689,7 @@ def handover_sections(payload: dict, rec: dict | None, rows: list[dict]) -> list
     sections = []
 
     kpi = ui.kpi_cards_html([
-        {"label": "업종", "value": ind}, {"label": "기준분기", "value": q},
+        {"label": "업종", "value": ind}, {"label": "기준분기", "value": quarter_label(q)},
         {"label": "현재 판정", "value": stage_display(triage["stage"]) if triage.get("stage") else "자료 없음"},
         {"label": "Q1 상태", "value": " · ".join(x for x in (q1.get("state"), q1.get("state_label")) if x) or "자료 없음"},
         {"label": "Q2 고용증감", "value": fmt(q2.get("employment_change"), suffix="명"),
@@ -745,12 +752,12 @@ def report_dialog(payload: dict, rec: dict | None):
     st.html(body)
     with st.expander("데이터 한계·출처 기준"):
         for caveat in payload.get("caveat") or []:
-            st.caption(f"- {caveat}")
+            st.caption(f"- {quarter_text(caveat)}")
         st.json({"basis_date": payload.get("basis_date"),
                  "snapshot_provenance": payload.get("snapshot_provenance"),
                  "contract_version": payload.get("contract_version")}, expanded=False)
     with st.container(horizontal=True, gap="small"):
-        st.download_button("HTML 저장 (인쇄용)", ui.document_html(f"{ind} {q} 진단 요약", body, DASHBOARD_CSS),
+        st.download_button("HTML 저장 (인쇄용)", ui.document_html(f"{ind} {quarter_label(q)} 진단 요약", body, DASHBOARD_CSS),
                            file_name=f"diagnosis_{ind}_{q}.html", mime="text/html", type="primary")
         st.download_button("JSON 원본", report_download(payload),
                            file_name=f"diagnosis_{ind}_{q}.json", mime="application/json")
@@ -768,7 +775,7 @@ def report_card(payload: dict, rec: dict):
     """왼쪽 패널 하단 — 담당자 인계용 진단서. 진단서 기능의 유일한 진입점(HTML 저장·JSON 원본은 발급 dialog 안)."""
     ind, q, t = payload["industry"], payload["quarter"], rec["triage"]
     with st.container(key="reportcard"):
-        st.html(ui.metric_list_html("담당자 인계용 진단서", [("업종 · 분기", f"{ind} · {q}")],
+        st.html(ui.metric_list_html("담당자 인계용 진단서", [("업종 · 분기", f"{ind} · {quarter_label(q)}")],
                                     badge_html=ui.stage_badge_html(t["stage"], stage_display(t["stage"]))))
         if st.button("진단서 발급", key="left_report", type="primary", width="stretch"):
             report_dialog(payload, rec)
@@ -795,7 +802,7 @@ def left_panel(industries: list[str], quarters: list[str], latest_quarter: str,
         t = rec["triage"]
         st.html(ui.metric_list_html(
             f"선택 업종 · {ind}",
-            [("기준 분기", q), ("분석본", nature_display(q)), ("다음 검토", t["next_review_quarter"] or "—")],
+            [("기준 분기", quarter_label(q)), ("분석본", nature_display(q)), ("다음 검토", quarter_label(t["next_review_quarter"]))],
             badge_html=ui.stage_badge_html(t["stage"], stage_display(t["stage"]))))
 
     with st.container(key="noticecard"):
@@ -829,7 +836,7 @@ def aux_evidence_view(rec: dict, q: str):
     external_sources_view(rec, q)
     ev = rec["external_evidence"]
     if ev["available"]:
-        st.markdown(f"#### 최신분기 외부근거 요약 카드 · 원천 분기 {ev['source_quarter']}")
+        st.markdown(f"#### 최신분기 외부근거 요약 카드 · 원천 분기 {quarter_label(ev['source_quarter'])}")
         if ev["card"]:
             card = ev["card"]
             for k in ("확인신호프로필", "교차확인", "고용flow", "수출", "경기심리", "전력", "자료품질"):
@@ -871,7 +878,7 @@ def aux_evidence_view(rec: dict, q: str):
         st.markdown(f"- {qs['check_question'] or S.NO_CONTEXT_QUESTION}")
     with st.container(border=True):
         st.markdown("**맥락 기반 추가 확인질문**")
-        st.caption(f"{q} 분기 해석층이 만든 질문 · 현장에서 추가로 확인할 내용이며 "
+        st.caption(f"{quarter_label(q)} 분기 해석층이 만든 질문 · 현장에서 추가로 확인할 내용이며 "
                    "Triage·선택적 재검토 판정을 바꾸지 않습니다 · 외부근거 카드가 아닙니다")
         if qs["context_available"]:
             for x in qs["context_questions"]:
@@ -983,18 +990,18 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
     cutoff = snap.provenance(q)["data_cutoff"]
 
     with st.container(key="dxsec-diag"):
-        meta_line = f"자료 기준 {cutoff} · 단계 내 {t['rank_in_stage']}순위 · 다음 검토 {t['next_review_quarter'] or '—'}"
+        meta_line = f"자료 기준 {cutoff} · 단계 내 {t['rank_in_stage']}순위 · 다음 검토 {quarter_label(t['next_review_quarter'] or '—')}"
         st.html(ui.header_html(q, ind, t["stage"], stage_display(t["stage"]), meta_line))
         # 분석본 성격(당시/후향 재구성)은 항상 텍스트로 드러낸다 — 후향 재구성을 당시 분석본처럼 보이게 하지 않는다
         nat = snapshot_nature(snap.quarter, q)
         if nat == "contemporaneous":
-            st.caption(f":blue-badge[{NATURE_LABEL[nat]}] {nature_note(snap.quarter, q)}")
+            st.caption(f":blue-badge[{NATURE_LABEL[nat]}] {nature_text(snap.quarter, q)}")
         else:
             st.html(ui.notice_html(
                 "과거분기 재계산 결과",
-                f"{q} 당시 저장된 진단 결과가 없어, 현재 분석기준으로 {q} 데이터를 다시 계산한 결과입니다. "
+                f"{quarter_label(q)} 당시 저장된 진단 결과가 없어, 현재 분석기준으로 {quarter_label(q)} 데이터를 다시 계산한 결과입니다. "
                 "이후 수정·보정된 자료가 반영되었을 수 있어 당시 실제 판정과 동일하다고 볼 수 없습니다.",
-                f"적용 분석기준: {snap.quarter} 버전", tone="violet"))
+                f"적용 분석기준: {quarter_label(snap.quarter)} 버전", tone="violet"))
 
         kpi_cards = [
             {"label": "Q1 상태 (국면)", "value": " · ".join(x for x in (q1["state"], q1["state_label"]) if x) or "자료 없음",
@@ -1033,7 +1040,7 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
                     footnote += " · 확인 가능한 신호에 따른 최소판정"
                 st.html(ui.rule_table_html(rows, footnote))
                 st.dataframe(pd.DataFrame([{
-                    "분기": h["quarter"], "Q1 상태": h["q1"]["state_label"], "Triage": h["triage"]["stage"],
+                    "분기": quarter_label(h["quarter"]), "Q1 상태": h["q1"]["state_label"], "Triage": h["triage"]["stage"],
                     "E": fmt(h["signals"]["E"], 2), "R": fmt(h["signals"]["R"], 2), "A": fmt(h["signals"]["A"], 2),
                     "P": fmt(h["signals"]["P"], 2), "고용 증감(명)": h["q2"]["emp_delta"],
                     "상태 지속(분기)": h["q3"]["state_run_length"],
@@ -1116,7 +1123,7 @@ def page_diagnosis():
                 center_card(ind, q, rec, latest_quarter, jobs, field_questions_all, report_payload)
         if rec is not None:
             copilot_panel(lambda: copilot_view(ind, q, current_field_context, rec["triage"]["stage"], industries,
-                                               f"{ind} · {q}", ["진단", "현장확인", "정책연계"]))
+                                               f"{ind} · {quarter_label(q)}", ["진단", "현장확인", "정책연계"]))
 
 
 # ------------------------------------------------------------------ 점검 관리
@@ -1181,7 +1188,7 @@ def resolve_occurred(choice, day, tm):
 
 
 def scope_title(sc: dict) -> str:
-    return f"{sc['quarter']} {sc['review_kind']}"
+    return f"{quarter_label(sc['quarter'])} {sc['review_kind']}"
 
 
 def referral_view(r: dict, closed: bool, scope_label: str):
@@ -1231,10 +1238,10 @@ def referral_view(r: dict, closed: bool, scope_label: str):
 
 def case_table(cases):
     return pd.DataFrame([{
-        "번호": c["id"], "업종": c["industry"], "개설 분기": c["quarter"], "개설 경로": c["origin"],
+        "번호": c["id"], "업종": c["industry"], "개설 분기": quarter_label(c["quarter"]), "개설 경로": c["origin"],
         "담당자": c["assignee"], "상태": c["status"], "현재 결정": c["decision"] or "—",
-        "다음 검토": c["next_review_quarter"] or "—",
-        "개설 분석본": f"{c['snapshot_quarter']} {c['snapshot_version']} ({NATURE_LABEL[c['snapshot_nature']]})",
+        "다음 검토": quarter_label(c["next_review_quarter"]),
+        "개설 분석본": f"{quarter_label(c['snapshot_quarter'])} {c['snapshot_version']} ({NATURE_LABEL[c['snapshot_nature']]})",
         "시연": "시연" if c["is_example"] else "",
     } for c in cases])
 
@@ -1243,7 +1250,7 @@ def ext_compact(rec: dict) -> list[str]:
     sources = rec.get("external_sources")
     if sources is None:
         return ["이 분석본에는 분기별 외부자료가 없습니다."]
-    return [f"{s['label']} · {s['source_period'] if s['available'] else s['unavailable_label']}"
+    return [f"{s['label']} · {quarter_text(s['source_period'] if s['available'] else s['unavailable_label'])}"
             + (f" ({s['role']})" if s["available"] else "") for s in sources if not s.get("quality_only")]
 
 
@@ -1256,7 +1263,7 @@ def point_view(title: str, rec: dict, snap_label: str):
                 f"- Q2 규모: 고용 {fmt(q2['employment'], suffix='명')} · 증감 {fmt(q2['emp_delta'], suffix='명')} · "
                 f"비중 {fmt(q2['employment_share_pct'], 2, '%')} · 순감소 기여율 {fmt(q2['contribution_pct'], 2, '%')}\n"
                 f"- Q3 시간: 상태 {fmt(q3['state_run_length'])}분기 지속 · 반복 고용진입신호 {fmt(q3['repeated_signal'])}")
-    with st.expander(f"외부자료 ({rec['quarter']} 기준)"):
+    with st.expander(f"외부자료 ({quarter_label(rec['quarter'])} 기준)"):
         for line in ext_compact(rec):
             st.caption(f"- {line}")
 
@@ -1282,7 +1289,7 @@ def change_table(prev: dict, cur: dict) -> pd.DataFrame:
 
 def version_compare_view(old, new, key: tuple[str, str] | None = None):
     d = snapshot_diff(old, new)
-    st.markdown(f"**{d['old']} ↔ {d['new']}** · **{d['verdict']}**")
+    st.markdown(f"**{quarter_text(d['old'])} ↔ {quarter_text(d['new'])}** · **{d['verdict']}**")
     st.caption(f"{d['review_threshold_label']} (자동 재검토 표시 비활성) — 차이를 계산해 보여주기만 하며, "
                "재검토 표시를 자동으로 붙이지 않습니다.")
     with st.container(border=True):
@@ -1290,7 +1297,7 @@ def version_compare_view(old, new, key: tuple[str, str] | None = None):
         if d["core_changes"] or d["core_meta_changed"] or d["records_only_in_old"] or d["records_only_in_new"]:
             st.markdown(f"변경된 업종×분기 {len(d['core_changed_records'])}건")
             if d["core_changes"]:
-                st.dataframe(pd.DataFrame([{"업종": c["industry"], "분기": c["quarter"], "항목": c["label"],
+                st.dataframe(pd.DataFrame([{"업종": c["industry"], "분기": quarter_label(c["quarter"]), "항목": c["label"],
                                             "이전": fmt(c["old"], 3), "이후": fmt(c["new"], 3)}
                                            for c in d["core_changes"]]), hide_index=True, width="stretch")
             if d["core_meta_changed"]:
@@ -1316,7 +1323,7 @@ def version_compare_view(old, new, key: tuple[str, str] | None = None):
             st.markdown(f"- {line}")
     if key is not None:
         rd = record_diff(old.get(*key), new.get(*key))
-        st.caption(f"이 점검 건({key[0]} {key[1]}): CORE 변경 {len(rd['core_changes'])}건 · "
+        st.caption(f"이 점검 건({key[0]} {quarter_label(key[1])}): CORE 변경 {len(rd['core_changes'])}건 · "
                    f"부가정보 변경 {len(rd['aux_changes']) + len(rd.get('aux_fields_added', []))}건")
 
 
@@ -1324,20 +1331,20 @@ def result_line(item: dict) -> str:
     r = item["latest"]
     q = item["question_text"] if len(item["question_text"]) <= 70 else item["question_text"][:70] + "…"
     if r is None:
-        return f"{item['position'] + 1}. {q} → 미실시"
+        return f"{item['position'] + 1}. {quarter_label(q)} → 미실시"
     performed = f"실제 확인 {ts(r['performed_at'])} KST" if r["performed_at"] else "실제 확인 일시 미입력"
     more = f" · 이전 기록 {len(item['history']) - 1}건" if len(item["history"]) > 1 else ""
-    return (f"{item['position'] + 1}. {q} → **{r['result_code']}** ({r['method']}) · {performed} · "
+    return (f"{item['position'] + 1}. {quarter_label(q)} → **{r['result_code']}** ({r['method']}) · {performed} · "
             f"기록 {ts(r['recorded_at'])} KST ({r['recorded_by']}){more}" + (f" — {r['note']}" if r["note"] else ""))
 
 
 def scope_header(sc: dict, case: dict):
     st.markdown(f"#### {scope_title(sc)} · {sc['review_status']}")
     nature_badge(sc["snapshot_quarter"], sc["quarter"], case["is_example"])
-    st.caption(f"사용 분석본 {sc['snapshot_quarter']} {sc['snapshot_version']} · 시작 {ts(sc['started_at'])} KST ({sc['reviewer']})"
+    st.caption(f"사용 분석본 {quarter_label(sc['snapshot_quarter'])} {sc['snapshot_version']} · 시작 {ts(sc['started_at'])} KST ({sc['reviewer']})"
                + (f" · 완료 {ts(sc['reviewed_at'])} KST" if sc["reviewed_at"] else ""))
     if sc["review_kind"] == "재점검":
-        st.markdown(f"단계 이동: **{sc['previous_quarter']} {sc['previous_stage']} → {sc['quarter']} {sc['current_stage']}**")
+        st.markdown(f"단계 이동: **{quarter_label(sc['previous_quarter'])} {sc['previous_stage']} → {quarter_label(sc['quarter'])} {sc['current_stage']}**")
         st.caption("단계 이동은 분석본 값을 그대로 옮긴 사실입니다. 그 의미는 담당자가 판단합니다.")
     else:
         st.markdown(f"이 시점 Triage: **{sc['current_stage']}**")
@@ -1346,7 +1353,7 @@ def scope_header(sc: dict, case: dict):
 def scope_record_view(sc: dict, case: dict):
     """한 점검 시점의 기록(읽기 전용). 이전 시점의 기록은 수정할 수 없다."""
     rec = snapshot(sc["snapshot_quarter"], sc["snapshot_version"]).get(case["industry"], sc["quarter"])
-    point_view(f"이 시점 분석값 · {sc['quarter']}", rec, f"{sc['snapshot_quarter']} {sc['snapshot_version']}")
+    point_view(f"이 시점 분석값 · {quarter_label(sc['quarter'])}", rec, f"{quarter_label(sc['snapshot_quarter'])} {sc['snapshot_version']}")
     done = [i for i in sc["checks"] if i["latest"]]
     st.markdown(f"**현장확인 결과** {len(done)}/{len(sc['checks'])}건")
     for item in done:
@@ -1361,7 +1368,7 @@ def scope_record_view(sc: dict, case: dict):
                    + f" — {n['note'] or ''} ({n['recorded_by']}, {ts(n['recorded_at'])} KST)")
     st.markdown("**결정** " + ("" if sc["decisions"] else "—"))
     for d in sc["decisions"]:
-        st.caption(f"- {d['decision']} · {d['rationale']} · 다음 검토 {d['next_review_quarter'] or '—'} "
+        st.caption(f"- {d['decision']} · {d['rationale']} · 다음 검토 {quarter_label(d['next_review_quarter'] or '—')} "
                    f"({d['decided_by']}, {ts(d['decided_at'])} KST)")
     st.markdown("**이 시점에서 작성한 인계** " + (", ".join(
         f"#{r['id']} {fn_name(r['function_tag'])} → {r['institution']} ({r['status']})" for r in sc["referrals"]) or "—"))
@@ -1466,7 +1473,7 @@ def current_scope_inputs(case: dict, sc: dict, fixed):
     # ④ 결정
     st.markdown("##### ④ 결정 · 어디로 인계했는가")
     for d in sc["decisions"]:
-        st.markdown(f"- **{d['decision']}** · {d['rationale']} · 다음 검토 {d['next_review_quarter'] or '—'} "
+        st.markdown(f"- **{d['decision']}** · {d['rationale']} · 다음 검토 {quarter_label(d['next_review_quarter'] or '—')} "
                     f"({d['decided_by']}, {ts(d['decided_at'])} KST)")
     if not sc["decisions"]:
         st.caption("이번 시점에 기록된 결정 없음")
@@ -1480,9 +1487,14 @@ def current_scope_inputs(case: dict, sc: dict, fixed):
     with st.form("decision", clear_on_submit=True):
         decision = st.radio("결정", M.DECISIONS, horizontal=True, index=None)
         rationale = st.text_area("결정 근거 (필수 · 종결이면 종결 사유)")
-        nrq = st.text_input("다음 검토 분기 (예: 2026Q3 · 계속 점검·추가확인·모니터링 전환은 필수)",
-                            value=case["next_review_quarter"] if (case["next_review_quarter"] or "") > sc["quarter"]
-                            else (rec["triage"]["next_review_quarter"] or ""))
+        prefill = (case["next_review_quarter"] if (case["next_review_quarter"] or "") > sc["quarter"]
+                   else (rec["triage"]["next_review_quarter"] or ""))
+        nrq_options = ["", *next_quarters(sc["quarter"])]
+        if prefill and prefill not in nrq_options:
+            nrq_options.append(prefill)
+        nrq = st.selectbox("다음 검토 분기 (계속 점검·추가확인·모니터링 전환은 필수)", nrq_options,
+                           index=nrq_options.index(prefill) if prefill in nrq_options else 0,
+                           format_func=lambda x: quarter_label(x) if x else "선택 안 함")
         picks = st.multiselect("인계할 곳 (결정이 '인계'일 때만 사용)", targets,
                                format_func=lambda x: f"{fn_name(x[0])} → {x[1]}",
                                placeholder="지원 필요 기능 · 담당 기관 선택",
@@ -1523,17 +1535,17 @@ def case_detail_view(cid: int):
     st.subheader("① 왜 이 업종을 확인했는가")
     with st.container(border=True):
         st.badge(f"점검 건 상태: {case['status']}", color=CASE_STATUS_COLOR[case["status"]])
-        st.markdown(f"### #{case['id']} {case['industry']} · {case['quarter']} 개설 — {case['status']}"
+        st.markdown(f"### #{case['id']} {case['industry']} · {quarter_label(case['quarter'])} 개설 — {case['status']}"
                     + (" · 시연 기록" if case["is_example"] else ""))
         st.markdown(f"**개설 시 판정 사유** {rec['triage']['stage_reason']}")
         st.markdown(f"**개설 경로** {case['origin']} · **담당자** {case['assignee']} · **개설** {case['opened_by']} {ts(case['opened_at'])} KST")
         st.markdown(f"**개설 사유** {case['opening_reason']}")
-        st.caption(f"개설에 사용한 분석본: {case['snapshot_quarter']} {case['snapshot_version']} (고정)")
+        st.caption(f"개설에 사용한 분석본: {quarter_label(case['snapshot_quarter'])} {case['snapshot_version']} (고정)")
         nature_badge(case["snapshot_quarter"], case["quarter"], case["is_example"])
         if closed:
             st.info(f"종결: {case['closed_by']} {ts(case['closed_at'])} KST — 종결 사유: {case['closing_note']}")
         elif case["status"] == "모니터링":
-            st.info(f"모니터링 중 — 적극 점검은 멈췄고 다음 검토 분기 {case['next_review_quarter']} 재점검 계획이 남아 있습니다.")
+            st.info(f"모니터링 중 — 적극 점검은 멈췄고 다음 검토 분기 {quarter_label(case['next_review_quarter'])} 재점검 계획이 남아 있습니다.")
     newer = [m for m in metas if m["quarter"] == case["snapshot_quarter"]][-1]
     if newer["snapshot_version"] != case["snapshot_version"]:
         with st.expander(f"분석본 보정 비교 — 개설 시 사용 {case['snapshot_version']} ↔ 최신 {newer['snapshot_version']}"):
@@ -1559,14 +1571,14 @@ def case_detail_view(cid: int):
                     case["industry"], cur["previous_quarter"])
                 left, right = st.columns(2)
                 with left, st.container(border=True):
-                    point_view(f"직전 점검 · {cur['previous_quarter']}", prev,
-                               f"{cur['previous_snapshot_quarter']} {cur['previous_snapshot_version']}")
+                    point_view(f"직전 점검 · {quarter_label(cur['previous_quarter'])}", prev,
+                               f"{quarter_label(cur['previous_snapshot_quarter'])} {cur['previous_snapshot_version']}")
                 with right, st.container(border=True):
-                    point_view(f"이번 시점 · {cur['quarter']}", cur_rec, f"{cur['snapshot_quarter']} {cur['snapshot_version']}")
+                    point_view(f"이번 시점 · {quarter_label(cur['quarter'])}", cur_rec, f"{quarter_label(cur['snapshot_quarter'])} {cur['snapshot_version']}")
                 st.markdown("**직전 시점 대비 변화** (값의 차이만 표시)")
                 st.dataframe(change_table(prev, cur_rec), hide_index=True, width="stretch")
             else:
-                point_view(f"이 시점 분석값 · {cur['quarter']}", cur_rec, f"{cur['snapshot_quarter']} {cur['snapshot_version']}")
+                point_view(f"이 시점 분석값 · {quarter_label(cur['quarter'])}", cur_rec, f"{quarter_label(cur['snapshot_quarter'])} {cur['snapshot_version']}")
         current_scope_inputs(case, cur, fixed)
 
     # ⑤ 인계 기록
@@ -1587,12 +1599,12 @@ def case_detail_view(cid: int):
         if not nrq:
             st.caption("다음 검토 분기가 기록되지 않았습니다.")
         elif target is None or target.get(case["industry"], nrq) is None:
-            st.caption(f"{nrq} 분석 자료가 아직 없습니다 — 자료가 등록되면 재점검 예정 목록에 나타납니다.")
+            st.caption(f"{quarter_label(nrq)} 분석 자료가 아직 없습니다 — 자료가 등록되면 재점검 예정 목록에 나타납니다.")
         else:
-            st.caption(f"{nrq} 재점검에 쓸 분석본: {target.quarter} {target.version} · {nature_note(target.quarter, nrq)}")
-            if st.button(f"{nrq} 재점검 시작", disabled=not actor, type="primary"):
+            st.caption(f"{quarter_label(nrq)} 재점검에 쓸 분석본: {quarter_label(target.quarter)} {target.version} · {nature_text(target.quarter, nrq)}")
+            if st.button(f"{quarter_label(nrq)} 재점검 시작", disabled=not actor, type="primary"):
                 if run(lambda: svc.start_quarterly_review(actor, case["id"], target),
-                       f"#{case['id']} {nrq} 재점검을 시작했습니다.") is not None:
+                       f"#{case['id']} {quarter_label(nrq)} 재점검을 시작했습니다.") is not None:
                     st.rerun()
 
     with st.expander("이 점검 건의 변경 기록"):
@@ -1601,8 +1613,9 @@ def case_detail_view(cid: int):
 
 def inspection_left_panel() -> str:
     st.markdown("**점검 기준 분기**")
-    quarter = st.selectbox("분기", snap.quarters[::-1], key="queue_quarter", label_visibility="collapsed")
-    st.caption(nature_note(snap.quarter, quarter))
+    quarter = st.selectbox("분기", snap.quarters[::-1], key="queue_quarter", label_visibility="collapsed",
+                           format_func=quarter_label)
+    st.caption(nature_text(snap.quarter, quarter))
 
     recs = snap.by_quarter(quarter)
     n_candidates = len([r for r in recs if r["triage"]["stage"] in ("우선점검", "추가확인")])
@@ -1643,7 +1656,7 @@ def _selected_candidate_detail(quarter: str):
         return
     rec = snap.get(ind, quarter)
     t = rec["triage"]
-    st.markdown(f"#### 선택 후보 · {ind} · {quarter}")
+    st.markdown(f"#### 선택 후보 · {ind} · {quarter_label(quarter)}")
     with st.container(border=True):
         reviewer_section(ind, quarter, rec, t)
     questions = decision_support.field_questions(quarter, ind)
@@ -1676,7 +1689,7 @@ def _start_case_cb(ind: str, quarter: str):
     except WorkflowError as e:
         st.session_state._start_error = str(e)
         return
-    st.session_state._flash = f"점검 건을 개설했습니다 — {ind} {quarter}."
+    st.session_state._flash = f"점검 건을 개설했습니다 — {ind} {quarter_label(quarter)}."
     go("점검 관리", None, None, cid, "진행 중")
     st.session_state._start_done = True
 
@@ -1685,8 +1698,8 @@ def _start_case_cb(ind: str, quarter: str):
 def start_case_dialog(ind: str, quarter: str):
     t = snap.get(ind, quarter)["triage"]
     display = stage_display(t["stage"])
-    st.markdown(f"**{ind} · {quarter}** · {display}")
-    st.caption(f"점검 후보 검토를 시작하고 점검 건을 개설합니다 · 분석 버전 {snap.quarter} {snap.version} 기준으로 고정")
+    st.markdown(f"**{ind} · {quarter_label(quarter)}** · {display}")
+    st.caption(f"점검 후보 검토를 시작하고 점검 건을 개설합니다 · 분석 버전 {quarter_label(snap.quarter)} {snap.version} 기준으로 고정")
     st.text_input("담당자 이름 (필수)", value=st.session_state.actor, key="start_actor")
     st.text_area("개설 사유 (필수)", value=f"등록 판정 {display} · {t['stage_reason']}", key="start_reason")
     st.button("점검 건 개설", type="primary", key="start_submit", on_click=_start_case_cb, args=(ind, quarter))
@@ -1743,8 +1756,8 @@ def inspection_cases_view(status_filter: str):
         for d in due:
             with st.container(border=True):
                 a, b = st.columns([4, 1])
-                a.markdown(f"**#{d['case_id']} {d['industry']}** · 직전 점검 {d['previous_quarter']} ({d['previous_stage']}) "
-                          f"→ 재점검 분기 **{d['review_quarter']}** · 현재 결정 {d['decision'] or '—'}"
+                a.markdown(f"**#{d['case_id']} {d['industry']}** · 직전 점검 {quarter_label(d['previous_quarter'])} ({d['previous_stage']}) "
+                          f"→ 재점검 분기 **{quarter_label(d['review_quarter'])}** · 현재 결정 {d['decision'] or '—'}"
                           + f" · 분석본 {d['snapshot']} ({NATURE_LABEL[d['snapshot_nature']]})"
                           + (" · 모니터링 중" if d["case_status"] == "모니터링" else "")
                           + (" · _시연 기록_" if d["is_example"] else ""))
@@ -1762,7 +1775,7 @@ def inspection_cases_view(status_filter: str):
     by_id = {c["id"]: c for c in cases}
     default = ids.index(st.session_state.get("case_id")) if st.session_state.get("case_id") in ids else 0
     cid = st.selectbox("점검 건 선택", ids, index=default,
-                       format_func=lambda i: f"#{i} {by_id[i]['industry']} {by_id[i]['quarter']}",
+                       format_func=lambda i: f"#{i} {by_id[i]['industry']} {quarter_label(by_id[i]['quarter'])}",
                        key=f"case_pick_{status_filter}")
     st.session_state.case_id = cid
     case_detail_view(cid)
@@ -1777,7 +1790,7 @@ def inspection_copilot(quarter: str, view: str):
         if case:
             ind = case["industry"]
             q = (case.get("current_scope") or {}).get("quarter") or case["quarter"]
-            context_title, context_tags = f"점검 건 #{cid} · {ind} · {q}", ["점검 관리"]
+            context_title, context_tags = f"점검 건 #{cid} · {ind} · {quarter_label(q)}", ["점검 관리"]
     if ind is None:
         pick = st.session_state.get("insp_pick")
         if pick and snap.get(pick, quarter) is not None:
@@ -1791,7 +1804,7 @@ def inspection_copilot(quarter: str, view: str):
     if ind is None:
         ind, q = st.session_state.dx_industry, st.session_state.dx_quarter
     if not context_title:
-        context_title = f"{ind} · {q}"
+        context_title = f"{ind} · {quarter_label(q)}"
     resolved_snap = resolved(q)
     rec = (resolved_snap.get(ind, q) if resolved_snap else None) or snap.get(ind, q)
     stage = (rec or {}).get("triage", {}).get("stage") if rec else None
@@ -2001,7 +2014,7 @@ def page_policy():
             context_tags = ["정책·지원 연계", *([function_ui_label(selected, C.label(selected))] if selected else [])]
         else:
             context_tags = [tabs[1]]  # 팀 제안은 전 업종 공통 — 업종 추천처럼 보이지 않게 탭 이름만
-        copilot_panel(lambda: copilot_view(ind, q, field_ctx, t["stage"], snap.industries, f"{ind} · {q}",
+        copilot_panel(lambda: copilot_view(ind, q, field_ctx, t["stage"], snap.industries, f"{ind} · {quarter_label(q)}",
                                            context_tags, team=tab == tabs[1]))
 
 
@@ -2028,17 +2041,18 @@ def page_operations():
     with st.container(key="adminpage"):
         st.html(ui.page_header_html("분기 사후검토", "관리 · 운영·검증용 보조 화면"))
         st.warning(SELECTION_BIAS_NOTE)
-        quarter = st.selectbox("기준 분기", svc.operations_quarters(snap)[::-1], index=0, key="ops_quarter")
+        quarter = st.selectbox("기준 분기", svc.operations_quarters(snap)[::-1], index=0, key="ops_quarter",
+                               format_func=quarter_label)
         o = svc.operations_summary(snap, quarter)
         b = o["basis"]
-        st.caption(f"후보 수는 분석본 {o['snapshot']} 기준 · 시연 기록 {o['excluded_example_cases']}건(점검 건 단위, 그 하위 기록 전부)은 "
+        st.caption(f"후보 수는 분석본 {quarter_text(o['snapshot'])} 기준 · 시연 기록 {o['excluded_example_cases']}건(점검 건 단위, 그 하위 기록 전부)은 "
                    "모든 지표에서 제외 · 지표마다 기준 시점이 다릅니다(각 영역 설명 참고).")
         recorded = (o["cases_opened"] + o["scopes"] + o["referrals_created"] + o["cases_closed"]
                     + sum(o["occurred_in_quarter"].values()))
         if recorded == 0:
-            st.info(f"{quarter}에 해당하는 운영 점검 기록이 아직 없습니다. 아래 기록 지표는 0 또는 '아직 기록 없음'입니다.")
+            st.info(f"{quarter_label(quarter)}에 해당하는 운영 점검 기록이 아직 없습니다. 아래 기록 지표는 0 또는 '아직 기록 없음'입니다.")
         if quarter not in snap.quarters:
-            st.caption(f"{quarter}는 분석본 {o['snapshot']}에 없는 분기입니다 — 후보·개설 지표는 해당 없음"
+            st.caption(f"{quarter_label(quarter)}는 분석본 {quarter_text(o['snapshot'])}에 없는 분기입니다 — 후보·개설 지표는 해당 없음"
                        "(실제 업무 발생·종결 기준 지표만 집계).")
         st.markdown(f"**①~④ 후보와 개설** · 기준: {b['candidates']}")
         c1, c2, c3, c4 = st.columns(4)
@@ -2064,12 +2078,12 @@ def page_operations():
             st.caption("회신율 분모 = 이 분기 시점에서 작성되고 발송이 기록된 인계(작성만 된 인계 제외), 분자 = 그중 회신이 기록된 인계.")
             st.markdown(f"**발송·접수·회신 발생** · 기준: {b['occurred']}")
             occ, unk = o["occurred_in_quarter"], o["occurred_unknown_all_quarters"]
-            st.markdown(f"- {quarter}에 실제로 발생: 발송 {occ['발송']} · 접수 {occ['접수']} · 회신 {occ['회신']}")
+            st.markdown(f"- {quarter_label(quarter)}에 실제로 발생: 발송 {occ['발송']} · 접수 {occ['접수']} · 회신 {occ['회신']}")
             st.caption(f"발생시각 미입력(분기 배정 불가, 전체 기간): 발송 {unk['발송']} · 접수 {unk['접수']} · 회신 {unk['회신']}")
             st.markdown(f"**⑨ 단계 이동** · 기준: {b['stage_moves']} (분석본 단계를 옮긴 사실, 해석 없음)")
             count_table(o["stage_moves"], "단계 이동", "아직 기록 없음")
             st.markdown(f"**점검 건 종결** · 기준: {b['closed']}")
-            st.markdown(f"- {quarter}에 종결한 운영 점검 건: {o['cases_closed']}건")
+            st.markdown(f"- {quarter_label(quarter)}에 종결한 운영 점검 건: {o['cases_closed']}건")
 
 
 # ------------------------------------------------------------------ 방법론·데이터 기준
@@ -2077,7 +2091,7 @@ def quote(doc: dict, section: str):
     body = doc.get("sections", {}).get(section) if doc.get("available") else None
     if body:
         with st.expander(f"원문 인용 — {doc['path']} · {section}"):
-            st.markdown(body)
+            st.markdown(quarter_text(body))  # 원문 파일은 그대로, 화면 표시만 분기 표기 통일
 
 
 def page_methodology():
@@ -2085,7 +2099,7 @@ def page_methodology():
         st.html(ui.page_header_html("방법론·데이터 기준", "설정·정보에서 연 화면 · 진단 구조·판정 기준·데이터 한계"))
         doc = registered_document(snap, "final_methodology")
         if doc.get("available"):
-            st.caption(f"방법론 원문: {doc['path']} · 분석본 {snap.quarter} {snap.version} 등록 해시 "
+            st.caption(f"방법론 원문: {doc['path']} · 분석본 {quarter_label(snap.quarter)} {snap.version} 등록 해시 "
                        + ("일치" if doc["hash_match"] else "불일치 — 문서가 분석본 등록 이후 바뀌었습니다"))
         else:
             st.caption(f"방법론 원문을 찾을 수 없습니다: {doc.get('reason')}")
@@ -2122,7 +2136,7 @@ def page_methodology():
         with st.container(border=True):
             st.markdown("#### 3. 무엇을 말할 수 있는가")
             st.markdown("- 업종별 산업·고용 변화\n- 점검 우선순위 신호\n- 지속·전환 상태")
-            st.caption(snap.reference.get("scope", ""))
+            st.caption(quarter_text(snap.reference.get("scope", "")))
 
         with st.container(border=True):
             st.markdown("#### 4. 무엇을 말할 수 없는가")
@@ -2135,7 +2149,7 @@ def page_methodology():
         with st.container(border=True):
             st.markdown("#### 5. 데이터 기준·한계")
             st.markdown("**KICOX (CORE)**")
-            st.caption(f"분석 범위: {meta['record_scope']}")
+            st.caption(f"분석 범위: {quarter_text(meta['record_scope'])}")
             st.caption(f"자료 기준 {snap.provenance(snap.quarter).get('data_cutoff')}")
             st.caption(EIS_POPULATION_NOTE)
 
@@ -2155,7 +2169,7 @@ def page_methodology():
             job_snapshot = decision_support.recruitment_snapshot(dx_ind)
             st.markdown(f"현재 선택 업종 기준 · {dx_ind}")
             for c in job_snapshot.get("caveat") or []:
-                st.caption(f"- {c}")
+                st.caption(f"- {quarter_text(c)}")
             st.caption(" · ".join(f"{k}: {v}" for k, v in RELEVANCE_LABELS.items()))
             st.caption("GENERAL_NONCORE는 산업기술·훈련 미스매치의 핵심 지표에서 제외합니다.")
 
@@ -2171,9 +2185,9 @@ def page_methodology():
                 f"- 검증된 담당기관 2곳은 기관 기능만 확인 — 실제 접수경로·기관 합의는 미확인\n"
                 f"- 지원사업 요건 카드: 공식 원장 {sum(len(svc.requirement_cards(t)) for t in C.function_tags())}건 "
                 "— 일반 조건 안내용이며 자동 적격·승인 판정 아님\n"
-                f"- 고용24 공개 채용공고: {jobs['unavailable_label'] if jobs else '—'} — 현재 분석기간과 겹치지 않음\n"
+                f"- 고용24 공개 채용공고: {quarter_text(jobs['unavailable_label']) if jobs else '—'} — 현재 분석기간과 겹치지 않음\n"
                 f"- 자동 재검토 표시: 비활성(기준 상태 {THRESHOLD_STATUS}) — 분석본 차이는 표시만 함\n"
-                f"- 과거분기 진단: 분석 실행분이 {', '.join(sorted({m['quarter'] for m in metas}))}뿐이므로 그 이전 분기는 "
+                f"- 과거분기 진단: 분석 실행분이 {', '.join(quarter_label(x) for x in sorted({m['quarter'] for m in metas}))}뿐이므로 그 이전 분기는 "
                 "후향 재구성 분석(당시 저장 분석본 없음, 후속 보정자료 반영 가능)\n"
                 f"- 인증: {'프로토타입 · 인증 미연결(로컬 이름 입력)' if not RT.authenticated else RT.auth_mode}")
             quote(doc, "상태와 한계")
@@ -2181,8 +2195,8 @@ def page_methodology():
         with st.container(border=True):
             st.markdown("#### 6. 분석 버전·재구성")
             st.markdown(f"**{NATURE_LABEL['contemporaneous']}** vs **{NATURE_LABEL['reconstructed']}** · "
-                        f"예: {nature_note(snap.quarter, snap.quarters[0])}")
-            st.caption(f"분석 실행 분기: {', '.join(sorted({m['quarter'] for m in metas}))}")
+                        f"예: {nature_text(snap.quarter, snap.quarters[0])}")
+            st.caption(f"분석 실행 분기: {', '.join(quarter_label(x) for x in sorted({m['quarter'] for m in metas}))}")
             st.caption("판정 추이 칸의 색은 등록 판정 단계이며 칸 사이 순서는 인과관계를 뜻하지 않습니다.")
             st.markdown("**분석본 버전 비교**")
             st.caption("같은 분석대상 분기의 두 분석본을 비교합니다. 분석본 파일은 수정하지 않습니다.")
@@ -2219,7 +2233,7 @@ def page_methodology():
         # 업종 진단에서 옮긴 분석 담당자용 상세(판정 경로·규모 gate·선택적 재검토·외부자료·분석 보완·자료 품질)
         ensure_dx_defaults()
         dx_ind, dx_q = st.session_state.dx_industry, st.session_state.dx_quarter
-        with st.expander(f"선택 업종 분석 상세 · {dx_ind} · {dx_q} · 판정 경로·규모 gate·선택적 재검토·외부자료·자료 품질"):
+        with st.expander(f"선택 업종 분석 상세 · {dx_ind} · {quarter_label(dx_q)} · 판정 경로·규모 gate·선택적 재검토·외부자료·자료 품질"):
             dx_rec = snap.get(dx_ind, dx_q)
             if dx_rec is None:
                 st.caption("이 분석 버전에 해당 업종·분기 자료가 없습니다.")
@@ -2308,7 +2322,7 @@ def audit_frame(logs: list[dict]) -> pd.DataFrame:
     return pd.DataFrame([{
         "기록 시각(KST)": ts(a["created_at"]), "담당자": a["actor"], "행동": ACTION_LABEL.get(a["action"], a["action"]),
         "대상": f"{TARGET_LABEL.get(a['target_type'], a['target_type'])} #{a['target_id']}",
-        "사용 분석본": f"{a['snapshot_quarter']} {a['snapshot_version']}" if a["snapshot_quarter"] else "—",
+        "사용 분석본": f"{quarter_label(a['snapshot_quarter'])} {a['snapshot_version']}" if a["snapshot_quarter"] else "—",
     } for a in logs])
 
 
