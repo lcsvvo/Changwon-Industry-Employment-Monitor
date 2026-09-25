@@ -70,7 +70,8 @@ _refresh_service_module()
 from export import schema as S  # noqa: E402
 from export.diff import record_diff, snapshot_diff  # noqa: E402
 from export.snapshot import (  # noqa: E402
-    NATURE_LABEL, list_snapshots, load_snapshot, nature_note, resolve_for_quarter, snapshot_nature,
+    NATURE_LABEL, SnapshotIntegrityError, SnapshotMissingError, active_snapshots, list_snapshots, load_snapshot,
+    nature_note, resolve_for_quarter, snapshot_nature, verify_snapshot_binding,
 )
 from app import team_copilot, ui  # noqa: E402
 from app.view_models import (  # noqa: E402
@@ -145,6 +146,40 @@ def nature_badge(run_quarter: str, target_quarter: str, demo_case: bool = False)
 @st.cache_data
 def snapshot(quarter: str, version: str):
     return load_snapshot(quarter, version)
+
+
+# 점검 기록에 묶인 분석본을 못 불러오는 경우 — 최신 분석본으로 대신하지 않고 재현 불가를 알린다
+SNAPSHOT_ERRORS = (SnapshotMissingError, SnapshotIntegrityError)
+
+
+def bound_snapshot(quarter: str, version: str, data_hash: str | None = None):
+    """점검 건·회차에 묶인 분석본. 저장된 data_hash와 다르면 SnapshotIntegrityError, 없으면 SnapshotMissingError."""
+    return verify_snapshot_binding(snapshot(quarter, version), quarter, version, data_hash)
+
+
+def scope_snapshot(sc: dict):
+    return bound_snapshot(sc["snapshot_quarter"], sc["snapshot_version"], sc.get("snapshot_data_hash"))
+
+
+def previous_scope_snapshot(case: dict, sc: dict):
+    """재점검의 직전 시점 분석본. 직전 회차에 저장된 data_hash가 있으면 그것으로 검증한다."""
+    q, v = sc["previous_snapshot_quarter"], sc["previous_snapshot_version"]
+    h = next((x["snapshot_data_hash"] for x in case["scopes"]
+              if (x["snapshot_quarter"], x["snapshot_version"]) == (q, v)), None)
+    return bound_snapshot(q, v, h)
+
+
+def evidence_snapshot_error(case: dict, err: Exception):
+    ref = f"{quarter_label(case['snapshot_quarter'])} {case['snapshot_version']}"
+    if isinstance(err, SnapshotMissingError):
+        st.error(f"**분석 근거를 재현할 수 없습니다** — 이 점검 건이 사용한 분석본({ref} 등)을 찾을 수 없습니다. "
+                 "최신 분석본으로 대신 표시하지 않습니다. 분석본 파일을 복구해야 당시 근거를 다시 볼 수 있습니다.  \n"
+                 f"상세: {err}")
+    else:
+        st.error(f"**분석본 무결성 오류** — 이 점검 건에 저장된 분석본({ref} 등)과 현재 분석본 파일의 내용이 다릅니다. "
+                 "다른 내용을 조용히 표시하지 않습니다.  \n"
+                 f"상세: {err}")
+    st.caption("점검 기록 자체(현장확인·결정·인계·변경 기록)는 그대로 보존되어 있습니다.")
 
 
 def fmt(v, digits=1, suffix=""):
@@ -232,9 +267,11 @@ def ts(iso: str | None) -> str:
 
 
 # ------------------------------------------------------------------ 상단 헤더(사이드바 대체)
-metas = list_snapshots()
+# 신규 업무용 분석본(active)만 선택지로 둔다. 보관·무효 분석본은 파일이 남아 기존 점검 건에서 계속 불러온다.
+metas = active_snapshots()
 if not metas:
-    st.error("등록된 분석 버전이 없습니다. `python -m export.snapshot` 으로 기존 분석 산출물을 먼저 등록하세요.")
+    st.error("사용 가능한 분석 버전이 없습니다. `python -m export.snapshot` 으로 기존 분석 산출물을 먼저 등록하세요."
+             if not list_snapshots() else "신규 업무에 쓸 수 있는(active) 분석 버전이 없습니다. 분석본 상태를 확인하세요.")
     st.stop()
 
 QP_PAGES = (*MAIN_PAGES, *INFO_PAGES, "분기 사후검토")
@@ -255,7 +292,10 @@ apply_nav()
 
 # 화면 이동은 상단 헤더 탭(go → apply_nav)이 st.session_state.page를 바꾼다. 실행 배너는 헤더 상태 표시에 둔다.
 labels = [f"{m['quarter']} {m['snapshot_version']}" for m in metas]  # 세션 저장값은 2026Q2 형식 — 표시는 format_func
-st.session_state.setdefault("analysis_version", labels[-1])
+if st.session_state.get("analysis_version") not in labels:  # 첫 진입 → 최신 / 없어진·보관된 선택값 → 최신으로 복구
+    if "analysis_version" in st.session_state:
+        st.toast("기존에 선택된 분석본을 찾을 수 없어 현재 기준 분석본으로 전환했습니다.")
+    st.session_state.analysis_version = labels[-1]
 st.session_state.setdefault("actor", "")
 st.session_state.setdefault("copilot_collapsed", False)
 meta = metas[labels.index(st.session_state.analysis_version)]
@@ -334,9 +374,16 @@ SOURCE_BADGE_COLOR = {"INTERNAL_DIAGNOSTIC": "blue", "INTERNAL_RAG": "green", "E
 with ai_status_slot:
     st.markdown("**AI 연결**")
     on = lambda flag: "켜짐" if flag else "꺼짐"  # noqa: E731
-    st.caption(f"Gemini 답변 {on(copilot.llm.available)} · 검색 {on(copilot.web.available)} · "
-               f"기업마당 {on(any(getattr(a, 'available', False) for a in copilot.official_apis))} · "
-               f"패널 이름 '{ASSISTANT_NAME}'")
+    web_on = copilot.web.available  # Google 검색 Grounding — 기본 사용 안 함(COPILOT_WEB_PROVIDER 미설정)
+    st.caption(f"Gemini 답변 {on(copilot.llm.available)} · "
+               f"기업마당 조회 {on(any(getattr(a, 'available', False) for a in copilot.official_apis))} · "
+               f"외부 웹검색 {'사용' if web_on else '사용 안 함'}",
+               help="**Gemini 답변** — 등록된 분석·근거를 바탕으로 AI가 설명합니다.  \n"
+                    "**기업마당 조회** — 기업마당 공식 API로 지원사업 공고를 조회합니다.  \n"
+                    "**외부 웹검색** — Google 최신 검색(Grounding) 기능입니다. "
+                    + ("현재 사용 중이며 공식기관 누리집 인용만 표시합니다." if web_on
+                       else "이 시스템에서는 의도적으로 사용하지 않습니다(오류 아님)."))
+    st.caption(f"패널 이름 '{ASSISTANT_NAME}'")
     # 기존 Copilot 계약: 세션 입력(field_ctx)은 등록 진단 backend에만 쓰이며 외부 provider로 보내지 않는다
     st.caption("현장 메모 등 입력 내용은 외부 AI로 보내지 않습니다.")
 
@@ -672,12 +719,16 @@ def case_chip_entry(prompt: str, case: dict) -> dict:
         lines += [f"{i['position'] + 1}. {checklist_text(i['question_text'])} → {check_result_label(i['latest']['result_code'])}"
                   + (f" ({i['latest']['note']})" if i["latest"]["note"] else "") for i in done]
     else:
-        fixed = snapshot(case["snapshot_quarter"], case["snapshot_version"])
+        try:
+            fixed = bound_snapshot(case["snapshot_quarter"], case["snapshot_version"], case["snapshot_data_hash"])
+        except SNAPSHOT_ERRORS:  # 최신 분석본으로 대신하지 않는다
+            fixed = None
         chosen = cur["support_needs"]["function_tags"] if cur.get("support_needs") else []
         lines = [f"{head} — 인계 전에 기록으로 확인할 사항입니다.",
                  f"현장확인 결과: {p['done']}/{p['total']}건" + ("" if p["done"] else " (인계는 현장확인 결과 기록 후 가능)"),
                  f"지원 필요 기능: {p['support']}"]
-        lines += [f"{fn_name(t)} — {institution_status_text(svc.institution_candidates(fixed, t))}" for t in chosen]
+        lines += ([f"{fn_name(t)} — {institution_status_text(svc.institution_candidates(fixed, t))}" for t in chosen]
+                  if fixed else ["개설 당시 분석본을 불러올 수 없어 담당기관 확인 상태를 재현하지 못했습니다."])
         lines.append("실제 접수경로가 미확인인 기관은 발송을 기록할 때 실제로 사용한 연락·접수 경로를 남기세요.")
     return {"role": "assistant", "content": "\n".join(lines), "source_type": "SYSTEM", "citations": [],
             "caveats": ["기록된 점검 값을 요약한 안내이며 입력·결정·인계를 대신하지 않습니다."],
@@ -1523,7 +1574,7 @@ def scope_header(sc: dict, case: dict):
 
 def scope_record_view(sc: dict, case: dict):
     """한 점검 시점의 기록(읽기 전용). 이전 시점의 기록은 수정할 수 없다. 접힌 칸 안에서도 쓸 수 있게 expander를 만들지 않는다."""
-    rec = snapshot(sc["snapshot_quarter"], sc["snapshot_version"]).get(case["industry"], sc["quarter"])
+    rec = scope_snapshot(sc).get(case["industry"], sc["quarter"])
     point_view(f"이 시점 분석값 · {quarter_label(sc['quarter'])}", rec,
                f"{quarter_label(sc['snapshot_quarter'])} {sc['snapshot_version']}", with_ext=False)
     done = [i for i in sc["checks"] if i["latest"]]
@@ -1624,7 +1675,7 @@ def case_summary_view(case: dict, fixed, rec: dict, cur: dict | None):
         st.info(f"모니터링 중 — 적극 점검은 멈췄고 다음 검토 분기 {quarter_label(case['next_review_quarter'])} 재점검 계획이 남아 있습니다.")
 
     now = cur or case["scopes"][-1]
-    now_rec = snapshot(now["snapshot_quarter"], now["snapshot_version"]).get(case["industry"], now["quarter"])
+    now_rec = scope_snapshot(now).get(case["industry"], now["quarter"])
     q1, q2, q3 = now_rec["q1"], now_rec["q2"], now_rec["q3"]
     section(f"핵심 분석값 · {quarter_label(now['quarter'])}")
     st.html(ui.kpi_cards_html([
@@ -1636,8 +1687,7 @@ def case_summary_view(case: dict, fixed, rec: dict, cur: dict | None):
         {"label": "지속·전환", "value": run_text(q3), "text": True, "sub": q3.get("transition") or "전환 자료 없음"},
     ]))
     if now["review_kind"] == "재점검":
-        prev = snapshot(now["previous_snapshot_quarter"], now["previous_snapshot_version"]).get(
-            case["industry"], now["previous_quarter"])
+        prev = previous_scope_snapshot(case, now).get(case["industry"], now["previous_quarter"])
         st.markdown(f"**직전 점검({quarter_label(now['previous_quarter'])}) 대비 변화** · 값의 차이만 표시")
         st.dataframe(change_table(prev, now_rec), hide_index=True, width="stretch")
     with st.expander("외부 참고자료"):
@@ -1650,8 +1700,8 @@ def case_summary_view(case: dict, fixed, rec: dict, cur: dict | None):
         if case["is_example"]:
             lines.append("- 시연 기록(운영지표 제외)")
         st.markdown("\n".join(lines))
-        newer = [m for m in metas if m["quarter"] == case["snapshot_quarter"]][-1]
-        if newer["snapshot_version"] != case["snapshot_version"]:
+        newer = next((m for m in reversed(metas) if m["quarter"] == case["snapshot_quarter"]), None)
+        if newer and newer["snapshot_version"] != case["snapshot_version"]:
             st.markdown(f"**분석본 보정 비교** — 개설 시 사용 {case['snapshot_version']} ↔ 최신 {newer['snapshot_version']}")
             version_compare_view(fixed, snapshot(newer["quarter"], newer["snapshot_version"]),
                                  (case["industry"], case["quarter"]))
@@ -1855,7 +1905,7 @@ def support_decision_view(case: dict, sc: dict, fixed, progress: dict):
             if decision:
                 st.text_area("종결 사유 (필수)" if decision == "종결" else "결정 근거 (필수)", key=f"{k}_why")
                 if decision != "종결":
-                    rec = snapshot(sc["snapshot_quarter"], sc["snapshot_version"]).get(case["industry"], sc["quarter"])
+                    rec = scope_snapshot(sc).get(case["industry"], sc["quarter"])
                     prefill = (case["next_review_quarter"] if (case["next_review_quarter"] or "") > sc["quarter"]
                                else (rec["triage"]["next_review_quarter"] or ""))
                     options = ["", *next_quarters(sc["quarter"])]
@@ -1948,15 +1998,23 @@ def referral_review_view(case: dict, sc: dict | None, fixed):
 
 
 def case_detail_view(cid: int):
-    """점검 건 상세 — 진행 요약(다음 할 일) → 하위 화면 4개(점검 요약·현장 확인·지원 검토·결정·인계·재점검).
-
-    현재 해야 할 업무만 펼치고, 완료·참고정보는 접는다. 저장·상태변경은 기존 service 메서드만 쓴다.
-    """
     case = svc.get_case(cid)
     if case is None:
         st.warning("선택한 점검 건을 찾을 수 없습니다.")
         return
-    fixed = snapshot(case["snapshot_quarter"], case["snapshot_version"])
+    try:
+        _case_detail_view(case)
+    except SNAPSHOT_ERRORS as err:
+        evidence_snapshot_error(case, err)
+
+
+def _case_detail_view(case: dict):
+    """점검 건 상세 — 진행 요약(다음 할 일) → 하위 화면 4개(점검 요약·현장 확인·지원 검토·결정·인계·재점검).
+
+    현재 해야 할 업무만 펼치고, 완료·참고정보는 접는다. 저장·상태변경은 기존 service 메서드만 쓴다.
+    """
+    cid = case["id"]
+    fixed = bound_snapshot(case["snapshot_quarter"], case["snapshot_version"], case["snapshot_data_hash"])
     rec = fixed.get(case["industry"], case["quarter"])
     closed = case["status"] == "종결"
     cur = None if closed else case["current_scope"]
@@ -2021,7 +2079,7 @@ def closed_case_summary_view(case: dict, vm: dict, fixed, rec: dict):
     st.html(ui.snapshot_brief_html([("개설 시 판정", opened_stage),
                                     ("핵심 근거", reason_summary(rec, rule_evidence_rows(rec, rules)))]))
     now = case["scopes"][-1]
-    now_rec = snapshot(now["snapshot_quarter"], now["snapshot_version"]).get(case["industry"], now["quarter"])
+    now_rec = scope_snapshot(now).get(case["industry"], now["quarter"])
     q1, q2, q3 = now_rec["q1"], now_rec["q2"], now_rec["q3"]
     production = ("명목 생산액 미확인" if q1.get("production_yoy") is None
                   else f"명목 생산액 전년 동분기 대비 {fmt(q1['production_yoy'], 1, '%')}")
@@ -2185,7 +2243,15 @@ def closed_case_detail_view(cid: int):
     if case is None:
         st.warning("선택한 점검 건을 찾을 수 없습니다.")
         return
-    fixed = snapshot(case["snapshot_quarter"], case["snapshot_version"])
+    try:
+        _closed_case_detail_view(case)
+    except SNAPSHOT_ERRORS as err:
+        evidence_snapshot_error(case, err)
+
+
+def _closed_case_detail_view(case: dict):
+    cid = case["id"]
+    fixed = bound_snapshot(case["snapshot_quarter"], case["snapshot_version"], case["snapshot_data_hash"])
     rec = fixed.get(case["industry"], case["quarter"])
     vm = closed_case_vm(case, fn_name)
     st.session_state.closed_subview = closed_subview_id(st.session_state.get("closed_subview"))

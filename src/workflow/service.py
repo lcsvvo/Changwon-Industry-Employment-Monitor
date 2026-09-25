@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from export.snapshot import Snapshot, snapshot_nature
+from export.snapshot import Snapshot, SnapshotIntegrityError, snapshot_nature, verify_snapshot_binding
 from workflow import catalog as C
 from workflow import models as M
 from workflow.identity import Actor
@@ -551,10 +551,11 @@ class WorkflowService:
     def _fixed_snapshot(scope: M.QuarterlyReview, snapshot: Snapshot | None) -> Snapshot:
         if snapshot is None:
             raise WorkflowError("현재 점검 시점의 분석본이 필요합니다.")
-        if (snapshot.quarter, snapshot.version, snapshot.meta["data_hash"]) != (
-                scope.snapshot_quarter, scope.snapshot_version, scope.snapshot_data_hash):
-            raise WorkflowError("현재 점검 시점에 사용한 분석본과 다른 분석본입니다.")
-        return snapshot
+        try:  # 화면 표시와 같은 검사(export.snapshot.verify_snapshot_binding)를 쓴다
+            return verify_snapshot_binding(snapshot, scope.snapshot_quarter, scope.snapshot_version,
+                                           scope.snapshot_data_hash)
+        except SnapshotIntegrityError:
+            raise WorkflowError("현재 점검 시점에 사용한 분석본과 다른 분석본입니다.") from None
 
     def _check_handoff_ready(self, s, case, scope, snapshot, targets):
         if not self._field_checked(s, scope.id):

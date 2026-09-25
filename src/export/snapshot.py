@@ -5,6 +5,9 @@
 - 분석값을 다시 계산하지 않는다. 원천 행을 key(industry, quarter)로 읽어 필드만 옮긴다.
 - 원천이 없는 항목은 null 과 사유로 남기며, 다른 분기 값을 빌려오지 않는다.
 - 같은 기준분기의 새 run 은 v2, v3… 로 추가되고 기존 버전은 덮어쓰지 않는다.
+- (기준분기, 버전)은 한번 발급되면 그 내용과 영구히 묶인다. 발급 이력은 snapshots/registry.json 에
+  추가만 하므로, 버전 폴더가 지워져도 그 번호는 다시 발급되지 않는다(점검 건·회차·변경 기록·후보 검토가 참조).
+- 보관(archived)·무효(invalidated)는 폴더를 지우지 않고 registry 의 상태 이벤트로만 남긴다.
 
 실행: python -m export.snapshot   (src 를 PYTHONPATH 에 둔 상태)
 """
@@ -30,6 +33,9 @@ SNAPSHOT_ROOT = ROOT / "snapshots"
 META_FILE = "snapshot_meta.json"
 DIAGNOSIS_FILE = "industry_diagnosis.json"
 REFERENCE_FILE = "reference.json"
+REGISTRY_FILE = "registry.json"  # 버전 폴더 밖: 발급 이력·상태 이벤트(추가만 한다)
+REGISTRY_SCHEMA = "snapshot-registry/1"
+SNAPSHOT_STATUSES = ("active", "archived", "invalidated")
 
 
 class ExportContractError(RuntimeError):
@@ -38,6 +44,10 @@ class ExportContractError(RuntimeError):
 
 class SnapshotIntegrityError(RuntimeError):
     """등록된 Snapshot 파일이 등록 당시와 달라졌을 때."""
+
+
+class SnapshotMissingError(FileNotFoundError):
+    """요청한 (기준분기, 버전)의 Snapshot 폴더가 없을 때. 최신 분석본으로 대신하지 않는다."""
 
 
 # ---------------------------------------------------------------- 값 변환
@@ -431,21 +441,134 @@ def list_snapshots(snapshot_root: Path = SNAPSHOT_ROOT) -> list[dict]:
     return sorted(out, key=lambda m: (m["quarter"], int(m["snapshot_version"][1:])))
 
 
+# ---------------------------------------------------------------- 발급 이력·상태(registry)
+def _utcnow() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def read_registry(snapshot_root: Path = SNAPSHOT_ROOT) -> dict:
+    """발급 이력(issued)과 상태 이벤트(status_events). 파일이 없으면 빈 registry."""
+    path = Path(snapshot_root) / REGISTRY_FILE
+    if not path.exists():
+        return {"schema": REGISTRY_SCHEMA, "issued": [], "status_events": []}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data.get("schema") != REGISTRY_SCHEMA:
+        raise SnapshotIntegrityError(f"알 수 없는 분석본 registry 형식: {data.get('schema')}")
+    data.setdefault("issued", [])
+    data.setdefault("status_events", [])
+    return data
+
+
+def _write_registry(snapshot_root: Path, registry: dict) -> None:
+    snapshot_root = Path(snapshot_root)
+    snapshot_root.mkdir(parents=True, exist_ok=True)
+    tmp = snapshot_root / f".{REGISTRY_FILE}.tmp"
+    tmp.write_bytes(_dump(registry))
+    os.replace(tmp, snapshot_root / REGISTRY_FILE)
+
+
+def _issued_record(meta: dict) -> dict:
+    return {"quarter": meta["quarter"], "snapshot_version": meta["snapshot_version"],
+            "data_hash": meta["data_hash"], "export_contract_version": meta.get("export_contract_version"),
+            "payload_sha256": meta["payload_sha256"], "created_at": meta.get("created_at"),
+            "recorded_at": _utcnow()}
+
+
+def _issued_index(registry: dict) -> dict:
+    return {(e["quarter"], e["snapshot_version"]): e for e in registry["issued"]}
+
+
+def _same_content(entry: dict, meta: dict) -> bool:
+    return (entry["data_hash"], entry["payload_sha256"]) == (meta["data_hash"], meta["payload_sha256"])
+
+
+def _reconcile(snapshot_root: Path, registry: dict) -> bool:
+    """registry 에 없는 기존 버전 폴더를 발급 이력에 올린다(폴더는 읽기만). 기록과 내용이 다르면 오류."""
+    known, changed = _issued_index(registry), False
+    for m in list_snapshots(snapshot_root):
+        entry = known.get((m["quarter"], m["snapshot_version"]))
+        if entry is None:
+            registry["issued"].append(_issued_record(m))
+            changed = True
+        elif not _same_content(entry, m):
+            raise SnapshotIntegrityError(
+                f"{m['quarter']} {m['snapshot_version']} 폴더 내용이 발급 기록과 다릅니다(번호 재사용 또는 변조 의심).")
+    return changed
+
+
+def issued_record(quarter: str, version: str, snapshot_root: Path = SNAPSHOT_ROOT) -> dict | None:
+    return _issued_index(read_registry(snapshot_root)).get((quarter, version))
+
+
+def next_snapshot_version(quarter: str, snapshot_root: Path = SNAPSHOT_ROOT, registry: dict | None = None) -> str:
+    """다음 버전 번호. 지금 남은 폴더가 아니라 한번이라도 발급된 번호(registry)·폴더 이름 중 최대값 + 1."""
+    snapshot_root = Path(snapshot_root)
+    registry = registry if registry is not None else read_registry(snapshot_root)
+    used = {int(e["snapshot_version"][1:]) for e in registry["issued"] if e["quarter"] == quarter}
+    qdir = snapshot_root / quarter
+    if qdir.exists():  # meta 가 없는 폴더·임시 폴더 이름도 쓴 번호로 본다
+        used |= {int(m.group(1)) for d in qdir.iterdir() if (m := re.fullmatch(r"\.?v(\d+)(?:\.tmp)?", d.name))}
+    return f"v{max(used, default=0) + 1}"
+
+
+def set_snapshot_status(quarter: str, version: str, status: str, reason: str, *, actor: str | None = None,
+                        snapshot_root: Path = SNAPSHOT_ROOT) -> dict:
+    """분석본 상태 변경(active/archived/invalidated). 폴더·meta 는 건드리지 않고 이벤트만 추가한다."""
+    if status not in SNAPSHOT_STATUSES:
+        raise ValueError(f"상태는 {SNAPSHOT_STATUSES} 중 하나여야 합니다: {status}")
+    reason = (reason or "").strip()
+    if not reason:
+        raise ValueError("상태 변경 사유가 필요합니다.")
+    snapshot_root = Path(snapshot_root)
+    registry = read_registry(snapshot_root)
+    _reconcile(snapshot_root, registry)
+    if (quarter, version) not in _issued_index(registry):
+        raise KeyError(f"발급된 적 없는 분석본: {quarter} {version}")
+    event = {"quarter": quarter, "snapshot_version": version, "status": status, "reason": reason,
+             "changed_at": _utcnow(), "actor": actor}
+    registry["status_events"].append(event)
+    _write_registry(snapshot_root, registry)
+    return event
+
+
+def snapshot_statuses(snapshot_root: Path = SNAPSHOT_ROOT) -> dict:
+    """(기준분기, 버전) → 현재 상태(마지막 이벤트). 이벤트가 없으면 active."""
+    out = {}
+    for e in read_registry(snapshot_root)["status_events"]:
+        out[(e["quarter"], e["snapshot_version"])] = {k: e.get(k) for k in ("status", "reason", "changed_at", "actor")}
+    return out
+
+
+def snapshot_status(quarter: str, version: str, snapshot_root: Path = SNAPSHOT_ROOT) -> dict:
+    return snapshot_statuses(snapshot_root).get(
+        (quarter, version), {"status": "active", "reason": None, "changed_at": None, "actor": None})
+
+
+def active_snapshots(snapshot_root: Path = SNAPSHOT_ROOT) -> list[dict]:
+    """신규 업무용 분석본(active). 보관·무효 분석본은 목록에서만 빠지고, 파일은 남아 기존 점검 건이 계속 불러온다."""
+    statuses = snapshot_statuses(snapshot_root)
+    return [m for m in list_snapshots(snapshot_root)
+            if statuses.get((m["quarter"], m["snapshot_version"]), {}).get("status", "active") == "active"]
+
+
 def register_snapshot(source_root: Path = ROOT, snapshot_root: Path = SNAPSHOT_ROOT) -> tuple[dict, bool]:
     """Snapshot 을 새 버전으로 등록한다. (meta, created) 반환.
 
     같은 기준분기에 data_hash·export 계약 버전이 같은 버전이 이미 있으면 새로 만들지 않는다.
-    기존 버전 디렉터리는 절대 수정하지 않는다.
+    기존 버전 디렉터리는 절대 수정하지 않는다. 새 번호는 발급 이력 기준이라 지워진 번호를 다시 쓰지 않는다.
     """
     snapshot_root = Path(snapshot_root)
     built = build_snapshot(source_root)
     meta = built["meta"]
+    registry = read_registry(snapshot_root)
+    reconciled = _reconcile(snapshot_root, registry)
     existing = [m for m in list_snapshots(snapshot_root) if m["quarter"] == meta["quarter"]]
     for m in existing:
         if (m["data_hash"], m.get("export_contract_version")) == (meta["data_hash"], meta["export_contract_version"]):
+            if reconciled:
+                _write_registry(snapshot_root, registry)
             return m, False
-    n = max((int(m["snapshot_version"][1:]) for m in existing), default=0) + 1
-    version = f"v{n}"
+    version = next_snapshot_version(meta["quarter"], snapshot_root, registry)
     final_dir = snapshot_root / meta["quarter"] / version
     if final_dir.exists():
         raise FileExistsError(f"이미 존재하는 Snapshot 디렉터리: {final_dir}")
@@ -461,6 +584,9 @@ def register_snapshot(source_root: Path = ROOT, snapshot_root: Path = SNAPSHOT_R
             REFERENCE_FILE: hashlib.sha256(ref).hexdigest(),
         },
     }
+    # 번호를 먼저 발급 이력에 남긴다 — 폴더 쓰기가 중간에 실패해도 이 번호는 다시 쓰이지 않는다
+    registry["issued"].append(_issued_record(meta))
+    _write_registry(snapshot_root, registry)
     tmp = final_dir.parent / f".{version}.tmp"
     if tmp.exists():
         shutil.rmtree(tmp)
@@ -531,7 +657,16 @@ class Snapshot:
 
 def load_snapshot(quarter: str, version: str, snapshot_root: Path = SNAPSHOT_ROOT) -> Snapshot:
     d = Path(snapshot_root) / quarter / version
+    if not (d / META_FILE).exists():
+        issued = issued_record(quarter, version, snapshot_root) is not None
+        raise SnapshotMissingError(f"분석본 {quarter} {version} 파일이 없습니다"
+                                   + (" (발급 기록은 있음)." if issued else "."))
     meta = json.loads((d / META_FILE).read_text(encoding="utf-8"))
+    if (meta.get("quarter"), meta.get("snapshot_version")) != (quarter, version):
+        raise SnapshotIntegrityError(f"{quarter}/{version} 폴더의 meta 가 다른 버전을 가리킴")
+    entry = issued_record(quarter, version, snapshot_root)
+    if entry is not None and not _same_content(entry, meta):  # 지워진 번호에 다른 내용이 들어온 경우
+        raise SnapshotIntegrityError(f"분석본 {quarter} {version}의 내용이 발급 기록과 다릅니다.")
     payload = {}
     for name, expected in meta["payload_sha256"].items():
         raw = (d / name).read_bytes()
@@ -540,6 +675,21 @@ def load_snapshot(quarter: str, version: str, snapshot_root: Path = SNAPSHOT_ROO
         payload[name] = json.loads(raw.decode("utf-8"))
     records = {(r["industry"], r["quarter"]): r for r in payload[DIAGNOSIS_FILE]["records"]}
     return Snapshot(meta=meta, records=records, reference=payload[REFERENCE_FILE])
+
+
+def verify_snapshot_binding(snapshot: Snapshot, quarter: str, version: str, data_hash: str | None) -> Snapshot:
+    """점검 건·회차가 저장한 (기준분기, 버전, data_hash)와 불러온 분석본이 같은지. 다르면 SnapshotIntegrityError."""
+    if (snapshot.quarter, snapshot.version) != (quarter, version) or (
+            data_hash and snapshot.meta.get("data_hash") != data_hash):
+        raise SnapshotIntegrityError(
+            f"저장된 분석본({quarter} {version})과 현재 불러온 분석본의 내용(data_hash)이 다릅니다.")
+    return snapshot
+
+
+def load_bound_snapshot(quarter: str, version: str, data_hash: str | None,
+                        snapshot_root: Path = SNAPSHOT_ROOT) -> Snapshot:
+    """점검 기록에 묶인 분석본. 없으면 SnapshotMissingError, 내용이 다르면 SnapshotIntegrityError(대체하지 않음)."""
+    return verify_snapshot_binding(load_snapshot(quarter, version, snapshot_root), quarter, version, data_hash)
 
 
 # ---------------------------------------------------------------- 분석본 성격(당시 분석본 / 후향 재구성)
@@ -566,7 +716,7 @@ def nature_note(run_quarter: str, target_quarter: str) -> str:
 def resolve_for_quarter(target_quarter: str, snapshot_root: Path = SNAPSHOT_ROOT) -> Snapshot | None:
     """대상 분기를 볼 분석본: 그 분기 실행본(당시 분석본)이 있으면 최신 버전, 없으면 그 분기를 포함한
     가장 최근 실행의 최신 버전(후향 재구성). 가짜 과거 분석본을 만들지 않는다."""
-    metas = list_snapshots(snapshot_root)
+    metas = active_snapshots(snapshot_root)  # 신규 업무용(보관·무효 분석본은 고르지 않음)
     same = [m for m in metas if m["quarter"] == target_quarter]
     if same:
         m = same[-1]
@@ -579,7 +729,7 @@ def resolve_for_quarter(target_quarter: str, snapshot_root: Path = SNAPSHOT_ROOT
 
 
 def latest_snapshot(snapshot_root: Path = SNAPSHOT_ROOT) -> Snapshot | None:
-    metas = list_snapshots(snapshot_root)
+    metas = active_snapshots(snapshot_root)
     if not metas:
         return None
     m = metas[-1]
@@ -590,7 +740,14 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="기존 분석 산출물을 Snapshot 으로 등록")
     ap.add_argument("--source-root", type=Path, default=ROOT)
     ap.add_argument("--snapshot-root", type=Path, default=SNAPSHOT_ROOT)
+    ap.add_argument("--set-status", nargs=3, metavar=("QUARTER", "VERSION", "STATUS"),
+                    help="등록 대신 분석본 상태를 바꾼다(active/archived/invalidated). 폴더는 지우지 않는다.")
+    ap.add_argument("--reason", default="", help="--set-status 사유(필수)")
     args = ap.parse_args()
+    if args.set_status:
+        event = set_snapshot_status(*args.set_status, args.reason, snapshot_root=args.snapshot_root)
+        print(f"[상태 변경] {event['quarter']}/{event['snapshot_version']} → {event['status']} ({event['reason']})")
+        return
     meta, created = register_snapshot(args.source_root, args.snapshot_root)
     state = "새 버전 등록" if created else "동일 원천 — 기존 버전 유지"
     print(f"[{state}] {meta['quarter']}/{meta['snapshot_version']} records={meta['record_count']} data_hash={meta['data_hash'][:12]}")
