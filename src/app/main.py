@@ -51,21 +51,39 @@ def _stamp_ui_modules():
             m._dx_mtime = _ui_module_mtime(m)
 
 
-def _refresh_service_module():
-    """업무 서비스(workflow.service)도 파일이 바뀌면 다시 읽는다 — src/app 밖이라 Streamlit이 자동으로 다시 읽지 않는다.
+# 분석본(export.*)·업무 서비스(workflow.service)도 파일이 바뀌면 다시 읽는다 — src/app 밖이라 Streamlit이 자동으로 다시 읽지 않는다.
+# 옛 export.snapshot이 남으면 새 이름(예: SnapshotMissingError)을 찾지 못해 ImportError가 나고, 예전 모듈로 만든 캐시 서비스
+# 객체에는 새 메서드(예: delete_case)가 없어 AttributeError가 난다. 서로의 클래스·예외를 이름으로 묶어 쓰므로(서비스가 던진
+# SnapshotIntegrityError를 화면이 잡는다) 하나라도 바뀌면 모두 함께 다시 읽는다. 모델(workflow.models)은 SQLAlchemy 선언을
+# 다시 하지 않도록 건드리지 않는다. 캐시 서비스는 아래 service()의 code_version 인자로 새로 만든다.
+BACKEND_MODULES = (
+    "export.schema", "export.snapshot", "export.diff", "export.documents", "policy.decision_support", "workflow.service",
+)
 
-    예전 모듈로 만든 캐시 서비스 객체에는 새 메서드(예: delete_case)가 없어 AttributeError가 난다. 모델(workflow.models)은
-    SQLAlchemy 선언을 다시 하지 않도록 건드리지 않는다. 캐시 서비스는 아래 service()의 code_version 인자로 새로 만든다.
-    """
-    module, pkg = sys.modules.get("workflow.service"), sys.modules.get("workflow")
-    if module is not None and getattr(module, "_dx_mtime", None) != _ui_module_mtime(module):
-        sys.modules.pop("workflow.service", None)
-        if pkg is not None and hasattr(pkg, "service"):
-            delattr(pkg, "service")
+
+def _refresh_backend_modules():
+    loaded = [m for m in (sys.modules.get(name) for name in BACKEND_MODULES) if m is not None]
+    if any(getattr(m, "_dx_mtime", None) != _ui_module_mtime(m) for m in loaded):
+        for name in BACKEND_MODULES:
+            sys.modules.pop(name, None)
+            pkg, attr = sys.modules.get(name.rsplit(".", 1)[0]), name.rsplit(".", 1)[1]
+            if pkg is not None and hasattr(pkg, attr):
+                delattr(pkg, attr)
+
+
+def _stamp_backend_modules():
+    for name in BACKEND_MODULES:
+        m = sys.modules.get(name)
+        if m is not None:
+            m._dx_mtime = _ui_module_mtime(m)
+
+
+def _backend_code_version() -> float:
+    return max((_ui_module_mtime(sys.modules[n]) or 0.0) for n in BACKEND_MODULES if n in sys.modules)
 
 
 _refresh_ui_modules()
-_refresh_service_module()
+_refresh_backend_modules()
 
 from export import schema as S  # noqa: E402
 from export.diff import record_diff, snapshot_diff  # noqa: E402
@@ -105,7 +123,7 @@ from workflow.service import (  # noqa: E402
     ACTION_LABEL, REFERRAL_ACTIONS, REFERRAL_INPUT_LABEL, REFERRAL_OCCURRED, TARGET_LABEL, WorkflowError,
     WorkflowService,
 )
-sys.modules["workflow.service"]._dx_mtime = _ui_module_mtime(sys.modules["workflow.service"])
+_stamp_backend_modules()
 
 st.set_page_config(page_title="창원국가산단 점검연계 시스템", layout="wide", initial_sidebar_state="collapsed")
 DASHBOARD_CSS = (Path(__file__).resolve().parent / "styles" / "dashboard.css").read_text(encoding="utf-8")
@@ -122,7 +140,7 @@ RT = runtime_context()
 # ------------------------------------------------------------------ 자원
 @st.cache_resource
 def service(url: str | None, demo: bool, code_version: float | None = None) -> WorkflowService:
-    """code_version = workflow/service.py 수정 시각 — 코드가 바뀌면 캐시된 서비스 객체를 새로 만든다."""
+    """code_version = 분석본·업무 서비스 모듈의 최신 수정 시각 — 코드가 바뀌면 캐시된 서비스 객체를 새로 만든다."""
     workflow = WorkflowService(M.make_session_factory(url), demo=demo)
     register_work24_snapshot(workflow.Session)
     return workflow
@@ -204,7 +222,7 @@ try:
 except M.DatabaseScopeError as e:
     st.error(str(e))
     st.stop()
-svc = service(database_url, RT.demo, _ui_module_mtime(sys.modules["workflow.service"]))
+svc = service(database_url, RT.demo, _backend_code_version())
 
 
 def case_no(cid: int | None) -> int | None:
