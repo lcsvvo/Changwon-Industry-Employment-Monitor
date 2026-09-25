@@ -9,7 +9,7 @@ from __future__ import annotations
 import html as _html
 from typing import Iterable
 
-from app.view_models import provenance_lines, quarter_text  # 분기 표시 '2026년 2분기'(저장값은 2026Q2)
+from app.view_models import REPORT_NOTICE as REPORT_NOTICE_TEXT, provenance_lines, quarter_text  # 분기 표시 '2026년 2분기'(저장값은 2026Q2)
 
 STAGE_TONE = {"우선점검": "rose", "추가확인": "amber", "관찰": "emerald"}
 VERDICT_TONE = {
@@ -69,7 +69,8 @@ def kpi_cards_html(cards: Iterable[dict]) -> str:
     items = "".join(
         '<div class="dx-kpi">'
         f'<div class="dx-kpi-label">{_e(c.get("label"))}</div>'
-        f'<div class="dx-kpi-value dx-tone-{_e(c.get("tone") or "default")}">{_e(c.get("value"))}</div>'
+        f'<div class="dx-kpi-value dx-tone-{_e(c.get("tone") or "default")}'
+        f'{" dx-kpi-value--text" if c.get("text") else ""}">{_e(c.get("value"))}</div>'
         f'<div class="dx-kpi-sub">{_e(c.get("sub"))}</div>'
         '</div>'
         for c in cards
@@ -186,6 +187,11 @@ def timeline_trail_html(rows_desc: list[dict]) -> str:
 
 
 # ------------------------------------------------------------------ 업종 진단 상단 점검 대기열 · 5초 요약
+def _state_cls(state: str | None) -> str:
+    """Q1 국면별 글자색 class(S1~S4, 그 밖은 muted). 색만으로 구분하지 않도록 문구·S코드는 항상 함께 쓴다."""
+    return state if state in ("S1", "S2", "S3", "S4") else "muted"
+
+
 def queue_card_html(row: dict, selected: bool) -> str:
     """점검 대기열의 우선점검 후보·추가확인 카드(값은 view_models.queue_rows가 포맷한 그대로)."""
     cls = "dx-qcard is-selected" if selected else "dx-qcard"
@@ -194,12 +200,13 @@ def queue_card_html(row: dict, selected: bool) -> str:
         f'<div class="{cls}">'
         f'<div class="dx-qcard-head"><span class="dx-qcard-name">{_e(row["industry"])}</span>'
         f'{stage_badge_html(row["stage"], row["display"])}<span class="dx-qcard-status">점검상태 · {_e(row["status"])}</span>{sel}</div>'
-        f'<div class="dx-qcard-state">{_e(row["state_plain"])} <span class="dx-muted">{_e(row["state"])}</span></div>'
+        f'<div class="dx-qcard-state dx-state--{_state_cls(row["state"])}">{_e(row["state_plain"])} '
+        f'<span class="dx-muted">{_e(row["state"])}</span></div>'
         '<div class="dx-qcard-metrics">'
         f'<span>고용 <b>{_e(row["emp_delta"])}</b> (YoY {_e(row["emp_yoy"])})</span>'
         f'<span>산단 고용 비중 <b>{_e(row["share"])}</b></span>'
         f'<span>지속 <b>{_e(row["run"])}</b></span></div>'
-        f'<div class="dx-qcard-reason">{_e(row["reason"])}</div>'
+        f'<div class="dx-qcard-reason">{_e(row.get("summary") or row["reason"])}</div>'
         '</div>'
     )
 
@@ -208,8 +215,10 @@ def queue_table_html(rows: list[dict], selected: str | None, rank_help: str) -> 
     """관찰 업종 압축 표(카드 반복 대신). 참고 순위는 관찰 단계 안의 비교 순위다."""
     body = "".join(
         f'<tr class="{"is-selected" if r["industry"] == selected else ""}">'
-        f'<td>{_e(r["rank"])}</td><td><b>{_e(r["industry"])}</b>{" ✓" if r["industry"] == selected else ""}</td>'
-        f'<td>{_e(r["state_plain"])} <span class="dx-muted">{_e(r["state"])}</span></td>'
+        f'<td>{_e(r["rank"])}</td><td class="dx-state--{_state_cls(r["state"])}"><b>{_e(r["industry"])}</b>'
+        f'{" ✓" if r["industry"] == selected else ""}</td>'
+        f'<td class="dx-muted">{_e(r["state_plain"])} '
+        f'<span class="dx-muted">{_e(r["state"])}</span></td>'
         f'<td>{_e(r["emp_delta"])} <span class="dx-muted">({_e(r["emp_yoy"])})</span></td>'
         f'<td>{_e(r["share"])}</td><td>{_e(r["run"])}</td><td>{_e(r["status"])}</td></tr>'
         for r in rows)
@@ -220,6 +229,50 @@ def queue_table_html(rows: list[dict], selected: str | None, rank_help: str) -> 
         f'<tbody>{body}</tbody></table></div>'
         f'<div class="dx-footnote">참고 순위 = {_e(rank_help)}</div>'
     )
+
+
+def case_progress_html(title: str, status: str, rows: list[tuple[str, str]], next_text: str | None,
+                       tone: str = "") -> str:
+    """점검 진행 요약 — 제목·상태 한 줄, 항목 격자, '다음 할 일' 한 줄(next_text=None이면 생략 — 종결 건).
+
+    tone='closed'면 종결 결과 요약 모양(회색 띠)으로 그린다. 값은 view_models가 만든 그대로 escape해서 쓴다.
+    """
+    items = "".join(f'<div class="dx-cprog-item"><span>{_e(k)}</span><b>{_e(v)}</b></div>' for k, v in rows)
+    nxt = f'<div class="dx-cprog-next"><span>다음 할 일</span> {_e(next_text)}</div>' if next_text else ""
+    return (
+        f'<div class="dx-cprog{" dx-cprog--closed" if tone == "closed" else ""}">'
+        f'<div class="dx-cprog-head"><span class="dx-cprog-title">{_e(title)}</span>'
+        f'<span class="dx-cprog-status">{_e(status)}</span></div>'
+        f'<div class="dx-cprog-grid">{items}</div>{nxt}'
+        '</div>'
+    )
+
+
+def simple_table_html(headers: list[str], rows: list[list], num_cols: tuple[int, ...] = (),
+                      widths: list[str] | None = None, row_classes: list[str] | None = None) -> str:
+    """읽기 전용 표(모든 값 escape). 빈 값은 '—'. 좁은 화면에서는 표만 가로 스크롤."""
+    cols = "".join(f'<col style="width:{w}">' if w else "<col>" for w in widths) if widths else ""
+    head = "".join(f'<th class="{"num" if i in num_cols else ""}">{_e(h)}</th>' for i, h in enumerate(headers))
+    body = "".join(
+        f'<tr class="{(row_classes or [""] * len(rows))[r]}">'
+        + "".join(f'<td class="{"num" if i in num_cols else ""}">{_e(v)}</td>' for i, v in enumerate(row)) + "</tr>"
+        for r, row in enumerate(rows))
+    return (f'<div class="dx-table-wrap"><table class="dx-rule-table dx-simple-table">'
+            f'{f"<colgroup>{cols}</colgroup>" if cols else ""}<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>')
+
+
+def check_table_html(rows: list[dict]) -> str:
+    """현장확인 문항 압축 표 — rows = [{no, text, done, result}]. 기록·미기록은 글자와 색으로 함께 구분한다."""
+    body = "".join(
+        f'<tr class="{"is-done" if r["done"] else "is-pending"}"><td>{_e(r["no"])}</td>'
+        f'<td class="dx-chk-q">{_e(r["text"])}</td>'
+        f'<td><span class="dx-chk-state">{"기록됨" if r["done"] else "미기록"}</span></td>'
+        f'<td>{_e(r["result"])}</td></tr>'
+        for r in rows)
+    return ('<div class="dx-table-wrap"><table class="dx-rule-table dx-chk-table">'
+            '<colgroup><col style="width:3rem"><col><col style="width:5.5rem"><col style="width:13rem"></colgroup>'
+            '<thead><tr><th>번호</th><th>확인사항</th><th>상태</th><th>최근 결과</th></tr></thead>'
+            f'<tbody>{body}</tbody></table></div>')
 
 
 def snapshot_brief_html(rows: list[tuple[str, str]]) -> str:
@@ -241,16 +294,21 @@ def disclaimer_html(text: str) -> str:
 
 def copilot_title_html(name: str, mode: str) -> str:
     """AI 패널 제목 — 이름 + 응답 방식(Gemini 설정 여부와 일치)."""
-    return (f'<div class="dx-copilot-title"><span class="dx-dot"></span>{_e(name)}'
-            f'<span class="dx-copilot-mode">{_e(mode)}</span></div>')
+    pill = f'<span class="dx-copilot-mode">{_e(mode)}</span>' if mode else ""  # 방식 표시가 없으면 이름만
+    return f'<div class="dx-copilot-title"><span class="dx-dot"></span>{_e(name)}{pill}</div>'
 
 
-def question_list_html(title: str | None, items: list[tuple[str, str]], caption: str = "") -> str:
-    """현장 확인 질문 번호 목록. items = [(질문, 출처 라벨)]. title이 없으면(화면에서 section()을 쓸 때) 생략."""
-    rows = "".join(f'<li>{_e(q)} <span class="dx-muted">· {_e(src)}</span></li>' for q, src in items)
+def question_list_html(title: str | None, items: list[tuple[str, str]], caption: str = "", start: int = 1) -> str:
+    """현장 확인 질문 번호 목록. items = [(질문, 출처 라벨)]. title이 없으면(화면에서 section()을 쓸 때) 생략.
+
+    start = 첫 번호(추가 확인사항은 4번부터 이어서). 출처 라벨이 빈 값이면 표시하지 않는다.
+    """
+    rows = "".join(f'<li>{_e(q)}' + (f' <span class="dx-muted">· {_e(src)}</span>' if src else "") + '</li>'
+                   for q, src in items)
     cap = f'<div class="dx-footnote">{_e(caption)}</div>' if caption else ""
     head = f'<div class="dx-sub-title">{_e(title)}</div>' if title else ""
-    return f'<div class="dx-qlist">{head}<ol class="dx-qlist-items">{rows}</ol>{cap}</div>'
+    start_attr = f' start="{int(start)}"' if start != 1 else ""
+    return f'<div class="dx-qlist">{head}<ol class="dx-qlist-items"{start_attr}>{rows}</ol>{cap}</div>'
 
 
 def chip_row_html(items: list[tuple[str, int]], tone: str = "sky") -> str:
@@ -401,12 +459,12 @@ def recruitment_summary_html(jobs: dict, keywords: list[dict], is_latest: bool, 
     levels = {lv.get("key"): lv for lv in jobs.get("evidence_levels") or []}
     lst, active = levels.get("LIST") or {}, levels.get("ACTIVE_CONFIRMED") or {}
     detail = levels.get("DETAIL_VERIFIED") or {}
-    tiles = (_level_tile("목록 데이터", lst.get("count"), keyword_basis.get("LIST"))
-            + _level_tile("현재 유효", active.get("count"), keyword_basis.get("ACTIVE_CONFIRMED"))
-            + _level_tile("상세 검증", detail.get("count"), keyword_basis.get("DETAIL_VERIFIED"))
-            + _level_tile("확인 기업", detail.get("company_count"), keyword_basis.get("DETAIL_COMPANY"), unit="개"))
+    # KPI 칸에는 숫자만 — 각 수준의 정의는 아래 한 줄(자세한 기준·한계는 방법론·데이터 기준 화면)
+    tiles = (_level_tile("목록 데이터", lst.get("count"), None)
+            + _level_tile("현재 유효", active.get("count"), None)
+            + _level_tile("상세 검증", detail.get("count"), None)
+            + _level_tile("확인 기업", detail.get("company_count"), None, unit="개"))
     kw = [(k["term"], k["count"]) for k in keywords]
-    kw_helper = f"목록 {_e(keyword_posting_count)}건의 {_e(keyword_basis.get('KEYWORD'))}"
     # 현재 유효·상세 검증이 모두 0건(또는 미확인)이면 목록 키워드를 채용수요 근거처럼 보이지 않게 한다
     unverified = not active.get("count") and not detail.get("count")
     if unverified:
@@ -415,12 +473,12 @@ def recruitment_summary_html(jobs: dict, keywords: list[dict], is_latest: bool, 
     return (
         f'<div class="dx-report-meta">{meta}</div>{warn}'
         f'<div class="dx-level-grid">{tiles}</div>'
-        '<div class="dx-note">공고 수는 모집인원이나 전체 노동수요가 아닙니다.</div>'
+        '<div class="dx-note">현재 유효 = 저장된 목록 마감일 기준 · 상세 검증 = 상세 페이지까지 확인한 공고 · '
+        '확인 기업 = 상세 검증 공고의 기업 수</div>'
         f'<div class="dx-sub-title">{"목록 키워드 (참고)" if unverified else "주요 키워드"}</div>'
-        f'<div class="dx-sub-helper">{kw_helper}</div>'
         f'{chip_row_html(kw, "muted" if unverified else "sky")}'
-        '<div class="dx-sub-title">관찰된 표현</div>'
-        f'{bullet_list_html(observations)}'
+        # '관찰된 표현'은 observations가 있을 때만(업종 진단 화면은 빈 목록을 넘겨 그리지 않는다)
+        + (f'<div class="dx-sub-title">관찰된 표현</div>{bullet_list_html(observations)}' if observations else "")
     )
 
 
@@ -428,32 +486,29 @@ def representative_postings_html(details: list[dict]) -> str:
     """대표 공고(최대 3건) — 없으면 표를 만들지 않고 빈 상태 안내만 보여준다."""
     if not details:  # 빈 상태(표시할 공고 없음)와 데이터 한계(추정하지 않음)는 서로 다른 정보라 따로 둔다
         return ('<div class="dx-sub-title">대표 공고</div>'
-                '<div class="dx-empty-note">상세 검증 공고가 없어 대표 공고를 표시하지 않습니다.</div>'
-                '<div class="dx-note">목록 정보만으로 직무·임금·경력 분포를 추정하지 않습니다.</div>')
+                '<div class="dx-empty-note">상세 검증 공고가 없어 대표 공고를 표시하지 않습니다.</div>')
     return ('<div class="dx-sub-title">대표 공고</div>'
-            '<div class="dx-sub-helper">상세 검증 공고 중 최대 3건</div>'
             f'{posting_table_html(details)}')
 
 
 def posting_table_html(records: list[dict]) -> str:
     if not records:
-        return '<div class="dx-muted">상세 직무 데이터 미확보 · 목록 정보만으로 직무·임금·경력 분포를 만들지 않습니다.</div>'
+        return '<div class="dx-muted">상세 직무 데이터 미확보</div>'
     rows = "".join(
         "<tr>"
         f'<td><b>{_e(d.get("company_name"))}</b><br><span class="dx-muted">{_e(d.get("posting_title"))}</span></td>'
         f'<td>{_e(d.get("occupation"))}</td><td>{_e(d.get("career"))}</td><td>{_e(d.get("education"))}</td>'
         f'<td>{_e(d.get("wage"))}</td><td>{_e(d.get("certificate"))}</td>'
-        f'<td>{_e(d.get("industrial_complex_match_status"))}</td>'
         "</tr>"
         for d in records
     )
     return (
         '<div class="dx-table-wrap"><table class="dx-rule-table dx-detail-table">'
         # 열 폭 고정(경력·임금·모집직종은 넉넉히, 자격은 좁게) — 좁은 화면에서는 표만 가로 스크롤
-        '<colgroup><col style="width:18%"><col style="width:18%"><col style="width:11%"><col style="width:9%">'
-        '<col style="width:17%"><col style="width:12%"><col style="width:15%"></colgroup>'
+        '<colgroup><col style="width:21%"><col style="width:21%"><col style="width:13%"><col style="width:10%">'
+        '<col style="width:20%"><col style="width:15%"></colgroup>'
         '<thead><tr><th>기업 · 공고</th><th>모집직종</th><th>경력</th><th>학력</th><th>임금</th>'
-        '<th>자격</th><th>산단 확인</th></tr></thead>'
+        '<th>자격</th></tr></thead>'
         f'<tbody>{rows}</tbody></table></div>'
     )
 
@@ -471,7 +526,7 @@ def recruitment_detail_html(jobs: dict) -> str:
     details = jobs.get("detail_records") or []
     return (
         f'<div class="dx-level-grid">{tiles}</div>'
-        f'<div class="dx-sub-title">상세 검증 공고 {len(details):,}건 — 표본 사실이며 업종 전체의 직무·임금·경력 분포가 아님</div>'
+        f'<div class="dx-sub-title">상세 검증 공고 {len(details):,}건</div>'
         f'{posting_table_html(details)}'
     )
 
@@ -494,7 +549,8 @@ def candidate_card_html(industry: str, stage: str, display: str, metrics: str,
 
 
 def support_summary_html(first_owner: str | None, functions: list[dict], cards: list[dict],
-                         title: str | None = "지원체계 검토 경로", label_of=None, status_of=None) -> str:
+                         title: str | None = "지원체계 검토 경로", label_of=None, status_of=None,
+                         show_owner: bool = True) -> str:
     """"지원체계 검토 경로" 요약 카드 — 기능별 등록 요건 카드 수만 센다(적격 판정 아님).
 
     title=None이면 카드 안 panel-title을 생략한다(화면에서 section()으로 이미 제목을 그릴 때).
@@ -505,25 +561,34 @@ def support_summary_html(first_owner: str | None, functions: list[dict], cards: 
     for card in cards:
         tag = card.get("function_tag")
         counts[tag] = counts.get(tag, 0) + 1
-    rows = []
+    rows, confirmed, unmapped = [], [], False
     for f in functions:
         n = counts.get(f.get("function_tag"), 0)
         right = f"관련 공식사업 {n}건" if n else "공식 요건 카드 없음"
-        status = (f'<span class="dx-support-inst">{_e(status_of(f.get("function_tag")))}</span>'
-                  if status_of else "")
+        label = label_of(f.get("function_tag")) if label_of else f.get("function_label")
+        # 담당기관 검증상태는 기능마다 달지 않고 아래 회색 안내 한 줄로 모은다(등록 매핑 그대로)
+        text = status_of(f.get("function_tag")) if status_of else ""
+        if text.startswith("담당기관 확인 · "):
+            confirmed.append(f"{label} — {text.removeprefix('담당기관 확인 · ')}")
+        elif text:
+            unmapped = True
         rows.append('<div class="dx-support-row">'
-                    f'<span>✓ {_e(label_of(f.get("function_tag")) if label_of else f.get("function_label"))}{status}</span>'
+                    f'<span>✓ {_e(label)}</span>'
                     f'<span class="dx-support-count">{_e(right)}</span>'
                     '</div>')
+    inst_parts = ([f"담당기관 확인: {', '.join(confirmed)}"] if confirmed else []) + (
+        [("그 외 기능은" if confirmed else "모든 기능이") + " 담당기관 미확정(실제 인계 전 담당기관 확인 필요)"]
+        if unmapped else [])
+    inst_note = f'<div class="dx-note">{_e(" · ".join(["채용 키워드·확인 신호 기반 후보", *inst_parts]))}</div>'
     body = "".join(rows) or '<div class="dx-support-row dx-muted">확인된 지원 기능 후보 없음</div>'
     head = f'<div class="dx-panel-title">{_e(title)}</div>' if title else ""
     return (
         '<div class="dx-support-card">'
         f'{head}'
-        f'<div class="dx-report-meta">1차 검토 기능 · {_e(first_owner)}</div>'
-        '<div class="dx-sub-title">관련 지원 기능</div>'
+        + (f'<div class="dx-report-meta">1차 검토 기능 · {_e(first_owner)}</div>' if show_owner else '')
+        + '<div class="dx-sub-title">관련 지원 기능</div>'
         f'{body}'
-        '<div class="dx-note">채용 키워드·확인 신호 기반 후보 · 자동 추천·적격 판정 아님</div>'
+        f'{inst_note}'
         '</div>'
     )
 
@@ -649,8 +714,7 @@ def policy_context_html(industry: str, quarter: str, badge_html: str) -> str:
     return ('<div class="dx-pctx"><div class="dx-pctx-label">현재 선택 업종 및 진단 결과</div>'
             f'<div class="dx-pctx-row"><b>{_e(industry)}</b><span class="dx-pctx-sep">|</span><b>{_e(quarter_text(quarter))}</b>'
             f'<span class="dx-pctx-sep">|</span>{badge_html}</div>'
-            '<div class="dx-pctx-help">현재 화면은 선택한 업종과 분기를 기준으로 조회합니다. '
-            '적격·선정 여부를 자동 판정하지 않습니다.</div></div>')
+            '<div class="dx-pctx-help">현재 화면은 선택한 업종과 분기를 기준으로 조회합니다.</div></div>')
 
 
 def official_programs_html(cards: list[dict], fn_label, doc_titles: dict | None = None) -> str:
@@ -663,7 +727,7 @@ def official_programs_html(cards: list[dict], fn_label, doc_titles: dict | None 
     def card(c: dict) -> str:
         status, tone = intake.get(c.get("current_intake_status"), (c.get("current_intake_status") or "—", "unknown"))
         more = "".join(f'<div><b>{k}</b> {_e(v)}</div>' for k, v in (
-            ("요건", c.get("eligibility")), ("확인일", c.get("verified_at"))) if v)
+            ("요건", c.get("eligibility")), ("유의", c.get("caveat")), ("확인일", c.get("verified_at"))) if v)
         more += "".join(f'<div><b>근거 위치</b> {_e(x)}</div>'
                         for x in provenance_lines(c, (doc_titles or {}).get(c.get("document_id"))))
         apply = _link(c.get("intake_url"), "신청 경로")
@@ -674,7 +738,6 @@ def official_programs_html(cards: list[dict], fn_label, doc_titles: dict | None 
             f'<span class="dx-prog-status is-{tone}">{_e(status)}</span></div>'
             f'<div class="dx-prog-title">{_e(c.get("title"))}</div>'
             f'<div class="dx-prog-inst">{_e(c.get("institution"))}</div>'
-            + (f'<div class="dx-prog-desc">유의 · {_e(c.get("caveat"))}</div>' if c.get("caveat") else "")
             + '<dl class="dx-prog-rows">'
             f'<dt>지원 대상</dt><dd>{_e(c.get("target"))}</dd>'
             f'<dt>지원 내용</dt><dd>{_e(c.get("support_content"))}</dd>'
@@ -693,8 +756,8 @@ def official_programs_html(cards: list[dict], fn_label, doc_titles: dict | None 
 def notice_cards_html(items: list[dict], fn_label, reasons_of) -> str:
     """현재 모집 중인 관련 공고 카드(공식 지원제도 카드와 같은 모양, 출처는 작은 메타데이터로만).
 
-    fn_label(tag) = 지원 기능 표시명, reasons_of(item) = 연결 사유 목록(공고 표현이 실제로 일치한 것만).
-    지원대상 적합성·신청 가능 여부는 판정하지 않는다 — 항상 '지원대상 추가 확인 필요'.
+    fn_label(tag) = 지원 기능 표시명. reasons_of는 호출 호환용으로 받기만 한다 — 카드에 연결 사유 목록을 그리지 않는다.
+    지원대상 적합성·신청 가능 여부는 판정하지 않는다(확인 안내는 목록 아래 한 줄 caption이 맡는다).
     """
     def card(i: dict) -> str:
         badges = [fn_label(t) for t in (i.get("function_tags") or [])][:2] or ([i["category"].split(" > ")[0]]
@@ -702,19 +765,19 @@ def notice_cards_html(items: list[dict], fn_label, reasons_of) -> str:
         badge_html = "".join(f'<span class="dx-prog-fn">{_e(b)}</span>' for b in badges)
         agency = i.get("agency") or i.get("executor")
         period = " ~ ".join(x for x in (i.get("start"), i.get("end")) if x) or i.get("period_text")
-        reasons = "".join(f"<li>{_e(r)}</li>" for r in reasons_of(i))
+        # 공식 지원제도 카드(official_programs_html)와 같은 틀·행 이름·버튼 모양. 'dx-notice'(안내 상자) class는 쓰지 않는다
         return (
-            '<div class="dx-prog dx-notice">'
+            '<div class="dx-prog dx-prog--notice">'
             f'<div class="dx-prog-top"><span class="dx-notice-badges">{badge_html}</span>'
             '<span class="dx-prog-status is-open">접수 중</span></div>'
             f'<div class="dx-prog-title">{_e(i.get("title"))}</div>'
             f'<div class="dx-prog-inst">{_e(agency)} · <span class="dx-notice-src">출처 · 기업마당</span></div>'
             '<dl class="dx-prog-rows">'
-            f'<dt>접수기간</dt><dd>{_e(period)}</dd>'
-            f'<dt>지원대상</dt><dd>{_e(i.get("target") or "공고문 확인")} · <span class="dx-muted">추가 확인 필요</span></dd>'
+            f'<dt>지원 대상</dt><dd>{_e(i.get("target") or "공고문 확인")}</dd>'
+            f'<dt>접수 기간</dt><dd>{_e(period)}</dd>'
+            '<dt>접수 상태</dt><dd>접수 중</dd>'
+            '<dt>문의·접수</dt><dd>공고문에서 확인</dd>'
             '</dl>'
-            + (f'<div class="dx-notice-why"><div class="dx-notice-why-h">현재 진단과의 연결 사유</div><ul>{reasons}</ul></div>'
-               if reasons else "")
             + f'<div class="dx-prog-actions">{_link(i.get("detail_url"), "공고 보기").replace("dx-link", "dx-link dx-prog-src")}</div>'
             '</div>')
     return f'<div class="dx-prog-grid">{"".join(card(i) for i in items)}</div>'
@@ -784,3 +847,197 @@ def section_count_html(title: str, count: str) -> str:
 
 def labeled_badge_html(label: str, badge_html: str) -> str:
     return f'<div class="dx-labeled"><span>{_e(label)}</span>{badge_html}</div>'
+
+
+# ------------------------------------------------------------------ 담당자 인계용 진단 요약(진단서) — 전용 HTML·CSS
+# 앱 전체 CSS(dashboard.css)를 넣지 않고 진단서 전용 스타일만 쓴다. class는 모두 'rp-' 접두어(앱 화면 CSS와 충돌 없음).
+REPORT_CSS = """
+@page { size: A4; margin: 14mm; }
+.rp-doc { font-family: Pretendard, 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #1F2937; font-size: 10pt;
+  line-height: 1.5; background: #fff; max-width: 182mm; margin: 0 auto; }
+.rp-doc * { box-sizing: border-box; }
+.rp-doc p { margin: 0 0 2pt; font-size: 10pt; line-height: 1.5; }
+.rp-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12pt;
+  border-bottom: 2px solid #0F172A; padding-bottom: 6pt; }
+.rp-title { font-size: 19pt; font-weight: 800; color: #0F172A; line-height: 1.25; margin: 0; padding: 0; }
+.rp-sub { font-size: 11.5pt; font-weight: 650; margin-top: 3pt; display: flex; flex-wrap: wrap; align-items: center; gap: 6pt; }
+.rp-badge { display: inline-block; border: 1px solid #CBD5E1; border-radius: 999px; padding: 0 7pt; font-size: 9pt; font-weight: 700; }
+.rp-badge--rose { color: #BE123C; border-color: #FDA4AF; background: #FFF1F2; }
+.rp-badge--amber { color: #B45309; border-color: #FCD34D; background: #FFFBEB; }
+.rp-badge--emerald { color: #047857; border-color: #6EE7B7; background: #ECFDF5; }
+.rp-meta { display: grid; grid-template-columns: auto auto; gap: 1pt 8pt; font-size: 9pt; margin: 0; min-width: 44mm; }
+.rp-meta dt { color: #64748B; } .rp-meta dd { margin: 0; font-weight: 650; color: #0F172A; }
+.rp-doc p.rp-notice { font-size: 8.5pt; color: #64748B; margin: 4pt 0 0; }
+.rp-sec { margin-top: 10pt; break-inside: avoid; page-break-inside: avoid; }
+.rp-h { font-size: 11.5pt; font-weight: 750; color: #0F172A; border-bottom: 1px solid #CBD5E1; padding: 0 0 2pt; margin: 0 0 5pt;
+  break-after: avoid; page-break-after: avoid; }
+.rp-doc p.rp-lead { font-size: 10.5pt; font-weight: 600; color: #0F172A; }
+.rp-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid #CBD5E1; border-radius: 5pt; }
+.rp-kpi { padding: 5pt 7pt; border-left: 1px solid #E2E8F0; }
+.rp-kpi:first-child { border-left: none; }
+.rp-kpi span { display: block; font-size: 8.5pt; color: #64748B; }
+.rp-kpi b { display: block; font-size: 12.5pt; font-weight: 750; color: #0F172A; font-variant-numeric: tabular-nums; }
+.rp-kpi small { display: block; font-size: 8.5pt; color: #475569; }
+.rp-rows { display: grid; grid-template-columns: 24mm minmax(0, 1fr); gap: 2pt 8pt; margin: 0; }
+.rp-rows dt { color: #64748B; font-size: 9.5pt; } .rp-rows dd { margin: 0; overflow-wrap: anywhere; }
+.rp-doc p.rp-small { font-size: 8.5pt; color: #64748B; margin: 3pt 0 0; }
+.rp-doc p.rp-warn { color: #92400E; }
+.rp-list { margin: 2pt 0 0 14pt; padding: 0; } .rp-list li { margin: 1pt 0; font-size: 9.5pt; }
+.rp-table { width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed; }
+.rp-table th { text-align: left; color: #475569; font-weight: 650; border-bottom: 1px solid #94A3B8; padding: 3pt 4pt; }
+.rp-table td { border-bottom: 1px solid #E2E8F0; padding: 3pt 4pt; vertical-align: top; overflow-wrap: anywhere; }
+.rp-table tr { break-inside: avoid; page-break-inside: avoid; }
+.rp-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.rp-ok { color: #047857; font-weight: 650; } .rp-no { color: #64748B; font-weight: 650; } .rp-up { color: #BE123C; font-weight: 700; }
+.rp-appendix { margin-top: 16pt; border-top: 2px dashed #CBD5E1; padding-top: 10pt; }
+.rp-doc p.rp-appendix-title { font-size: 14pt; font-weight: 800; color: #0F172A; margin: 0 0 4pt; }
+.rp-doc a { color: #0369A1; }
+@media print {
+  body { padding: 0 !important; max-width: none !important; }
+  .rp-doc { max-width: none; }
+  .rp-appendix { break-before: page; page-break-before: always; border-top: none; margin-top: 0; padding-top: 0; }
+  .rp-doc a { color: inherit; text-decoration: none; }
+}
+"""
+_RP_TONE = {"우선점검": "rose", "추가확인": "amber", "관찰": "emerald"}
+_VERDICT_CLS = {"상위": "rp-up", "진입": "rp-ok", "충족": "rp-ok", "통과": "rp-ok", "미달": "rp-no", "미확인": "rp-no"}
+_SOURCE_NAME = {"Q1": "진단 Q1", "Q2": "진단 Q2", "Q3": "진단 Q3", "WORK24": "채용공고", "SNAPSHOT": "등록 확인질문"}
+
+
+def _rp_rows(rows: list[tuple[str, str]]) -> str:
+    return '<dl class="rp-rows">' + "".join(f"<dt>{_e(k)}</dt><dd>{_e(v)}</dd>" for k, v in rows if v) + "</dl>"
+
+
+def _rp_list(items: list[str]) -> str:
+    items = [x for x in items if x and str(x).strip()]  # 빈 글머리표를 만들지 않는다
+    return f'<ul class="rp-list">{"".join(f"<li>{_e(x)}</li>" for x in items)}</ul>' if items else ""
+
+
+def _rp_count(v, unit="건") -> str:
+    return "미확인" if v is None else f"{int(v):,}{unit}"
+
+
+def render_report_summary_html(vm: dict) -> str:
+    """1페이지 요약본 — 판정 → 핵심지표 → 현재 상태·다음 행동 → 우선 확인 → 지원 검토 → 채용 보조신호 → 자료 기준."""
+    tone = _RP_TONE.get(vm["stage"], "")
+    head = (
+        '<div class="rp-head"><div>'
+        '<h1 class="rp-title">담당자 인계용 진단 요약</h1>'
+        f'<div class="rp-sub">{_e(vm["industry"])} · {_e(vm["quarter"])}'
+        f'<span class="rp-badge rp-badge--{tone}">{_e(vm["stage_display"])}</span></div></div>'
+        '<dl class="rp-meta">'
+        f'<dt>점검 상태</dt><dd>{_e(vm["case_status"])}</dd><dt>담당자</dt><dd>{_e(vm["assignee"])}</dd>'
+        f'<dt>현장확인</dt><dd>{_e(vm["field_done"])}/{_e(vm["field_total"])}건</dd></dl></div>'
+        f'<p class="rp-notice">{_e(REPORT_NOTICE_TEXT)}</p>'
+    )
+    verdict = (f'<div class="rp-sec"><h2 class="rp-h">핵심 판정</h2><p class="rp-lead">{_e(vm["reason"])}</p>'
+               f'<p class="rp-small">{_e(vm["production"])}</p></div>')
+    kpis = "".join(f'<div class="rp-kpi"><span>{_e(k)}</span><b>{_e(v)}</b><small>{_e(s)}</small></div>'
+                   for k, v, s in vm["kpis"])
+    kpi_sec = f'<div class="rp-sec"><h2 class="rp-h">핵심 지표</h2><div class="rp-kpis">{kpis}</div></div>'
+    has_fn = bool(vm["candidates"] or vm["selected"])
+    support_state = ((f"후보 기능 {len(vm['candidates'])}개"
+                      + (f" · 담당자 선택 {len(vm['selected'])}개" if vm["selected"] else "")
+                      + f" · 담당기관 확인 {len(vm['confirmed'])}개") if has_fn else "검토 후보 없음")
+    state = _rp_rows([("현장확인", vm["field_text"]), ("지원 검토", support_state), ("결정", vm["decision"]),
+                      ("인계", vm["referral_text"]), vm["review"], ("다음 행동", vm["next_action"])])
+    state_sec = f'<div class="rp-sec"><h2 class="rp-h">현재 확인상태와 다음 행동</h2>{state}</div>'
+    if vm["priority"]:
+        prio = (f'<p class="rp-lead">{_e(vm["priority"])}</p>'
+                + (f'<p class="rp-small">추가 확인사항 {vm["more_questions"]}건은 상세본에서 확인할 수 있습니다.</p>'
+                   if vm["more_questions"] else ""))
+    else:
+        prio = f'<p>우선 확인사항 미지정 · 상세 확인문항 {vm["question_total"]}건</p>'
+    prio_sec = f'<div class="rp-sec"><h2 class="rp-h">우선 확인사항</h2>{prio}</div>'
+    sup_rows = [("검토 후보", " · ".join(vm["candidates"]))]
+    if vm["selected"]:
+        sup_rows.append(("담당자 선택", " · ".join(vm["selected"])))
+    sup_rows += [("기관 확인", " · ".join(vm["confirmed"])), ("확인 필요", " · ".join(vm["need_check"]))]
+    sup = _rp_rows(sup_rows) if has_fn else "<p>채용 키워드·확인 신호로 연결된 검토 후보 기능이 없습니다.</p>"
+    if not vm["field_done"] and has_fn:
+        sup += '<p class="rp-small rp-warn">현장확인 전 검토 후보이며 실제 인계·지원 적격은 확정되지 않았습니다.</p>'
+    sup_sec = f'<div class="rp-sec"><h2 class="rp-h">지원 검토</h2>{sup}</div>'
+    if vm["jobs_found"]:
+        c = vm["jobs_counts"]
+        kw = " · ".join(f"{t} {n}건" for t, n in vm["keywords_top"]) or "확인된 키워드 없음"
+        jobs = (f'<p>현재 유효 공고 {_rp_count(c["현재 유효"])} · 확인 기업 {_rp_count(c["확인 기업"], "개")}</p>'
+                f'<p>주요 확인 키워드 {_e(kw)}</p>'
+                f'<p class="rp-small">Work24 {_e(vm["jobs_quarter"])} 공고 기준 보조자료이며 진단 판정에는 사용하지 않았습니다.</p>')
+    else:
+        jobs = '<p>확보된 채용공고 없음</p><p class="rp-small">채용공고는 진단 판정에 사용하지 않는 보조자료입니다.</p>'
+    jobs_sec = f'<div class="rp-sec"><h2 class="rp-h">채용시장 보조신호</h2>{jobs}</div>'
+    basis_lines = [" · ".join(vm["basis"]), "생산지표는 가격변동 효과가 포함될 수 있는 명목 생산액입니다.",
+                   "통계 신호는 원인이나 지원 적격을 자동 확정하지 않습니다."]
+    basis = "".join(f'<p class="rp-small">{_e(x)}</p>' for x in basis_lines if x)
+    basis_sec = f'<div class="rp-sec"><h2 class="rp-h">자료 기준</h2>{basis}</div>'
+    return head + verdict + kpi_sec + state_sec + prio_sec + sup_sec + jobs_sec + basis_sec
+
+
+def render_report_appendix_html(vm: dict) -> str:
+    """상세본 부록 A~E — 판정근거 · 전체 현장 확인문항 · 지원 검토 상세 · 채용 보조자료 · 자료 한계와 출처(새 페이지에서 시작)."""
+    rule = "".join(
+        f'<tr><td>{_e(r.get("signal"))}</td><td class="num">{_e(r.get("current"))}</td>'
+        f'<td>{_e(" / ".join(x for x in (r.get("entry_threshold"), r.get("upper_threshold")) if x) or "—")}</td>'
+        f'<td class="{_VERDICT_CLS.get(r.get("verdict"), "")}">{_e(r.get("verdict"))}</td><td>{_e(r["role"])}</td></tr>'
+        for r in vm["rule_rows"])
+    a = ('<div class="rp-sec"><h2 class="rp-h">부록 A. 판정근거</h2>'
+         '<table class="rp-table"><colgroup><col style="width:34%"><col style="width:14%"><col style="width:18%">'
+         '<col style="width:12%"><col style="width:22%"></colgroup>'
+         '<thead><tr><th>지표</th><th class="num">관측값</th><th>기준(진입 / 상위)</th><th>결과</th><th>증거 역할</th></tr></thead>'
+         f'<tbody>{rule}</tbody></table><p class="rp-small">{_e(vm["rule_summary"])} · '
+         'P(명목 생산액 감소)는 고용 진입신호가 아니라 상위 판정의 보강근거입니다.</p></div>')
+
+    with_result = vm["any_results"]
+    result_col = '<col style="width:20%">' if with_result else ""
+    result_head = "<th>최근 결과</th>" if with_result else ""
+    qrows = "".join(
+        f'<tr><td class="num">{q["no"]}</td><td>{_e(q["text"])}</td>'
+        f'<td>{_e(_SOURCE_NAME.get(q["source"], q["source"]) or "—")}</td>'
+        + (f'<td>{_e(q["result"] or "—")}</td>' if with_result else "") + "</tr>"
+        for q in vm["question_rows"])
+    b = ('<div class="rp-sec"><h2 class="rp-h">부록 B. 현장 확인사항</h2>'
+         f'<p class="rp-small">현장확인 입력 {_e(vm["field_text"])}</p>'
+         f'<table class="rp-table"><colgroup><col style="width:6%"><col><col style="width:15%">{result_col}</colgroup>'
+         f'<thead><tr><th class="num">번호</th><th>확인사항(원문)</th><th>근거·출처</th>{result_head}</tr></thead>'
+         f'<tbody>{qrows}</tbody></table></div>')
+
+    frows = "".join(
+        f'<tr><td>{_e(r["label"])}</td><td>{_e(r["status"])}</td>'
+        f'<td class="num">{"—" if r["cards"] is None else _e(r["cards"])}</td>'
+        f'<td>{_e(r["institutions"] or "담당기관 미확정")}</td><td>{_e(r["intake"])}</td><td>{_e(r["referral"])}</td></tr>'
+        for r in vm["fn_rows"])
+    cards = "".join(
+        f'<tr><td>{_e(c.get("title"))}</td><td>{_e(c.get("institution"))}</td><td>{_e(c.get("current_intake_status"))}</td>'
+        f'<td>{_e(c.get("verified_at"))}</td><td>{_link(c.get("source_url"), "공식 출처") or "—"}</td></tr>'
+        for c in vm["cards"])
+    fn_table = ('<table class="rp-table"><thead><tr><th>기능</th><th>상태</th><th class="num">요건 카드</th>'
+                f'<th>검증된 담당기관</th><th>접수경로</th><th>인계</th></tr></thead><tbody>{frows}</tbody></table>'
+                if frows else "<p>검토 후보·선택 기능 없음</p>")
+    card_table = ('<table class="rp-table" style="margin-top:6pt"><thead><tr><th>공식 요건 카드</th><th>기관</th>'
+                  f'<th>접수 상태</th><th>확인일</th><th>출처</th></tr></thead><tbody>{cards}</tbody></table>'
+                  if cards else '<p class="rp-small">확인된 공식 요건 카드 없음</p>')
+    c_sec = ('<div class="rp-sec"><h2 class="rp-h">부록 C. 지원 검토 상세</h2>' + fn_table
+             + ('<p class="rp-small">후보는 채용 키워드·확인 신호로 제시된 검토 대상이며 지원 확정이 아닙니다. '
+                '요건 카드는 일반 조건 안내이며 개별 적격을 판정하지 않습니다.</p>')
+             + card_table + '</div>')
+
+    if vm["jobs_found"]:
+        cnt = vm["jobs_counts"]
+        d_body = (_rp_rows([("목록", _rp_count(cnt["목록"])), ("현재 유효", _rp_count(cnt["현재 유효"])),
+                            ("상세 검증", _rp_count(cnt["상세 검증"])), ("확인 기업", _rp_count(cnt["확인 기업"], "개")),
+                            ("기준 분기", f"Work24 {vm['jobs_quarter']} 공고")])
+                  + '<p style="margin-top:4pt">' + _e(" · ".join(f"{t} {n}건" for t, n in vm["keywords_all"])) + "</p>")
+    else:
+        d_body = "<p>확보된 채용공고 없음</p>"
+    d = ('<div class="rp-sec"><h2 class="rp-h">부록 D. 채용시장 보조자료</h2>' + d_body
+         + '<p class="rp-small">채용공고 자료는 현장 확인을 위한 보조근거이며 진단 판정 입력값이 아닙니다.</p></div>')
+
+    src = "".join(f"<li>{_e(t)} · {_link(u, '원문')}</li>" for t, u in vm["sources"])
+    source_block = f'<p style="margin-top:4pt"><b>공식 출처</b></p><ul class="rp-list">{src}</ul>' if src else ""
+    e = '<div class="rp-sec"><h2 class="rp-h">부록 E. 자료 한계와 출처</h2>' + _rp_list(vm["limits"]) + source_block + "</div>"
+    return f'<div class="rp-appendix"><p class="rp-appendix-title">상세 부록</p>{a}{b}{c_sec}{d}{e}</div>'
+
+
+def render_report_html(vm: dict, detailed: bool = False) -> str:
+    """진단서 본문(요약본 또는 요약본 + 부록). 화면 미리보기와 저장 HTML이 같은 것을 쓴다."""
+    return f'<div class="rp-doc">{render_report_summary_html(vm)}{render_report_appendix_html(vm) if detailed else ""}</div>'

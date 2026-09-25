@@ -51,28 +51,43 @@ def _stamp_ui_modules():
             m._dx_mtime = _ui_module_mtime(m)
 
 
+def _refresh_service_module():
+    """업무 서비스(workflow.service)도 파일이 바뀌면 다시 읽는다 — src/app 밖이라 Streamlit이 자동으로 다시 읽지 않는다.
+
+    예전 모듈로 만든 캐시 서비스 객체에는 새 메서드(예: delete_case)가 없어 AttributeError가 난다. 모델(workflow.models)은
+    SQLAlchemy 선언을 다시 하지 않도록 건드리지 않는다. 캐시 서비스는 아래 service()의 code_version 인자로 새로 만든다.
+    """
+    module, pkg = sys.modules.get("workflow.service"), sys.modules.get("workflow")
+    if module is not None and getattr(module, "_dx_mtime", None) != _ui_module_mtime(module):
+        sys.modules.pop("workflow.service", None)
+        if pkg is not None and hasattr(pkg, "service"):
+            delattr(pkg, "service")
+
+
 _refresh_ui_modules()
+_refresh_service_module()
 
 from export import schema as S  # noqa: E402
-from export.diff import THRESHOLD_STATUS, record_diff, snapshot_diff  # noqa: E402
-from export.documents import registered_document  # noqa: E402
+from export.diff import record_diff, snapshot_diff  # noqa: E402
 from export.snapshot import (  # noqa: E402
     NATURE_LABEL, list_snapshots, load_snapshot, nature_note, resolve_for_quarter, snapshot_nature,
 )
 from app import team_copilot, ui  # noqa: E402
 from app.view_models import (  # noqa: E402
     COPILOT_ICONS, INTAKE_UI, RELEVANCE_LABELS, SOURCE_CATEGORY_LABEL, TEAM_PROPOSALS, TEAM_STAGE_FILTERS,
-    TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, WORK24_BASIS, chip_label, clarification, comparison_view,
-    copilot_suggestions, data_quality_flags, evidence_level, evidence_level_value, field_context, filter_official_cards,
+    TEAM_STAGE_FLOW, TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE, CASE_SUGGESTIONS, WORK24_BASIS, chip_label, clarification, comparison_view,
+    copilot_suggestions, data_quality_flags, field_context, filter_official_cards,
     collect_related_notices, function_card_counts, function_name, function_ui_label, next_quarters, notice_reasons,
-    quarter_label, quarter_text, recruitment_observations,
+    quarter_label, quarter_text,
     report_download,
     rule_evidence_rows, session_scope,
     signal_explanation, stage_code, stage_counts, stage_display, structure_answer, supporting_fact_items,
     team_kpis, team_principles, top_questions, with_session_context,
-    SIGNAL_EXPLANATION_TITLE, HANDOVER_NOTICE, LINK_FLOW, NOMINAL_NOTE, OBSERVATION_RANK_HELP, PRODUCTION_LABEL, REVIEW_REQUIRED_LABEL, YOY_NOTE,
+    SIGNAL_EXPLANATION_TITLE, LINK_FLOW, REPORT_TYPES, build_report_vm, NOMINAL_NOTE, OBSERVATION_RANK_HELP, PRODUCTION_LABEL, REVIEW_REQUIRED_LABEL, YOY_NOTE,
     assistant_labels, case_status_label, institution_audit_label, institution_status_text, next_action, pick_case,
-    q1_plain, queue_rows, rank_text, reason_sentence, run_text,
+    q1_plain, queue_rows, rank_text, reason_summary, run_text, checklist_text,
+    CASE_SUBVIEWS, case_progress, default_check_position, CHECK_RESULT_HELP, check_result_label,
+    CHECK_RESULT_ORDER, CLOSED_SUBVIEWS, closed_case_timeline, closed_case_vm, closed_subview_id,
 )
 _stamp_ui_modules()
 from copilot import Copilot  # noqa: E402
@@ -80,7 +95,7 @@ from copilot import router as R  # noqa: E402  (읽기 전용: 비교·되묻기
 from copilot.audit import JsonlAuditSink, audit_path_for  # noqa: E402
 from copilot.contracts import SOURCE_LABEL as ANSWER_SOURCE_LABEL  # noqa: E402
 from policy.decision_support import DecisionSupportService  # noqa: E402
-from policy.rag import PolicyRAG, rebuild_policy_index  # noqa: E402
+from policy.rag import rebuild_policy_index  # noqa: E402
 from policy.work24_evidence import register_work24_snapshot  # noqa: E402
 from workflow import models as M  # noqa: E402
 from workflow import catalog as C  # noqa: E402
@@ -89,6 +104,7 @@ from workflow.service import (  # noqa: E402
     ACTION_LABEL, REFERRAL_ACTIONS, REFERRAL_INPUT_LABEL, REFERRAL_OCCURRED, TARGET_LABEL, WorkflowError,
     WorkflowService,
 )
+sys.modules["workflow.service"]._dx_mtime = _ui_module_mtime(sys.modules["workflow.service"])
 
 st.set_page_config(page_title="창원국가산단 점검연계 시스템", layout="wide", initial_sidebar_state="collapsed")
 DASHBOARD_CSS = (Path(__file__).resolve().parent / "styles" / "dashboard.css").read_text(encoding="utf-8")
@@ -104,7 +120,8 @@ RT = runtime_context()
 
 # ------------------------------------------------------------------ 자원
 @st.cache_resource
-def service(url: str | None, demo: bool) -> WorkflowService:
+def service(url: str | None, demo: bool, code_version: float | None = None) -> WorkflowService:
+    """code_version = workflow/service.py 수정 시각 — 코드가 바뀌면 캐시된 서비스 객체를 새로 만든다."""
     workflow = WorkflowService(M.make_session_factory(url), demo=demo)
     register_work24_snapshot(workflow.Session)
     return workflow
@@ -152,7 +169,18 @@ try:
 except M.DatabaseScopeError as e:
     st.error(str(e))
     st.stop()
-svc = service(database_url, RT.demo)
+svc = service(database_url, RT.demo, _ui_module_mtime(sys.modules["workflow.service"]))
+
+
+def case_no(cid: int | None) -> int | None:
+    """화면 표시 번호 — 지금 남아 있는 점검 건을 개설 순서대로 1, 2, 3…(삭제하면 다시 매겨진다).
+
+    DB 번호(id)는 인계·변경 기록이 가리키므로 바꾸지 않는다. 변경 기록 화면만 DB 번호를 그대로 보여준다.
+    """
+    if cid is None:
+        return None
+    order = sorted(c["id"] for c in svc.list_cases())
+    return order.index(cid) + 1 if cid in order else cid
 
 
 def go(page: str, industry: str | None = None, quarter: str | None = None,
@@ -219,6 +247,10 @@ if "page" not in st.session_state:
         st.session_state.case_id = int(qp["case"])
     if qp.get("view") in INSP_VIEWS:
         st.session_state.insp_view = qp["view"]
+    if qp.get("case_tab") in CASE_SUBVIEWS:  # 잘못된 값이면 무시 → 점검 요약
+        st.session_state.case_subview = qp["case_tab"]
+    if qp.get("case_tab"):  # 종결 건: ID·표시 이름·예전 이름 모두 받아 종결 하위 화면으로(그 밖은 종결 요약)
+        st.session_state.closed_subview = closed_subview_id(qp["case_tab"])
 apply_nav()
 
 # 화면 이동은 상단 헤더 탭(go → apply_nav)이 st.session_state.page를 바꾼다. 실행 배너는 헤더 상태 표시에 둔다.
@@ -252,7 +284,6 @@ def ensure_dx_defaults():
         st.session_state.dx_industry = snap.industries[0]
 
 
-policy = PolicyRAG(svc.Session)
 decision_support = DecisionSupportService(svc.Session, snap, svc)
 # Copilot = 기존 backend를 감싸는 계층(등록 진단 → 공식 RAG → 외부 공식 도메인 → 일반 LLM). provider는 환경변수로만 설정.
 copilot = Copilot.from_env(decision_support, audit=JsonlAuditSink(audit_path_for(database_url)))
@@ -269,15 +300,14 @@ with st.container(key="topbar"):
                 st.text_input("담당자 이름", key="actor", help="모든 검토·개설·결정 기록에 남습니다.")
                 st.selectbox("분석 버전", labels, key="analysis_version", format_func=quarter_text,
                              help="분석 실행 분기별로 보존된 불변 분석본. 실행 분기 이전 분기는 후향 재구성 값입니다.")
-                st.caption("분석 정보")
-                st.caption(f"기준분기 {quarter_label(meta['quarter'])} · 분석 버전 {meta['snapshot_version']}")
-                st.caption(f"규칙 버전 `{meta['rule_version']}`")
-                st.caption(f"분석 실행일 {meta['source_run']['triage_run_at_utc'][:10]}")
-                st.caption(f"등록일 {meta['created_at'][:10]}")
-                # 개발·운영 상태는 메인 헤더가 아니라 여기서만 보여준다(값은 runtime_context 그대로)
-                st.caption("시스템 상태")
-                st.caption(f"운영 상태: {'프로토타입' if not RT.authenticated else '운영'}")
-                st.caption(f"사용자 인증: {'미연결' if not RT.authenticated else RT.auth_mode}")
+                # 짧게 세 묶음(분석 정보 · 시스템 상태 · AI 연결) — 값은 등록 분석본·runtime_context 그대로
+                st.markdown("**분석 정보**")
+                st.caption(f"{quarter_label(meta['quarter'])} · 분석 버전 {meta['snapshot_version']} · "
+                           f"규칙 {meta['rule_version'].split('/')[-1]} · 실행 {meta['source_run']['triage_run_at_utc'][:10]} · "
+                           f"등록일 {meta['created_at'][:10]}")
+                st.markdown("**시스템 상태**")
+                st.caption(f"운영 상태: {'프로토타입' if not RT.authenticated else '운영'} · "
+                           f"사용자 인증: {'미연결' if not RT.authenticated else RT.auth_mode}")
                 # AI 연결 설정은 copilot 인스턴스가 만들어진 뒤(아래) 이 자리에 채운다
                 ai_status_slot = st.container()
                 st.divider()
@@ -302,17 +332,13 @@ SOURCE_BADGE_COLOR = {"INTERNAL_DIAGNOSTIC": "blue", "INTERNAL_RAG": "green", "E
 
 # provider 연결 여부(설정값만 읽음 — 실제 호출은 하지 않음). 설정·정보 popover 안 자리(ai_status_slot)를 채운다.
 with ai_status_slot:
-    st.caption("AI 연결 설정")
-    st.caption(f"Gemini 답변 생성: {'설정됨' if copilot.llm.available else '미설정'}")
-    st.caption(f"Gemini 검색 grounding: {'설정됨' if copilot.web.available else '미설정'}")
-    st.caption(f"기업마당(BIZINFO): "
-              f"{'설정됨' if any(getattr(a, 'available', False) for a in copilot.official_apis) else '미설정'}")
-    st.caption("설정됨은 키·옵션이 켜져 있다는 뜻이며 실제 호출 성공 여부는 각 답변의 근거 표시·한계에서 확인합니다.")
-    st.caption(f"AI 패널 표시: {ASSISTANT_NAME} · {ASSISTANT_MODE}"
-               + ("" if copilot.llm.available else " — Gemini 미설정이라 등록 진단·공식 문서를 규칙으로 찾아 답합니다."))
-    st.caption(f"{ASSISTANT_NAME}는 답변마다 근거 유형(등록 진단·공식문서·외부 최신정보·일반 AI)을 구분해 표시합니다.")
+    st.markdown("**AI 연결**")
+    on = lambda flag: "켜짐" if flag else "꺼짐"  # noqa: E731
+    st.caption(f"Gemini 답변 {on(copilot.llm.available)} · 검색 {on(copilot.web.available)} · "
+               f"기업마당 {on(any(getattr(a, 'available', False) for a in copilot.official_apis))} · "
+               f"패널 이름 '{ASSISTANT_NAME}'")
     # 기존 Copilot 계약: 세션 입력(field_ctx)은 등록 진단 backend에만 쓰이며 외부 provider로 보내지 않는다
-    st.caption("현장 메모 등 세션 입력은 외부 AI로 전달하지 않습니다.")
+    st.caption("현장 메모 등 입력 내용은 외부 AI로 보내지 않습니다.")
 
 
 # ------------------------------------------------------------------ 공통 조각
@@ -368,7 +394,7 @@ def open_case_form(rec: dict, key: str):
 def reviewer_section(ind: str, q: str, rec: dict, t: dict):
     cand = next(c for c in svc.candidates(snap, q) if c["industry"] == ind)
     if cand["open_case_id"]:
-        st.success(f"진행 중 점검 건 #{cand['open_case_id']}")
+        st.success(f"진행 중 점검 건 {case_no(cand['open_case_id'])}번")
         st.button("점검 건 열기", key="reviewer_open_case",
                  on_click=go, args=("점검 관리", None, None, cand["open_case_id"], "진행 중"))
     elif not actor:
@@ -481,6 +507,29 @@ def source_lines(src: dict) -> list[str]:
     return []
 
 
+QUALITY_LABEL = {  # 품질정보만 있는 외부자료(예: 법정동×업종 전력)의 표시 항목 — 원자료 JSON 대신 읽을 수 있는 목록
+    "kepco_legal_dong_observation_period": ("관측 기간", "{}"),
+    "kepco_legal_dong_suppression_pct_all": ("비공개(가림) 셀 비율", "{:.1f}%"),
+    "kepco_legal_dong_complete_industry_quarters": ("업종 합계가 완결된 분기", "{}개"),
+    "kepco_legal_mapping_grade": ("업종 매핑 등급", "{}"),
+    "kepco_legal_proxy_dong_coverage": ("법정동 범위", "{}"),
+    "kepco_legal_dong_note": ("참고", "{}"),
+}
+
+
+def quality_lines(quality: dict) -> list[str]:
+    lines = []
+    for key, (label, pattern) in QUALITY_LABEL.items():
+        value = quality.get(key)
+        if value is None or value == "":
+            continue
+        try:
+            lines.append(f"{label}: {pattern.format(value)}")
+        except (ValueError, TypeError):
+            lines.append(f"{label}: {value}")
+    return lines or ["표시할 품질 정보 없음"]
+
+
 def external_sources_view(rec: dict, quarter: str):
     st.markdown(f"#### 외부자료 ({quarter_label(quarter)} 기준)")
     sources = rec.get("external_sources")
@@ -510,7 +559,8 @@ def external_sources_view(rec: dict, quarter: str):
                     st.markdown(f"- **{src['label']}** — {quarter_text(src['unavailable_label'])}")
                     if src.get("quality_only") and src.get("quality"):
                         st.caption("자료 품질·결합 한계")
-                        st.json(src["quality"], expanded=False)
+                        for line in quality_lines(src["quality"]):
+                            st.markdown(f"    - {line}")
 
 
 def timeline_chips(industry: str, current_quarter: str, rows: list[dict]):
@@ -599,35 +649,68 @@ def copilot_panel(render):
     """Copilot 패널 — 접힘(좁은 레일) / 펼침(카드) 두 모양을 감싼다."""
     if st.session_state.copilot_collapsed:
         with st.container(key="copilotrail", width=64):
-            st.button("‹ AI", key="copilot_expand", help=f"{ASSISTANT_NAME} 펼치기 · {ASSISTANT_MODE}",
+            st.button("‹ AI", key="copilot_expand", help=f"{ASSISTANT_NAME} 펼치기" + (f" · {ASSISTANT_MODE}" if ASSISTANT_MODE else ""),
                       on_click=set_copilot, args=(False,))
     else:
         with st.container(key="copilot", width=320):  # 왼쪽 패널과 같은 너비
             render()
 
 
+def case_chip_entry(prompt: str, case: dict) -> dict:
+    """점검 건 상세의 추천 질문(앞 3개) 답변 — 저장된 점검 기록만 요약한다. 입력·기능 선택·결정·인계를 대신하지 않는다."""
+    p = case_progress(case, fn_name)
+    cur = case["current_scope"] if case["status"] != "종결" else case["scopes"][-1]
+    head = f"점검 건 {case_no(case['id'])}번 · {case['industry']} · {quarter_label(case['quarter'])}"
+    if prompt == CASE_SUGGESTIONS[0]:
+        lines = [f"{head} — 다음 할 일: {p['next'][0]}", f"현장확인 {p['done']}/{p['total']}건 기록",
+                 f"지원 필요 기능: {p['support']}", f"결정: {p['decision']}", f"인계: {p['referral_text']}",
+                 f"다음 검토: {p['next_review']}"]
+    elif prompt == CASE_SUGGESTIONS[1]:
+        done = [i for i in cur["checks"] if i["latest"]]
+        lines = [f"{head} — 현장확인 {len(done)}/{len(cur['checks'])}건 기록"
+                 + ("" if done else " · 아직 기록된 결과가 없습니다.")]
+        lines += [f"{i['position'] + 1}. {checklist_text(i['question_text'])} → {check_result_label(i['latest']['result_code'])}"
+                  + (f" ({i['latest']['note']})" if i["latest"]["note"] else "") for i in done]
+    else:
+        fixed = snapshot(case["snapshot_quarter"], case["snapshot_version"])
+        chosen = cur["support_needs"]["function_tags"] if cur.get("support_needs") else []
+        lines = [f"{head} — 인계 전에 기록으로 확인할 사항입니다.",
+                 f"현장확인 결과: {p['done']}/{p['total']}건" + ("" if p["done"] else " (인계는 현장확인 결과 기록 후 가능)"),
+                 f"지원 필요 기능: {p['support']}"]
+        lines += [f"{fn_name(t)} — {institution_status_text(svc.institution_candidates(fixed, t))}" for t in chosen]
+        lines.append("실제 접수경로가 미확인인 기관은 발송을 기록할 때 실제로 사용한 연락·접수 경로를 남기세요.")
+    return {"role": "assistant", "content": "\n".join(lines), "source_type": "SYSTEM", "citations": [],
+            "caveats": ["기록된 점검 값을 요약한 안내이며 입력·결정·인계를 대신하지 않습니다."],
+            "route": "CASE_WORKFLOW", "intent": "CASE_WORKFLOW", "meta": {}, "composer": "TEMPLATE",
+            "answer_type": "CASE_WORKFLOW", "target": {"industry": case["industry"], "quarter": cur["quarter"]}}
+
+
 def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None, industries: list[str],
-                 context_title: str, context_tags: list[str], team: bool = False):
+                 context_title: str, context_tags: list[str], team: bool = False, case: dict | None = None):
     """team=True: 정책·지원 연계의 '공모전 팀 제안' 탭 — 추천 질문과, 팀 제안 질문의 답변 근거만 바뀐다(대화 기록은 공유)."""
     scope = session_scope(industry, quarter)
-    histories = st.session_state.setdefault("copilot_histories", {})
-    history = histories.setdefault(scope, [])
+    # 대화 기록은 화면·업종과 무관하게 하나로 유지한다 — 답변마다 '답변 기준 · 업종 · 분기'가 붙어 맥락을 구분한다
+    history = st.session_state.setdefault("copilot_history", [])
     # 패널 = 고정 높이 세로 3단: 머리(제목·맥락·추천 질문) / 대화(남는 높이 전부, 이것만 스크롤) / 질문 입력(맨 아래 고정)
-    with st.container(horizontal=True, vertical_alignment="center"):
-        st.html(ui.copilot_title_html(ASSISTANT_NAME, ASSISTANT_MODE))
-        if st.button("↻", key=f"chatreset::{scope}", help="이 업종·분기 대화 초기화"):
-            history.clear()
-            st.rerun()
-        st.button("»", key="copilot_collapse", help=f"{ASSISTANT_NAME} 접기", on_click=set_copilot, args=(True,))
+    # 머리 한 줄: 제목(남는 폭) + [↻ 초기화][» 접기] 묶음 — 두 버튼은 항상 나란히 붙는다(줄바꿈 없음)
+    with st.container(key="copilottop", horizontal=True, vertical_alignment="center", gap="small"):
+        st.html(ui.copilot_title_html(ASSISTANT_NAME, ASSISTANT_MODE), width="stretch")
+        with st.container(key="copilotacts", horizontal=True, vertical_alignment="center", gap="small",
+                          width="content"):
+            if st.button("↻", key="chatreset", help="대화 초기화"):
+                history.clear()
+                st.rerun()
+            st.button("»", key="copilot_collapse", help=f"{ASSISTANT_NAME} 접기", on_click=set_copilot, args=(True,))
     selected, comparison_industry = None, None
     with st.container(key="copilothead"):
         st.html(ui.context_tags_html(context_title, context_tags,
                                      optional_tags=tuple(context_tags) == DIAG_CONTEXT_TAGS))
-        other = "(선택 안 함)"
-        if not team:  # 팀 제안은 전 업종 공통 — 업종 비교는 두지 않는다
-            other_options = ["(선택 안 함)"] + [i for i in industries if i != industry]
-            other = st.selectbox("비교 업종(선택)", other_options, key=f"cmp::{scope}")
+        # 비교 업종 선택은 '질문 더보기' 안에 둔다(대화 영역 높이 확보) — 비교 버튼은 지난 실행의 선택값으로 먼저 그린다
+        other_options = ["(선택 안 함)"] + [i for i in industries if i != industry]
+        other = "(선택 안 함)" if team else st.session_state.get(f"cmp::{scope}", "(선택 안 함)")
         primary, more = (TEAM_SUGGESTIONS, TEAM_SUGGESTIONS_MORE) if team else copilot_suggestions(stage)
+        if case is not None:  # 점검 건 상세: 현재 업무에 맞춘 추천 질문(기존 질문은 '질문 더보기'로)
+            primary, more = list(CASE_SUGGESTIONS), [*primary, *more]
         with st.container(key="chips", horizontal=True, gap="small"):
             for index, (icon, question) in enumerate(zip(COPILOT_ICONS, primary)):
                 # 버튼에는 아이콘 + 짧은 표시명, 마우스를 올리면 원문. 보내는 질문은 원문 그대로
@@ -636,14 +719,16 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
             if other != "(선택 안 함)" and st.button(f"{other}와 비교", key=f"chip-cmp::{scope}",
                                                    help=f"{industry}와 {other} 비교"):
                 selected, comparison_industry = f"{industry}와 {other} 비교", other
-        with st.expander("질문 더보기"):
+        with st.expander("질문 더보기" if team else "질문 더보기 · 업종 비교"):
+            if not team:  # 팀 제안은 전 업종 공통 — 업종 비교는 두지 않는다
+                st.selectbox("비교 업종(선택)", other_options, key=f"cmp::{scope}")
             with st.container(key="chipsmore", horizontal=True, gap="small"):
                 for offset, question in enumerate(more, start=len(primary)):
                     if st.button(chip_label(question), key=f"chip-{offset}::{scope}", help=question):
                         selected = question
     # 'AI 비서 안내'(근거 유형 표시·세션 입력 비전송)는 설정·정보 → AI 연결 설정으로 옮겼다 — 대화 영역을 넓게 쓰기 위해
     if history:  # 대화가 생겼을 때만 대화 영역을 만든다(높이는 CSS가 패널 남은 높이로 맞춘다)
-        with st.container(key="chatlog", height=420):
+        with st.container(key="chatlog", height=560):
             last = len(history) - 1
             for pos, message in enumerate(history):
                 with st.chat_message(message["role"]):
@@ -654,10 +739,14 @@ def copilot_view(industry: str, quarter: str, field_ctx: dict, stage: str | None
                         st.write(message["content"])
     else:  # 빈 상자 없이 안내 한 줄 → 바로 입력창
         st.caption("질문을 입력하거나 추천 질문을 눌러 보세요.")
-    typed = st.chat_input(f"{industry} · {quarter_label(quarter)}에 대해 질문하세요.", key=f"chat::{scope}")
+    # 안내문은 한 줄(좁은 패널에서 두 줄로 접히면 빈 입력칸이 입력할 때보다 커진다) — 업종·분기는 패널 머리와 답변에 표시
+    typed = st.chat_input("질문을 입력하세요.", key="chat")
     prompt = selected or typed
     if prompt:
         decision = R.route(prompt, list(snap.industries), list(snap.quarters))
+        if case is not None and prompt in CASE_SUGGESTIONS[:3]:
+            history.extend([{"role": "user", "content": prompt}, case_chip_entry(prompt, case)])
+            st.rerun()
         if team and team_copilot.applies(prompt, decision):
             # 팀 제안 탭: 팀 제안 정본만 근거로 답한다(업종·세션 입력은 보내지 않음). 그 밖의 질문은 기존 Copilot 그대로.
             result = team_copilot.answer(prompt, copilot.llm, decision)
@@ -748,120 +837,44 @@ def provider_usage_marks(message: dict) -> list[str]:
     return marks
 
 
-def handover_status(ind: str, q: str, rec: dict | None, payload: dict) -> dict:
-    """진단서에 덧붙이는 점검·인계 상태(기록된 값만). 없으면 '미배정'·'미확인' — 담당자·기관·기한을 만들지 않는다."""
-    cand = next((c for c in svc.candidates(snap, q) if c["industry"] == ind), None)
-    case = pick_case(svc.list_cases(), ind, q)
-    if case and case.get("next_review_quarter"):
-        review = f"{quarter_label(case['next_review_quarter'])} (점검 건 기록)"
-    elif rec and rec["triage"].get("next_review_quarter"):
-        review = f"{quarter_label(rec['triage']['next_review_quarter'])} (등록 판정 기준)"
-    else:
-        review = "미확인"
-    institutions = [f"{fn_name(f['function_tag'])} — "
-                    f"{institution_status_text(svc.institution_candidates(snap, f['function_tag']))}"
-                    for f in payload.get("support_functions") or []]
-    return {"status": case_status_label(cand, case), "assignee": (case or {}).get("assignee") or "미배정",
-            "review": review, "institutions": institutions or ["검토 지원 기능 후보 없음 · 담당기관 미확인"]}
-
-
-def handover_sections(payload: dict, rec: dict | None, rows: list[dict], handover: dict | None = None) -> list[str]:
-    """담당자 인계용 진단 요약 6개 섹션(HTML). 화면·저장 HTML 파일에 동일하게 쓴다."""
+def report_view_model(payload: dict, rec: dict | None) -> dict:
+    """진단서 ViewModel 입력 — 점검 건 기록·담당기관 후보·문서명만 여기서 읽고(읽기 전용), 표시값은 build_report_vm이 만든다."""
     ind, q = payload["industry"], payload["quarter"]
-    triage = payload.get("triage") or {}
-    q1, q2, q3 = payload.get("q1") or {}, payload.get("q2") or {}, payload.get("q3") or {}
-    sections = [ui.disclaimer_html(HANDOVER_NOTICE)]
-
-    kpi = ui.kpi_cards_html([
-        {"label": "업종", "value": ind}, {"label": "기준분기", "value": quarter_label(q)},
-        {"label": "현재 판정", "value": stage_display(triage["stage"]) if triage.get("stage") else "자료 없음"},
-        {"label": "Q1 산업·고용 상태", "value": q1_plain(q1.get("state")), "sub": q1.get("state") or "—"},
-        {"label": "Q2 고용증감", "value": fmt(q2.get("employment_change"), suffix="명"),
-         "sub": f"YoY {fmt(q2.get('employment_yoy'), 2, '%')}",
-         "tone": "rose" if (q2.get("employment_change") or 0) < 0 else "emerald"},
-        {"label": "Q3 지속", "value": fmt(q3.get("duration"), suffix="분기")},
-    ])
-    if handover:
-        kpi += ui.metric_list_html("점검·인계 상태", [
-            ("현재 점검상태", handover["status"]), ("담당자", handover["assignee"]), ("다음 검토", handover["review"])])
-    sections.append(ui.section_html("1. 진단 요약", kpi))
-
-    if rec:
-        explanation = signal_explanation(rows, rec["signals"], p_title="명목 생산 감소 (보강)")
-        summary_line = f"{explanation['summary']} → 등록 판정 {stage_display(rec['triage']['stage'])}"
-    else:
-        explanation, summary_line = {"items": []}, None
-    fallback = rec["triage"]["stage_reason"] if rec else "고용 축 진입신호 없음"
-    reason_body = (ui.snapshot_brief_html([("판정 이유", reason_sentence(rec, rows))]) if rec else "")
-    reason_body += ui.reason_cards_html("", explanation["items"], fallback)
-    if summary_line:
-        reason_body += f'<div class="dx-footnote">{html.escape(summary_line)} · P = {PRODUCTION_LABEL} 감소율</div>'
-    sections.append(ui.section_html("2. 왜 점검 대상인가", reason_body))
-
-    jobs = payload.get("recruitment_snapshot") or {}
-    detail = evidence_level(jobs, "DETAIL_VERIFIED")
-    n = evidence_level_value(detail) if detail else "상세 미확인"
-    company = evidence_level_value({"count": (detail or {}).get("company_count")}) if detail else "상세 미확인"
-    kw_payload = payload.get("recruitment_keywords") or {}
-    kw = [(k["term"], k["count"]) for k in (kw_payload.get("keywords") or [])[:6]]
-    kw_basis = f"주요 키워드 · 목록 {fmt(kw_payload.get('posting_count'))}건의 {WORK24_BASIS['KEYWORD']}"
-    jobs_html = (f'<div class="dx-report-meta">상세 검증 {n} · 기업 {company}</div>'
-                + ui.chip_row_html(kw)
-                + f'<div class="dx-footnote">{html.escape(kw_basis)}</div>'
-                + '<div class="dx-tag-line">현재 채용시장 보조근거 · 선택 분기의 진단 판정 입력 아님</div>')
-    sections.append(ui.section_html("3. 채용시장 보조신호", jobs_html))
-
-    questions = payload.get("field_checks", {}).get("questions", [])
-    q_items = [(item["question"], SOURCE_LABEL.get(item.get("source"), item.get("source") or "출처 미확인"))
-              for item in top_questions(questions, 3)]
-    checks = payload.get("field_checks", {}).get("session_context", {})
-    answered = [f"{row['question']} — {row.get('answer') or '확인 표시만 입력'}"
-               for row in checks.get("responses", []) if row.get("checked") or row.get("answer")]
-    field_html = (ui.question_list_html("현장 확인 질문", q_items)
-                 + ui.bullet_list_html(answered, "입력된 현장 확인 내용 없음"))
-    sections.append(ui.section_html("4. 현장 확인", field_html))
-
-    first_owner = rec["triage"].get("first_owner") if rec else None
-    support_html = ui.support_summary_html(first_owner, payload.get("support_functions") or [],
-                                           payload.get("requirement_cards") or [], label_of=fn_name)
-    if handover:
-        support_html += ('<div class="dx-sub-title">담당기관 검증상태</div>'
-                         + ui.bullet_list_html(handover["institutions"]))
-    sections.append(ui.section_html("5. 지원 검토", support_html))
-
-    limits = ["통계 신호는 원인을 자동 판정하지 않습니다(현장 확인 필요).",
-              "지원 적격·선정 여부를 자동 판정하지 않습니다(담당기관 확인 필요).",
-              NOMINAL_NOTE, YOY_NOTE,
-              nature_line(q), f"자료 기준 {payload.get('basis_date')}"]
-    sections.append(ui.section_html("6. 한계", ui.bullet_list_html(limits)))
-    return sections
+    rules = {r["rule_name"]: r for r in snap.reference["triage_rules"]}
+    rows = rule_evidence_rows(rec, rules) if rec else []
+    picked = pick_case(svc.list_cases(), ind, q)
+    case = svc.get_case(picked["id"]) if picked else None
+    selected = []
+    if case:
+        cur = case["current_scope"] if case["status"] != "종결" else case["scopes"][-1]
+        selected = (cur.get("support_needs") or {}).get("function_tags") or []
+    tags = dict.fromkeys([*(f["function_tag"] for f in payload.get("support_functions") or []), *selected])
+    institutions = {t: (svc.institution_candidates(snap, t) if (C.function(t) or {}).get("referable") else [])
+                    for t in tags}
+    return build_report_vm(payload, rec, rows, fn_label=fn_name, case=case, institutions=institutions,
+                           doc_titles=document_titles(), snapshot_label=f"{quarter_label(snap.quarter)} {snap.version}",
+                           nature=nature_line(q), population_note=EIS_POPULATION_NOTE)
 
 
 @st.dialog("담당자 인계용 진단 요약", width="large")
 def report_dialog(payload: dict, rec: dict | None):
+    """기본 = 1페이지 요약본, 선택 = 요약 + 근거 부록. 진단서 전용 CSS만 쓴다(앱 전체 CSS 미포함)."""
     ind, q = payload["industry"], payload["quarter"]
-    body = report_body(payload, rec)
-    st.html(body)
-    with st.expander("데이터 한계·출처 기준"):
-        for caveat in payload.get("caveat") or []:
-            st.caption(f"- {quarter_text(caveat)}")
-        st.json({"basis_date": payload.get("basis_date"),
-                 "snapshot_provenance": payload.get("snapshot_provenance"),
-                 "contract_version": payload.get("contract_version")}, expanded=False)
-    with st.container(horizontal=True, gap="small"):
-        st.download_button("HTML 저장 (인쇄용)", ui.document_html(f"{ind} {quarter_label(q)} 진단 요약", body, DASHBOARD_CSS),
-                           file_name=f"diagnosis_{ind}_{q}.html", mime="text/html", type="primary")
-        st.download_button("JSON 원본", report_download(payload),
-                           file_name=f"diagnosis_{ind}_{q}.json", mime="application/json")
-    st.caption("HTML 파일을 브라우저에서 열어 인쇄(PDF로 저장 가능)할 수 있습니다. PDF를 직접 생성하지 않습니다.")
-
-
-def report_body(payload: dict, rec: dict | None) -> str:
-    """담당자 인계용 진단 요약 본문(HTML) — 진단서 dialog의 화면 표시와 HTML 저장이 같은 것을 쓴다."""
-    rules = {r["rule_name"]: r for r in snap.reference["triage_rules"]}
-    rows = rule_evidence_rows(rec, rules) if rec else []
-    handover = handover_status(payload["industry"], payload["quarter"], rec, payload)
-    return "".join(handover_sections(payload, rec, rows, handover))
+    # 모달 전용 wrapper(reportdlg) — 발급 설정(한 줄) + 미리보기(이 칸만 스크롤). 스타일은 이 wrapper에만 적용된다
+    with st.container(key="reportdlg"):
+        with st.container(key="reporthead", horizontal=True, vertical_alignment="center", gap="small"):
+            kind = st.radio("발급 유형", REPORT_TYPES, index=0, horizontal=True, key="report_type", width="stretch")
+            detailed = kind == REPORT_TYPES[1]
+            body = ui.render_report_html(report_view_model(payload, rec), detailed=detailed)
+            suffix = "detail" if detailed else "summary"
+            st.download_button("HTML 저장 (인쇄용)", ui.document_html(f"{ind} {quarter_label(q)} 진단 요약", body, ui.REPORT_CSS),
+                               file_name=f"diagnosis_{ind}_{q}_{suffix}.html", mime="text/html", type="primary",
+                               help="브라우저에서 열어 인쇄(PDF로 저장 가능)할 수 있습니다. 요약본은 A4 1페이지, "
+                                    "상세본 부록은 새 페이지에서 시작합니다.")
+            st.download_button("JSON 원본", report_download(payload),
+                               file_name=f"diagnosis_{ind}_{q}.json", mime="application/json")
+        with st.container(key="reportpreview"):
+            st.html(f"<style>{ui.REPORT_CSS}</style>{body}")
 
 
 def report_card(payload: dict, rec: dict):
@@ -897,9 +910,6 @@ def left_panel(industries: list[str], quarters: list[str], latest_quarter: str,
             [("기준 분기", quarter_label(q)), ("분석본", nature_display(q)), ("다음 검토", quarter_label(t["next_review_quarter"]))],
             badge_html=ui.stage_badge_html(t["stage"], stage_display(t["stage"]))))
 
-    with st.container(key="noticecard"):
-        st.caption("본 시스템은 원인을 자동 단정하거나 지원사업을 자동 선정하지 않으며, "
-                   "담당자의 확인·판단을 지원합니다.")
     if rec is not None and report_payload is not None:
         report_card(report_payload, rec)  # 이 아래는 비워 둔다(column 배경만 이어짐)
 
@@ -934,7 +944,6 @@ def aux_evidence_view(rec: dict, q: str):
             for k in ("확인신호프로필", "교차확인", "고용flow", "수출", "경기심리", "전력", "자료품질"):
                 if card.get(k):
                     st.markdown(f"- **{k}** · {card[k]}")
-        st.json(ev["summary"], expanded=False)
 
     dq = rec["data_quality"]
     items = []
@@ -999,11 +1008,10 @@ def aux_evidence_view(rec: dict, q: str):
 def recruitment_signal_view(jobs: dict, keywords: list[dict], q: str, latest_quarter: str,
                             keyword_posting_count):
     """채용시장 보조 신호 — 요약(항상 렌더) + 대표 공고 + 전체 상세(lazy)."""
-    section("채용시장 보조 신호", helper="현재 채용정보이며 선택 분기의 진단 판정에는 사용하지 않습니다.",
-           badge="현재 채용시장 보조근거")
+    section("채용시장 보조 신호", badge="현재 채용시장 보조근거")
     kw = keywords[:8] if jobs.get("status") == "FOUND" else []
-    observations = recruitment_observations(jobs, kw)
-    st.html(ui.recruitment_summary_html(jobs, kw, q == latest_quarter, q, observations, WORK24_BASIS,
+    # 관찰된 표현·한계 문구는 본문에 두지 않는다(데이터 기준·한계는 방법론·데이터 기준 화면)
+    st.html(ui.recruitment_summary_html(jobs, kw, q == latest_quarter, q, [], WORK24_BASIS,
                                         keyword_posting_count))
     if jobs.get("status") != "FOUND":
         return
@@ -1019,11 +1027,6 @@ def recruitment_signal_view(jobs: dict, keywords: list[dict], q: str, latest_qua
         with box:
             if box.open:
                 st.html(ui.recruitment_detail_html(jobs))
-                distribution = jobs.get("job_relevance_distribution") or {}
-                if distribution:
-                    st.caption("직무 관련성 분류(상세 검증 공고만): " + " · ".join(
-                        f"{RELEVANCE_LABELS.get(key, key)} {value}건" for key, value in distribution.items())
-                        + " · GENERAL_NONCORE는 산업기술·훈련 미스매치의 핵심 지표에서 제외합니다.")
 
     st.button("데이터 기준·한계 보기 →", key="dx_to_method_jobs", type="tertiary", on_click=go,
              args=("방법론·데이터 기준",))
@@ -1039,19 +1042,18 @@ def to_inspection_candidate(ind: str, q: str):
 def field_summary_view(ind: str, q: str, questions: list[dict]):
     """현장에서 우선 확인할 사항(요약, 읽기 전용) — 체크·입력은 점검 관리로 이동."""
     section("현장에서 우선 확인할 사항", helper="진단 결과를 바탕으로 담당자가 현장에서 추가로 확인할 항목입니다.")
-    items = [(item["question"], SOURCE_LABEL.get(item.get("source"), item.get("source") or "출처 미확인"))
+    items = [(checklist_text(item["question"]), SOURCE_LABEL.get(item.get("source"), item.get("source") or "출처 미확인"))
              for item in top_questions(questions, 3)]
     if items:
         st.html(ui.question_list_html(None, items))
     else:
         st.html(ui.note_html("등록된 확인질문이 없습니다."))
-    st.html(ui.note_html("질문은 원인 판정이 아니라 현장에서 확인할 가설입니다."))
     if len(questions) > 3:
         box = lazy_expander(f"추가 확인사항 보기 · {len(questions) - 3}건", "exp_field_more")
         with box:
             if box.open:
-                for i, item in enumerate(questions[3:], 4):
-                    st.markdown(f"{i}. {item['question']}")
+                st.html(ui.question_list_html(None, [(checklist_text(item["question"]), "") for item in questions[3:]],
+                                              start=4))
     st.button("점검 관리에서 체크·기록하기 →", key="dx_to_inspection", type="tertiary",
               on_click=to_inspection_candidate, args=(ind, q))
 
@@ -1103,7 +1105,7 @@ def queue_view(q: str, ind: str, rows: list[dict]):
                               on_click=set_industry, args=(r["industry"],), disabled=picked,
                               type="secondary" if picked else "primary")
                     if r["case_id"]:
-                        st.button(f"점검 건 #{r['case_id']} 열기 →", key=f"qc-{r['industry']}", type="tertiary",
+                        st.button("점검 건 열기 →", key=f"qc-{r['industry']}", type="tertiary",
                                   on_click=go, args=("점검 관리", None, None, r["case_id"]))
                     else:
                         st.button("점검 관리로 →", key=f"qc-{r['industry']}", type="tertiary",
@@ -1122,7 +1124,7 @@ def queue_view(q: str, ind: str, rows: list[dict]):
 def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, field_questions_all: list[dict],
                 report_payload: dict):
     """업종 진단 중앙 — 1 점검 대기열 → 2 5초 요약 → 3 판정 근거 → 4 최근 판정 추이 → 5 현장 확인 → 6 지원체계 검토 경로
-    → 7 채용시장 보조 신호 → 8 데이터 기준·해석 주의. 값은 모두 등록 분석본 그대로(재계산 없음)."""
+    → 7 채용시장 보조 신호(보조 산업지표는 판정 근거 아래 접힌 칸). 값은 모두 등록 분석본 그대로(재계산 없음)."""
     t, q1, q2, q3 = rec["triage"], rec["q1"], rec["q2"], rec["q3"]
     cutoff = snap.provenance(q)["data_cutoff"]
     rules = {r["rule_name"]: r for r in snap.reference["triage_rules"]}
@@ -1154,19 +1156,23 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         repeated = ("반복신호 미확인" if q3["repeated_signal"] is None
                     else ("반복신호 있음" if q3["repeated_signal"] else "반복신호 없음"))
         kpi_cards = [
-            {"label": "Q1 산업·고용 상태", "value": q1_plain(q1["state"]), "sub": f"{q1['state'] or '—'} · {production}"},
+            # 문장형 값이라 숫자 KPI보다 작은 글씨(text)로 — 네 칸의 시각적 크기를 맞춘다
+            {"label": "Q1 산업·고용 상태", "value": q1_plain(q1["state"]), "text": True,
+             "sub": f"{q1['state'] or '—'} · {production}"},
             {"label": "Q2 고용 영향 규모", "value": fmt(q2["emp_delta"], suffix="명"),
              "tone": "rose" if (q2["emp_delta"] or 0) < 0 else "emerald",
              "sub": f"고용 YoY {fmt(q2['employment_yoy'], 2, '%')}"},
             {"label": "Q2 산단 고용 비중", "value": fmt(q2["employment_share_pct"], 2, "%"),
              "sub": f"고용 {fmt(q2['employment'], suffix='명')}"},
             # KPI 한 줄 유지: 'S4→S4 · 반복신호 없음'
-            {"label": "Q3 지속·전환", "value": run_text(q3),
+            {"label": "Q3 지속·전환", "value": run_text(q3), "text": True,
              "sub": f"{(q3.get('transition') or '전환 자료 없음').replace(' → ', '→')} · {repeated}"},
         ]
         st.html(ui.kpi_cards_html(kpi_cards))
-        first_check = field_questions_all[0]["question"] if field_questions_all else "등록된 확인질문 없음"
-        st.html(ui.snapshot_brief_html([("판정 이유", reason_sentence(rec, rows)), ("우선 확인", first_check)]))
+        first_check = (checklist_text(rec["questions"].get("check_question"))
+                       or f"우선 확인사항 미지정 · 확인문항 {len(field_questions_all)}건")
+        # 판정 이유는 짧은 문장(수치는 바로 위 KPI·아래 판정 근거 카드에 있음)
+        st.html(ui.snapshot_brief_html([("판정 이유", reason_summary(rec, rows)), ("우선 확인", first_check)]))
         case_status_bar(ind, q, t, cand, case)
 
     with st.container(key="dxsec-reason"):
@@ -1203,6 +1209,14 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
                     "상태 지속(분기)": fmt(h["q3"]["state_run_length"]),
                 } for h in snap.history(ind, q)]), hide_index=True, width="stretch")
 
+        # 보조 산업지표 — 판정 입력이 아닌 참고 지표라 세부 판정규칙 아래 접힌 칸에 둔다
+        with st.expander("보조 산업지표 · 가동률 · 입주/가동 기업 · 순감소 기여율"):
+            st.html(ui.bullet_list_html(supporting_fact_items(rec)))
+            flags = data_quality_flags(rec)[:2]  # 이 업종·분기에만 해당하는 자료 품질 표시(일반 한계는 방법론 화면)
+            st.html(ui.note_html(f"자료 기준 {cutoff}" + ("" if not flags else " · 자료 품질 · " + " · ".join(flags))))
+            st.button("데이터 기준·해석 주의 보기 →", key="dx_to_method_caveat", type="tertiary", on_click=go,
+                      args=("방법론·데이터 기준",))
+
     with st.container(key="dxsec-timeline"):
         section(f"최근 판정 추이 · {ind}",
                 helper="최근 4개 분기의 판정·Q1 상태를 먼저 보여줍니다. 아래 분기 칸(전체 분기)을 선택하면 그 시점의 진단을 확인할 수 있습니다.")
@@ -1223,7 +1237,8 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         st.html(ui.support_summary_html(
             t.get("first_owner"), report_payload.get("support_functions") or [],
             report_payload.get("requirement_cards") or [], title=None, label_of=fn_name,
-            status_of=lambda tag: institution_status_text(svc.institution_candidates(snap, tag))))
+            status_of=lambda tag: institution_status_text(svc.institution_candidates(snap, tag)),
+            show_owner=False))  # 1차 검토 기능 문구는 업종 진단에서 빼고 진단서·정책 화면 검토 경로에만 둔다
         st.button("관련 지원제도 자세히 보기 →", key="dx_to_policy", type="tertiary", on_click=go,
                  args=("정책·지원 연계", ind, q))
 
@@ -1231,16 +1246,6 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         recruitment_signal_view(jobs, report_payload["recruitment_keywords"]["keywords"], q, latest_quarter,
                                 report_payload["recruitment_keywords"]["posting_count"])
 
-    with st.container(key="dxsec-facts"):
-        section("데이터 기준·해석 주의", helper=f"자료 기준 {cutoff} · {YOY_NOTE}")
-        st.html(ui.fact_caveat_html(supporting_fact_items(rec), [
-            "이 진단은 산업·고용 변화의 점검 신호입니다.",
-            "감소 원인이나 기업별 지원 필요성을 자동으로 확정하지 않습니다.",
-            NOMINAL_NOTE,
-            *data_quality_flags(rec)[:2],
-        ]))
-        st.button("자세한 방법론·데이터 기준 →", key="dx_to_method_caveat", type="tertiary", on_click=go,
-                 args=("방법론·데이터 기준",))
     # 판정 경로·규모 gate·선택적 재검토·외부자료·자료 품질(분석 담당자용)은 설정·정보 → 방법론·데이터 기준에서만 본다
 
 
@@ -1352,69 +1357,74 @@ def scope_title(sc: dict) -> str:
 
 
 def referral_view(r: dict, closed: bool, scope_label: str):
+    """인계 기록 한 건 — 현재 상태와 다음에 기록할 수 있는 행동을 먼저, 처리 이력은 아래 접힌 칸에."""
+    nxt = M.REFERRAL_TRANSITIONS[r["status"]]
+    events = svc.referral_events(r["id"])
     with st.container(border=True):
         st.badge(r["status"], color=REFERRAL_COLOR.get(r["status"], "gray"))
-        st.markdown(f"**#{r['id']} {fn_name(r['function_tag'])} → {r['institution']}** · {scope_label}에서 작성")
-        for e in svc.referral_events(r["id"]):
-            label = ACTION_LABEL.get(e["action"], e["action"])
-            when = ""
-            if e["has_occurred_time"]:
-                when = (" · 실제 발생 일시 미입력" if e["occurred_unknown"] or not e["occurred_at"]
-                        else f" · 실제 {ts(e['occurred_at'])} KST")
-            contact = ""
-            if e["contact"]:
-                m, route, ref = e["contact"]
-                contact = f" · 담당자가 사용한 방식 {m} · 경로 {route}" + (f" · 외부 참조 {ref}" if ref else "")
-            st.markdown(f"- {label}{when} · 기록 {ts(e['recorded_at'])} KST ({e['actor']}){contact}"
-                        + (f" — {e['text']}" if e["text"] else ""))
-        nxt = M.REFERRAL_TRANSITIONS[r["status"]]
-        if closed or not nxt:
-            return
-        with st.form(f"ref_{r['id']}", clear_on_submit=True):
-            text = st.text_input("메모 · 회신 내용 · 사유",
-                                 help=" / ".join(f"{s}: {REFERRAL_INPUT_LABEL[REFERRAL_ACTIONS[s][1]]}"
-                                                 + (" (필수)" if REFERRAL_ACTIONS[s][2] else "") for s in nxt))
-            contact = (None, None, None)
-            if "발송 기록" in nxt:
-                st.caption("발송 기록 = 담당자가 기관에 실제로 연락·접수한 사실을 기록합니다. 이 시스템은 기관에 아무것도 보내지 않습니다.")
-                a, b, c = st.columns(3)
-                contact = (a.selectbox("실제 연락·접수 방식", M.CONTACT_METHODS, index=None, key=f"cm_{r['id']}"),
-                           b.text_input("실제 사용한 접수·연락 경로", key=f"cr_{r['id']}"),
-                           c.text_input("외부 참조번호·비고 (선택)", key=f"ce_{r['id']}"))
-            occ = (None, None, None)
-            if any(s in REFERRAL_OCCURRED for s in nxt):
-                occ = occurred_input(f"ref{r['id']}", "실제 발생 일시 (발송·접수·회신에 필요)")
-                st.caption("실제 발생 일시는 기관과 실제로 주고받은 때입니다. 기록 시각은 시스템이 따로 남깁니다.")
-            cols = st.columns(len(nxt))
-            for col, to in zip(cols, nxt):
-                if col.form_submit_button(f"{to}", disabled=not actor):
-                    def act(to=to):
-                        at, unknown = resolve_occurred(*occ) if to in REFERRAL_OCCURRED else (None, False)
-                        cm, cr, ce = contact if to == "발송 기록" else (None, None, None)
-                        return svc.advance_referral(actor, r["id"], to, text, at, unknown, cm, cr, ce)
-                    if run(act, f"인계 기록 #{r['id']}: '{to}' 기록 완료 (현재 상태 {to})") is not None:
-                        st.rerun()
+        st.markdown(f"**{r['id']}번 {fn_name(r['function_tag'])} → {r['institution']}** · {scope_label}에서 작성")
+        if not closed and nxt:
+            st.caption("다음에 기록할 수 있는 상태: " + " · ".join(nxt))
+            with st.form(f"ref_{r['id']}", clear_on_submit=True):
+                text = st.text_input("메모 · 회신 내용 · 사유",
+                                     help=" / ".join(f"{s}: {REFERRAL_INPUT_LABEL[REFERRAL_ACTIONS[s][1]]}"
+                                                     + (" (필수)" if REFERRAL_ACTIONS[s][2] else "") for s in nxt))
+                contact = (None, None, None)
+                if "발송 기록" in nxt:
+                    st.caption("발송 기록 = 담당자가 기관에 실제로 연락·접수한 사실을 기록합니다. 이 시스템은 기관에 아무것도 보내지 않습니다.")
+                    a, b, c = st.columns(3)
+                    contact = (a.selectbox("실제 연락·접수 방식", M.CONTACT_METHODS, index=None, key=f"cm_{r['id']}"),
+                               b.text_input("실제 사용한 접수·연락 경로", key=f"cr_{r['id']}"),
+                               c.text_input("외부 참조번호·비고 (선택)", key=f"ce_{r['id']}"))
+                occ = (None, None, None)
+                if any(s in REFERRAL_OCCURRED for s in nxt):
+                    occ = occurred_input(f"ref{r['id']}", "실제 발생 일시 (발송·접수·회신에 필요)")
+                    st.caption("실제 발생 일시는 기관과 실제로 주고받은 때입니다. 기록 시각은 시스템이 따로 남깁니다.")
+                cols = st.columns(len(nxt))
+                for col, to in zip(cols, nxt):
+                    if col.form_submit_button(f"{to}", disabled=not actor):
+                        def act(to=to):
+                            at, unknown = resolve_occurred(*occ) if to in REFERRAL_OCCURRED else (None, False)
+                            cm, cr, ce = contact if to == "발송 기록" else (None, None, None)
+                            return svc.advance_referral(actor, r["id"], to, text, at, unknown, cm, cr, ce)
+                        if run(act, f"인계 기록 {r['id']}번: '{to}' 기록 완료 (현재 상태 {to})") is not None:
+                            st.rerun()
+        with st.expander(f"처리 이력 · {len(events)}건"):
+            for e in events:
+                label = ACTION_LABEL.get(e["action"], e["action"])
+                when = ""
+                if e["has_occurred_time"]:
+                    when = (" · 실제 발생 일시 미입력" if e["occurred_unknown"] or not e["occurred_at"]
+                            else f" · 실제 {ts(e['occurred_at'])} KST")
+                contact_line = ""
+                if e["contact"]:
+                    m, route, ref = e["contact"]
+                    contact_line = f" · 담당자가 사용한 방식 {m} · 경로 {route}" + (f" · 외부 참조 {ref}" if ref else "")
+                st.markdown(f"- {label}{when} · 기록 {ts(e['recorded_at'])} KST ({e['actor']}){contact_line}"
+                            + (f" — {e['text']}" if e["text"] else ""))
 
 
-def case_table(cases):
-    return pd.DataFrame([{
-        "번호": c["id"], "업종": c["industry"], "개설 분기": quarter_label(c["quarter"]), "개설 경로": c["origin"],
-        "담당자": c["assignee"], "상태": c["status"], "현재 결정": c["decision"] or "—",
-        "다음 검토": quarter_label(c["next_review_quarter"]),
-        "개설 분석본": f"{quarter_label(c['snapshot_quarter'])} {c['snapshot_version']} ({NATURE_LABEL[c['snapshot_nature']]})",
-        "시연": "시연" if c["is_example"] else "",
-    } for c in cases])
+EXT_GROUP = {"VALIDATION": "교차확인 자료 — 진단과 변화 방향만 비교", "CONTEXT": "참고 맥락 자료 — 배경 확인용"}
 
 
 def ext_compact(rec: dict) -> list[str]:
-    sources = rec.get("external_sources")
-    if sources is None:
+    """외부자료 목록(판정 입력 아님) — 역할별로 묶고 '이 분기 자료 있음/없음'만 쉬운 말로 적는다(markdown 목록)."""
+    sources = [s for s in rec.get("external_sources") or [] if not s.get("quality_only")]
+    if rec.get("external_sources") is None:
         return ["이 분석본에는 분기별 외부자료가 없습니다."]
-    return [f"{s['label']} · {quarter_text(s['source_period'] if s['available'] else s['unavailable_label'])}"
-            + (f" ({s['role']})" if s["available"] else "") for s in sources if not s.get("quality_only")]
+    lines = []
+    for role, title in EXT_GROUP.items():
+        group = [s for s in sources if s["role"] == role]
+        if not group:
+            continue
+        lines += ["", f"**{title}**", ""]  # 빈 줄로 목록과 제목을 분리(목록에 붙지 않게)
+        lines += [f"- {s['label']}: " + (quarter_text(s["source_period"]).replace(" (분기)", "") if s["available"]
+                                          else "이 분기 자료 없음") for s in group]
+    return lines
 
 
-def point_view(title: str, rec: dict, snap_label: str):
+def point_view(title: str, rec: dict, snap_label: str, with_ext: bool = True):
+    """한 시점의 분석값(읽기 전용). with_ext=False: 접힌 칸 안에서 부를 때(Streamlit은 expander 중첩 불가)."""
     t, q1, q2, q3 = rec["triage"], rec["q1"], rec["q2"], rec["q3"]
     st.markdown(f"**{title}**")
     stage_badge(t["stage"], stage_display(t["stage"]))
@@ -1423,9 +1433,10 @@ def point_view(title: str, rec: dict, snap_label: str):
                 f"- Q2 규모: 고용 {fmt(q2['employment'], suffix='명')} · 증감 {fmt(q2['emp_delta'], suffix='명')} · "
                 f"비중 {fmt(q2['employment_share_pct'], 2, '%')} · 순감소 기여율 {fmt(q2['contribution_pct'], 2, '%')}\n"
                 f"- Q3 시간: 상태 {fmt(q3['state_run_length'])}분기 지속 · 반복 고용진입신호 {fmt(q3['repeated_signal'])}")
-    with st.expander(f"외부자료 ({quarter_label(rec['quarter'])} 기준)"):
-        for line in ext_compact(rec):
-            st.caption(f"- {line}")
+    if with_ext:
+        with st.expander(f"외부 참고자료 ({quarter_label(rec['quarter'])} 기준)"):
+            st.caption("판정 입력이 아니며 판정을 바꾸지 않습니다.")
+            st.markdown("\n".join(ext_compact(rec)))
 
 
 def change_table(prev: dict, cur: dict) -> pd.DataFrame:
@@ -1494,7 +1505,7 @@ def result_line(item: dict) -> str:
         return f"{item['position'] + 1}. {quarter_label(q)} → 미실시"
     performed = f"실제 확인 {ts(r['performed_at'])} KST" if r["performed_at"] else "실제 확인 일시 미입력"
     more = f" · 이전 기록 {len(item['history']) - 1}건" if len(item["history"]) > 1 else ""
-    return (f"{item['position'] + 1}. {quarter_label(q)} → **{r['result_code']}** ({r['method']}) · {performed} · "
+    return (f"{item['position'] + 1}. {quarter_label(q)} → **{check_result_label(r['result_code'])}** ({r['method']}) · {performed} · "
             f"기록 {ts(r['recorded_at'])} KST ({r['recorded_by']}){more}" + (f" — {r['note']}" if r["note"] else ""))
 
 
@@ -1511,9 +1522,10 @@ def scope_header(sc: dict, case: dict):
 
 
 def scope_record_view(sc: dict, case: dict):
-    """한 점검 시점의 기록(읽기 전용). 이전 시점의 기록은 수정할 수 없다."""
+    """한 점검 시점의 기록(읽기 전용). 이전 시점의 기록은 수정할 수 없다. 접힌 칸 안에서도 쓸 수 있게 expander를 만들지 않는다."""
     rec = snapshot(sc["snapshot_quarter"], sc["snapshot_version"]).get(case["industry"], sc["quarter"])
-    point_view(f"이 시점 분석값 · {quarter_label(sc['quarter'])}", rec, f"{quarter_label(sc['snapshot_quarter'])} {sc['snapshot_version']}")
+    point_view(f"이 시점 분석값 · {quarter_label(sc['quarter'])}", rec,
+               f"{quarter_label(sc['snapshot_quarter'])} {sc['snapshot_version']}", with_ext=False)
     done = [i for i in sc["checks"] if i["latest"]]
     st.markdown(f"**현장확인 결과** {len(done)}/{len(sc['checks'])}건")
     for item in done:
@@ -1531,146 +1543,382 @@ def scope_record_view(sc: dict, case: dict):
         st.caption(f"- {d['decision']} · {d['rationale']} · 다음 검토 {quarter_label(d['next_review_quarter'] or '—')} "
                    f"({d['decided_by']}, {ts(d['decided_at'])} KST)")
     st.markdown("**이 시점에서 작성한 인계** " + (", ".join(
-        f"#{r['id']} {fn_name(r['function_tag'])} → {r['institution']} ({r['status']})" for r in sc["referrals"]) or "—"))
+        f"{r['id']}번 {fn_name(r['function_tag'])} → {r['institution']} ({r['status']})" for r in sc["referrals"]) or "—"))
 
 
-def current_scope_inputs(case: dict, sc: dict, fixed):
-    cid = case["id"]
-    # ② 현장확인
-    done = [i for i in sc["checks"] if i["latest"]]
-    st.markdown("##### ② 무엇을 현장에서 확인했는가")
-    st.caption(f"이번 시점 현장확인 결과 {len(done)}/{len(sc['checks'])}건 · 문항은 이 시점 분석본에 등록된 확인질문입니다. "
-               "결과를 다시 기록하면 이전 기록은 남고 새 기록이 추가됩니다.")
+# ------------------------------------------------------------------ 진행 중 점검 상세 — 진행 요약 + 하위 화면 4개
+def _case_actor():
+    """콜백 안에서 쓰는 담당자 신원(설정·정보의 담당자 이름). 없으면 None → 입력 버튼은 비활성."""
+    return local_actor(st.session_state.get("actor", ""))
+
+
+def _set_case_subview(view: str):
+    st.session_state.case_subview = view
+
+
+def _open_close_decision(case: dict):
+    """결정 화면으로 이동하고 결정 종류를 '종결'로 미리 골라 둔다(기록은 담당자가 사유·확인 후 '결정 기록'으로)."""
+    st.session_state.case_subview = "지원 검토·결정"
+    st.session_state[f"dec{case['current_scope']['id']}_choice"] = "종결"
+
+
+def _set_actor(name: str):
+    """기록자 이름(설정·정보의 '담당자 이름'과 같은 값) — 콜백이라 설정 위젯이 그려지기 전에 안전하게 바꾼다."""
+    st.session_state.actor = (name or "").strip()
+
+
+def _set_actor_from_inline():
+    _set_actor(st.session_state.get("inline_actor", ""))
+
+
+def case_progress_summary(case: dict, progress: dict):
+    """점검 진행 요약 — 현재 상태와 '다음 할 일' 한 줄 + 해당 하위 화면으로 이동하는 버튼(저장·상태변경 없음)."""
+    rows = [("상태", case["status"]), ("담당자", case["assignee"] or "미배정"),
+            ("현장확인", f"{progress['done']}/{progress['total']}건"), ("지원 필요 기능", progress["support"]),
+            ("결정", progress["decision"]), ("인계", progress["referral_text"]), ("다음 검토", progress["next_review"])]
+    title = f"점검 건 {case_no(case['id'])}번 · {case['industry']} · {quarter_label(case['quarter'])}"
+    text, target, button = progress["next"]
+    with st.container(key="caseprog"):
+        st.html(ui.case_progress_html(title, case["status"] + (" · 시연 기록" if case["is_example"] else ""), rows, text))
+        if not progress["closed"]:
+            with st.container(horizontal=True, gap="small"):
+                if st.session_state.get("case_subview") != target:
+                    st.button(f"{button} →", key="case_next_action", type="primary", on_click=_set_case_subview,
+                              args=(target,))
+                st.button("종결 기록 →", key="case_close_shortcut", on_click=_open_close_decision, args=(case,),
+                          help="현장확인을 모두 마치지 않아도 결정 화면에서 종결 사유를 적고 종결할 수 있습니다.")
+        if not actor and not progress["closed"]:
+            # 기록에는 기록자 이름이 필요하다(로컬 프로토타입 신원) — 설정·정보까지 가지 않고 여기서 바로 입력
+            st.warning("기록자(담당자) 이름이 입력되지 않아 결과 기록·메모·결정 버튼이 비활성입니다.")
+            # 저장된 담당자 이름으로 대신 기록하는 바로가기는 두지 않는다 — 사용하는 사람이 자기 이름을 입력한다
+            st.text_input("기록자 이름", key="inline_actor", placeholder="본인 이름 입력 후 Enter",
+                          on_change=_set_actor_from_inline)
+
+
+def opening_reason_text(case: dict, rec: dict, opened_stage: str) -> str:
+    """개설 사유 표시 — 시스템이 미리 채운 문장(등록 판정 + 판정 규칙 원문)이면 짧게, 담당자가 쓴 문장은 그대로.
+
+    저장된 원문은 바꾸지 않으며 '점검 기본정보'에서 그대로 볼 수 있다.
+    """
+    reason = (case.get("opening_reason") or "").strip()
+    if not reason:
+        return "—"
+    if reason.startswith("등록 판정 ") and rec["triage"].get("stage_reason") and rec["triage"]["stage_reason"] in reason:
+        return f"등록 판정 '{opened_stage}'에 따라 점검 개설 (판정 이유는 위 핵심 근거)"
+    return reason
+
+
+def case_summary_view(case: dict, fixed, rec: dict, cur: dict | None):
+    """① 점검 요약(읽기 전용) — 개설 근거 · 핵심 분석값 · 이전 점검 이력. 입력폼 없음."""
+    closed = case["status"] == "종결"
+    rules = {r["rule_name"]: r for r in fixed.reference["triage_rules"]}
+    opened_stage = stage_display(case.get("triage_stage_at_open") or rec["triage"]["stage"])
+    st.html(ui.snapshot_brief_html([
+        ("개설 시 판정", opened_stage),
+        ("핵심 근거", reason_summary(rec, rule_evidence_rows(rec, rules))),
+        ("개설 사유", opening_reason_text(case, rec, opened_stage)),
+    ]))
+    if closed:
+        st.info(f"종결: {case['closed_by']} {ts(case['closed_at'])} KST — 종결 사유: {case['closing_note']}")
+    elif case["status"] == "모니터링":
+        st.info(f"모니터링 중 — 적극 점검은 멈췄고 다음 검토 분기 {quarter_label(case['next_review_quarter'])} 재점검 계획이 남아 있습니다.")
+
+    now = cur or case["scopes"][-1]
+    now_rec = snapshot(now["snapshot_quarter"], now["snapshot_version"]).get(case["industry"], now["quarter"])
+    q1, q2, q3 = now_rec["q1"], now_rec["q2"], now_rec["q3"]
+    section(f"핵심 분석값 · {quarter_label(now['quarter'])}")
+    st.html(ui.kpi_cards_html([
+        {"label": "산업·고용 상태", "value": q1_plain(q1["state"]), "text": True, "sub": q1["state"] or "—"},
+        {"label": "고용 영향", "value": fmt(q2["emp_delta"], suffix="명"),
+         "tone": "rose" if (q2["emp_delta"] or 0) < 0 else "emerald", "sub": f"고용 YoY {fmt(q2['employment_yoy'], 2, '%')}"},
+        {"label": "산단 고용 비중", "value": fmt(q2["employment_share_pct"], 2, "%"),
+         "sub": f"고용 {fmt(q2['employment'], suffix='명')}"},
+        {"label": "지속·전환", "value": run_text(q3), "text": True, "sub": q3.get("transition") or "전환 자료 없음"},
+    ]))
+    if now["review_kind"] == "재점검":
+        prev = snapshot(now["previous_snapshot_quarter"], now["previous_snapshot_version"]).get(
+            case["industry"], now["previous_quarter"])
+        st.markdown(f"**직전 점검({quarter_label(now['previous_quarter'])}) 대비 변화** · 값의 차이만 표시")
+        st.dataframe(change_table(prev, now_rec), hide_index=True, width="stretch")
+    with st.expander("외부 참고자료"):
+        st.caption("생산자물가·고용보험·수출·전력·경기실사·노동이동·채용공고 자료입니다. 판정 입력이 아니며 판정을 바꾸지 않습니다.")
+        st.markdown("\n".join(ext_compact(now_rec)))
+    with st.expander("점검 기본정보"):
+        lines = [f"- 개설: {case['opened_by']} · {ts(case['opened_at'])} KST · '{case['origin']}'에서 개설",
+                 f"- 분석 자료: {quarter_label(case['snapshot_quarter'])} 분석본({case['snapshot_version']}) · "
+                 f"{nature_display(case['quarter'])} · 개설 시점 값으로 고정"]
+        if case["is_example"]:
+            lines.append("- 시연 기록(운영지표 제외)")
+        st.markdown("\n".join(lines))
+        newer = [m for m in metas if m["quarter"] == case["snapshot_quarter"]][-1]
+        if newer["snapshot_version"] != case["snapshot_version"]:
+            st.markdown(f"**분석본 보정 비교** — 개설 시 사용 {case['snapshot_version']} ↔ 최신 {newer['snapshot_version']}")
+            version_compare_view(fixed, snapshot(newer["quarter"], newer["snapshot_version"]),
+                                 (case["industry"], case["quarter"]))
+
+    # 이전 점검 이력 — 현재 진행 중인 시점은 포함하지 않는다(종결 건은 모든 시점이 이력)
+    past = case["scopes"] if closed else case["scopes"][:-1]
+    if not past:
+        st.caption("이전 점검 이력 없음")
+    else:
+        section(f"{'점검 이력' if closed else '이전 점검 이력'} · {len(past)}개",
+                helper="각 시점의 현장확인·메모·지원 필요 기능·결정·인계는 그 시점에 묶여 보존되며 수정할 수 없습니다.")
+        for sc in past:
+            with st.expander(f"{scope_title(sc)} · {sc['review_status']}"):
+                scope_header(sc, case)
+                scope_record_view(sc, case)
+
+
+def _save_check(cid: int, sc: dict, item: dict):
+    """현장확인 결과 기록(콜백) — 기존 record_check_result 그대로. 성공 후에만 입력을 비우고 다음 미기록 문항을 고른다."""
+    k = f"chk{item['id']}"
+    ss = st.session_state
+    try:
+        at, unknown = resolve_occurred(ss.get(f"occ_{k}"), ss.get(f"occ_d_{k}"), ss.get(f"occ_t_{k}"))
+        svc.record_check_result(_case_actor(), cid, item["id"], ss.get(f"cm_{k}"), ss.get(f"cr_{k}"),
+                                ss.get(f"cn_{k}") or "", at, unknown)
+    except WorkflowError as e:
+        ss._case_error = str(e)
+        return
+    ss._flash = f"{scope_title(sc)} 현장확인 {item['position'] + 1}번 결과를 기록했습니다."
+    for prefix in ("cm_", "cr_", "cn_", "occ_", "occ_d_", "occ_t_"):
+        ss.pop(f"{prefix}{k}", None)
+    remaining = [i for i in sc["checks"] if not i["latest"] and i["id"] != item["id"]]
+    if remaining:
+        ss[f"chk_pick_{sc['id']}"] = remaining[0]["position"]
+
+
+def _clear_check_inputs(item: dict):
+    for prefix in ("cm_", "cr_", "cn_", "occ_", "occ_d_", "occ_t_"):
+        st.session_state.pop(f"{prefix}chk{item['id']}", None)
+
+
+def field_checks_view(case: dict, sc: dict, progress: dict):
+    """② 현장 확인 — 진행률 · 문항 압축 표 · 고른 문항 하나의 입력폼 · 현장 메모. 종결 건은 읽기 전용."""
+    cid, closed = case["id"], case["status"] == "종결"
+    counts = progress["counts"]
+    st.markdown(f"**현장확인 {progress['done']}/{progress['total']}건 기록**")
+    st.caption(f"미기록 {progress['unrecorded']}건 · " + " · ".join(f"{check_result_label(k)} {v}건" for k, v in counts.items())
+               + " · 다시 기록하면 이전 기록은 남고 새 기록이 추가됩니다.")
+    rows = []
     for item in sc["checks"]:
-        with st.container(border=True):
-            st.markdown(f"**{item['position'] + 1}.** {item['question_text']}")
-            if item["latest"]:
-                st.caption(result_line(item).split(" → ", 1)[1])
-            with st.form(f"chk_{item['id']}", clear_on_submit=True):
-                a, b = st.columns(2)
-                method = a.radio("확인 방법", M.CHECK_METHODS, horizontal=True, index=None)
-                result = b.radio("결과", M.CHECK_RESULTS, horizontal=True, index=None)
-                note = st.text_input("결과 메모")
-                occ = occurred_input(f"chk{item['id']}", "실제 확인 일시")
-                if st.form_submit_button("결과 기록", disabled=not actor):
-                    def act():
-                        at, unknown = resolve_occurred(*occ)
-                        return svc.record_check_result(actor, cid, item["id"], method, result, note, at, unknown)
-                    if run(act, f"{scope_title(sc)} 현장확인 {item['position'] + 1}번 결과를 기록했습니다.") is not None:
-                        st.rerun()
-    st.markdown("**현장 메모**")
-    for n in sc["notes"]:
-        st.caption(f"- {n['note']} ({n['recorded_by']}, {ts(n['recorded_at'])} KST)")
+        r = item["latest"]
+        rows.append({"no": item["position"] + 1, "text": checklist_text(item["question_text"]), "done": bool(r),
+                     "result": (f"{check_result_label(r['result_code'])} · {r['method']} · {ts(r['recorded_at'])}" if r else "—")})
+    st.html(ui.check_table_html(rows))
+    if closed or not sc["checks"]:
+        return
+
+    by_pos = {i["position"]: i for i in sc["checks"]}
+    pick_key = f"chk_pick_{sc['id']}"
+    if st.session_state.get(pick_key) not in by_pos:
+        st.session_state[pick_key] = default_check_position(sc["checks"])
+    pos = st.pills("기록할 문항 번호 (✓ 기록됨)", list(by_pos), selection_mode="single", key=pick_key,
+                   format_func=lambda p: f"{p + 1}" + (" ✓" if by_pos[p]["latest"] else ""))
+    if pos not in by_pos:  # 선택 해제 → 기본 문항
+        pos = default_check_position(sc["checks"])
+    item = by_pos[pos]
+    k = f"chk{item['id']}"
+    with st.container(key="checkpanel", border=True):
+        st.markdown(f"**{item['position'] + 1}. {item['question_text']}**")
+        if item["latest"]:
+            st.caption("최근 기록 · " + result_line(item).split(" → ", 1)[1])
+        a, b = st.columns(2)
+        a.radio("확인 방법", M.CHECK_METHODS, horizontal=True, index=None, key=f"cm_{k}")
+        b.radio("결과", M.CHECK_RESULTS, horizontal=True, index=None, key=f"cr_{k}", format_func=check_result_label,
+                help=CHECK_RESULT_HELP)
+        st.text_input("결과 메모", key=f"cn_{k}")
+        choice = st.radio("실제 확인 일시", OCCURRED_CHOICES, index=None, horizontal=True, key=f"occ_{k}")
+        if choice == OCCURRED_CHOICES[0]:  # 직접 입력일 때만 날짜·시각(나머지는 저장 시 기존 방식 그대로)
+            c, d = st.columns(2)
+            c.date_input("날짜", value=None, key=f"occ_d_{k}")
+            d.time_input("시각 KST", value=None, key=f"occ_t_{k}", step=600)
+        error = st.session_state.pop("_case_error", None)
+        if error:
+            st.error(error)
+        with st.container(horizontal=True, gap="small"):
+            st.button("결과 기록", key=f"chk_save_{item['id']}", type="primary", disabled=not actor,
+                      on_click=_save_check, args=(cid, sc, item))
+            st.button("입력 초기화", key=f"chk_reset_{item['id']}", on_click=_clear_check_inputs, args=(item,),
+                      help="아직 기록하지 않은 입력(방법·결과·메모·일시)만 비웁니다. 이미 기록된 결과는 지워지지 않습니다.")
+
+    with st.expander(f"기존 현장 메모 · {len(sc['notes'])}건"):
+        for n in sc["notes"]:
+            st.caption(f"- {n['note']} ({n['recorded_by']}, {ts(n['recorded_at'])} KST)")
+        if not sc["notes"]:
+            st.caption("기록된 메모 없음")
     with st.form("note", clear_on_submit=True):
         text = st.text_area("이번 시점 현장 메모")
         if st.form_submit_button("메모 추가", disabled=not actor):
             if run(lambda: svc.record_note(actor, cid, text), f"{scope_title(sc)} 메모를 추가했습니다.") is not None:
                 st.rerun()
 
-    # ③ 지원 필요 기능
-    st.markdown("##### ③ 어떤 지원 기능이 필요한가")
-    st.caption("담당자가 이번 시점 현장확인 결과를 보고 직접 고릅니다. 시스템은 업종 진단·외부자료로 기능을 고르거나 추천하지 않습니다.")
+
+def _function_detail(tag: str, fixed, sc: dict):
+    """선택 기능 한 개 — 기본은 한 줄(담당기관 상태 · 요건 카드 수), 기관·요건 카드 전체는 접힌 칸 안에."""
+    cards = svc.requirement_cards(tag)
+    cands = svc.institution_candidates(fixed, tag) if C.function(tag)["referable"] else []
+    status = (C.function(tag)["not_referable_label"] if not C.function(tag)["referable"]
+              else ("담당기관 확인" if cands else C.UNMAPPED_LABEL))
+    st.markdown(f"**{fn_name(tag)}** · {status} · 공식 요건 카드 {len(cards)}건")
+    with st.expander(f"{fn_name(tag)} 공식 지원정보 보기"):
+        institution_view(tag, fixed)
+        if C.function(tag)["referable"] and not cards:
+            st.caption(f"지원사업 요건: {C.NO_REQUIREMENT_CARD}")
+        for card in cards:
+            intake = card.get("current_intake_status") or "UNKNOWN"
+            badge = {"OPEN": "접수 안내", "CLOSED": "과거 회차", "UNKNOWN": "확인 요청",
+                     "NOT_APPLICABLE": "정보 제공"}.get(intake, intake)
+            st.markdown(f"**{card.get('requirement_id')} · {card.get('title') or card['program_name']}** · `{badge}`")
+            st.caption(f"기관: {card.get('institution') or '—'} · 일반 요건: {card.get('eligibility') or '확인 필요'} · "
+                       f"적용 범위: {card.get('scope_note') or '—'}")
+            st.caption(f"지원 내용: {card.get('support_content') or '—'} · 확인사항: {card.get('requirements') or '—'}")
+            st.caption(f"검증일 {card['verified_at']} · 문의 {card.get('contact') or '관할기관 확인'} · "
+                       f"주의: {card.get('caveat') or '개별 적격·승인 여부 별도 확인'}")
+            st.link_button("공식 출처", card["official_source_url"], key=f"card_src_{sc['id']}_{card['requirement_id']}")
+            if intake == "OPEN" and card.get("intake_url"):
+                st.link_button("신청 경로", card["intake_url"], key=f"card_apply_{sc['id']}_{card['requirement_id']}")
+
+
+def _referral_targets(chosen: list[str], fixed) -> list[tuple[str, str]]:
+    return [(t, c["institution"]) for t in chosen if C.function(t)["referable"]
+            for c in svc.institution_candidates(fixed, t)]
+
+
+def _save_decision(cid: int, sc: dict, fixed):
+    """결정 기록(콜백) — 기존 record_decision·검증 그대로. 화면에서 숨긴 칸의 값은 보내지 않는다."""
+    ss, k = st.session_state, f"dec{sc['id']}"
+    decision = ss.get(f"{k}_choice")
+    picks = list(ss.get(f"{k}_picks") or []) if decision == "인계" else []
+    nrq = "" if decision == "종결" else (ss.get(f"{k}_nrq") or "")
+    confirm = bool(ss.get(f"{k}_confirm")) if decision == "종결" else False
+    try:
+        svc.record_decision(_case_actor(), cid, decision, ss.get(f"{k}_why") or "", nrq, picks, fixed, confirm)
+    except WorkflowError as e:
+        ss._decision_error = str(e)
+        return
+    ss._flash = f"{scope_title(sc)} 결정 '{decision}'을(를) 기록했습니다."
+    for suffix in ("_choice", "_why", "_nrq", "_picks", "_confirm"):
+        ss.pop(f"{k}{suffix}", None)
+    if decision == "종결":
+        go("점검 관리", None, None, cid, "종결")
+    elif decision == "인계":
+        ss.case_subview = "인계·재점검"
+
+
+def support_decision_view(case: dict, sc: dict, fixed, progress: dict):
+    """③ 지원 검토·결정 — 현장확인 결과 → 지원 필요 기능 → 담당기관·공식사업 → 결정(결정 종류별 필요한 칸만)."""
+    cid, closed = case["id"], case["status"] == "종결"
     need = sc["support_needs"]
     chosen = need["function_tags"] if need else []
-    if not done:
+    st.markdown(f"**현장확인 {progress['done']}/{progress['total']}건 기록**")
+    if not progress["done"] and not closed:
         st.warning("이번 시점 현장확인 결과가 아직 없습니다. 지금 고르는 지원 필요 기능은 **현장확인 전·참고용**으로 기록되며, "
                    "인계는 현장확인 결과 기록 후에만 가능합니다.")
+
+    section("지원 필요 기능", helper="담당자가 현장확인 결과를 보고 직접 고릅니다. 시스템은 기능을 고르거나 추천하지 않습니다.")
     if need:
         st.markdown(f"**이번 시점 지원 필요 기능** · {', '.join(fn_name(t) for t in chosen) or '선택 없음'}"
                     + ("" if need["field_checked"] else " · _현장확인 전·참고용 선택_"))
         st.caption(f"선택 이유·메모: {need['note'] or '—'} ({need['recorded_by']}, {ts(need['recorded_at'])} KST)")
     else:
         st.caption("이번 시점에 선택된 지원 필요 기능 없음")
-    with st.form("support"):
-        cols = st.columns(4)
-        picked = [f["tag"] for i, f in enumerate(C.functions())
-                  if cols[i % 4].checkbox(fn_name(f["tag"]), value=f["tag"] in chosen, key=f"fn_{sc['id']}_{f['tag']}")]
-        note = st.text_area("선택 이유 또는 메모", value=need["note"] if need and need["note"] else "")
-        if st.form_submit_button("지원 필요 기능 저장", disabled=not actor):
-            if run(lambda: svc.record_support_needs(actor, cid, picked, note),
-                   f"{scope_title(sc)} 지원 필요 기능 선택을 기록했습니다.") is not None:
-                st.rerun()
-    for tag in chosen:
-        with st.container(border=True):
-            st.markdown(f"**선택 기능 · {fn_name(tag)}**")
-            institution_view(tag, fixed)
-            cards = svc.requirement_cards(tag)
-            if C.function(tag)["referable"] and not cards:
-                st.caption(f"지원사업 요건: {C.NO_REQUIREMENT_CARD}")
-            for card in cards:
-                status = card.get("current_intake_status") or "UNKNOWN"
-                badge = {"OPEN": "접수 안내", "CLOSED": "과거 회차", "UNKNOWN": "확인 요청",
-                         "NOT_APPLICABLE": "정보 제공"}.get(status, status)
-                st.markdown(f"**{card.get('requirement_id')} · {card.get('title') or card['program_name']}** · `{badge}`")
-                st.caption(f"일반 요건: {card.get('eligibility') or '확인 필요'} · 적용 범위: {card.get('scope_note') or '—'}")
-                st.caption(f"지원 내용: {card.get('support_content') or '—'} · 확인사항: {card.get('requirements') or '—'}")
-                st.caption(f"검증일 {card['verified_at']} · 문의 {card.get('contact') or '관할기관 확인'} · "
-                           f"주의: {card.get('caveat') or '개별 적격·승인 여부 별도 확인'}")
-                st.link_button("공식 출처", card["official_source_url"], key=f"card_src_{sc['id']}_{card['requirement_id']}")
-                if status == "OPEN" and card.get("intake_url"):
-                    st.link_button("신청 경로", card["intake_url"], key=f"card_apply_{sc['id']}_{card['requirement_id']}")
-    with st.expander("목록에 없는 기관 후보 제안 (검증 전에는 인계 대상 아님)"):
-        st.caption("제안은 '검토 중(proposed)'으로만 저장됩니다. 관리자 검증 기능은 로그인 도입 후 제공되며, "
-                   "검증(verified) 전에는 인계할 곳으로 나타나지 않습니다.")
-        with st.form("propose", clear_on_submit=True):
-            a, b = st.columns(2)
-            name = a.text_input("기관명")
-            unit = b.text_input("담당 단위 (선택)")
-            desc = st.text_input("기관 기능 설명")
-            url = st.text_input("공식 출처 URL")
-            tags = st.multiselect("해당 지원 기능", [f["tag"] for f in C.functions() if f["referable"]],
-                                  format_func=fn_name, placeholder="지원 기능 선택")
-            basis = st.text_input("근거 메모 (선택)")
-            if st.form_submit_button("기관 후보 제안", disabled=not actor):
-                if run(lambda: svc.propose_institution(actor, name, desc, url, tags, unit, basis),
-                       "기관 후보를 제안했습니다(검토 중 — 인계 대상 아님).") is not None:
+    if not closed:
+        with st.form("support"):
+            cols = st.columns(4)
+            picked = [f["tag"] for i, f in enumerate(C.functions())
+                      if cols[i % 4].checkbox(fn_name(f["tag"]), value=f["tag"] in chosen, key=f"fn_{sc['id']}_{f['tag']}")]
+            note = st.text_area("선택 이유 또는 메모", value=need["note"] if need and need["note"] else "")
+            if st.form_submit_button("지원 필요 기능 저장", disabled=not actor):
+                if run(lambda: svc.record_support_needs(actor, cid, picked, note),
+                       f"{scope_title(sc)} 지원 필요 기능 선택을 기록했습니다.") is not None:
                     st.rerun()
-        for r in svc.institution_registry():
-            st.caption(f"- {r['institution']} · {', '.join(fn_name(t) for t in r['function_tags'])} · 상태 "
-                       f"{ {'proposed': '검토 중(인계 불가)', 'verified': '검증됨', 'rejected': '반려'}[r['status']] } "
-                       f"({r['proposed_by']}, {ts(r['proposed_at'])} KST)")
+    for tag in chosen:
+        _function_detail(tag, fixed, sc)
 
-    # ④ 결정
-    st.markdown("##### ④ 결정 · 어디로 인계했는가")
+    section("결정", helper="결정은 담당자가 기록합니다. 결정 종류에 필요한 칸만 표시하며 검증 규칙은 그대로입니다.")
     for d in sc["decisions"]:
         st.markdown(f"- **{d['decision']}** · {d['rationale']} · 다음 검토 {quarter_label(d['next_review_quarter'] or '—')} "
                     f"({d['decided_by']}, {ts(d['decided_at'])} KST)")
     if not sc["decisions"]:
         st.caption("이번 시점에 기록된 결정 없음")
-    st.dataframe(pd.DataFrame([{"결정": k, "결정 후 점검 건 상태": v["case_status"],
-                                "다음 검토 분기": {"required": "필수", "optional": "선택", "none": "없음(종결)"}[v["next_review"]]}
-                               for k, v in M.DECISION_RULES.items()]), hide_index=True)
-    targets = [(t, c["institution"]) for t in chosen if C.function(t)["referable"]
-               for c in svc.institution_candidates(fixed, t)]
-    active = [r for r in case["referrals"] if r["status"] != "종결"]
-    rec = snapshot(sc["snapshot_quarter"], sc["snapshot_version"]).get(case["industry"], sc["quarter"])
-    with st.form("decision", clear_on_submit=True):
-        decision = st.radio("결정", M.DECISIONS, horizontal=True, index=None)
-        rationale = st.text_area("결정 근거 (필수 · 종결이면 종결 사유)")
-        prefill = (case["next_review_quarter"] if (case["next_review_quarter"] or "") > sc["quarter"]
-                   else (rec["triage"]["next_review_quarter"] or ""))
-        nrq_options = ["", *next_quarters(sc["quarter"])]
-        if prefill and prefill not in nrq_options:
-            nrq_options.append(prefill)
-        nrq = st.selectbox("다음 검토 분기 (계속 점검·추가확인·모니터링 전환은 필수)", nrq_options,
-                           index=nrq_options.index(prefill) if prefill in nrq_options else 0,
-                           format_func=lambda x: quarter_label(x) if x else "선택 안 함")
-        picks = st.multiselect("인계할 곳 (결정이 '인계'일 때만 사용)", targets,
-                               format_func=lambda x: f"{fn_name(x[0])} → {x[1]}",
-                               placeholder="지원 필요 기능 · 담당 기관 선택",
-                               help="이번 시점에 고른 지원 필요 기능 중 검증된 담당 기관이 있는 것만 표시됩니다.")
-        if not targets:
-            st.caption(f"인계 가능한 곳 없음 — 지원 필요 기능을 고르지 않았거나 모두 {C.UNMAPPED_LABEL}입니다.")
-        confirm = st.checkbox("'종결'을 고른 경우: 이 점검 건을 종결합니다(종결 후에는 수정할 수 없음)")
-        if active:
-            st.caption(f"진행 중인 인계 기록 {len(active)}건이 있어 지금은 종결할 수 없습니다.")
-        if st.form_submit_button("결정 기록", disabled=not actor):
-            if run(lambda: svc.record_decision(actor, cid, decision, rationale, nrq, picks, fixed, confirm),
-                   f"{scope_title(sc)} 결정 '{decision}'을(를) 기록했습니다.") is not None:
-                st.rerun()
-    if case["decision"] == "인계" and any(d["decision"] == "인계" for d in sc["decisions"]):
-        existing = {(r["function_tag"], r["institution"]) for r in active}
-        more = [t for t in targets if t not in existing]
+    with st.expander("결정별 처리기준 보기"):
+        st.dataframe(pd.DataFrame([{"결정": k, "결정 후 점검 건 상태": v["case_status"],
+                                    "다음 검토 분기": {"required": "필수", "optional": "선택", "none": "없음(종결)"}[v["next_review"]]}
+                                   for k, v in M.DECISION_RULES.items()]), hide_index=True)
+    if not closed:
+        k = f"dec{sc['id']}"
+        targets = _referral_targets(chosen, fixed)
+        active = [r for r in case["referrals"] if r["status"] != "종결"]
+        with st.container(key="decisionpanel", border=True):
+            decision = st.radio("결정", M.DECISIONS, horizontal=True, index=None, key=f"{k}_choice")
+            if decision:
+                st.text_area("종결 사유 (필수)" if decision == "종결" else "결정 근거 (필수)", key=f"{k}_why")
+                if decision != "종결":
+                    rec = snapshot(sc["snapshot_quarter"], sc["snapshot_version"]).get(case["industry"], sc["quarter"])
+                    prefill = (case["next_review_quarter"] if (case["next_review_quarter"] or "") > sc["quarter"]
+                               else (rec["triage"]["next_review_quarter"] or ""))
+                    options = ["", *next_quarters(sc["quarter"])]
+                    if prefill and prefill not in options:
+                        options.append(prefill)
+                    if f"{k}_nrq" not in st.session_state:
+                        st.session_state[f"{k}_nrq"] = prefill if prefill in options else ""
+                    required = M.DECISION_RULES[decision]["next_review"] == "required"
+                    st.selectbox("다음 검토 분기" + (" (필수)" if required else " (선택)"), options, key=f"{k}_nrq",
+                                 format_func=lambda x: quarter_label(x) if x else "선택 안 함")
+                if decision == "인계":
+                    if targets:
+                        st.multiselect("인계할 곳", targets, key=f"{k}_picks", format_func=lambda x: f"{fn_name(x[0])} → {x[1]}",
+                                       placeholder="지원 필요 기능 · 담당 기관 선택",
+                                       help="이번 시점에 고른 지원 필요 기능 중 검증된 담당 기관이 있는 것만 표시됩니다.")
+                    else:
+                        st.info("인계 가능한 곳이 없습니다. 먼저 지원 필요 기능과 담당기관 검증상태를 확인하세요.")
+                if decision == "종결":
+                    st.checkbox("이 점검 건을 종결합니다(종결 후에는 수정할 수 없음)", key=f"{k}_confirm")
+                    if active:
+                        st.caption(f"진행 중인 인계 기록 {len(active)}건이 있어 지금은 종결할 수 없습니다.")
+            error = st.session_state.pop("_decision_error", None)
+            if error:
+                st.error(error)
+            st.button("결정 기록", key=f"dec_save_{sc['id']}", type="primary", disabled=not actor or not decision,
+                      on_click=_save_decision, args=(cid, sc, fixed))
+
+    with st.expander("기타 관리기능 · 목록에 없는 기관 후보 제안 (검증 전에는 인계 대상 아님)"):
+        st.caption("제안은 '검토 중(proposed)'으로만 저장됩니다. 관리자 검증 기능은 로그인 도입 후 제공되며, "
+                   "검증(verified) 전에는 인계할 곳으로 나타나지 않습니다.")
+        if not closed:
+            with st.form("propose", clear_on_submit=True):
+                a, b = st.columns(2)
+                name = a.text_input("기관명")
+                unit = b.text_input("담당 단위 (선택)")
+                desc = st.text_input("기관 기능 설명")
+                url = st.text_input("공식 출처 URL")
+                tags = st.multiselect("해당 지원 기능", [f["tag"] for f in C.functions() if f["referable"]],
+                                      format_func=fn_name, placeholder="지원 기능 선택")
+                basis = st.text_input("근거 메모 (선택)")
+                if st.form_submit_button("기관 후보 제안", disabled=not actor):
+                    if run(lambda: svc.propose_institution(actor, name, desc, url, tags, unit, basis),
+                           "기관 후보를 제안했습니다(검토 중 — 인계 대상 아님).") is not None:
+                        st.rerun()
+        for r in svc.institution_registry():
+            st.caption(f"- {r['institution']} · {', '.join(fn_name(t) for t in r['function_tags'])} · 상태 "
+                       f"{ {'proposed': '검토 중(인계 불가)', 'verified': '검증됨', 'rejected': '반려'}[r['status']] } "
+                       f"({r['proposed_by']}, {ts(r['proposed_at'])} KST)")
+
+
+def referral_review_view(case: dict, sc: dict | None, fixed):
+    """④ 인계·재점검 — 인계 기록(현재 상태·다음 행동 먼저) · 인계 기록 추가 · 다음 분기 재점검 · 변경 기록."""
+    cid, closed = case["id"], case["status"] == "종결"
+    section("인계 기록 · 회신 상태", helper="외부 기관 시스템과 연동하지 않습니다. 발송·접수·회신은 담당자가 실제로 한 일을 기록합니다.")
+    if not case["referrals"]:
+        st.html(ui.note_html("인계 기록 없음 — '지원 검토·결정'에서 인계를 결정하면 이곳에서 발송·접수·회신 상태를 기록할 수 있습니다."))
+    titles = {s_["id"]: scope_title(s_) for s_ in case["scopes"]}
+    for r in case["referrals"]:
+        referral_view(r, closed, titles[r["quarterly_review_id"]])
+    if sc is not None and not closed and case["decision"] == "인계" and any(d["decision"] == "인계" for d in sc["decisions"]):
+        chosen = sc["support_needs"]["function_tags"] if sc["support_needs"] else []
+        existing = {(r["function_tag"], r["institution"]) for r in case["referrals"] if r["status"] != "종결"}
+        more = [t for t in _referral_targets(chosen, fixed) if t not in existing]
         if more:
             with st.form("add_referral"):
                 pick = st.selectbox("인계 기록 추가", more, index=None, placeholder="지원 필요 기능 · 담당 기관 선택",
@@ -1680,8 +1928,30 @@ def current_scope_inputs(case: dict, sc: dict, fixed):
                            "인계 기록을 작성했습니다.") is not None:
                         st.rerun()
 
+    if not closed:
+        section("다음 분기 재점검", helper="다음 검토 분기는 담당자가 기록한 결정값을 따릅니다. 시스템은 자동으로 종결하거나 순서를 바꾸지 않습니다.")
+        nrq = case["next_review_quarter"]
+        target = resolved(nrq) if nrq else None
+        if not nrq:
+            st.html(ui.note_html("다음 검토분기 미정 — 결정을 기록할 때 다음 검토분기를 지정할 수 있습니다."))
+        elif target is None or target.get(case["industry"], nrq) is None:
+            st.caption(f"{quarter_label(nrq)} 분석 자료가 아직 없습니다 — 자료가 등록되면 재점검 예정 목록에 나타납니다.")
+        else:
+            st.caption(f"{quarter_label(nrq)} 재점검에 쓸 분석본: {quarter_label(target.quarter)} {target.version} · {nature_text(target.quarter, nrq)}")
+            if st.button(f"{quarter_label(nrq)} 재점검 시작", disabled=not actor, type="primary"):
+                if run(lambda: svc.start_quarterly_review(actor, case["id"], target),
+                       f"점검 건 {case_no(case['id'])}번 {quarter_label(nrq)} 재점검을 시작했습니다.") is not None:
+                    st.rerun()
+
+    with st.expander("이 점검 건의 변경 기록"):
+        st.dataframe(audit_frame(case_logs(cid)), hide_index=True, width="stretch")
+
 
 def case_detail_view(cid: int):
+    """점검 건 상세 — 진행 요약(다음 할 일) → 하위 화면 4개(점검 요약·현장 확인·지원 검토·결정·인계·재점검).
+
+    현재 해야 할 업무만 펼치고, 완료·참고정보는 접는다. 저장·상태변경은 기존 service 메서드만 쓴다.
+    """
     case = svc.get_case(cid)
     if case is None:
         st.warning("선택한 점검 건을 찾을 수 없습니다.")
@@ -1689,86 +1959,249 @@ def case_detail_view(cid: int):
     fixed = snapshot(case["snapshot_quarter"], case["snapshot_version"])
     rec = fixed.get(case["industry"], case["quarter"])
     closed = case["status"] == "종결"
-    cur = case["current_scope"]
+    cur = None if closed else case["current_scope"]
+    progress = case_progress(case, fn_name)
 
-    # ① 왜 이 업종을 확인했는가
-    st.subheader("① 왜 이 업종을 확인했는가")
-    with st.container(border=True):
-        st.badge(f"점검 건 상태: {case['status']}", color=CASE_STATUS_COLOR[case["status"]])
-        st.markdown(f"### #{case['id']} {case['industry']} · {quarter_label(case['quarter'])} 개설 — {case['status']}"
-                    + (" · 시연 기록" if case["is_example"] else ""))
-        st.markdown(f"**개설 시 판정 사유** {rec['triage']['stage_reason']}")
-        st.markdown(f"**개설 경로** {case['origin']} · **담당자** {case['assignee']} · **개설** {case['opened_by']} {ts(case['opened_at'])} KST")
-        st.markdown(f"**개설 사유** {case['opening_reason']}")
-        st.caption(f"개설에 사용한 분석본: {quarter_label(case['snapshot_quarter'])} {case['snapshot_version']} (고정)")
-        nature_badge(case["snapshot_quarter"], case["quarter"], case["is_example"])
+    if st.session_state.get("case_subview") not in CASE_SUBVIEWS:  # 잘못된 값·첫 진입 → 점검 요약
+        st.session_state.case_subview = CASE_SUBVIEWS[0]
+    with st.container(key="caseview"):
+        _case_detail_body(case, fixed, rec, closed, cur, progress)
+
+
+def _case_detail_body(case: dict, fixed, rec: dict, closed: bool, cur: dict | None, progress: dict):
+    case_progress_summary(case, progress)
+    with st.container(key="casetabs"):
+        view = st.segmented_control("점검 상세 화면", CASE_SUBVIEWS, key="case_subview", required=True,
+                                    label_visibility="collapsed") or CASE_SUBVIEWS[0]
+    scope = cur or case["scopes"][-1]
+    if view == "점검 요약":
+        case_summary_view(case, fixed, rec, cur)
+    elif view == "현장 확인":
         if closed:
-            st.info(f"종결: {case['closed_by']} {ts(case['closed_at'])} KST — 종결 사유: {case['closing_note']}")
-        elif case["status"] == "모니터링":
-            st.info(f"모니터링 중 — 적극 점검은 멈췄고 다음 검토 분기 {quarter_label(case['next_review_quarter'])} 재점검 계획이 남아 있습니다.")
-    newer = [m for m in metas if m["quarter"] == case["snapshot_quarter"]][-1]
-    if newer["snapshot_version"] != case["snapshot_version"]:
-        with st.expander(f"분석본 보정 비교 — 개설 시 사용 {case['snapshot_version']} ↔ 최신 {newer['snapshot_version']}"):
-            version_compare_view(fixed, snapshot(newer["quarter"], newer["snapshot_version"]),
-                                 (case["industry"], case["quarter"]))
+            st.caption("종결된 점검 건 — 마지막 점검 시점의 현장확인 기록(읽기 전용)")
+        field_checks_view(case, scope, progress)
+    elif view == "지원 검토·결정":
+        support_decision_view(case, scope, fixed, progress)
+    else:
+        referral_review_view(case, cur, fixed)
 
-    # 점검 이력: 이전 시점(종결된 건은 모든 시점)
-    past = case["scopes"] if closed else case["scopes"][:-1]
-    st.subheader(f"점검 이력 · {len(case['scopes'])}개 시점")
-    st.caption("각 시점의 현장확인·메모·지원 필요 기능·결정·인계는 그 시점에 묶여 보존되며 수정할 수 없습니다.")
-    for sc in past:
-        with st.container(border=True):
-            scope_header(sc, case)
-            scope_record_view(sc, case)
 
-    if not closed:
-        st.subheader(f"현재 점검 시점 · {scope_title(cur)}")
-        with st.container(border=True):
-            scope_header(cur, case)
-            cur_rec = snapshot(cur["snapshot_quarter"], cur["snapshot_version"]).get(case["industry"], cur["quarter"])
-            if cur["review_kind"] == "재점검":
-                prev = snapshot(cur["previous_snapshot_quarter"], cur["previous_snapshot_version"]).get(
-                    case["industry"], cur["previous_quarter"])
-                left, right = st.columns(2)
-                with left, st.container(border=True):
-                    point_view(f"직전 점검 · {quarter_label(cur['previous_quarter'])}", prev,
-                               f"{quarter_label(cur['previous_snapshot_quarter'])} {cur['previous_snapshot_version']}")
-                with right, st.container(border=True):
-                    point_view(f"이번 시점 · {quarter_label(cur['quarter'])}", cur_rec, f"{quarter_label(cur['snapshot_quarter'])} {cur['snapshot_version']}")
-                st.markdown("**직전 시점 대비 변화** (값의 차이만 표시)")
-                st.dataframe(change_table(prev, cur_rec), hide_index=True, width="stretch")
-            else:
-                point_view(f"이 시점 분석값 · {quarter_label(cur['quarter'])}", cur_rec, f"{quarter_label(cur['snapshot_quarter'])} {cur['snapshot_version']}")
-        current_scope_inputs(case, cur, fixed)
+# ------------------------------------------------------------------ 종결 점검 건 — 읽기 전용 보관 화면
+def closed_case_progress_summary(case: dict, vm: dict):
+    """종결 결과 요약 — 최종 결정·종결 담당자·일시·사유가 가장 먼저. 다음 행동 버튼은 두지 않는다."""
+    rows = [("최종 상태", case["status"]), ("최종 결정", vm["final_decision"]), ("종결 처리", vm["closed_by"]),
+            ("종결 일시", f"{ts(vm['closed_at'])} KST" if vm["closed_at"] else "기록 없음"),
+            ("종결 사유", vm["closing_note"]), ("현장확인", f"{vm['done']}/{vm['total']}건"),
+            ("기록된 지원 필요 기능", vm["support"]), ("인계 기록", vm["referral_text"]), ("후속 검토", vm["followup"])]
+    st.html(ui.case_progress_html(f"점검 건 {case_no(case['id'])}번 · {case['industry']} · {quarter_label(case['quarter'])}",
+                                  "종결" + (" · 시연 기록" if case["is_example"] else ""), rows, None, tone="closed"))
+    st.caption("종결된 점검 건으로 모든 기록은 읽기 전용입니다.")
 
-    # ⑤ 인계 기록
-    st.subheader("⑤ 인계 기록 · 회신 상태")
-    st.caption("외부 기관 시스템과 연동하지 않습니다. 발송·접수·회신은 담당자가 실제로 한 일을 기록하는 것입니다.")
+
+def closed_case_summary_view(case: dict, vm: dict, fixed, rec: dict):
+    """종결 요약 — 최종 처리결과 → 업무 수행 요약 → 처리 흐름 → 개설 당시 진단(작게) → 접힌 상세."""
+    section("최종 처리결과")
+    st.html(ui.snapshot_brief_html([
+        ("최종 결정", vm["final_decision"]), ("종결 일시", f"{ts(vm['closed_at'])} KST" if vm["closed_at"] else "기록 없음"),
+        ("종결 처리", vm["closed_by"]), ("담당자", vm["assignee"]), ("종결 사유", vm["closing_note"]),
+        ("인계 기록", vm["referral_text"]), ("후속 검토", vm["followup"])]))
+    section("업무 수행 요약")
+    st.html(ui.snapshot_brief_html([
+        ("현장확인", f"{vm['done']}/{vm['total']}건 · {vm['counts_text']}"),
+        ("지원 필요 기능", f"{vm['support']}" + (f" · {vm['support_count']}개" if vm["support_count"] else "")),
+        ("결정 기록", f"{vm['decision_count']}건"), ("인계 기록", vm["referral_text"]), ("점검 회차", f"{vm['rounds']}회")]))
+    section("처리 흐름", helper="저장된 기록만 시간순으로 표시합니다.")
+    st.html(ui.simple_table_html(["일시", "단계", "내용"],
+                                 [[f"{ts(t)} KST", step, detail or "—"] for t, step, detail in closed_case_timeline(case)],
+                                 widths=["11rem", "9rem", None]))
+
+    section("개설 당시 진단", helper="종결 결과의 참고 정보입니다.")
+    rules = {r["rule_name"]: r for r in fixed.reference["triage_rules"]}
+    opened_stage = stage_display(case.get("triage_stage_at_open") or rec["triage"]["stage"])
+    st.html(ui.snapshot_brief_html([("개설 시 판정", opened_stage),
+                                    ("핵심 근거", reason_summary(rec, rule_evidence_rows(rec, rules)))]))
+    now = case["scopes"][-1]
+    now_rec = snapshot(now["snapshot_quarter"], now["snapshot_version"]).get(case["industry"], now["quarter"])
+    q1, q2, q3 = now_rec["q1"], now_rec["q2"], now_rec["q3"]
+    production = ("명목 생산액 미확인" if q1.get("production_yoy") is None
+                  else f"명목 생산액 전년 동분기 대비 {fmt(q1['production_yoy'], 1, '%')}")
+    st.html(ui.simple_table_html(
+        ["산업·고용 상태", "고용 영향", "산단 고용 비중", "지속·전환"],
+        [[f"{q1_plain(q1['state'])} ({q1['state'] or '—'})", fmt(q2["emp_delta"], suffix="명"),
+          fmt(q2["employment_share_pct"], 2, "%"), run_text(q3)],
+         [production, f"고용 전년 동분기 대비 {fmt(q2['employment_yoy'], 2, '%')}", f"고용 {fmt(q2['employment'], suffix='명')}",
+          (q3.get("transition") or "전환 자료 없음").replace(" → ", "→")]],
+        num_cols=(1, 2), row_classes=["", "dx-muted-row"]))
+    with st.expander("개설 정보 상세"):
+        st.markdown("\n".join([
+            f"- 개설: {case['opened_by']} · {ts(case['opened_at'])} KST · '{case['origin']}'에서 개설",
+            f"- 개설 사유(입력 원문): {case['opening_reason'] or '기록 없음'}",
+            f"- 분석 자료: {quarter_label(case['snapshot_quarter'])} 분석본({case['snapshot_version']}) · "
+            f"{nature_display(case['quarter'])} · 개설 시점 값으로 고정"]))
+    with st.expander("외부 참고자료"):
+        st.caption("판정 입력이 아니며 판정을 바꾸지 않습니다.")
+        st.markdown("\n".join(ext_compact(now_rec)))
+    with st.expander(f"점검 회차 · {vm['rounds']}회"):
+        for sc in case["scopes"]:
+            done = sum(1 for i in sc["checks"] if i["latest"])
+            st.markdown(f"- **{scope_title(sc)}** · {sc['review_status']} · 현장확인 {done}/{len(sc['checks'])}건 · "
+                        f"결정 {len(sc['decisions'])}건 · 인계 {len(sc['referrals'])}건")
+        st.caption("문항별 결과는 '현장확인 기록', 결정은 '지원·결정 기록'에서 볼 수 있습니다.")
+
+
+def _closed_scope(case: dict) -> dict:
+    """재점검이 있었으면 회차를 고른다(기본: 마지막 회차)."""
+    scopes = case["scopes"]
+    if len(scopes) == 1:
+        return scopes[0]
+    ids = [sc["id"] for sc in scopes]
+    titles = {sc["id"]: scope_title(sc) for sc in scopes}
+    pick = st.segmented_control("점검 회차", ids, format_func=titles.get, default=ids[-1],
+                                key=f"closed_scope_{case['id']}") or ids[-1]
+    return next(sc for sc in scopes if sc["id"] == pick)
+
+
+def closed_case_checks_view(case: dict):
+    """현장확인 기록 — 결과 요약 · 압축 표 · 고른 문항 하나의 상세(수정·저장 없음) · 현장 메모 표."""
+    sc = _closed_scope(case)
+    checks = sc["checks"]
+    done = [i for i in checks if i["latest"]]
+    counts = {code: sum(1 for i in done if i["latest"]["result_code"] == code) for code in CHECK_RESULT_ORDER}
+    st.markdown(f"**현장확인 {len(done)}/{len(checks)}건**")
+    st.caption(" · ".join(f"{check_result_label(k)} {v}건" for k, v in counts.items())
+               + (f" · 미기록 {len(checks) - len(done)}건" if len(done) < len(checks) else ""))
+    st.html(ui.simple_table_html(
+        ["번호", "확인사항", "결과", "확인방법", "실제 확인일시"],
+        [[i["position"] + 1, checklist_text(i["question_text"]),
+          check_result_label(i["latest"]["result_code"]) if i["latest"] else "미기록",
+          (i["latest"] or {}).get("method") or "—",
+          (f"{ts(i['latest']['performed_at'])}" if (i["latest"] or {}).get("performed_at")
+           else ("일시 미입력" if i["latest"] else "—"))] for i in checks],
+        num_cols=(0,), widths=["3rem", None, "7rem", "5.5rem", "9.5rem"]))
+    if not checks:
+        return
+    by_no = {str(i["position"] + 1): i for i in checks}
+    key = f"closed_chk_{sc['id']}"
+    if st.session_state.get(key) not in by_no:
+        st.session_state[key] = next(iter(by_no))
+    pick = st.pills("상세를 볼 문항 번호", list(by_no), selection_mode="single", key=key)
+    item = by_no.get(pick, checks[0])
+    r = item["latest"]
+    with st.container(key="closedcheck", border=True):
+        st.html(ui.snapshot_brief_html([
+            ("확인사항", item["question_text"]),
+            ("결과", check_result_label(r["result_code"]) if r else "미기록"),
+            ("확인방법", (r or {}).get("method") or "—"), ("결과 메모", (r or {}).get("note") or "기록 없음"),
+            ("실제 확인일시", (f"{ts(r['performed_at'])} KST" if r and r.get("performed_at")
+                          else ("일시 미입력" if r else "—"))),
+            ("기록일시", f"{ts(r['recorded_at'])} KST" if r else "—"), ("기록자", (r or {}).get("recorded_by") or "—")]))
+        older = item["history"][:-1]
+        if older:
+            with st.expander(f"이전 확인 기록 · {len(older)}건"):
+                st.html(ui.simple_table_html(
+                    ["결과", "확인방법", "결과 메모", "기록일시", "기록자"],
+                    [[check_result_label(h["result_code"]), h["method"], h["note"] or "—", ts(h["recorded_at"]),
+                      h["recorded_by"]] for h in reversed(older)]))
+    section("현장 메모")
+    if sc["notes"]:
+        st.html(ui.simple_table_html(["작성자", "작성일시", "메모"],
+                                     [[n["recorded_by"], ts(n["recorded_at"]), n["note"]] for n in sc["notes"]],
+                                     widths=["7rem", "9.5rem", None]))
+    else:
+        st.caption("현장 메모 없음")
+
+
+def closed_case_support_decisions_view(case: dict, vm: dict):
+    """지원·결정 기록 — 지원 필요 기능 표(메모는 별도 열) · 최종 결정 강조 · 이전 결정은 접힌 표."""
+    section("기록된 지원 필요 기능")
+    needs = [n for sc in case["scopes"] for n in sc["support_need_history"]]
+    latest = needs[-1] if needs else None
+    if latest and latest["function_tags"]:
+        st.html(ui.simple_table_html(["지원 필요 기능", "선택 사유·메모", "기록자", "기록일시"],
+                                     [[fn_name(t), latest["note"] or "—", latest["recorded_by"], ts(latest["recorded_at"])]
+                                      for t in latest["function_tags"]], widths=["9rem", None, "7rem", "9.5rem"]))
+    else:
+        st.caption("기록된 지원 필요 기능 없음")
+    st.caption("지원 필요 기능 기록은 담당자의 검토 결과이며 지원 적격 또는 지원 완료를 의미하지 않습니다.")
+    if len(needs) > 1:
+        with st.expander(f"지원 필요 기능 변경 이력 · {len(needs)}건"):
+            st.html(ui.simple_table_html(["기능", "메모", "기록자", "기록일시"],
+                                         [[", ".join(fn_name(t) for t in n["function_tags"]) or "선택 없음", n["note"] or "—",
+                                           n["recorded_by"], ts(n["recorded_at"])] for n in needs]))
+
+    section("최종 결정")
+    final = vm["final"] or {}
+    st.html(ui.snapshot_brief_html([
+        ("최종 결정", final.get("decision") or "기록 없음"),
+        ("종결 사유" if final.get("decision") == "종결" else "결정 근거", str(final.get("rationale") or "").strip() or "기록 없음"),
+        ("결정자", final.get("decided_by") or "미지정"),
+        ("결정일시", f"{ts(final['decided_at'])} KST" if final.get("decided_at") else "기록 없음")]))
+    if vm["previous"]:
+        with st.expander(f"이전 결정 기록 · {len(vm['previous'])}건"):
+            ordered = [*vm["previous"], final] if final else vm["previous"]
+            st.html(ui.simple_table_html(
+                ["순서", "결정", "근거", "당시 다음 검토", "기록자", "기록일시"],
+                [[i, (d.get("decision") or "—") + (" · 최종" if d is final else ""), d.get("rationale") or "—",
+                  quarter_label(d.get("next_review_quarter")) if d.get("next_review_quarter") else "해당 없음",
+                  d.get("decided_by") or "—", ts(d.get("decided_at"))] for i, d in enumerate(ordered, 1)],
+                num_cols=(0,), widths=["3.5rem", "7rem", None, "7.5rem", "6rem", "9.5rem"],
+                row_classes=["is-final" if d is final else "" for d in ordered]))
+            st.caption("이전 결정의 다음 검토 분기는 그 결정 당시의 기록이며 최종 종결 후 현재 일정이 아닙니다.")
+
+
+def closed_case_referrals_history_view(case: dict):
+    """인계·변경 기록 — 인계(읽기 전용, 상태변경 없음) · 재점검 기록 · 변경 기록(접힘) · 관리 작업(삭제, 맨 아래)."""
+    section("인계 기록")
     if not case["referrals"]:
-        st.caption("인계 기록 없음 — '인계'를 결정한 경우에만 만들어집니다.")
-    titles = {sc["id"]: scope_title(sc) for sc in case["scopes"]}
+        st.html(ui.note_html("인계 기록 없음 — 이 점검 건에는 생성된 인계 기록이 없습니다. "
+                             "지원 필요 기능 기록과 실제 인계 여부는 서로 다른 정보입니다."))
     for r in case["referrals"]:
-        referral_view(r, closed, titles[r["quarterly_review_id"]])
-
-    # ⑥ 다음 분기 재점검
-    if not closed:
-        st.subheader("⑥ 다음 분기 재점검")
-        st.caption("다음 검토 분기는 담당자가 기록한 결정값을 따릅니다. 시스템은 단계 변화를 보고 자동으로 종결하거나 순서를 바꾸지 않습니다.")
-        nrq = case["next_review_quarter"]
-        target = resolved(nrq) if nrq else None
-        if not nrq:
-            st.caption("다음 검토 분기가 기록되지 않았습니다.")
-        elif target is None or target.get(case["industry"], nrq) is None:
-            st.caption(f"{quarter_label(nrq)} 분석 자료가 아직 없습니다 — 자료가 등록되면 재점검 예정 목록에 나타납니다.")
-        else:
-            st.caption(f"{quarter_label(nrq)} 재점검에 쓸 분석본: {quarter_label(target.quarter)} {target.version} · {nature_text(target.quarter, nrq)}")
-            if st.button(f"{quarter_label(nrq)} 재점검 시작", disabled=not actor, type="primary"):
-                if run(lambda: svc.start_quarterly_review(actor, case["id"], target),
-                       f"#{case['id']} {quarter_label(nrq)} 재점검을 시작했습니다.") is not None:
-                    st.rerun()
-
+        events = svc.referral_events(r["id"])
+        with st.container(border=True):
+            st.html(ui.snapshot_brief_html([
+                ("최종 인계상태", r["status"]), ("인계 기능", fn_name(r["function_tag"])), ("담당기관", r["institution"]),
+                ("최근 처리일", f"{ts(events[-1]['recorded_at'])} KST" if events else "기록 없음")]))
+            if events:
+                st.html(ui.simple_table_html(
+                    ["단계", "실제 발생", "기록", "기록자", "내용"],
+                    [[ACTION_LABEL.get(e["action"], e["action"]),
+                      (ts(e["occurred_at"]) if e["occurred_at"] else ("미입력" if e["has_occurred_time"] else "—")),
+                      ts(e["recorded_at"]), e["actor"], e["text"] or "—"] for e in events]))
+    section("재점검 기록")
+    rechecks = [sc for sc in case["scopes"] if sc["review_kind"] == "재점검"]
+    if not rechecks:
+        st.caption("재점검 기록 없음")
+    else:
+        with st.expander(f"재점검 기록 · {len(rechecks)}회"):
+            for sc in rechecks:
+                st.markdown(f"- **{scope_title(sc)}** · {quarter_label(sc['previous_quarter'])} {sc['previous_stage']} → "
+                            f"{quarter_label(sc['quarter'])} {sc['current_stage']} · {sc['review_status']}")
     with st.expander("이 점검 건의 변경 기록"):
-        st.dataframe(audit_frame(case_logs(cid)), hide_index=True, width="stretch")
+        st.dataframe(audit_frame(case_logs(case["id"])), hide_index=True, width="stretch")
+
+
+def closed_case_detail_view(cid: int):
+    case = svc.get_case(cid)
+    if case is None:
+        st.warning("선택한 점검 건을 찾을 수 없습니다.")
+        return
+    fixed = snapshot(case["snapshot_quarter"], case["snapshot_version"])
+    rec = fixed.get(case["industry"], case["quarter"])
+    vm = closed_case_vm(case, fn_name)
+    st.session_state.closed_subview = closed_subview_id(st.session_state.get("closed_subview"))
+    with st.container(key="caseview"):
+        closed_case_progress_summary(case, vm)
+        with st.container(key="casetabs"):
+            view = st.segmented_control("종결 점검 화면", list(CLOSED_SUBVIEWS), format_func=CLOSED_SUBVIEWS.get,
+                                        key="closed_subview", required=True, label_visibility="collapsed") or "closed_summary"
+        if view == "closed_summary":
+            closed_case_summary_view(case, vm, fixed, rec)
+        elif view == "closed_checks":
+            closed_case_checks_view(case)
+        elif view == "closed_support_decisions":
+            closed_case_support_decisions_view(case, vm)
+        else:
+            closed_case_referrals_history_view(case)
 
 
 def inspection_left_panel() -> str:
@@ -1861,7 +2294,7 @@ def start_case_dialog(ind: str, quarter: str):
     st.markdown(f"**{ind} · {quarter_label(quarter)}** · {display}")
     st.caption(f"점검 후보 검토를 시작하고 점검 건을 개설합니다 · 분석 버전 {quarter_label(snap.quarter)} {snap.version} 기준으로 고정")
     st.text_input("담당자 이름 (필수)", value=st.session_state.actor, key="start_actor")
-    st.text_area("개설 사유 (필수)", value=f"등록 판정 {display} · {t['stage_reason']}", key="start_reason")
+    st.text_area("개설 사유 (필수)", value=f"등록 판정 '{display}'에 따라 점검 개설", key="start_reason")
     st.button("점검 건 개설", type="primary", key="start_submit", on_click=_start_case_cb, args=(ind, quarter))
     error = st.session_state.pop("_start_error", None)
     if error:
@@ -1884,11 +2317,11 @@ def inspection_candidates_view(quarter: str):
             t, q2, sg = r["triage"], r["q2"], r["signals"]
             c = rows_by_ind.get(ind)
             with st.container(border=True):
-                questions = [item["question"] for item in decision_support.field_questions(quarter, ind)[:2]]
+                questions = [checklist_text(item["question"]) for item in decision_support.field_questions(quarter, ind)[:2]]
                 metrics = (f"고용 {fmt(q2['emp_delta'], suffix='명')} | YoY {fmt(q2['employment_yoy'], 2, '%')} | "
                           f"산단 대비 감소규모 {fmt(sg['A'], 2, '%')}")
                 if c and c["open_case_id"]:
-                    status_note = f"진행 중 점검 건 #{c['open_case_id']}"
+                    status_note = f"진행 중 점검 건 {case_no(c['open_case_id'])}번"
                 elif c and c["review"]:
                     status_note = f"검토 상태: {c['review']['status']} ({c['review']['reviewer']})"
                 else:
@@ -1908,49 +2341,115 @@ def inspection_candidates_view(quarter: str):
 
 
 def inspection_cases_view(status_filter: str):
+    """진행 중·종결 점검 건 — 선택기 한 줄 + 접힌 전체 목록, 그 아래 선택한 점검 건 상세."""
     if status_filter == "진행 중":
         due = svc.due_reviews(resolved)
-        st.markdown(f"**재점검 예정 · {len(due)}건**")
-        if not due:
-            st.caption("재점검 예정 없음")
-        for d in due:
-            with st.container(border=True):
-                a, b = st.columns([4, 1])
-                a.markdown(f"**#{d['case_id']} {d['industry']}** · 직전 점검 {quarter_label(d['previous_quarter'])} ({d['previous_stage']}) "
-                          f"→ 재점검 분기 **{quarter_label(d['review_quarter'])}** · 현재 결정 {d['decision'] or '—'}"
-                          + f" · 분석본 {d['snapshot']} ({NATURE_LABEL[d['snapshot_nature']]})"
-                          + (" · 모니터링 중" if d["case_status"] == "모니터링" else "")
-                          + (" · _시연 기록_" if d["is_example"] else ""))
-                b.button("점검 건 열기", key=f"due_{d['case_id']}", on_click=go,
-                        args=("점검 관리", None, None, d["case_id"], "진행 중"))
-        st.divider()
+        if due:  # 재점검 예정이 있을 때만 표시
+            with st.expander(f"재점검 예정 · {len(due)}건"):
+                for d in due:
+                    a, b = st.columns([4, 1])
+                    a.markdown(f"**{case_no(d['case_id'])}번 {d['industry']}** · 직전 점검 {quarter_label(d['previous_quarter'])} ({d['previous_stage']}) "
+                               f"→ 재점검 분기 **{quarter_label(d['review_quarter'])}** · 현재 결정 {d['decision'] or '—'}"
+                               + f" · 분석본 {d['snapshot']} ({NATURE_LABEL[d['snapshot_nature']]})"
+                               + (" · 모니터링 중" if d["case_status"] == "모니터링" else "")
+                               + (" · _시연 기록_" if d["is_example"] else ""))
+                    b.button("점검 건 열기", key=f"due_{d['case_id']}", on_click=go,
+                             args=("점검 관리", None, None, d["case_id"], "진행 중"))
 
     cases = [c for c in svc.list_cases() if (c["status"] != "종결") == (status_filter == "진행 중")]
     if not cases:
         st.info("진행 중인 점검 건이 없습니다. 점검 후보에서 개설하세요." if status_filter == "진행 중"
                 else "종결된 점검 건이 없습니다.")
         return
-    st.dataframe(case_table(cases), hide_index=True, width="stretch")
     ids = [c["id"] for c in cases]
     by_id = {c["id"]: c for c in cases}
     default = ids.index(st.session_state.get("case_id")) if st.session_state.get("case_id") in ids else 0
-    cid = st.selectbox("점검 건 선택", ids, index=default,
-                       format_func=lambda i: f"#{i} {by_id[i]['industry']} {quarter_label(by_id[i]['quarter'])}",
-                       key=f"case_pick_{status_filter}")
+
+    def case_label(i: int) -> str:  # 선택기는 짧게 — 담당자·결정·다음 검토는 아래 목록 표와 진행 요약에서
+        c = by_id[i]
+        return f"{case_no(i)}번 · {c['industry']} · {quarter_label(c['quarter'])} · {c['status']}" + (" · 시연" if c["is_example"] else "")
+    if status_filter == "종결":  # 종결: 짧은 선택기 + 접힌 목록, 상세는 읽기 전용 보관 화면(삭제는 맨 아래 관리 작업)
+        with st.container(key="casepick", horizontal=True, vertical_alignment="bottom", gap="small"):
+            cid = st.selectbox(f"종결 점검 건 · {len(cases)}건", ids, index=default, key="case_pick_종결", width="stretch",
+                               format_func=lambda i: f"{case_no(i)}번 · {by_id[i]['industry']} · {quarter_label(by_id[i]['quarter'])} · 종결")
+            with st.popover("점검 건 삭제", help="선택한 점검 건과 그 하위 기록을 삭제합니다."):
+                case_delete_form(by_id[cid])
+        with st.expander(f"종결 점검 목록 보기 · {len(cases)}건"):
+            rows = []
+            for c in cases:
+                full = svc.get_case(c["id"]) or {}
+                last = (full.get("scopes") or [{}])[-1]
+                checks = last.get("checks") or []
+                rows.append([case_no(c["id"]), c["industry"], quarter_label(c["quarter"]), ts(c["closed_at"])[:10],
+                             c["assignee"] or "미지정", c["decision"] or "—",
+                             f"{sum(1 for i in checks if i.get('latest'))}/{len(checks)}건",
+                             f"{len(full.get('referrals') or [])}건" if full.get("referrals") else "인계 기록 없음"])
+            st.html(ui.simple_table_html(["번호", "업종", "점검 분기", "종결일", "담당자", "최종 결정", "현장확인", "인계"],
+                                         rows, num_cols=(0,)))
+        st.session_state.case_id = cid
+        closed_case_detail_view(cid)
+        return
+    with st.container(key="casepick", horizontal=True, vertical_alignment="bottom", gap="small"):
+        cid = st.selectbox(f"{status_filter} 점검 건 · {len(cases)}건", ids, index=default, format_func=case_label,
+                           key=f"case_pick_{status_filter}", width="stretch")
+        with st.popover("점검 건 삭제", help="선택한 점검 건과 그 하위 기록을 삭제합니다."):
+            case_delete_form(by_id[cid])
+    with st.expander(f"진행 중 점검 목록 보기 · {len(cases)}건"):
+        rows = []
+        for c in cases:
+            full = svc.get_case(c["id"]) or {}
+            checks = (full.get("current_scope") or {}).get("checks") or []
+            rows.append([case_no(c["id"]), c["industry"], quarter_label(c["quarter"]), ts(c["opened_at"])[:10],
+                         c["assignee"] or "미지정", c["status"], c["decision"] or "미기록",
+                         f"{sum(1 for i in checks if i.get('latest'))}/{len(checks)}건",
+                         quarter_label(c["next_review_quarter"]) if c["next_review_quarter"] else "미정"])
+        st.html(ui.simple_table_html(["번호", "업종", "점검 분기", "개설일", "담당자", "상태", "현재 결정", "현장확인", "다음 검토"],
+                                     rows, num_cols=(0,)))
     st.session_state.case_id = cid
     case_detail_view(cid)
 
 
+def _delete_case(cid: int):
+    """점검 건 삭제(콜백) — 사유·확인이 있을 때만. 감사로그에는 삭제 기록이 남는다."""
+    ss = st.session_state
+    ss._deleting_no = case_no(cid)  # 삭제 뒤에는 순번을 계산할 수 없으므로 먼저 기억
+    try:
+        # 기록자 이름 없이도 삭제할 수 있다 — 이름이 없으면 삭제 기록의 기록자는 '기록자 미입력'
+        svc.delete_case(_case_actor() or local_actor("기록자 미입력"), cid, ss.get(f"del_reason_{cid}") or "")
+    except WorkflowError as e:
+        ss._delete_error = str(e)
+        return
+    ss._flash = f"점검 건 {ss.pop('_deleting_no', cid)}번을 삭제했습니다(변경 기록에 삭제 사유가 남습니다)."
+    ss.pop("case_id", None)
+    for key in (f"del_reason_{cid}", f"del_confirm_{cid}"):
+        ss.pop(key, None)
+
+
+def case_delete_form(case: dict):
+    st.markdown(f"**{case_no(case['id'])}번 · {case['industry']} · {quarter_label(case['quarter'])}** 삭제")
+    st.caption("현장확인 결과·메모·지원 필요 기능·결정·인계 기록이 함께 삭제되며 되돌릴 수 없습니다. "
+               "누가·언제·왜 삭제했는지는 변경 기록에 남습니다.")
+    st.text_input("삭제 사유 (필수)", key=f"del_reason_{case['id']}", placeholder="예: 시험 입력으로 만든 점검 건")
+    confirm = st.checkbox("이 점검 건과 하위 기록을 모두 삭제합니다", key=f"del_confirm_{case['id']}")
+    error = st.session_state.pop("_delete_error", None)
+    if error:
+        st.error(error)
+    st.button("삭제", key=f"del_case_{case['id']}", type="primary", disabled=not confirm,
+              on_click=_delete_case, args=(case["id"],))
+
+
 def inspection_copilot(quarter: str, view: str):
     cid = st.session_state.get("case_id")
+    case_ctx = None
     ind = q = None
     context_title, context_tags = "", ["점검 후보"]
     if view in ("진행 중", "종결") and cid is not None:
         case = svc.get_case(cid)
         if case:
+            case_ctx = case
             ind = case["industry"]
             q = (case.get("current_scope") or {}).get("quarter") or case["quarter"]
-            context_title, context_tags = f"점검 건 #{cid} · {ind} · {quarter_label(q)}", ["점검 관리"]
+            context_title, context_tags = f"점검 건 {case_no(cid)} · {ind} · {quarter_label(q)}", ["점검 관리"]
     if ind is None:
         pick = st.session_state.get("insp_pick")
         if pick and snap.get(pick, quarter) is not None:
@@ -1970,7 +2469,7 @@ def inspection_copilot(quarter: str, view: str):
     stage = (rec or {}).get("triage", {}).get("stage") if rec else None
     questions = decision_support.field_questions(q, ind)
     field_ctx = field_context_for(ind, q, questions)
-    copilot_view(ind, q, field_ctx, stage, snap.industries, context_title, context_tags)
+    copilot_view(ind, q, field_ctx, stage, snap.industries, context_title, context_tags, case=case_ctx)
 
 
 def page_inspection():
@@ -2030,48 +2529,16 @@ def notices_view(industry: str, fn_tags: list[str]) -> None:
         NOTICE_LOG.info("related notices hidden: status=%s, no related open notice", notices["status"])
         return
     with st.container(key="dxsec-policy-biz"):
-        section("현재 모집 중인 관련 공고", "선택한 업종·진단 결과와 관련 가능한, 지금 접수 중인 공고입니다.")
+        # 머리·설명·카드 모양을 '연결 가능한 지원제도'와 같게(제목 + 오른쪽 건수 → 한 줄 설명 → 카드)
+        st.html(ui.section_count_html("현재 모집 중인 관련 공고", f"관련 공고 {len(notices['items'])}건"))
+        st.caption(f"선택한 업종·진단 결과와 관련 가능한, 지금 접수 중인 공고입니다 · 출처 기업마당({notices['checked_at']} 확인)")
         st.html(ui.notice_cards_html(notices["items"], lambda tag: function_ui_label(tag, C.label(tag)), notice_reasons))
-        st.caption(f"출처 · 기업마당 공고({notices['checked_at']} 확인) · 공고 표현이 일치한 것만 표시하며 지원대상·신청자격은 "
-                   "공고문과 담당기관에서 확인해야 합니다. 더 궁금한 점은 행정 AI 비서에 물어보세요.")
 
 
-def policy_search_view() -> str | None:
-    address = st.text_input("사업장 주소로 관할 확인", placeholder="예: 창원시 성산구 ...")
-    if address:
-        route = policy.route_jurisdiction(address)
-        if route["jurisdiction_status"] == "MATCHED":
-            st.info(f"{route['district']} → {route['institution']} · 관할은 사업장 주소 기준이며 사업별 접수부서는 재확인합니다.")
-        else:
-            st.warning(route["message"])
-
-    a, b = st.columns([2, 1])
-    query = a.text_input("근거 검색", placeholder="예: 산업·일자리전환 채용장려금 지원금액은?")
-    namespace = b.selectbox("검색 구분", ("공식 정책", "팀 제안"))
-    current_only = st.checkbox("현재 신청 가능성이 있는 자료만", value=False,
-                               help="종료·정보전용 문서를 제외합니다. UNKNOWN은 재확인 대상으로 남깁니다.")
-    if query:
-        result = policy.search(query, "team" if namespace == "팀 제안" else "official", current_only=current_only)
-        (st.info if result["status"] == "FOUND" else st.warning)(result["message"])
-        for hit_index, hit in enumerate(result["hits"]):
-            with st.container(border=True):
-                locator = f"PDF {hit['page']}쪽" if hit["page"] else (hit["section"] or "본문")
-                label = "팀 제안" if hit["source_class"] == "TEAM_PROPOSAL" else "공식 안내"
-                st.markdown(f"**{hit['document_id']} · {hit['title']}** · `{label}` · {locator}")
-                st.write(hit["excerpt"])
-                st.caption(f"접수상태 {hit['current_intake_status']} · 검증일 {hit['verified_at']} · "
-                           f"주의: {hit['caveat'] or '개별 적용 여부 재확인'}")
-                st.link_button("원문 출처", hit["source_url"],
-                               key=f"rag_{hit_index}_{hit['document_id']}_{hit['page']}_{hit['score']}")
-
+def policy_index_admin():
+    """정책 원문 검색 색인 관리(관리자). 근거 위치 표시·AI 비서의 공식 문서 검색이 이 색인을 쓴다."""
     with svc.Session() as s:
         chunk_count = s.query(M.SourceEvidence).count()
-        cards = s.query(M.RequirementCard).order_by(M.RequirementCard.requirement_id).all()
-    with st.expander(f"요건 카드 {len(cards)}건"):
-        for card in cards:
-            st.markdown(f"- **{card.requirement_id}** {card.title or card.program_name} · "
-                        f"{card.current_intake_status} / {card.card_status} · {card.caveat or '—'}")
-
     with st.expander("검색 색인 관리 · 관리자"):
         if chunk_count == 0:
             st.warning("검색 색인이 아직 없습니다. 원문 해시 검증 후 색인을 재구축하세요.")
@@ -2084,7 +2551,6 @@ def policy_search_view() -> str | None:
             else:
                 st.success(f"{report['indexed_documents']}개 문서·{report['chunks']}개 청크를 색인했습니다.")
             st.rerun()
-    return query
 
 
 def page_policy():
@@ -2153,7 +2619,7 @@ def page_policy():
                     intake = st.session_state.get(f"policy_intake::{ind}::{q}") or "*"
                     shown = filter_official_cards(all_cards, selected, None if intake == "*" else intake)
                     st.html(ui.section_count_html("연결 가능한 지원제도", f"관련 제도 {len(shown)}건"))
-                    st.caption("현재 진단 결과로 검토할 수 있는 기존 공식 지원제도입니다. 지원 여부는 담당기관 확인이 필요합니다.")
+                    st.caption("현재 진단 결과로 검토할 수 있는 기존 공식 지원제도입니다.")
                     with st.container(key="proghead"):
                         st.pills("진행 상태", ("*", *INTAKE_UI), selection_mode="single", default="*", required=True,
                                  format_func=lambda k: "진행 상태 전체" if k == "*" else INTAKE_UI[k],
@@ -2164,10 +2630,6 @@ def page_policy():
                     if len(shown) > 4:
                         with st.expander(f"더 많은 지원제도 보기 ({len(shown) - 4}건)"):
                             st.html(ui.official_programs_html(shown[4:], fn_label, titles))
-                    if fn_tags:  # 기능별 담당기관 검증상태(등록 매핑 그대로 — 기관을 새로 확정하지 않음)
-                        st.html('<div class="dx-sub-title">담당기관 검증상태</div>' + ui.bullet_list_html([
-                            f"{fn_name(tag)} — {institution_status_text(svc.institution_candidates(snap, tag))}"
-                            for tag in fn_tags]))
                 else:
                     st.html(ui.team_intro_html())
                     st.html(ui.team_flow_html(TEAM_STAGE_FLOW))
@@ -2180,7 +2642,7 @@ def page_policy():
 
             if tab == tabs[0]:
                 # 흐름: [1] 현재 진단 요약 → [2] 연결 가능한 지원제도(위) → [3] 현재 모집 중인 관련 공고
-                #       → [4] 참고 기관·검토 경로(+ 관리자용 공식 근거 직접 검색)
+                #       → [4] 참고 기관·검토 경로(공식 근거 검색은 AI 비서, 색인 관리는 방법론·데이터 기준)
                 notices_view(ind, fn_tags)
                 with st.container(key="dxsec-policy-more"):
                     with st.expander("참고 기관 · 검토 경로"):
@@ -2189,10 +2651,6 @@ def page_policy():
                         st.html(ui.route_summary_html(
                             t.get("first_owner"), rec["questions"].get("handoff_review_functions"), institutions,
                             status_of=lambda i: institution_audit_label(audit.get(i.get("institution")))))
-                    box = lazy_expander("공식 근거 직접 검색", "exp_policy_search")
-                    with box:
-                        if box.open:
-                            policy_search_view()
 
         if tab == tabs[0]:
             # 맥락 줄 한 줄 유지: 기능을 고르면 그 기능 태그 하나만(정책 화면임은 페이지로 알 수 있음)
@@ -2272,24 +2730,19 @@ def page_operations():
 
 
 # ------------------------------------------------------------------ 방법론·데이터 기준
-def quote(doc: dict, section: str):
-    body = doc.get("sections", {}).get(section) if doc.get("available") else None
-    if body:
-        with st.expander(f"원문 인용 — {doc['path']} · {section}"):
-            st.markdown(quarter_text(body))  # 원문 파일은 그대로, 화면 표시만 분기 표기 통일
+WORK24_LEVEL_NAME = {"LIST": "목록 데이터", "ACTIVE_CONFIRMED": "현재 유효", "DETAIL_VERIFIED": "상세 검증",
+                     "DETAIL_COMPANY": "확인 기업", "KEYWORD": "주요 키워드"}
 
 
 def page_methodology():
-    with st.container(key="adminpage"):
-        st.html(ui.page_header_html("방법론·데이터 기준", "설정·정보에서 연 화면 · 진단 구조·판정 기준·데이터 한계"))
-        doc = registered_document(snap, "final_methodology")
-        if doc.get("available"):
-            st.caption(f"방법론 원문: {doc['path']} · 분석본 {quarter_label(snap.quarter)} {snap.version} 등록 해시 "
-                       + ("일치" if doc["hash_match"] else "불일치 — 문서가 분석본 등록 이후 바뀌었습니다"))
-        else:
-            st.caption(f"방법론 원문을 찾을 수 없습니다: {doc.get('reason')}")
+    """진단 구조·판정 기준·말할 수 있는/없는 것·데이터 기준·선택적 재검토·Human-in-the-Loop.
 
+    본문은 같은 크기의 목록(markdown)으로 통일하고, 회색 caption은 절마다 한 줄(보충 설명)만 쓴다.
+    """
+    with st.container(key="adminpage"):
+        st.html(ui.page_header_html("방법론·데이터 기준", "진단 구조 · 판정 기준 · 데이터 기준과 한계"))
         sample = next((r for r in snap.records.values() if r.get("external_sources")), None)
+        run_quarters = ", ".join(quarter_label(x) for x in sorted({m["quarter"] for m in metas}))
 
         with st.container(border=True):
             st.markdown("#### 1. 진단 구조")
@@ -2297,14 +2750,13 @@ def page_methodology():
                         "Human-in-the-Loop 의사결정 지원체계")
             states = sorted({(r["q1"]["state"], r["q1"]["state_label"]) for r in snap.records.values()})
             st.markdown("**Q1 상태(국면)**")
-            st.dataframe(pd.DataFrame(states, columns=["상태", "설명"]), hide_index=True, width="stretch")
-            st.markdown("**Q2 규모** · 고용 증감(명) · 산단 제조업 고용 비중 · 순감소 기여율")
-            st.markdown("**Q3 시간** · 동일 상태 지속 분기 · 반복 진입신호 · 상태 전이")
+            st.dataframe(pd.DataFrame([(s_, q1_plain(s_), label) for s_, label in states],
+                                      columns=["상태", "설명", "생산·고용 방향"]), hide_index=True, width="stretch")
             ladder = {r["rule_name"]: r for r in snap.reference["triage_rules"]}.get("ladder", {})
-            st.markdown(f"**Triage** · {ladder.get('definition', '')} · 경계 {ladder.get('threshold') or '—'} · "
+            st.markdown("- **Q2 규모** · 고용 증감(명) · 산단 제조업 고용 비중 · 순감소 기여율\n"
+                        "- **Q3 시간** · 동일 상태 지속 분기 · 반복 진입신호 · 상태 전이\n"
+                        f"- **Triage** · {ladder.get('definition', '')} · 경계 {ladder.get('threshold') or '—'} · "
                         f"{stage_display('우선점검')} / {stage_display('추가확인')} / {stage_display('관찰')}")
-            quote(doc, "최종 채택 구조")
-            quote(doc, "Q1~Q3와 Triage")
 
         with st.container(border=True):
             st.markdown("#### 2. 판정 기준")
@@ -2314,112 +2766,81 @@ def page_methodology():
                                        "source_category": "근거 구분"}))
             rule_df["근거 구분"] = rule_df["근거 구분"].map(lambda x: SOURCE_CATEGORY_LABEL.get(x, x))
             st.dataframe(rule_df, hide_index=True, width="stretch")
-            st.caption(f"규칙 버전 {spec['triage_rule_version']}")
-            st.caption("경계값은 프로젝트 운영규칙이며 법정 기준 또는 최적값이 아닙니다.")
-            st.markdown(f"규칙 시나리오: {S.SCENARIO_STATUS_LABEL[snap.meta['scenario_status']]}")
+            st.caption(f"경계값은 프로젝트 운영규칙이며 법정 기준 또는 최적값이 아닙니다 · 규칙 버전 {spec['triage_rule_version']} · "
+                       f"규칙 시나리오 {S.SCENARIO_STATUS_LABEL[snap.meta['scenario_status']]}")
 
-        with st.container(border=True):
+        # 3·4는 좌우 2분할(좁은 화면에서는 위아래로 쌓인다)
+        can, cannot = st.columns(2, gap="small")
+        with can.container(border=True, height="stretch"):
             st.markdown("#### 3. 무엇을 말할 수 있는가")
             st.markdown("**데이터가 직접 보여주는 것**\n- 생산(명목 생산액)·고용 증감\n- 고용 증감 인원·산단 고용 비중\n"
                         "- 동일 상태 지속기간·상태 전환\n- 확보된 채용공고(목록·현재 유효·상세 검증)")
             st.markdown("**간접적으로 시사하는 것**\n- 추가 점검 필요성(점검 우선순위 신호)\n"
                         "- 감소가 특정 업종에 집중됐는지\n- 채용 키워드의 반복\n- 현장에서 확인해야 할 가설")
-            st.caption(quarter_text(snap.reference.get("scope", "")))
-
-        with st.container(border=True):
+        with cannot.container(border=True, height="stretch"):
             st.markdown("#### 4. 무엇을 말할 수 없는가")
             st.markdown("**판단할 수 없는 것**\n- 자동화가 원인인지(고용감소의 원인 자동판정)\n- 구조조정이 발생했는지\n"
                         "- 산업위기인지(기업별 위기 여부 확정)\n"
                         "- 특정 기업이 지원대상인지(정책 적격 자동판정·예산/선정 자동결정)\n"
                         "- 채용난·기술 미스매치가 실제 발생했는지")
-            st.markdown("고용 감소의 원인(수주·자동화·폐업·외주화 등)은 집계자료만으로 판단할 수 없습니다.")
             n_cards = sum(len(svc.requirement_cards(t)) for t in C.function_tags())
-            st.markdown(f"지원사업 요건 카드: 공식 원장 {n_cards}건 — 일반 조건 안내용이며 자동 적격·승인 판정 아님")
+            st.markdown(f"**지원사업 요건 카드: 공식 원장 {n_cards}건** — 일반 조건 안내용이며 자동 적격·승인 판정 아님")
+        if snap.reference.get("scope"):
+            st.caption(quarter_text(snap.reference["scope"]))
 
         with st.container(border=True):
             st.markdown("#### 5. 데이터 기준·한계")
-            st.markdown("**KICOX (CORE)**")
-            st.caption(f"분석 범위: {quarter_text(meta['record_scope'])}")
-            st.caption(f"자료 기준 {snap.provenance(snap.quarter).get('data_cutoff')}")
-            st.caption(f"{NOMINAL_NOTE} {YOY_NOTE} PPI 교차확인은 외부자료(VALIDATION)이며 판정 입력이 아닙니다.")
-            st.caption(EIS_POPULATION_NOTE)
-
-            st.markdown("**외부자료 (PPI 포함)**")
+            st.markdown(
+                "**생산·고용 — KICOX (판정 입력)**\n"
+                f"- 분석 범위: {quarter_text(meta['record_scope'])} · 자료 기준 {snap.provenance(snap.quarter).get('data_cutoff')}\n"
+                f"- {YOY_NOTE}\n"
+                f"- {NOMINAL_NOTE}\n"
+                f"- 과거분기 진단: 분석 실행분이 {run_quarters}뿐이므로 그 이전 분기는 후향 재구성 분석입니다"
+                "(당시 저장 분석본 없음, 후속 보정자료 반영 가능).")
+            roles = []
             if sample:
                 for role in ("VALIDATION", "CONTEXT"):
-                    title = ROLE_TITLE[role][0]
-                    names = [s["label"] for s in sample["external_sources"] if s["role"] == role]
-                    st.markdown(f"- **{title}** `{role}`: " + ", ".join(names))
-            st.caption("외부자료는 Triage·선택적 재검토의 입력이 아니며 판정을 바꾸지 않습니다.")
-            quote(doc, "외부데이터 원칙")
-
-            st.markdown("**Work24 · FactoryOn**")
-            for text_ in WORK24_BASIS.values():
-                st.caption(f"- {text_}")
+                    names = [s_["label"] for s_ in sample["external_sources"] if s_["role"] == role]
+                    roles.append(f"- {ROLE_TITLE[role][0]} `{role}`: {', '.join(names)}")
+            st.markdown("**외부자료 (판정 입력 아님 · Triage·선택적 재검토를 바꾸지 않음)**\n" + "\n".join(roles)
+                        + "\n- PPI는 명목 생산 방향에 가격효과가 섞였는지 교차확인하는 자료입니다."
+                        + f"\n- {EIS_POPULATION_NOTE}")
+            jobs = next((s_ for s_ in (sample or {}).get("external_sources", []) if s_["key"] == "changwon_jobs"), None)
             dx_ind = st.session_state.get("dx_industry") or snap.industries[0]
-            job_snapshot = decision_support.recruitment_snapshot(dx_ind)
-            st.markdown(f"현재 선택 업종 기준 · {dx_ind}")
-            for c in job_snapshot.get("caveat") or []:
-                st.caption(f"- {quarter_text(c)}")
-            st.caption(" · ".join(f"{k}: {v}" for k, v in RELEVANCE_LABELS.items()))
-            st.caption("GENERAL_NONCORE는 산업기술·훈련 미스매치의 핵심 지표에서 제외합니다.")
-
-            st.markdown("**데이터 시점 차이 · 현재 운영 한계**")
-            cats = sorted({r["source_category"] for r in snap.meta["parameter_spec"]["triage_rules"]})
+            job_caveats = [quarter_text(c) for c in decision_support.recruitment_snapshot(dx_ind).get("caveat") or []]
+            st.markdown(
+                "**채용공고 — Work24 · FactoryOn (현재 채용시장 보조근거 · 판정 입력 아님)**\n"
+                + "\n".join(f"- {WORK24_LEVEL_NAME.get(k, k)}: {v}" for k, v in WORK24_BASIS.items())
+                + f"\n- 수집 시점: {quarter_text(jobs['unavailable_label']) if jobs else '—'} — 진단 분석기간과 겹치지 않습니다."
+                + "\n- 직무 관련성: " + " · ".join(f"{k} {v}" for k, v in RELEVANCE_LABELS.items())
+                + " (GENERAL_NONCORE는 산업기술·훈련 미스매치의 핵심 지표에서 제외)"
+                + (f"\n- 선택 업종({dx_ind}) 채용자료 주의" + "".join(f"\n    - {c}" for c in job_caveats)
+                   if job_caveats else ""))
             unmapped = [fn_name(f["tag"]) for f in C.functions() if f["referable"] and not C.institution_candidates(
                 f["tag"], snap.reference["institution_routing_map"])]
-            jobs = next((s for s in (sample or {}).get("external_sources", []) if s["key"] == "changwon_jobs"), None)
             st.markdown(
-                f"- 경계값 근거 구분: {', '.join(cats)} — 행정 최적값으로 검증된 경계값이 아님\n"
+                "**운영 한계**\n"
                 f"- 현장확인 선택편향: {SELECTION_BIAS_NOTE.split('. ')[0]}.\n"
                 f"- 담당기관 미확정 지원 기능: {', '.join(unmapped)}\n"
-                f"- 검증된 담당기관 2곳은 기관 기능만 확인 — 실제 접수경로·기관 합의는 미확인\n"
-                f"- 지원사업 요건 카드: 공식 원장 {sum(len(svc.requirement_cards(t)) for t in C.function_tags())}건 "
-                "— 일반 조건 안내용이며 자동 적격·승인 판정 아님\n"
-                f"- 고용24 공개 채용공고: {quarter_text(jobs['unavailable_label']) if jobs else '—'} — 현재 분석기간과 겹치지 않음\n"
-                f"- 자동 재검토 표시: 비활성(기준 상태 {THRESHOLD_STATUS}) — 분석본 차이는 표시만 함\n"
-                f"- 과거분기 진단: 분석 실행분이 {', '.join(quarter_label(x) for x in sorted({m['quarter'] for m in metas}))}뿐이므로 그 이전 분기는 "
-                "후향 재구성 분석(당시 저장 분석본 없음, 후속 보정자료 반영 가능)\n"
+                "- 검증된 담당기관 2곳은 기관 기능만 확인 — 실제 접수경로·기관 합의는 미확인\n"
                 f"- 인증: {'프로토타입 · 인증 미연결(로컬 이름 입력)' if not RT.authenticated else RT.auth_mode}")
-            quote(doc, "상태와 한계")
 
         with st.container(border=True):
-            st.markdown("#### 6. 분석 버전·재구성")
-            st.markdown(f"**{NATURE_LABEL['contemporaneous']}** vs **{NATURE_LABEL['reconstructed']}** · "
-                        f"예: {nature_text(snap.quarter, snap.quarters[0])}")
-            st.caption(f"분석 실행 분기: {', '.join(quarter_label(x) for x in sorted({m['quarter'] for m in metas}))}")
-            st.caption("판정 추이 칸의 색은 등록 판정 단계이며 칸 사이 순서는 인과관계를 뜻하지 않습니다.")
-            st.markdown("**분석본 버전 비교**")
-            st.caption("같은 분석대상 분기의 두 분석본을 비교합니다. 분석본 파일은 수정하지 않습니다.")
-            same = [m for m in metas if m["quarter"] == snap.quarter]
-            vers = [m["snapshot_version"] for m in same]
-            a, b = st.columns(2)
-            old_v = a.selectbox("이전 버전", vers, index=max(0, len(vers) - 2), key="cmp_old")
-            new_v = b.selectbox("비교 버전", vers, index=len(vers) - 1, key="cmp_new")
-            if old_v == new_v:
-                st.caption("서로 다른 버전을 고르세요.")
-            else:
-                version_compare_view(snapshot(snap.quarter, old_v), snapshot(snap.quarter, new_v))
-
-        with st.container(border=True):
-            st.markdown("#### 7. 선택적 재검토 — ELECTRE/SMAA")
+            st.markdown("#### 6. 선택적 재검토 — ELECTRE/SMAA")
             p = snap.reference["electre_smaa_protocol"]
             st.markdown(f"- 적용 범위: **{p['scope']}**\n"
                         f"- Triage 단계 변경: **{'금지' if p['triage_stage_mutation'] == 'forbidden' else p['triage_stage_mutation']}**\n"
                         f"- ELECTRE 결과 용도: {p['electre_result_use']}\n- SMAA 결과 용도: {p['smaa_result_use']}\n"
                         f"- CAI 해석: {p.get('cai_interpretation', '—')}")
             elec_spec = meta["parameter_spec"]
-            st.caption(f"선택적 재검토 명세: {elec_spec['electre_specification']} · 적용 범위: {elec_spec['electre_scope']}")
-            st.caption("Triage를 대체하지 않으며 추가확인 사례의 검토 보조용입니다.")
-            quote(doc, "ELECTRE 선택적 채택")
+            st.caption(f"Triage를 대체하지 않으며 추가확인 사례의 검토 보조용입니다 · 명세 {elec_spec['electre_specification']} · "
+                       f"적용 범위 {elec_spec['electre_scope']}")
 
         with st.container(border=True):
-            st.markdown("#### 8. Human-in-the-Loop")
+            st.markdown("#### 7. Human-in-the-Loop")
             st.markdown("- 점검 건 개설\n- 현장확인 결과\n- 지원 필요 기능\n- 담당 기관·인계, 발송·접수·회신 기록\n"
                         "- 재점검 판단(계속 점검·추가확인·모니터링 전환·새 인계·종결)\n- 점검 건 종결")
-            st.caption("시스템은 위 항목을 자동으로 선택하거나 확정하지 않습니다.")
-            st.caption(SELECTION_BIAS_NOTE)
-            quote(doc, "Human Review와 지원연계")
+            st.caption("시스템은 위 항목을 자동으로 선택하거나 확정하지 않습니다. " + SELECTION_BIAS_NOTE)
 
         # 업종 진단에서 옮긴 분석 담당자용 상세(판정 경로·규모 gate·선택적 재검토·외부자료·분석 보완·자료 품질)
         ensure_dx_defaults()
@@ -2430,6 +2851,8 @@ def page_methodology():
                 st.caption("이 분석 버전에 해당 업종·분기 자료가 없습니다.")
             else:
                 aux_evidence_view(dx_rec, dx_q)
+
+        policy_index_admin()
 
 
 # ------------------------------------------------------------------ 변경 기록
@@ -2517,10 +2940,38 @@ def audit_frame(logs: list[dict]) -> pd.DataFrame:
     } for a in logs])
 
 
+def _clear_audit():
+    """변경 기록 초기화(콜백) — 사유와 확인 문구('초기화')가 있을 때만."""
+    ss = st.session_state
+    if (ss.get("audit_clear_confirm") or "").strip() != "초기화":
+        ss._audit_error = "확인 문구로 '초기화'를 입력하세요."
+        return
+    try:
+        # 기록자 이름 없이도 초기화할 수 있다 — 이름이 없으면 초기화 기록의 기록자는 '기록자 미입력'
+        n = svc.clear_audit_log(_case_actor() or local_actor("기록자 미입력"), ss.get("audit_clear_reason") or "")
+    except WorkflowError as e:
+        ss._audit_error = str(e)
+        return
+    ss._flash = f"변경 기록 {n}건을 초기화했습니다(초기화 기록 1건이 남습니다)."
+    for key in ("audit_clear_reason", "audit_clear_confirm"):
+        ss.pop(key, None)
+
+
 def page_audit():
     with st.container(key="adminpage"):
         st.html(ui.page_header_html("변경 기록", "관리 · 운영·검증용 보조 화면"))
-        st.caption("관리용 보조 화면 · 기록은 추가만 되며 수정·삭제되지 않습니다. 항목 이름은 업무용 표현으로 바꿔 보여줍니다.")
+        with st.container(horizontal=True, vertical_alignment="center"):
+            st.caption("관리용 보조 화면 · 기록은 수정되지 않으며, 초기화하면 '변경 기록 초기화' 1건만 남습니다. "
+                       "항목 이름은 업무용 표현으로 바꿔 보여줍니다.")
+            with st.popover("변경 기록 초기화", help="현재 실행 범위의 변경 기록을 비웁니다."):
+                st.warning("모든 변경 기록이 삭제되며 되돌릴 수 없습니다. 인계 기록의 처리 이력(발송·접수·회신 시각)도 "
+                           "변경 기록에서 만들어지므로 함께 사라집니다. 점검 건·현장확인 등 업무 기록 자체는 지워지지 않습니다.")
+                st.text_input("초기화 사유 (필수)", key="audit_clear_reason", placeholder="예: 시험 데이터 정리")
+                st.text_input("확인 문구 — '초기화' 입력", key="audit_clear_confirm")
+                error = st.session_state.pop("_audit_error", None)
+                if error:
+                    st.error(error)
+                st.button("변경 기록 초기화", key="audit_clear", type="primary", on_click=_clear_audit)
         logs = svc.audit_log()
         if not logs:
             st.info("기록된 변경이 없습니다.")
@@ -2550,5 +3001,9 @@ if st.session_state.page == "점검 관리":
         _qp["case"] = str(st.session_state.case_id)
     if st.session_state.get("insp_view") in INSP_VIEWS:
         _qp["view"] = st.session_state.insp_view
+    if st.session_state.get("insp_view") == "진행 중" and st.session_state.get("case_subview") in CASE_SUBVIEWS:
+        _qp["case_tab"] = st.session_state.case_subview
+    elif st.session_state.get("insp_view") == "종결" and st.session_state.get("closed_subview") in CLOSED_SUBVIEWS:
+        _qp["case_tab"] = st.session_state.closed_subview
 if dict(st.query_params) != _qp:
     st.query_params.from_dict(_qp)

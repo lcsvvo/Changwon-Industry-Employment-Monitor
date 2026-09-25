@@ -357,7 +357,11 @@ CHIP_LABELS = {
     "공모전 팀 제안에는 어떤 내용이 있어?": "팀 제안 요약", "조기경보 제안은 어떻게 작동해?": "조기경보 작동",
     "기업 조기진단의 기대효과는?": "조기진단 효과", "정책 성과는 어떤 지표로 확인해?": "정책 성과 지표",
     "공식 지원사업과 팀 제안은 뭐가 달라?": "공식 vs 팀 제안",
+    "현재 남은 점검 절차는?": "남은 점검 절차", "현장확인 결과를 요약해줘": "현장확인 요약",
+    "인계 전에 확인할 사항은?": "인계 전 확인", "이 점검 건의 판정 근거는?": "판정 근거",
 }
+# 점검 건 상세에서의 추천 질문 — 앞의 셋은 저장된 점검 기록 요약(입력·선택·결정을 대신하지 않음), 마지막은 등록 진단 경로
+CASE_SUGGESTIONS = ("현재 남은 점검 절차는?", "현장확인 결과를 요약해줘", "인계 전에 확인할 사항은?", "이 점검 건의 판정 근거는?")
 
 
 def chip_label(question: str) -> str:
@@ -412,6 +416,34 @@ def signal_explanation(rows: list[dict], signals: dict, p_title: str = "생산 �
     return {"items": items[:5], "summary": summary}
 
 
+# 현장 확인 질문 표시용 어미 통일(원문은 backend·Snapshot 그대로, 화면에서만 '~ 확인' 체크리스트 문체로 바꾼다)
+_CHECK_ENDINGS = (
+    ("확인했습니까?", "확인"), ("했습니까?", "했는지 확인"), ("였습니까?", "였는지 확인"), ("입니까?", "인지 확인"), ("있습니까?", "있는지 확인"),
+    ("없습니까?", "없는지 확인"), ("합니까?", "한지 확인"), ("습니까?", "는지 확인"),
+    ("확인할 필요가 있다", "확인"), ("할 필요가 있다", ""), ("확인한다", "확인"), ("할 수 없다", "할 수 없음"),
+    ("아니다", "아님"), ("않는다", "않음"), ("나타난다", "나타남"), ("다르다", "다름"),
+    ("이다", "임"), ("있다", "있음"), ("없다", "없음"), ("한다", "함"),
+)
+_TRAILING_NOTE = re.compile(r"^(.*?)(\s*\([^()]*\))?$")
+
+
+def checklist_text(text: str | None) -> str:
+    """'…발생했습니까?' / '…확인할 필요가 있다.'처럼 섞인 어미를 '…발생했는지 확인' 형태로 맞춘다. 내용·수치는 그대로."""
+    out = []
+    for sentence in re.split(r"(?<=[.?])\s+", (text or "").strip()):
+        body, note = _TRAILING_NOTE.match(sentence.rstrip(".").strip()).groups()
+        body = body.rstrip(".").strip()
+        for ending, repl in _CHECK_ENDINGS:
+            if body.endswith(ending):
+                body = body[: -len(ending)] + repl
+                break
+        else:
+            if body.endswith("?"):
+                body = body[:-1] + " 확인"
+        out.append(body.rstrip() + (note or ""))
+    return ". ".join(x for x in out if x)
+
+
 def top_questions(questions: list[dict], n: int = 3) -> list[dict]:
     """앞의 n개만 잘라 보여준다. backend 순서(Q1→Q3→WORK24→SNAPSHOT)를 그대로 쓰며 재정렬하지 않는다."""
     return questions[:n]
@@ -436,13 +468,13 @@ def pick_case(cases: list[dict], industry: str, quarter: str) -> dict | None:
 
 
 def case_status_label(candidate: dict | None, case: dict | None) -> str:
-    """점검상태 표시(기록된 값만): 미개설 · 검토 중 · 진행 중 #n · 인계 #n · 모니터링 #n · 종결 #n."""
+    """점검상태 표시(기록된 값만): 미개설 · 검토 중 · 진행 중 · 인계 · 모니터링 · 종결(점검 건 번호는 표시하지 않음)."""
     if case:
         if case.get("status") == "종결":
-            return f"종결 #{case['id']}"
+            return "종결"
         if case.get("decision") == "인계":
-            return f"인계 #{case['id']}"
-        return f"{case.get('status') or '진행 중'} #{case['id']}"
+            return "인계"
+        return case.get("status") or "진행 중"
     review = (candidate or {}).get("review") or {}
     if review.get("status") == "점검 불필요":
         return "검토 종료(점검 불필요)"
@@ -491,11 +523,34 @@ def reason_sentence(rec: dict, rows: list[dict]) -> str:
     return text
 
 
+_SIGNAL_PLAIN = {"E": "고용 감소율", "R": "산단 평균 대비 감소", "A": "고용 감소 규모"}
+_STAGE_IS = {"우선점검": "우선점검 후보입니다", "추가확인": "추가확인 단계입니다", "관찰": "관찰 단계입니다"}
+
+
+def reason_summary(rec: dict, rows: list[dict]) -> str:
+    """대기열용 짧은 판정 이유 — 어떤 신호가 기준을 넘었는지만(수치·경계값은 진단카드 판정 근거에서 본다)."""
+    stage = rec["triage"].get("stage")
+    met = [_SIGNAL_PLAIN[c] for c in ("E", "R", "A")
+           if any((r.get("signal") or "").startswith(c) and r.get("verdict") in ("상위", "진입") for r in rows)]
+    extra = [name for prefix, name in (("P ", "생산 감소"), ("반복 진입신호", "2분기 연속 신호"))
+             if any((r.get("signal") or "").startswith(prefix) and r.get("verdict") == "충족" for r in rows)]
+    tail = _STAGE_IS.get(stage, f"{stage_display(stage)}입니다")
+    if rec["triage"].get("scale_flag"):  # 규모 gate로 우선점검이 아닌 경우를 문장에 드러낸다
+        tail = tail.removesuffix("입니다") + f"입니다({rec['triage']['scale_flag']})"
+    if not met:
+        return f"고용 신호가 기준에 못 미쳐 {tail}." if stage == "관찰" else reason_sentence(rec, rows)
+    last = met[-1][-1]
+    josa = "이" if "가" <= last <= "힣" and (ord(last) - 0xAC00) % 28 else "가"  # 받침 있으면 '이', 없으면 '가'
+    subject = f"{'·'.join(met)}{josa}"
+    return (f"{subject} 기준을 넘고 {'·'.join(extra)}도 확인돼 {tail}." if extra
+            else f"{subject} 기준을 넘어 {tail}.")
+
+
 def next_action(stage: str | None, status: str, next_review: str | None) -> str:
     """다음 조치 한 줄 — 등록 단계와 기록된 점검상태만으로 정한다(새 판단 없음)."""
-    if status.startswith(("진행 중", "인계", "모니터링")):
-        return f"진행 중인 점검 건 확인 · {status}"
-    if status.startswith("종결"):
+    if status in ("진행 중", "인계", "모니터링"):
+        return "진행 중인 점검 건 확인" + ("" if status == "진행 중" else f" · {status}")
+    if status == "종결":
         return f"종결된 점검 건 기록 확인 · 다음 검토 {quarter_label(next_review)}"
     if stage in ("우선점검", "추가확인"):
         return "점검 개설 · 현재 점검 미개설" if status == "미개설" else f"점검 후보 검토 · {status}"
@@ -519,7 +574,8 @@ def queue_rows(records: list[dict], candidates: list[dict], cases: list[dict], r
             "emp_delta": _num(q2.get("emp_delta"), suffix="명"), "emp_yoy": _num(q2.get("employment_yoy"), 2, "%"),
             "share": _num(q2.get("employment_share_pct"), 2, "%"), "run": run_text(q3),
             "transition": q3.get("transition") or "전환 자료 없음",
-            "reason": reason_sentence(r, rule_evidence_rows(r, rules)), "status": status,
+            "reason": reason_sentence(r, rule_evidence_rows(r, rules)),
+            "summary": reason_summary(r, rule_evidence_rows(r, rules)), "status": status,
             "case_id": case["id"] if active else None,
             "next_review": t.get("next_review_quarter"),
         })
@@ -533,6 +589,302 @@ def rank_text(stage: str | None, rank) -> str:
     if stage == "관찰":
         return f"관찰 단계 내 참고 순위 {rank}위"
     return f"{stage_display(stage)} 단계 내 {rank}순위"
+
+
+# ------------------------------------------------------------------ 점검 관리 · 진행 중 점검 상세(저장된 기록만 읽는 진행 요약)
+CASE_SUBVIEWS = ("점검 요약", "현장 확인", "지원 검토·결정", "인계·재점검")
+CHECK_RESULT_ORDER = ("확인", "부분 확인", "미확인", "반대증거")
+# 현장확인 결과 표시명(저장값은 그대로) — '반대증거'는 뜻이 바로 읽히지 않아 화면에서만 풀어 쓴다
+CHECK_RESULT_DISPLAY = {"반대증거": "반대 사실 확인"}
+CHECK_RESULT_HELP = ("확인: 질문 내용이 사실로 확인됨 · 부분 확인: 일부만 사실로 확인됨 · 미확인: 확인하지 못함 · "
+                     "반대 사실 확인: 질문과 반대되는 사실이 확인됨(예: 감원·휴업이 실제로는 없었음)")
+
+
+def check_result_label(code: str | None) -> str:
+    return CHECK_RESULT_DISPLAY.get(code or "", code or "—")
+
+
+def case_progress(case: dict, label_of=None) -> dict:
+    """진행 요약·다음 할 일 — get_case() 결과만 읽어 계산한다(DB에 진행률을 따로 저장하지 않음, 상태를 바꾸지 않음).
+
+    next = (다음 할 일 문장, 이동할 하위 화면, 버튼 이름). 버튼은 화면 이동만 하며 저장·상태변경을 하지 않는다.
+    """
+    label_of = label_of or (lambda tag: tag)
+    closed = case.get("status") == "종결"
+    cur = case.get("current_scope") or {}
+    checks = cur.get("checks") or []
+    done = [i for i in checks if i.get("latest")]
+    counts = {code: 0 for code in CHECK_RESULT_ORDER}
+    for item in done:
+        code = item["latest"].get("result_code")
+        counts[code] = counts.get(code, 0) + 1
+    need = cur.get("support_needs")
+    if need is None:
+        support = "미선택"
+    else:
+        support = ", ".join(label_of(t) for t in need.get("function_tags") or []) or "선택 없음(기록됨)"
+    decisions = cur.get("decisions") or []
+    decision = decisions[-1]["decision"] if decisions else None
+    referrals = case.get("referrals") or []
+    active = [r for r in referrals if r.get("status") != "종결"]
+    nrq = case.get("next_review_quarter")
+    if closed:
+        nxt = ("종결된 점검 건입니다. 기록은 읽기 전용으로 확인할 수 있습니다.", "점검 요약", "점검 요약 보기")
+    elif not done:
+        nxt = ("첫 번째 현장확인 결과를 기록하세요.", "현장 확인", "현장 확인 계속")
+    elif len(done) < len(checks):
+        nxt = (f"남은 현장확인 {len(checks) - len(done)}건을 기록하세요.", "현장 확인", "현장 확인 계속")
+    elif need is None:
+        nxt = ("현장확인 결과를 검토하고 필요한 지원기능을 선택하세요.", "지원 검토·결정", "지원기능 검토")
+    elif not decisions:
+        nxt = ("점검 결과와 지원 필요성을 바탕으로 결정을 기록하세요.", "지원 검토·결정", "결정 기록")
+    elif decision == "인계" and active:
+        nxt = ("인계 발송·접수·회신 상태를 기록하세요.", "인계·재점검", "인계 상태 기록")
+    elif nrq:
+        nxt = (f"{quarter_label(nrq)} 재점검을 준비하세요.", "인계·재점검", "재점검 확인")
+    else:
+        nxt = ("기록된 결정을 확인하세요.", "지원 검토·결정", "결정 확인")
+    return {
+        "closed": closed, "total": len(checks), "done": len(done), "counts": counts,
+        "unrecorded": len(checks) - len(done), "support": support, "support_recorded": need is not None,
+        "decision": decision or "미기록", "referrals": len(referrals), "active_referrals": len(active),
+        "referral_text": (f"{len(referrals)}건 · 진행 중 {len(active)}건" if referrals else "없음"),
+        "next_review": quarter_label(nrq) if nrq else "미정",
+        "next": nxt,
+    }
+
+
+# 종결 점검 건 — 하위 화면은 안정적인 ID로 두고 표시 이름만 바꾼다(예전 case_tab 이름도 받아들인다)
+CLOSED_SUBVIEWS = {"closed_summary": "종결 요약", "closed_checks": "현장확인 기록",
+                   "closed_support_decisions": "지원·결정 기록", "closed_referrals_history": "인계·변경 기록"}
+CLOSED_TAB_ALIAS = {"점검 요약": "closed_summary", "현장 확인": "closed_checks", "지원 검토·결정": "closed_support_decisions",
+                    "인계·재점검": "closed_referrals_history", **{v: k for k, v in CLOSED_SUBVIEWS.items()}}
+
+
+def closed_subview_id(value: str | None) -> str:
+    """URL·세션의 case_tab 값을 종결 하위 화면 ID로(ID·표시 이름·예전 이름 모두 허용, 그 밖은 종결 요약)."""
+    if value in CLOSED_SUBVIEWS:
+        return value
+    return CLOSED_TAB_ALIAS.get(value or "", "closed_summary")
+
+
+def closed_case_vm(case: dict, label_of=None) -> dict:
+    """종결 점검 건 표시값 — get_case() 결과만 읽는다. 최종 결정/이전 결정 구분, 후속 검토는 저장값만(없으면 '해당 없음 · 종결').
+
+    '기록된 지원 필요 기능'은 담당자의 검토 기록이며 지원 완료·인계를 뜻하지 않는다. 인계 기록이 없으면 '인계 기록 없음'으로만 쓴다.
+    """
+    label_of = label_of or (lambda tag: tag)
+    scopes = case.get("scopes") or []
+    last = scopes[-1] if scopes else {}
+    decisions = list(case.get("decisions") or [])
+    final = next((d for d in reversed(decisions) if d.get("decision") == "종결"), decisions[-1] if decisions else None)
+    previous = [d for d in decisions if d is not final]
+    checks = last.get("checks") or []
+    done = [i for i in checks if i.get("latest")]
+    counts = {code: 0 for code in CHECK_RESULT_ORDER}
+    for item in done:
+        code = item["latest"].get("result_code")
+        counts[code] = counts.get(code, 0) + 1
+    need = last.get("support_needs")
+    tags = list((need or {}).get("function_tags") or [])
+    referrals = case.get("referrals") or []
+    reason = str(case.get("closing_note") or "").strip() or "기록 없음"
+    return {
+        "final": final, "previous": previous, "decision_count": len(decisions),
+        "final_decision": (final or {}).get("decision") or "기록 없음", "closing_note": reason,
+        "closed_by": case.get("closed_by") or "미지정", "closed_at": case.get("closed_at"),
+        "assignee": case.get("assignee") or "미지정",
+        "done": len(done), "total": len(checks), "counts": counts,
+        "counts_text": " · ".join(f"{check_result_label(k)} {v}건" for k, v in counts.items()),
+        "support": ", ".join(label_of(t) for t in tags) or ("선택 없음(기록됨)" if need else "기록 없음"),
+        "support_count": len(tags),
+        "referral_text": f"{len(referrals)}건" if referrals else "인계 기록 없음",
+        "followup": quarter_label(case["next_review_quarter"]) if case.get("next_review_quarter") else "해당 없음 · 종결",
+        "rounds": len(scopes),
+    }
+
+
+def closed_case_timeline(case: dict) -> list[tuple[str, str, str]]:
+    """처리 흐름 — 저장된 이벤트만(개설 · 재점검 시작 · 현장확인 기록 · 결정). (시각 ISO, 단계, 내용), 시간순. 누락 단계를 추정하지 않는다."""
+    events = [(case.get("opened_at") or "", "점검 개설", f"{case.get('origin') or ''}에서 개설".strip())]
+    for sc in case.get("scopes") or []:
+        title = f"{quarter_label(sc.get('quarter'))} {sc.get('review_kind') or ''}".strip()
+        if sc.get("review_kind") == "재점검":
+            events.append((sc.get("started_at") or "", "재점검 시작", title))
+        latest = [i["latest"] for i in sc.get("checks") or [] if i.get("latest")]
+        if latest:
+            events.append((max(str(r.get("recorded_at") or "") for r in latest), "현장확인 기록",
+                           f"{len(latest)}/{len(sc.get('checks') or [])}건 · {title}"))
+    for d in case.get("decisions") or []:
+        detail = (f"다음 검토 {quarter_label(d['next_review_quarter'])} (결정 당시)"
+                  if d.get("next_review_quarter") else ("점검 건 종결" if d.get("decision") == "종결" else ""))
+        events.append((d.get("decided_at") or "", f"{d.get('decision')} 결정", detail))
+    return sorted((e for e in events if e[0]), key=lambda e: str(e[0]))
+
+
+def default_check_position(checks: list[dict]) -> int | None:
+    """기록할 문항 기본값: 첫 번째 미기록 문항 → 모두 기록됐으면 가장 최근에 기록한 문항."""
+    if not checks:
+        return None
+    pending = [i for i in checks if not i.get("latest")]
+    if pending:
+        return pending[0]["position"]
+    return max(checks, key=lambda i: str(i["latest"].get("recorded_at") or ""))["position"]
+
+
+# ------------------------------------------------------------------ 담당자 인계용 진단 요약(진단서) ViewModel
+REPORT_TYPES = ("요약본 · 1페이지", "상세본 · 요약 + 근거 부록")
+REPORT_NOTICE = "담당자 검토·인계용 자료이며 행정처분 또는 지원대상 확정 문서가 아닙니다."
+_RULE_ROLE = {"상위": "상위신호", "진입": "진입신호", "미달": "미충족", "미확인": "미확인"}
+
+
+def _evidence_role(row: dict) -> str:
+    sig, verdict = row.get("signal") or "", row.get("verdict")
+    if sig.startswith(("P ", "반복")):
+        return "보강근거" if verdict == "충족" else ("미확인" if verdict == "미확인" else "보강 미충족")
+    if sig.startswith("규모"):
+        return "규모 기준 " + ("통과" if verdict == "통과" else verdict or "미확인")
+    return _RULE_ROLE.get(verdict, verdict or "미확인")
+
+
+def build_report_vm(payload: dict, rec: dict | None, rows: list[dict], *, fn_label, case: dict | None = None,
+                    institutions: dict[str, list[dict]] | None = None, doc_titles: dict | None = None,
+                    snapshot_label: str = "", nature: str = "", population_note: str = "") -> dict:
+    """진단서 표시용 값 — payload·등록 Snapshot·점검 건 기록(get_case 결과)만 읽는다. 판정·상태를 다시 계산하거나 저장하지 않는다.
+
+    구분: 지원기능 '검토 후보'(채용 키워드·확인 신호) vs '담당자 선택'(점검 건 support_needs) / 담당기관 확인(verified) vs
+    접수경로 확인 / '다음 검토'(점검 건에 저장된 값) vs '권고 검토분기'(등록 판정 규칙 값) / 판정근거 vs 보조자료.
+    """
+    institutions = institutions or {}
+    t = (rec or {}).get("triage") or {}
+    q1, q2, q3 = ((rec or {}).get(k) or {} for k in ("q1", "q2", "q3"))
+    stage = t.get("stage") or (payload.get("triage") or {}).get("stage")
+    questions = (payload.get("field_checks") or {}).get("questions") or []
+
+    # 현장확인 — 점검 건이 있으면 그 기록, 없으면 이 세션의 체크·입력(영구 저장 아님)
+    cur = None
+    if case:
+        cur = case["current_scope"] if case.get("status") != "종결" else case["scopes"][-1]
+    case_results = {i["question_text"]: i["latest"] for i in (cur or {}).get("checks") or [] if i.get("latest")}
+    session = {r["question"]: r for r in ((payload.get("field_checks") or {}).get("session_context") or {}).get("responses", [])
+               if r.get("checked") or r.get("answer")}
+    if cur is not None:
+        total, done, basis = len(cur.get("checks") or []), len(case_results), "점검 건 기록"
+    else:
+        total, done, basis = len(questions), len(session), "현재 세션 입력"
+    field_text = f"{done}/{total}건" + (" · 입력 없음" if not done else f" · {basis}")
+
+    # 지원 검토 — 후보(payload)와 담당자 선택(점검 건) 구분, 담당기관은 verified 후보만
+    candidates = [f["function_tag"] for f in payload.get("support_functions") or []]
+    need = (cur or {}).get("support_needs")
+    selected = list(need.get("function_tags") or []) if need else []
+    cards = payload.get("requirement_cards") or []
+    card_count = {tag: sum(1 for c in cards if c.get("function_tag") == tag) for tag in candidates}
+    referrals = (case or {}).get("referrals") or []
+    fn_rows = []
+    for tag in list(dict.fromkeys([*selected, *candidates])):
+        cands = institutions.get(tag) or []
+        ref = [r for r in referrals if r.get("function_tag") == tag]
+        fn_rows.append({
+            "label": fn_label(tag), "status": "담당자 선택" if tag in selected else "후보",
+            "cards": card_count.get(tag), "institutions": ", ".join(dict.fromkeys(c["institution"] for c in cands)),
+            "intake": ("접수경로 확인" if cands and all(c.get("intake_route_verified") for c in cands)
+                       else ("접수경로 미확인" if cands else "—")),
+            "referral": (f"인계 기록 · {ref[-1]['status']}" if ref else "인계 없음"),
+            "confirmed": bool(cands),
+        })
+    confirmed = [f"{r['label']} — {r['institutions']}" for r in fn_rows if r["confirmed"]]
+    unmapped = [r["label"] for r in fn_rows if not r["confirmed"]]
+    need_check = []
+    if any(r["confirmed"] and r["intake"] == "접수경로 미확인" for r in fn_rows):
+        need_check.append("실제 접수경로")
+    if unmapped:
+        need_check.append(f"담당기관 미확정 기능({'·'.join(unmapped)})의 담당기관")
+
+    # 다음 검토 — 저장값과 규칙상 권고값 구분
+    if case and case.get("next_review_quarter"):
+        review = ("다음 검토", quarter_label(case["next_review_quarter"]))
+    elif t.get("next_review_quarter"):
+        review = ("권고 검토분기", f"{quarter_label(t['next_review_quarter'])} (등록 판정 규칙)")
+    else:
+        review = ("다음 검토", "미정")
+
+    priority = checklist_text(((rec or {}).get("questions") or {}).get("check_question")) or None
+    if case:
+        next_text = case_progress(case, fn_label)["next"][0]
+    elif priority:
+        next_text = f"점검 개설 검토 · 우선 확인: {priority}"
+    else:
+        next_text = "점검 개설 검토"
+
+    jobs = payload.get("recruitment_snapshot") or {}
+    levels = {lv.get("key"): lv for lv in jobs.get("evidence_levels") or []}
+    keywords = [(k["term"], k["count"]) for k in (payload.get("recruitment_keywords") or {}).get("keywords") or []]
+
+    def level(key, field="count"):
+        return (levels.get(key) or {}).get(field)
+
+    production = q1.get("production_yoy")
+    kpis = [
+        ("산업·고용 상태", q1_plain(q1.get("state")), q1.get("state") or "—"),
+        ("고용 영향", _num(q2.get("emp_delta"), suffix="명"), f"전년 동분기 대비 {_num(q2.get('employment_yoy'), 2, '%')}"),
+        ("산단 고용 비중", _num(q2.get("employment_share_pct"), 2, "%"), f"고용 {_num(q2.get('employment'), suffix='명')}"),
+        ("지속·전환", run_text(q3) if rec else "자료 없음", (q3.get("transition") or "전환 자료 없음").replace(" → ", "→")),
+    ]
+
+    # 부록 B — 현장 확인문항 원문 전체(출처 메타데이터만 사용)
+    question_rows = []
+    for i, item in enumerate(questions, 1):
+        latest = case_results.get(item["question"])
+        sess = session.get(item["question"])
+        if latest:
+            result = f"{check_result_label(latest.get('result_code'))} · {latest.get('method') or ''}".strip(" ·")
+        elif sess:
+            result = sess.get("answer") or "확인 표시(세션)"
+        else:
+            result = ""
+        question_rows.append({"no": i, "text": item["question"], "source": item.get("source") or "", "result": result})
+
+    sources = []
+    for s in payload.get("official_sources") or []:
+        title = (doc_titles or {}).get(s.get("document_id")) or s.get("document_id")
+        if title and s.get("source_url"):
+            sources.append((f"{title} (확인 {s.get('verified_at') or '—'})", s["source_url"]))
+    limits = [x for x in [
+        f"자료 기준일 {payload.get('basis_date')}" if payload.get("basis_date") else "",
+        f"분석본 {snapshot_label}" if snapshot_label else "", nature,
+        "생산지표는 가격변동 효과가 포함될 수 있는 명목 생산액입니다. 실제 생산물량 변화는 추가 확인이 필요합니다.",
+        YOY_NOTE, population_note,
+        *[quarter_text(c) for c in payload.get("caveat") or []],
+    ] if x and str(x).strip()]
+
+    return {
+        "industry": payload["industry"], "quarter": quarter_label(payload["quarter"]),
+        "stage": stage, "stage_display": stage_display(stage),
+        "case_status": (case or {}).get("status") or "점검 미개설", "assignee": (case or {}).get("assignee") or "미배정",
+        "field_text": field_text, "field_done": done, "field_total": total,
+        "reason": reason_summary(rec, rows) if rec else "등록 진단 없음",
+        "production": ("명목 생산액 미확인" if production is None else f"명목 생산액 전년 동분기 대비 {_num(production, 1, '%')}"),
+        "kpis": kpis, "review": review,
+        "decision": ((cur or {}).get("decisions") or [{}])[-1].get("decision") or "미결정",
+        "referral_text": (f"{len(referrals)}건" if referrals else "없음"),
+        "next_action": next_text,
+        "priority": priority, "question_total": len(questions),
+        "more_questions": max(len(questions) - (1 if priority else 0), 0),
+        "candidates": [fn_label(tg) for tg in candidates], "selected": [fn_label(tg) for tg in selected],
+        "confirmed": confirmed, "need_check": need_check, "fn_rows": fn_rows,
+        "jobs_found": jobs.get("status") == "FOUND", "jobs_quarter": quarter_label(jobs.get("quarter")),
+        "jobs_counts": {"목록": level("LIST"), "현재 유효": level("ACTIVE_CONFIRMED"),
+                        "상세 검증": level("DETAIL_VERIFIED"), "확인 기업": level("DETAIL_VERIFIED", "company_count")},
+        "keywords_top": keywords[:3], "keywords_all": keywords,
+        "rule_rows": [{**r, "role": _evidence_role(r)} for r in rows],
+        "rule_summary": (f"진입신호 {_num((rec or {}).get('signals', {}).get('n_entry'))}건 · "
+                         f"상위신호 {_num((rec or {}).get('signals', {}).get('n_up'))}건 → 등록 판정 {stage_display(stage)}"),
+        "question_rows": question_rows, "any_results": any(r["result"] for r in question_rows),
+        "cards": cards, "sources": sources, "limits": list(dict.fromkeys(limits)),
+        "basis": [x for x in (f"자료 기준일 {payload.get('basis_date')}" if payload.get("basis_date") else "",
+                              nature) if x],
+    }
 
 
 # ------------------------------------------------------------------ 정책 근거 위치 · 담당기관 검증상태(등록 값만)
@@ -583,7 +935,7 @@ def institution_audit_label(entry: dict | None) -> str:
 def assistant_labels(llm_available: bool) -> tuple[str, str]:
     """(패널 이름, 응답 방식). Gemini가 설정되지 않으면 생성형 AI처럼 보이지 않게 '규칙 기반'으로 표시한다."""
     if llm_available:
-        return "행정 AI 비서", "등록된 진단·정책 근거 기반"
+        return "행정 AI 비서", ""  # 설정된 경우는 이름만(응답 방식 표시 없음)
     return "진단 근거 도우미", "규칙 기반 응답"
 
 

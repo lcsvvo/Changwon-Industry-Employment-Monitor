@@ -34,6 +34,8 @@ ACTION_LABEL = {
     "candidate.review_concluded": "점검 후보 검토 종료(점검 불필요)",
     "candidate.case_opened": "점검 후보 → 점검 건 개설",
     "case.opened": "점검 건 개설(최초 점검)",
+    "case.deleted": "점검 건 삭제",
+    "audit.cleared": "변경 기록 초기화",
     "case.field_result_recorded": "현장확인 결과 입력",
     "case.context_questions_added": "현장확인 질문 후보 추가",
     "case.note_recorded": "현장 메모 기록",
@@ -55,7 +57,7 @@ TARGET_LABEL = {
     "candidate_review": "점검 후보", "inspection_case": "점검 건", "case_check_item": "현장확인 항목",
     "check_result": "현장확인 결과", "case_note": "현장 메모",
     "case_support_need": "지원 필요 기능", "referral": "인계 기록", "quarterly_review": "점검 시점",
-    "institution_registry": "기관 후보",
+    "institution_registry": "기관 후보", "audit_log": "변경 기록",
 }
 # 실제 업무 발생시각을 입력받는 인계 단계 → 컬럼 접두어(발송→접수→회신 순)
 REFERRAL_OCCURRED = {"발송 기록": "sent", "접수 확인": "received", "처리·회신 기록": "replied"}
@@ -798,6 +800,56 @@ class WorkflowService:
                                     else None),
                         "text": after.get(field) if field else None})
         return out
+
+    def clear_audit_log(self, actor, reason: str) -> int:
+        """현재 실행 범위(운영/시연)의 변경 기록을 비운다 — 담당자가 사유를 적었을 때만.
+
+        인계 처리 이력(발송·접수·회신 시각)은 변경 기록에서 파생되므로 함께 사라진다. 초기화 사실은 새 기록 1건
+        ('변경 기록 초기화' · 사유 · 삭제 건수)으로 남긴다. 다른 실행 범위의 기록은 건드리지 않는다.
+        """
+        who = self._who(actor)
+        reason = _require(reason, "초기화 사유")
+        with self.Session.begin() as s:
+            rows = list(s.scalars(select(M.AuditLog).where(M.AuditLog.is_example.is_(self.demo))))
+            for row in rows:
+                s.delete(row)
+            s.flush()
+            self._audit(s, who, "audit.cleared", "audit_log", "all", None,
+                        {"reason": reason, "deleted_records": len(rows)}, None, None)
+        return len(rows)
+
+    def delete_case(self, actor, case_id: int, reason: str) -> dict:
+        """점검 건과 그 하위 기록(점검 시점·현장확인 문항·결과·메모·지원 필요 기능·결정·인계)을 한 transaction으로 삭제한다.
+
+        - 담당자가 사유를 적어야만 삭제한다(진행 중·종결 모두 가능).
+        - 이 점검 건을 열기 위해서만 쓰인 점검 후보 검토(상태 '점검 건 개설')도 함께 지워 후보가 '미개설'로 돌아간다.
+        - 감사로그는 지우지 않는다. 기존 기록은 그대로 두고 '점검 건 삭제' 기록(사유·삭제 건수·삭제 전 점검 건)을 추가한다.
+        """
+        who = self._who(actor)
+        reason = _require(reason, "삭제 사유")
+        with self.Session.begin() as s:
+            case = self._case(s, case_id)
+            before = _plain(case, CASE_FIELDS)
+            snap_q, snap_v, review_id = case.snapshot_quarter, case.snapshot_version, case.candidate_review_id
+            deleted = {}
+            # 외래키 순서: 결과→문항, 인계→결정, 모든 하위 기록→점검 시점→점검 건
+            for model in (M.CheckResult, M.CaseNote, M.CaseSupportNeed, M.Referral, M.CaseDecision, M.CaseCheckItem,
+                          M.QuarterlyReview):
+                rows = list(s.scalars(select(model).where(model.case_id == case_id)))
+                deleted[model.__tablename__] = len(rows)
+                for row in rows:
+                    s.delete(row)
+                s.flush()
+            s.delete(case)
+            s.flush()
+            review = s.get(M.CandidateReview, review_id) if review_id else None
+            if review is not None and review.status == "점검 건 개설" and s.scalar(
+                    select(M.InspectionCase.id).where(M.InspectionCase.candidate_review_id == review.id)) is None:
+                s.delete(review)
+                deleted["candidate_reviews"] = 1
+            self._audit(s, who, "case.deleted", "inspection_case", case_id, before,
+                        {"reason": reason, "deleted_records": deleted}, snap_q, snap_v)
+        return deleted
 
     def get_case(self, case_id: int) -> dict | None:
         with self.Session() as s:
