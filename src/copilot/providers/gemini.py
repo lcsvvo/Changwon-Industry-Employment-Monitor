@@ -138,8 +138,8 @@ def _default_resolver(url: str) -> str | None:
 
 
 class GeminiSearchProvider:
-    """Gemini + Google Search grounding. 인용 chunk를 실제 URL로 풀어 공식 도메인만 남기고,
-    그 chunk가 뒷받침하는 문장(segment)만 답변으로 쓴다."""
+    """Gemini + Google Search grounding. 답변 원문(Grounded Result)은 수정하지 않고 그대로 돌려주며,
+    인용 chunk는 실제 URL로 풀어 공식기관 여부만 표시한다."""
     name = "gemini_grounding"
 
     def __init__(self, llm: GeminiProvider, *, resolver: Resolver | None = None,
@@ -167,37 +167,26 @@ class GeminiSearchProvider:
         meta = candidate.get("groundingMetadata") or {}
         chunks = meta.get("groundingChunks") or []
         retrieved = str(self._today())
-        allowed: dict[int, WebResult] = {}
-        for index, chunk in enumerate(chunks):
+        # Gemini API 약관: Grounded Result·Search Suggestions는 수정하거나 다른 내용을 섞어 표시하지 않는다.
+        # 그래서 답변 원문은 문장 선별 없이 그대로 두고, 출처에는 공식기관 여부만 표시한다(표시 여부만 결정).
+        answer = "".join(part.get("text") or "" for part in (candidate.get("content") or {}).get("parts") or [])
+        results = []
+        for chunk in chunks[:max_results]:
             web = chunk.get("web") or {}
-            final = self._resolve(web.get("uri") or "") if web.get("uri") else None
-            tier, institution = classify(final)
-            if not final or tier is None:
+            if not web.get("uri"):
                 continue
-            allowed[index] = WebResult(title=web.get("title") or domain_of(final) or final, url=final,
-                                       domain=domain_of(final), tier=tier, institution=institution,
-                                       retrieved_at=retrieved)
-        order: list[int] = []
-        segments: list[dict] = []
-        seen: set[str] = set()
-        for support in meta.get("groundingSupports") or []:
-            idx = [i for i in support.get("groundingChunkIndices") or [] if i in allowed]
-            text = ((support.get("segment") or {}).get("text") or "").strip()
-            if not idx or not text or mentions_internal_judgment(text):
-                continue  # 공식 도메인 근거가 없거나 본 시스템 판정을 말하는 문장은 버린다
-            marks = []
-            for i in idx:
-                if i not in order:
-                    order.append(i)
-                marks.append(f"[{order.index(i) + 1}]")
-            if text not in seen:
-                seen.add(text)
-                segments.append({"text": text, "marks": "".join(dict.fromkeys(marks))})
-        results = tuple(allowed[i] for i in order[:max_results])
-        answer = " ".join(f"{s['text']} {s['marks']}" for s in segments)
-        ok = bool(answer and results)
-        return WebSearchResult(ok=ok, results=results, answer=answer if ok else "", provider=self.name,
-                               model=self.model, queries=tuple(meta.get("webSearchQueries") or ()),
-                               raw_result_count=len(chunks), error=None if ok else "NO_OFFICIAL_SUPPORT",
-                               meta={"segments": segments,
-                                     "search_entry_point": (meta.get("searchEntryPoint") or {}).get("renderedContent")})
+            final = self._resolve(web["uri"])
+            tier, institution = classify(final)
+            results.append(WebResult(title=web.get("title") or domain_of(final or web["uri"]) or web["uri"],
+                                     url=final or web["uri"], domain=domain_of(final) if final else None,
+                                     tier=tier, institution=institution, retrieved_at=retrieved))
+        error = None
+        if not answer.strip():
+            error = "EMPTY"
+        elif mentions_internal_judgment(answer):
+            error = "MENTIONS_INTERNAL_JUDGMENT"  # 본 시스템 판정을 말하는 외부 답변은 고치지 않고 표시하지 않는다
+        return WebSearchResult(ok=error is None, results=tuple(results), answer=answer if error is None else "",
+                               provider=self.name, model=self.model,
+                               queries=tuple(meta.get("webSearchQueries") or ()), raw_result_count=len(chunks),
+                               error=error,
+                               meta={"search_entry_point": (meta.get("searchEntryPoint") or {}).get("renderedContent")})

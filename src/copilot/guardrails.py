@@ -1,7 +1,9 @@
 """응답 안전장치.
 
 - 모든 응답은 유효한 source_type을 가진다.
-- EXTERNAL_WEB은 공식 도메인 인용(URL·기관·확인일) 없이는 내보내지 않는다.
+- EXTERNAL_WEB(공식 API 공고)은 공식 도메인 인용(URL·기관·확인일) 없이는 내보내지 않는다.
+- Google 검색 grounding 답변(WEB_GROUNDED)은 Gemini API 약관에 따라 수정·선별 없이 원문 그대로 두고,
+  '시스템 미검증' 표시는 원문 밖(caveat·화면 라벨)에 붙인다. 표시하지 않는 것만 고를 수 있다.
 - LLM이 쓴 문장은 (1) 원본에 없는 숫자 (2) 등록 판정과 다른 단계어 (3) 공식 근거 없는 단정 표현
   (4) 업종 A 신호를 산단 전체 고용 감소율로 바꾼 표현이 있으면 폐기한다.
 - 등록 진단 답변에 붙는 LLM 쉬운 설명은 숫자를 아예 쓸 수 없다(수치는 등록 원문 그대로 함께 표시). 폐기 시 호출부가 결정론적 원문으로 되돌린다.
@@ -29,6 +31,10 @@ PARK_WIDE_DECLINE = re.compile(
     r"[-+]?\d+(?:\.\d+)?\s*%\s*(?:가|이|나|만큼|정도)?\s*(?:줄|감소|하락|떨어)")
 # '진입신호 없음'(경계 미달)을 '고용 감소(신호)가 없다'로 바꾼 문장 — 관찰 업종도 고용은 줄었을 수 있다
 NO_DECLINE = re.compile(r"고용\s*(?:이|은|의)?\s*(?:감소|줄)[^.\n]{0,8}?(?:없|않았)")
+
+WEB_GROUNDED = "WEB_GROUNDED"
+WEB_GROUNDED_CAVEAT = ("Google 검색 기반 Gemini 답변을 수정 없이 표시한 외부 정보로, 시스템이 검증하지 않았습니다. "
+                       "등록 진단 값을 바꾸지 않으며, 신청 가능 여부는 담당기관에 확인하세요.")
 
 STANDARD_CAVEAT = {
     GENERAL_LLM: "일반 지식 설명이며 공식 근거나 본 시스템의 등록 진단이 아닙니다.",
@@ -141,6 +147,9 @@ def official_citations(citations: list[Citation]) -> list[Citation]:
 def finalize(ans: CopilotAnswer) -> CopilotAnswer:
     if ans.source_type not in SOURCE_TYPES:
         raise ValueError(f"unknown source_type: {ans.source_type}")
+    if ans.answer_type == WEB_GROUNDED:
+        # Google 검색 grounding 답변은 약관상 수정·선별하지 않는다 — 미검증 표시만 원문 밖에 붙인다
+        return replace(ans, caveats=[*ans.caveats, WEB_GROUNDED_CAVEAT])
     if ans.source_type == EXTERNAL_WEB:
         cited = official_citations(ans.citations)
         if not cited:

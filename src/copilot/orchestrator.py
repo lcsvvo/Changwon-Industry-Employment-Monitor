@@ -503,34 +503,29 @@ class Copilot:
         return ans
 
     def _web(self, decision, question, quarter, industry, trace, usage) -> CopilotAnswer | None:
-        """Gemini Google Search grounding → 공식 도메인 인용 문장만. 미설정·실패·인용 없음이면 None."""
+        """Gemini Google Search grounding → 답변 원문을 수정 없이 표시(약관). 미설정·실패·표시 불가면 None."""
         if not self.web.available:
             trace.append({"stage": EXTERNAL_WEB, "status": "NOT_CONFIGURED"})
             return None
         usage.update(web=True, provider=self.web.name, model=self.web.model)
         result = self.web.search(question, domains=WEB_DOMAINS)  # 질문 문장만(세션 입력·진단값 없음)
-        step = {"stage": EXTERNAL_WEB, "status": "OK" if result.ok else "NO_OFFICIAL_RESULT", "error": result.error,
-                "raw": result.raw_result_count, "kept": len(result.results)}
+        step = {"stage": EXTERNAL_WEB, "status": "OK" if result.ok else "NO_RESULT", "error": result.error,
+                "raw": result.raw_result_count, "sources": len(result.results),
+                "official_sources": sum(1 for r in result.results if r.tier)}
         trace.append(step)
         if not result.ok:
-            usage["error"] = result.error if result.error not in ("NO_OFFICIAL_SUPPORT",) else None
+            usage["error"] = result.error if result.error not in ("EMPTY", "MENTIONS_INTERNAL_JUDGMENT") else None
             return None
-        # 단정 표현(대상·선정·원인 확정) 문장은 뺀다 — 남는 문장이 없으면 외부 답변을 쓰지 않는다
-        segments = result.meta.get("segments") or [{"text": result.answer, "marks": ""}]
-        sentences = [f"{s['text']} {s['marks']}".strip() for s in segments]
-        kept = [s for seg, s in zip(segments, sentences) if not guardrails.assertive(seg["text"])]
-        step["assertive_removed"] = len(sentences) - len(kept)
-        if not kept:
-            step["status"] = "ALL_SENTENCES_REMOVED"
-            return None
+        # 원문은 그대로(약관: 수정·혼합 금지). 등록 진단 기준 안내·미검증 표시는 원문 밖(caveat·화면 라벨)에 둔다.
         usage["domains"] = tuple(dict.fromkeys(r.domain for r in result.results if r.domain))
+        note = self._authority_note(decision, quarter, industry).strip().removeprefix("※").strip()
         return CopilotAnswer(
-            answer=" ".join(kept) + self._authority_note(decision, quarter, industry),
-            source_type=EXTERNAL_WEB, route=decision.route, intent=decision.intent, answer_type="WEB_GROUNDED",
-            composer="LLM",
-            citations=[Citation(title=r.title, url=r.url, source_type=EXTERNAL_WEB, official=True,
+            answer=result.answer, source_type=EXTERNAL_WEB, route=decision.route, intent=decision.intent,
+            answer_type="WEB_GROUNDED", composer="LLM",
+            citations=[Citation(title=r.title, url=r.url, source_type=EXTERNAL_WEB, official=bool(r.tier),
                                 institution=r.institution, checked_at=r.retrieved_at, tier=r.tier)
                        for r in result.results],
+            caveats=[note] if note else [],
             official_evidence_sufficient=False, target={"industry": industry, "quarter": quarter},
             meta={"search_entry_point": result.meta.get("search_entry_point")})
 

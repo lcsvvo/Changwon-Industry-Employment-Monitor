@@ -882,20 +882,35 @@ def assistant_message_view(message: dict, scope: str, is_last: bool) -> str | No
         rec_a, rec_b = snap.get(a, message["compare_quarter"]), snap.get(b, message["compare_quarter"])
         if rec_a and rec_b:
             view = comparison_view(a, rec_a, b, rec_b, {r["rule_name"]: r for r in snap.reference["triage_rules"]})
+    grounded = message.get("answer_type") == "WEB_GROUNDED"
+    search_entry = (message.get("meta") or {}).get("search_entry_point")
     if clarify:
         st.markdown(quarter_text(clarify["text"]))
     elif view:
         st.html(ui.comparison_html(view))
+    elif grounded:
+        # Gemini API 약관: Grounded Result는 수정·혼합 없이 Search Suggestions와 함께 표시한다.
+        # 문장 나누기·분기 표기 변환·markdown 해석 없이 원문 글자 그대로 별도 칸에 두고, 라벨·주의는 칸 밖에 둔다.
+        st.caption("외부 검색 결과 · Google 검색 기반 Gemini 답변을 수정 없이 표시 · 시스템 미검증")
+        with st.container(border=True):
+            st.html(f'<div style="white-space:pre-wrap;line-height:1.6">{html.escape(message["content"])}</div>')
+            if search_entry:
+                st.html(search_entry)
     else:
         st.html(ui.answer_html(structure_answer(quarter_text(message["content"]))))  # 답변 원문은 그대로, 표시만 분기 표기 통일
     for cite in message.get("citations") or []:
         detail = " · ".join(x for x in (cite.get("institution"), cite.get("locator"),
                                          f"확인 {cite['checked_at']}" if cite.get("checked_at") else None) if x)
+        if grounded and not cite.get("official"):
+            detail = " · ".join(x for x in ("비공식 출처", detail) if x)
         st.caption(f"근거: [{cite['title']}]({cite['url']})" + (f" · {detail}" if detail else ""))
-    if (message.get("meta") or {}).get("search_entry_point"):
-        st.html(message["meta"]["search_entry_point"])  # Google 검색 제안(grounding 사용 시 표시)
+    if search_entry and not grounded:
+        st.html(search_entry)  # Google 검색 제안(grounding 사용 시 표시)
     # 별도 '근거 한계' 상자는 두지 않는다 — 일반 AI 답변은 badge로 충분, 그 밖에는 짧은 주의 한 줄만
-    if message.get("caveats") and message.get("source_type") != "GENERAL_LLM" and not clarify and not view:
+    if grounded:
+        for caveat in message.get("caveats") or []:  # 등록 진단 기준 안내 + 미검증 안내(원문 밖)
+            st.caption(f"주의 · {caveat}")
+    elif message.get("caveats") and message.get("source_type") != "GENERAL_LLM" and not clarify and not view:
         st.caption(f"주의 · {quarter_text(message['caveats'][0])}")
     if clarify and is_last:
         with st.container(key="clarifyacts", horizontal=True, gap="small"):
