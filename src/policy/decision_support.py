@@ -54,6 +54,24 @@ FUNCTION_RULES = {
 }
 
 
+# 등록 판정 사유의 A 신호 문구('산단 제조업 고용의 3.47% 감소')는 '산단 고용이 3.47% 줄었다'로 오독되기 쉽다.
+# A = 이 업종 감소인원 ÷ 현재 산단 제조업 고용 — 답변 문장에서만 감소인원 기준으로 풀어 쓴다(등록 원문·값은 그대로).
+_A_REASON = re.compile(r"산단 제조업 고용의 (\d+(?:\.\d+)?)% 감소")
+
+
+def plain_reason(reason: str | None, employment_change: float | None = None) -> str | None:
+    """등록 판정 사유를 오독되지 않게 풀어 쓴다 — A 신호는 '업종 감소인원 N명이 산단 제조업 고용의 X%에 해당'으로,
+    관찰의 '고용 축 진입신호 없음'은 '고용 신호(E·R·A) 모두 진입경계 미달'로."""
+    if not reason:
+        return reason
+    known = isinstance(employment_change, (int, float)) and employment_change == employment_change \
+        and employment_change < 0
+    who = f"업종 감소인원 {-employment_change:,.0f}명이" if known else "업종 감소인원이"
+    reason = _A_REASON.sub(lambda m: f"{who} 산단 제조업 고용의 {m.group(1)}%에 해당", reason)
+    # '고용 축 진입신호 없음'은 '고용 감소 없음'으로 오독됐다(관찰 업종도 고용이 줄었을 수 있음)
+    return reason.replace("고용 축 진입신호 없음", "고용 신호(E·R·A) 모두 진입경계 미달")
+
+
 def _normal(value: str) -> str:
     return re.sub(r"[^0-9a-z가-힣]+", "", (value or "").lower())
 
@@ -397,8 +415,10 @@ class DecisionSupportService:
                 answer_type = "NEED_COMPARISON_INDUSTRY"
             else:
                 a, b = ctx["diagnostic"], other
-                answer = (f"{industry}은 {a['triage']['stage']}({a['triage']['reason']}), "
-                          f"{comparison_industry}은 {b['triage']['stage']}({b['triage']['reason']})입니다. "
+                reason_a = plain_reason(a['triage']['reason'], a['q2']['employment_change'])
+                reason_b = plain_reason(b['triage']['reason'], b['q2']['employment_change'])
+                answer = (f"{industry}은 {a['triage']['stage']}({reason_a}), "
+                          f"{comparison_industry}은 {b['triage']['stage']}({reason_b})입니다. "
                           "같은 단계라도 Q1 상태와 고용 증감이 다를 수 있어 원인은 별도로 확인해야 합니다.")
                 answer_type = "INDUSTRY_COMPARISON"
                 evidence = [a, b]
@@ -472,7 +492,7 @@ class DecisionSupportService:
                 answer_type = "INSUFFICIENT_EVIDENCE"
             else:
                 answer = (f"{industry}의 {quarter} 단계는 {d['triage']['stage']}입니다. "
-                          f"등록된 판정 근거는 ‘{d['triage']['reason']}’입니다. "
+                          f"등록된 판정 근거는 ‘{plain_reason(d['triage']['reason'], d['q2']['employment_change'])}’입니다. "
                           "이는 원인 판정이 아니므로 현장 확인이 필요합니다.")
                 answer_type = "DIAGNOSTIC_EXPLANATION"
                 evidence = [d]

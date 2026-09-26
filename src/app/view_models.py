@@ -6,6 +6,9 @@ import re
 from typing import Any
 
 
+# 등록 진단 답변 뒤에 붙는 LLM 설명의 구분자 — 수치는 앞의 등록 원문에만 있고, 이 뒤 설명에는 숫자가 없다
+EXPLANATION_MARK = "\n\nAI 쉬운 설명 · "
+
 STAGE_CODE = {"우선점검": "priority", "추가확인": "check", "관찰": "watch"}
 SOURCE_CATEGORY_LABEL = {"PRINCIPLE_ADAPTED": "원칙 차용", "PROJECT_OPERATIONAL": "운영규칙"}
 QUICK_PROMPTS_TAIL = (
@@ -979,8 +982,14 @@ def structure_answer(text: str) -> dict:
     """backend 답변 문자열을 결론 → 근거 → 다음 확인으로 '나눠' 보여주기 위한 구조. 문장·수치는 그대로다.
 
     줄바꿈이 있는 답변(목록·공고 등)은 첫 줄을 결론, 나머지 줄을 근거로 쓰고, 한 문단 답변은 문장 단위로 나눈다.
+    등록 답변 뒤에 붙은 'AI 쉬운 설명'은 등록 원문을 나눈 뒤 근거의 마지막 항목으로 붙인다.
     """
-    text = (text or "").replace("**", "").strip()  # LLM 답변의 markdown 굵게 표시만 걷어낸다(문장·수치는 그대로)
+    text, mark, explanation = (text or "").partition(EXPLANATION_MARK)
+    if mark:
+        out = structure_answer(text)
+        out["points"] = [*out["points"], f"{EXPLANATION_MARK.strip()} {explanation.replace('**', '').strip()}"]
+        return out
+    text = text.replace("**", "").strip()  # LLM 답변의 markdown 굵게 표시만 걷어낸다(문장·수치는 그대로)
     if not text:
         return {"conclusion": "", "points": [], "next": []}
     if "\n" in text:

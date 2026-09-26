@@ -2,8 +2,9 @@
 
 - 모든 응답은 유효한 source_type을 가진다.
 - EXTERNAL_WEB은 공식 도메인 인용(URL·기관·확인일) 없이는 내보내지 않는다.
-- LLM이 쓴 문장은 (1) 원본에 없는 숫자 (2) 등록 판정과 다른 단계어 (3) 공식 근거 없는 단정 표현이
-  있으면 폐기한다. 폐기 시 호출부가 결정론적 원문으로 되돌린다.
+- LLM이 쓴 문장은 (1) 원본에 없는 숫자 (2) 등록 판정과 다른 단계어 (3) 공식 근거 없는 단정 표현
+  (4) 업종 A 신호를 산단 전체 고용 감소율로 바꾼 표현이 있으면 폐기한다.
+- 등록 진단 답변에 붙는 LLM 쉬운 설명은 숫자를 아예 쓸 수 없다(수치는 등록 원문 그대로 함께 표시). 폐기 시 호출부가 결정론적 원문으로 되돌린다.
 """
 from __future__ import annotations
 
@@ -21,6 +22,13 @@ ASSERTIVE = re.compile(
     r"(지원\s*대상(입니다|이다|에\s*해당합니다|으로\s*확정)|선정(되었|됩니다|됐)|대상으로\s*확정|확정(되었|됩니다|적으로)|"
     r"원인은[^.。\n]{0,30}(때문|입니다)|때문입니다|추천합니다|받을\s*수\s*있습니다|반드시\s*받)")
 NUMBER = re.compile(r"[-+]?\d[\d,]*(?:\.\d+)?")
+# 업종 신호(A = 업종 감소인원 ÷ 산단 제조업 고용)를 산단 전체 고용 감소율로 바꿔 쓴 문장
+# 차단: '산업단지 제조업 고용이 3.47% 줄어' · 통과: '산단 제조업 고용의 3.47%에 해당'
+PARK_WIDE_DECLINE = re.compile(
+    r"(?:산단|산업단지)\s*(?:전체\s*)?(?:제조업\s*)?(?:전체\s*)?고용(?:이|은|는|도)?\s+(?:[^\s.\n의]+\s+){0,3}?"
+    r"[-+]?\d+(?:\.\d+)?\s*%\s*(?:가|이|나|만큼|정도)?\s*(?:줄|감소|하락|떨어)")
+# '진입신호 없음'(경계 미달)을 '고용 감소(신호)가 없다'로 바꾼 문장 — 관찰 업종도 고용은 줄었을 수 있다
+NO_DECLINE = re.compile(r"고용\s*(?:이|은|의)?\s*(?:감소|줄)[^.\n]{0,8}?(?:없|않았)")
 
 STANDARD_CAVEAT = {
     GENERAL_LLM: "일반 지식 설명이며 공식 근거나 본 시스템의 등록 진단이 아닙니다.",
@@ -83,6 +91,23 @@ def check_rewrite(original: str, rewritten: str, registered_stage: str | None) -
         return False, "STAGE_CHANGED"
     if assertive(rewritten) and not assertive(original):
         return False, "ASSERTIVE"
+    if PARK_WIDE_DECLINE.search(rewritten) and not PARK_WIDE_DECLINE.search(original or ""):
+        return False, "SIGNAL_MEANING_CHANGED"
+    return True, "PASS"
+
+
+def check_explanation(original: str, explanation: str, registered_stage: str | None) -> tuple[bool, str]:
+    """등록 답변 뒤에 붙는 LLM 쉬운 설명의 수용 여부. 수치는 등록 원문이 맡으므로 설명에는 숫자가 없어야 한다."""
+    if not (explanation or "").strip():
+        return False, "EMPTY"
+    if re.search(r"\d", explanation):
+        return False, "NUMBER_IN_EXPLANATION"
+    if stage_changed(original, explanation, registered_stage):
+        return False, "STAGE_CHANGED"
+    if assertive(explanation) and not assertive(original):
+        return False, "ASSERTIVE"
+    if NO_DECLINE.search(explanation):
+        return False, "SIGNAL_MEANING_CHANGED"
     return True, "PASS"
 
 

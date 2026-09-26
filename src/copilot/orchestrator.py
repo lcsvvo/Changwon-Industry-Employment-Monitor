@@ -16,6 +16,8 @@ from datetime import date, datetime, timezone
 
 from sqlalchemy import select
 
+from app.view_models import EXPLANATION_MARK
+from policy.decision_support import plain_reason
 from workflow import catalog as C
 from workflow import models as M
 
@@ -53,22 +55,31 @@ GENERAL_SYSTEM = (
     "당신은 제조업·고용 행정 용어를 설명하는 도우미입니다. 일반적인 개념만 한국어로 3~6문장으로 설명하세요. "
     "창원국가산단의 특정 업종 판정, 조치등급, E/R/A/P·Q1~Q3 값, 특정 기업의 지원 대상 여부나 원인은 말하지 마세요. "
     "모르는 내용은 추측하지 말고 모른다고 하세요.")
+# live 확인에서 Gemini가 A 신호 3.47%를 '산단 제조업 고용이 3.47% 줄었다'로 바꿔 썼다(숫자는 같아 guardrail 통과).
+A_SIGNAL_RULE = ("A 신호(산단 대비 감소규모)는 이 업종 감소인원이 산단 제조업 고용에서 차지하는 비중입니다. "
+                 "이 비율을 산단(산업단지) 전체 고용의 감소율로 바꿔 쓰지 마세요.")
+# 등록 진단 답변은 수치 원문을 그대로 두고, LLM은 그 아래 붙일 '숫자 없는' 쉬운 설명만 쓴다.
+# live 확인에서 수치 문장을 바꿔 쓰게 하면 숫자는 같아도 의미가 바뀌는 오류(A 오독 등)가 반복됐다.
 REPHRASE_SYSTEM = (
-    "다음은 행정 시스템의 등록된 진단 문장입니다. 제공된 답변의 의미를 쉽게 다시 표현하세요.\n"
+    "다음은 행정 시스템의 등록된 진단 답변입니다. 이 원문은 수치와 함께 화면에 그대로 표시됩니다.\n"
+    "당신은 원문 아래에 덧붙일 쉬운 설명만 한 문단, 2~3문장으로 쓰세요.\n"
+    "아라비아 숫자를 하나도 쓰지 마세요. 수치·비율·분기·연도는 원문에 이미 있으니 되풀이하지 말고, "
+    "'고용 감소율이 상위경계를 넘었습니다'처럼 신호 이름과 경계(진입·상위)로만 말하세요.\n"
     "절대 추가하지 말 것: 새로운 사실, 새로운 숫자, 새로운 비율, 새로운 순위, 새로운 단계, 새로운 기간"
     "(예: '1년 전', '3개월'), 새로운 예시, 새로운 정책 자격, 새로운 신청 가능 여부, 새로운 인과관계.\n"
-    "원문에 없는 숫자를 만들지 마세요. 숫자를 반올림·환산·풀어쓰기(예: 3.47% → 약 3%, 100명 중 3명)하지 마세요.\n"
-    "원문에 있는 숫자는 값·단위·부호·소수점을 그대로 쓰세요. '2026Q2' 같은 분기 표기도 그대로 쓰세요.\n"
     "단계명(우선점검/추가확인/관찰)·업종명은 원문 그대로 쓰고, 원문의 한계 문구(원인 판정이 아님 등)는 유지하세요.\n"
+    f"{A_SIGNAL_RULE}\n"
+    "'진입경계 미달'·'진입신호 없음'은 고용 감소가 없다는 뜻이 아니라 기준값에 못 미쳤다는 뜻입니다. "
+    "'고용 감소가 없다', '고용 감소 신호가 없다'고 쓰지 마세요.\n"
     "원인을 단정하는 표현('~때문입니다', '원인은 ~입니다')과 지원 대상·선정·확정·추천·'받을 수 있습니다' 같은 "
-    "표현을 쓰지 마세요. 판정 이유는 원문처럼 '판정 근거는 ~입니다'로 쓰세요.\n"
-    "원문의 의미를 바꾸지 말고, 문장을 짧게 하며 어려운 표현만 쉬운 표현으로 바꾸세요. 5문장 이내.")
+    "표현을 쓰지 마세요.")
 GROUNDED_SYSTEM = (
     "당신은 창원국가산단 산업·고용 전환진단 시스템의 행정 AI 비서입니다. 아래 '등록 진단 요약'만을 이 업종·분기에 관한 "
     "사실 근거로 쓰세요.\n"
     "- 질문이 이 업종·분기와 관련되면 요약에 있는 사실만으로 2~4문장으로 답하세요. 요약에 없는 숫자·비율·순위·판정·원인은 "
     "만들지 마세요.\n"
     "- 숫자와 분기 표기는 요약에 있는 그대로 쓰고 반올림하거나 풀어쓰지 마세요. 단계명(우선점검/추가확인/관찰)은 요약 그대로 쓰세요.\n"
+    f"- {A_SIGNAL_RULE}\n"
     "- 지원사업·지원금·신청 가능 여부를 물으면 구체적인 사업명·금액은 말하지 말고, 완전한 문장으로 이렇게 안내하세요: "
     "'기존 공식 지원체계는 \"연결 가능한 공식 지원은?\"으로, 지금 모집 중인 공고는 \"현재 신청 가능한 지원사업은?\"으로 "
     "물어보시면 공식 근거로 확인해 드립니다.'\n"
@@ -237,7 +248,7 @@ class Copilot:
         return self.compose_with_llm and self.llm.available
 
     def _rephrase(self, base: CopilotAnswer, quarter, industry, trace, usage, compose: bool = False) -> CopilotAnswer:
-        """등록 답변(read-only)을 LLM이 바꿔 쓰고, 수치·단계 보존 검증 통과분만 쓴다.
+        """등록 답변(read-only)은 그대로 두고, LLM이 쓴 숫자 없는 쉬운 설명을 뒤에 붙인다(검증 통과분만).
 
         compose=False: 사용자가 쉬운 설명을 명시적으로 요청한 경우. compose=True: Gemini 작성 모드(COPILOT_LLM_COMPOSE)에서
         모든 등록 진단 답변에 적용. 검증 실패·호출 실패 시 두 경우 모두 등록 원문을 그대로 쓴다.
@@ -259,20 +270,18 @@ class Copilot:
             base.caveats = [*base.caveats, ("Gemini 답변 작성에 실패해 등록 답변을 그대로 표시합니다." if compose
                                             else "쉬운 설명을 만들지 못해 등록 답변을 그대로 표시합니다.")]
             return base
-        ok, why = guardrails.check_rewrite(base.answer, result.text, stage)
+        explanation = " ".join(line.strip() for line in (result.text or "").splitlines() if line.strip())
+        ok, why = guardrails.check_explanation(base.answer, explanation, stage)
         trace.append({"stage": stage_name, "status": "ACCEPTED" if ok else "REJECTED", "check": why,
-                      **({"matched": guardrails.assertive(result.text)[:3]} if why == "ASSERTIVE" else {})})
+                      **({"matched": guardrails.assertive(explanation)[:3]} if why == "ASSERTIVE" else {})})
         if not ok:
-            base.caveats = [*base.caveats, "AI 문장이 수치·판정 보존 검증을 통과하지 못해 등록 답변을 그대로 표시합니다."
-                            if compose else "AI 쉬운 설명이 수치·판정 보존 검증을 통과하지 못해 등록 답변을 그대로 표시합니다."]
+            base.caveats = [*base.caveats, "AI 설명이 자동 검증을 통과하지 못해 등록 답변만 표시합니다."]
             base.guardrail = f"{'COMPOSE' if compose else 'REPHRASE'}_REJECTED:{why}"
             return base
         base.evidence = [*base.evidence, {"registered_answer": base.answer}]
-        base.caveats = [*base.caveats, ("Gemini가 등록 진단 답변을 근거로 작성했습니다. 수치·판정이 원문과 같은지 자동 검증했으며, "
-                                        "원문은 근거(evidence)에 남아 있습니다." if compose else
-                                        "AI가 등록 답변을 쉬운 말로 바꾼 것입니다. 수치·판정이 원문과 같은지 자동 검증했으며, "
-                                        "원문은 근거(evidence)에 남아 있습니다.")]
-        base.answer, base.composer = result.text, "LLM"
+        base.caveats = [*base.caveats, ("수치·판정은 등록 진단 원문 그대로이며, 'AI 쉬운 설명'은 Gemini가 원문을 근거로 "
+                                        "숫자 없이 작성했습니다(자동 검증 통과).")]
+        base.answer, base.composer = f"{base.answer}{EXPLANATION_MARK}{explanation}", "LLM"
         base.official_evidence_sufficient = True  # 등록 진단 원문이 근거
         return base
 
@@ -565,7 +574,8 @@ class Copilot:
             return f"업종 {industry} · 분기 {quarter} · 등록 진단 없음", None
         num = lambda v, digits=2: "자료 없음" if v is None else (f"{v:,}" if isinstance(v, int) else f"{v:.{digits}f}")
         q1, q2, q3, t = d["q1"], d["q2"], d["q3"], d["triage"]
-        summary = (f"업종 {industry} · 분기 {quarter} · 등록 판정 {t['stage']} · 판정 근거: {t['reason']} · "
+        summary = (f"업종 {industry} · 분기 {quarter} · 등록 판정 {t['stage']} · "
+                   f"판정 근거: {plain_reason(t['reason'], q2['employment_change'])} · "
                    f"Q1 상태 {q1['state']}({q1['state_label']}) · 생산 YoY {num(q1['production_yoy'], 1)}% · "
                    f"고용 증감 {num(q2['employment_change'])}명 · 고용 YoY {num(q2['employment_yoy'])}% · "
                    f"동일 상태 지속 {num(q3['duration'])}분기 · 자료 기준 {d['data_cutoff']} · "
