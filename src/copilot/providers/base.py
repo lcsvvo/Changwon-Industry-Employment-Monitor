@@ -111,7 +111,7 @@ class NullWebSearchProvider:
 
 
 def providers_from_env(env: dict | None = None) -> tuple[LLMProvider, WebSearchProvider]:
-    """환경변수로 provider를 고른다. 명시적으로 켠 경우에만 외부 호출(기본은 미설정).
+    """환경변수로 provider를 고른다. Gemini LLM은 명시 설정, Grounding은 키가 있으면 기본 연결한다.
 
     COPILOT_LLM_PROVIDER=gemini + GEMINI_API_KEY → Gemini(일반 개념·명시적 쉬운 설명). 모델: COPILOT_LLM_MODEL.
     key는 저장소 루트 .env.txt(gitignore)나 환경변수로만 설정한다.

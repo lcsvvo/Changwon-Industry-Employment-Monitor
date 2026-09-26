@@ -110,7 +110,7 @@ class Copilot:
         self.web = web or NullWebSearchProvider()
         self.audit = audit or NullAuditSink()
         self._today = today or date.today
-        self.summarize_rag = summarize_rag  # 정책 RAG 결과 LLM 요약(기본 꺼짐 — 명시적으로 켤 때만)
+        self.summarize_rag = summarize_rag  # 정책 RAG 결과 LLM 요약(from_env에서는 기본 켜짐, 명시적 off만 비활성화)
 
     @classmethod
     def from_env(cls, service, audit: AuditSink | None = None, env: dict | None = None) -> "Copilot":
@@ -373,17 +373,24 @@ class Copilot:
             return {r.document_id: {"official": bool(r.official), "institution": r.institution} for r in rows}
 
     def _rag_answer(self, decision, rag, hits, meta, *, sufficient: bool) -> CopilotAnswer:
-        lines, citations, seen = [], [], set()
+        # 같은 공식문서가 검색 점수 때문에 여러 페이지로 잡혀도 사용자에게는 문서 1건으로 묶어 보여준다.
+        grouped: dict[str, dict] = {}
         for hit in hits:
             locator = f"{hit['page']}쪽" if hit.get("page") else (hit.get("section") or "본문")
-            lines.append(f"- {hit['document_id']} {hit['title']} · {locator} · 접수 {hit.get('current_intake_status')}"
+            row = grouped.setdefault(hit["document_id"], {"hit": hit, "locators": []})
+            if locator not in row["locators"]:
+                row["locators"].append(locator)
+        lines, citations = [], []
+        for document_id, row in list(grouped.items())[:5]:
+            hit, locators = row["hit"], row["locators"]
+            locator = "·".join(locators)
+            lines.append(f"- {document_id} {hit['title']} · {locator} · 접수 {hit.get('current_intake_status')}"
                          f" · 확인 {hit.get('verified_at')}")
-            key = (hit["document_id"], locator)
-            if hit.get("source_url") and key not in seen:
-                seen.add(key)
-                citations.append(Citation(title=f"{hit['document_id']} {hit['title']}", url=hit["source_url"],
-                                          source_type=INTERNAL_RAG, official=bool(meta.get(hit["document_id"], {}).get("official")),
-                                          institution=meta.get(hit["document_id"], {}).get("institution"),
+            if hit.get("source_url"):
+                citations.append(Citation(title=f"{document_id} {hit['title']}", url=hit["source_url"],
+                                          source_type=INTERNAL_RAG,
+                                          official=bool(meta.get(document_id, {}).get("official")),
+                                          institution=meta.get(document_id, {}).get("institution"),
                                           checked_at=hit.get("verified_at"), locator=locator))
         return CopilotAnswer(answer=f"{rag['message']}\n" + "\n".join(lines[:5]), source_type=INTERNAL_RAG,
                              route=decision.route, intent=decision.intent, answer_type="OFFICIAL_POLICY_RAG",
