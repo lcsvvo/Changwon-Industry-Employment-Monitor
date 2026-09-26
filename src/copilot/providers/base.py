@@ -128,10 +128,9 @@ def providers_from_env(env: dict | None = None) -> tuple[LLMProvider, WebSearchP
     if key and env is os.environ:
         secrets.require("GEMINI_API_KEY")  # 마스킹 대상 등록
     want_llm = env.get("COPILOT_LLM_PROVIDER", "").lower() == "gemini"
-    # Grounding은 기본 OFF(값 없음·'off'·그 밖의 값 모두 OFF). 현재 구현은 Grounded Result를 문장 단위로
-    # 걸러 표시하므로 Gemini API 약관(Grounded Result·Search Suggestions 비수정·비혼합 표시)과 충돌할 수 있다.
-    # 약관에 맞는 표시(원문 그대로 + Search Suggestions + 별도 '시스템 확인' 블록)를 갖추기 전에는 켜지 않는다.
-    want_web = env.get("COPILOT_WEB_PROVIDER", "off").strip().lower() == "gemini_grounding"
+    # Gemini 키가 있으면 공식기관 최신정보 검색도 기본 연결한다. 명시적으로 off를 주면 끌 수 있다.
+    # UI는 Grounding 검색 제안을 원문 HTML로 표시하고, 답변에는 공식기관 출처가 붙은 문장만 사용한다.
+    want_web = env.get("COPILOT_WEB_PROVIDER", "gemini_grounding").strip().lower() == "gemini_grounding"
     gemini = None
     if want_llm or want_web:
         from .gemini import GeminiProvider

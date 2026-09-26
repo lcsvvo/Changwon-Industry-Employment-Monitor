@@ -16,6 +16,7 @@ from sqlalchemy import desc, func, select
 from evidence.collection.kicox_factory import normalize_company
 from export.snapshot import Snapshot
 from policy.rag import PolicyRAG, rebuild_policy_index
+from policy.recruitment_rag import RecruitmentRAG
 from workflow import catalog as C
 from workflow import models as M
 
@@ -95,6 +96,8 @@ class DecisionSupportService:
         self.snapshot = snapshot
         self.workflow = workflow_service
         self.rag = PolicyRAG(Session)
+        # 고용24 상세 HTML에서 정제한 채용공고 문맥. 판정 입력과 분리된 설명용 RAG다.
+        self.recruitment_rag = RecruitmentRAG()
 
     def diagnosis(self, quarter: str, industry: str) -> dict:
         rec = self.snapshot.get(industry, quarter)

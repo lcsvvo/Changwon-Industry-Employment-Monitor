@@ -57,7 +57,8 @@ def _stamp_ui_modules():
 # SnapshotIntegrityError를 화면이 잡는다) 하나라도 바뀌면 모두 함께 다시 읽는다. 모델(workflow.models)은 SQLAlchemy 선언을
 # 다시 하지 않도록 건드리지 않는다. 캐시 서비스는 아래 service()의 code_version 인자로 새로 만든다.
 BACKEND_MODULES = (
-    "export.schema", "export.snapshot", "export.diff", "export.documents", "policy.decision_support", "workflow.service",
+    "export.schema", "export.snapshot", "export.diff", "export.documents", "policy.recruitment_rag",
+    "policy.decision_support", "workflow.service",
 )
 
 
@@ -143,6 +144,11 @@ def service(url: str | None, demo: bool, code_version: float | None = None) -> W
     """code_version = 분석본·업무 서비스 모듈의 최신 수정 시각 — 코드가 바뀌면 캐시된 서비스 객체를 새로 만든다."""
     workflow = WorkflowService(M.make_session_factory(url), demo=demo)
     register_work24_snapshot(workflow.Session)
+    # 새 DB에서도 정책·지원 연계의 RAG 검색이 바로 동작하도록 공식 원문 색인이 비어 있을 때만 구축한다.
+    with workflow.Session() as session:
+        policy_index_empty = session.query(M.SourceEvidence).count() == 0
+    if policy_index_empty:
+        rebuild_policy_index(workflow.Session)
     return workflow
 
 
@@ -392,15 +398,18 @@ SOURCE_BADGE_COLOR = {"INTERNAL_DIAGNOSTIC": "blue", "INTERNAL_RAG": "green", "E
 with ai_status_slot:
     st.markdown("**AI 연결**")
     on = lambda flag: "켜짐" if flag else "꺼짐"  # noqa: E731
-    web_on = copilot.web.available  # Google 검색 Grounding — 기본 사용 안 함(COPILOT_WEB_PROVIDER 미설정)
-    st.caption(f"Gemini 답변 {on(copilot.llm.available)} · "
-               f"기업마당 조회 {on(any(getattr(a, 'available', False) for a in copilot.official_apis))} · "
-               f"외부 웹검색 {'사용' if web_on else '사용 안 함'}",
-               help="**Gemini 답변** — 등록된 분석·근거를 바탕으로 AI가 설명합니다.  \n"
-                    "**기업마당 조회** — 기업마당 공식 API로 지원사업 공고를 조회합니다.  \n"
-                    "**외부 웹검색** — Google 최신 검색(Grounding) 기능입니다. "
-                    + ("현재 사용 중이며 공식기관 누리집 인용만 표시합니다." if web_on
-                       else "이 시스템에서는 의도적으로 사용하지 않습니다(오류 아님)."))
+    web_on = copilot.web.available
+    bizinfo_on = any(getattr(a, "available", False) for a in copilot.official_apis)
+    recruitment_rag_on = decision_support.recruitment_rag.available
+    st.caption(f"공식 정책자료 RAG 켜짐 · 고용24 채용공고 HTML RAG {on(recruitment_rag_on)}")
+    st.caption(f"Gemini 답변·RAG 요약 {on(copilot.llm.available and copilot.summarize_rag)} · "
+               f"기업마당 최신 공고 조회 {on(bizinfo_on)} · "
+               f"Google 외부 최신검색 {'사용' if web_on else '사용 안 함'}",
+               help="**공식 정책자료 RAG** — 기업마당·고용24·경남지역인적자원개발위원회 등에서 저장한 공식 HTML·PDF를 검색합니다.  \n"
+                    "**고용24 채용공고 HTML RAG** — 상세 HTML에서 정제한 직무·기술·자격·경력 내용을 선택 업종 안에서 검색합니다.  \n"
+                    "**Gemini 답변·RAG 요약** — 등록 진단과 검색 근거만 사용해 문장을 작성하고, 수치·판정·인용 검사를 거칩니다.  \n"
+                    "**기업마당 최신 공고 조회** — 기업마당 공식 API에서 현재 접수 중인 지원사업을 확인합니다.  \n"
+                    "**Google 외부 최신검색** — 내부 근거가 부족한 최신 질문에만 사용하며 공식기관 누리집 인용만 표시합니다.")
     st.caption(f"패널 이름 '{ASSISTANT_NAME}'")
     # 기존 Copilot 계약: 세션 입력(field_ctx)은 등록 진단 backend에만 쓰이며 외부 provider로 보내지 않는다
     st.caption("현장 메모 등 입력 내용은 외부 AI로 보내지 않습니다.")
@@ -903,6 +912,9 @@ def provider_usage_marks(message: dict) -> list[str]:
         marks.append({"OK": ":green-badge[모집 중 공고 조회 · 출처 기업마당]",
                       "NO_MATCH": ":gray-badge[모집 중 공고 조회 · 접수 중 공고 없음]"}.get(
                           biz.get("status"), ":orange-badge[기업마당 조회 실패]"))
+    recruitment_rag = (message.get("meta") or {}).get("recruitment_rag")
+    if recruitment_rag and recruitment_rag.get("status") == "FOUND":
+        marks.append(":green-badge[고용24 채용공고 HTML RAG 사용]")
     return marks
 
 
@@ -2578,6 +2590,15 @@ def page_inspection():
 # ------------------------------------------------------------------ 정책·지원 연계
 NOTICE_LIMIT = 5
 NOTICE_LOG = logging.getLogger("app.policy_notices")
+POLICY_RAG_SEED_QUERY = {
+    "employment_retention": "고용유지 휴업 휴직 지원금",
+    "vocational_training": "직업훈련 내일배움 산대특 훈련",
+    "reemployment": "재취업 전직 중장년 내일센터",
+    "recruitment_matching": "채용장려금 신규채용 재고용",
+    "business_difficulty": "기업 컨설팅 현장애로 기술닥터",
+    "technology_transition": "스마트공장 공정분석 컨설팅",
+    "crisis_response": "위기대응 맞춤지원 Stand-up 밀집지역",
+}
 
 
 @st.cache_data(ttl=1800, show_spinner=False)
@@ -2599,6 +2620,73 @@ def document_titles() -> dict[str, str]:
     """공식문서 ID → 문서명(요건 카드 근거 위치 표시용, DB 색인 그대로)."""
     with svc.Session() as s:
         return {d.document_id: d.title for d in s.query(M.DocumentMaster).all() if d.title}
+
+
+def _policy_rag_default_query(industry: str, fn_tags: list[str], selected: str | None) -> str:
+    tags = [selected] if selected else fn_tags[:3]
+    labels = " · ".join(function_ui_label(tag, C.label(tag)) for tag in tags)
+    return f"{labels} 관련 현재 지원사업" if labels else f"{industry} 관련 현재 지원사업"
+
+
+def policy_rag_view(industry: str, quarter: str, fn_tags: list[str], selected: str | None) -> None:
+    """진단 결과를 기존 정책에 연결하는 RAG를 정책 화면의 명시적 단계로 보여준다."""
+    default_query = _policy_rag_default_query(industry, fn_tags, selected)
+    hits, seen_documents = [], set()
+    search_tags = [selected] if selected else fn_tags[:3]
+    auto_queries = [POLICY_RAG_SEED_QUERY.get(tag, f"{C.label(tag)} 지원사업") for tag in search_tags] or [default_query]
+    for auto_query in auto_queries:
+        auto = decision_support.rag.search(auto_query, namespace="official", current_only=True, limit=8)
+        for hit in auto.get("hits") or []:
+            if hit["document_id"] in seen_documents:
+                continue
+            seen_documents.add(hit["document_id"])
+            hits.append(hit)
+            break
+        if len(hits) == 3:
+            break
+    with st.container(key="dxsec-policy-rag"):
+        st.html(ui.section_count_html("현재 정책 RAG 연결", f"공식 근거 {len(hits)}건"))
+        st.caption("진단에서 나온 지원 필요 기능을 LLM/sources의 공식 HTML·PDF에서 먼저 찾고, "
+                   "기업마당의 현재 공고와 담당기관 확인으로 이어갑니다. RAG와 Gemini는 적격 여부를 결정하지 않습니다.")
+        st.markdown(f"**자동 검색어** · {default_query}")
+        if hits:
+            for hit in hits:
+                locator = f"{hit['page']}쪽" if hit.get("page") else (hit.get("section") or "본문")
+                status = {"OPEN": "현재 안내", "UNKNOWN": "현재 상태 확인 필요"}.get(
+                    hit.get("current_intake_status"), hit.get("current_intake_status") or "상태 확인 필요")
+                st.markdown(f"- **[{hit['title']}]({hit['source_url']})** · {status} · {locator} · "
+                            f"원문 확인 {hit.get('verified_at') or '미확인'}")
+        else:
+            st.caption("자동 검색어와 맞는 현재 공식 원문을 찾지 못했습니다. 아래에서 사업명이나 지원 내용을 직접 검색할 수 있습니다.")
+
+        result_key = f"policy_rag_result::{industry}::{quarter}"
+        query_key = f"policy_rag_query::{industry}::{quarter}::{selected or 'all'}"
+        with st.form(f"policy_rag_form::{industry}::{quarter}::{selected or 'all'}"):
+            query = st.text_input("공식 정책·지원사업 검색", value=default_query, key=query_key,
+                                  placeholder="예: 현재 신청 가능한 직업훈련 지원사업")
+            submitted = st.form_submit_button("RAG로 공식 지원 찾기", type="primary")
+        if submitted:
+            with st.spinner("공식 정책 원문과 현재 공고를 확인하는 중입니다."):
+                st.session_state[result_key] = {"query": query, "answer": copilot.ask(query, quarter, industry)}
+
+        stored = st.session_state.get(result_key)
+        if stored:
+            answer = stored["answer"]
+            st.markdown(f"**검색 결과** · {stored['query']}")
+            st.badge(ANSWER_SOURCE_LABEL.get(answer.get("source_type"), answer.get("source_type", "검색 결과")),
+                     color=SOURCE_BADGE_COLOR.get(answer.get("source_type"), "gray"))
+            used = provider_usage_marks(answer)
+            if used:
+                st.caption(" ".join(used))
+            st.html(ui.answer_html(structure_answer(quarter_text(answer.get("answer") or ""))))
+            for cite in answer.get("citations") or []:
+                detail = " · ".join(x for x in (
+                    cite.get("institution"), cite.get("locator"),
+                    f"확인 {cite['checked_at']}" if cite.get("checked_at") else None,
+                ) if x)
+                st.caption(f"근거: [{cite['title']}]({cite['url']})" + (f" · {detail}" if detail else ""))
+            if answer.get("caveats"):
+                st.caption(f"주의 · {quarter_text(answer['caveats'][0])}")
 
 
 def notices_view(industry: str, fn_tags: list[str]) -> None:
@@ -2700,6 +2788,7 @@ def page_policy():
                                                      f"{function_ui_label(tag, C.label(tag))} · {counts.get(tag, 0)}건"),
                             key=f"policy_fn2::{ind}::{q}", label_visibility="collapsed")
                     selected = None if pick in (None, "*") else pick
+                    policy_rag_view(ind, q, fn_tags, selected)
                     intake = st.session_state.get(f"policy_intake::{ind}::{q}") or "*"
                     shown = filter_official_cards(all_cards, selected, None if intake == "*" else intake)
                     st.html(ui.section_count_html("연결 가능한 지원제도", f"관련 제도 {len(shown)}건"))

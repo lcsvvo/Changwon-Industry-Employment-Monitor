@@ -80,6 +80,10 @@ GROUNDED_SYSTEM = (
 RAG_SYSTEM = (
     "공식 문서 발췌만 근거로 질문에 답하세요. 발췌에 없는 금액·기간·대상은 쓰지 마세요. "
     "개별 기업의 적격·승인·지급을 확정하지 말고, 담당기관 확인이 필요하다고 덧붙이세요.")
+RECRUITMENT_RAG_SYSTEM = (
+    "고용24 채용공고 상세 HTML에서 추출·정제한 발췌만 근거로 한국어로 답하세요. "
+    "공고에 적힌 직무·기술·자격·경력 조건만 요약하고, 발췌에 없는 수치나 사실은 만들지 마세요. "
+    "일부 상세검증 공고의 수집 단면이므로 업종 전체 노동수요·채용난·미충원·기술 미스매치를 단정하지 마세요.")
 
 EXAMPLES = ("이 업종이 왜 우선점검인가?", "E값은?", "Q1 상태 알려줘", "현장에서 뭘 확인해야 해?",
             "직전 분기 대비 판정 변화는?", "현재 신청 가능한 고용유지 사업 있어?")
@@ -113,7 +117,8 @@ class Copilot:
         import os
         llm, web = providers_from_env(env)
         env = os.environ if env is None else env
-        return cls(service, llm, web, audit, summarize_rag=env.get("COPILOT_LLM_RAG_SUMMARY") == "1",
+        return cls(service, llm, web, audit,
+                   summarize_rag=env.get("COPILOT_LLM_RAG_SUMMARY", "on").strip().lower() not in {"0", "off", "false"},
                    official_apis=official_apis_from_env(None if env is os.environ else env),
                    compose_with_llm=env.get("COPILOT_LLM_COMPOSE", "all").strip().lower() != "off")
 
@@ -128,7 +133,8 @@ class Copilot:
         target_industry, target_quarter, comparison = self._target(decision, quarter, industry, comparison_industry)
         usage = {"llm": False, "web": False, "domains": (), "error": None, "provider": None, "model": None}
         if decision.route == INTERNAL_DIAGNOSTIC:
-            ans = self._diagnostic(decision, target_quarter, target_industry, comparison, field_context, trace, usage)
+            ans = self._diagnostic(decision, question, target_quarter, target_industry, comparison, field_context,
+                                   trace, usage)
         elif decision.route == INTERNAL_RAG:
             ans = self._policy(decision, question, target_quarter, target_industry, trace, usage)
         elif decision.route == EXTERNAL_WEB:
@@ -156,17 +162,76 @@ class Copilot:
         return target, decision.quarter or quarter, comparison
 
     # ------------------------------------------------------------ ① 등록 진단
-    def _diagnostic(self, decision, quarter, industry, comparison, field_context, trace, usage) -> CopilotAnswer:
+    def _diagnostic(self, decision, question, quarter, industry, comparison, field_context, trace, usage) -> CopilotAnswer:
         ans = self.internal.answer(decision, quarter, industry, comparison_industry=comparison,
                                    field_context=field_context)
         trace.append({"stage": INTERNAL_DIAGNOSTIC, "status": ans.answer_type})
-        if decision.intent == R.REPHRASE:
+        if decision.intent == R.RECRUITMENT:
+            ans = self._recruitment_rag(ans, question, decision, quarter, industry, trace, usage)
+        elif decision.intent == R.REPHRASE:
             ans = self._rephrase(ans, quarter, industry, trace, usage)
         elif self._composing() and decision.intent not in (R.COMPARE, R.LIMIT):
             # 비교는 화면이 등록 수치로 구조화해 보여주므로, 단정 여부(LIMIT)는 '아니요' 결론을 그대로 두기 위해 제외.
             # 나머지 등록 진단 답변은 Gemini가 같은 근거로 다시 쓴다.
             ans = self._rephrase(ans, quarter, industry, trace, usage, compose=True)
         return ans
+
+    def _recruitment_rag(self, base: CopilotAnswer, question, decision, quarter, industry, trace, usage) -> CopilotAnswer:
+        """등록 채용 스냅샷 뒤에 고용24 상세 HTML 정제본 검색 결과를 붙인다."""
+        searcher = getattr(self.service, "recruitment_rag", None)
+        if searcher is None:
+            trace.append({"stage": "RECRUITMENT_RAG", "status": "NOT_AVAILABLE"})
+            return base
+        rag = searcher.search(question, industry=industry, limit=5)
+        hits = rag.get("hits") or []
+        trace.append({"stage": "RECRUITMENT_RAG", "status": rag.get("status"), "hits": len(hits),
+                      "source_file": rag.get("source_file")})
+        base.meta = {**base.meta, "recruitment_rag": {
+            "status": rag.get("status"), "hits": len(hits), "source_file": rag.get("source_file"),
+            "verified_detail_count": rag.get("verified_detail_count"),
+        }}
+        if not hits:
+            base.caveats = [*base.caveats, rag.get("message") or "검색 가능한 채용공고 상세 근거가 없습니다."]
+            return base
+
+        sources = [SourceDoc(
+            id=h["document_id"], title=h["title"], text=h["excerpt"], url=h.get("source_url"),
+            institution="고용24", checked_at=h.get("checked_at"),
+        ) for h in hits]
+        listing = "\n".join(
+            f"- {h['title']} · {h.get('company') or '기업명 확인 필요'} · 등록 {h.get('registered_at') or '미확인'}"
+            f" · 마감 {h.get('closing_at') or '미확인'}"
+            for h in hits
+        )
+        detail = f"{rag['message']}\n{listing}"
+        if self.llm.available:
+            usage["llm"] = True
+            result = self.llm.generate_with_sources(question, sources, system=RECRUITMENT_RAG_SYSTEM)
+            extra = guardrails.numbers_supported(result.text, [f"{s.title} {s.text}" for s in sources]) if result.ok else set()
+            ok = result.ok and not extra and not guardrails.assertive(result.text)
+            trace.append({"stage": "RECRUITMENT_RAG_LLM", "status": "ACCEPTED" if ok else "REJECTED",
+                          "error": result.error, "unsupported_numbers": sorted(extra)})
+            if ok:
+                detail = f"{result.text}\n\n검색된 공고:\n{listing}"
+                base.composer = "LLM"
+            elif result.error:
+                usage["error"] = usage["error"] or result.error
+
+        base.answer = f"{base.answer}\n\n[고용24 채용공고 HTML RAG]\n{detail}"
+        base.source_type = INTERNAL_RAG
+        base.answer_type = "RECRUITMENT_HTML_RAG"
+        base.citations = [*base.citations, *[
+            Citation(title=h["title"], url=h["source_url"], source_type=INTERNAL_RAG, official=True,
+                     institution="고용24", checked_at=h.get("checked_at"), locator="상세 HTML 정제본")
+            for h in hits if h.get("source_url")
+        ]]
+        base.evidence = [*base.evidence, *[
+            {k: h.get(k) for k in ("document_id", "posting_id", "score", "matched_terms", "checked_at")}
+            for h in hits
+        ]]
+        base.official_evidence_sufficient = True
+        base.caveats = [*base.caveats, "채용공고는 일부 상세검증 공고의 수집 단면이며 CORE/Triage 판정 입력이 아닙니다."]
+        return base
 
     def _composing(self) -> bool:
         return self.compose_with_llm and self.llm.available
