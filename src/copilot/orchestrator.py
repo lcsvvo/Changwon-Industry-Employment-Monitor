@@ -88,9 +88,13 @@ GROUNDED_SYSTEM = (
     "한 문장으로 알려 주세요.\n"
     "- 원인을 단정하거나('~때문입니다') 지원 대상·선정·적격·추천을 확정하는 표현을 쓰지 마세요. 구조조정·산업위기·채용난·"
     "기술 미스매치가 발생했다고 단정하지 마세요.")
+# 정책 요약도 진단 답변과 같은 방식: 금액·기간 등 수치는 인용한 원문 발췌를 그대로 보여주고, LLM 요약에는 숫자를 쓰지 않는다.
 RAG_SYSTEM = (
-    "공식 문서 발췌만 근거로 질문에 답하세요. 발췌에 없는 금액·기간·대상은 쓰지 마세요. "
-    "개별 기업의 적격·승인·지급을 확정하지 말고, 담당기관 확인이 필요하다고 덧붙이세요.")
+    "공식 문서 발췌만 근거로 질문에 대한 요약을 2~4문장으로 쓰세요. 인용한 발췌 원문은 수치와 함께 요약 아래에 그대로 "
+    "표시됩니다.\n"
+    "금액·비율·기간·날짜·인원 등 아라비아 숫자를 하나도 쓰지 마세요([S1] 같은 근거 번호 표시만 예외). 수치가 답의 핵심이면 "
+    "'지원 수준은 [S2] 원문에 금액으로 제시돼 있습니다'처럼 원문 위치를 안내하세요.\n"
+    "발췌에 없는 대상·조건은 쓰지 마세요. 개별 기업의 적격·승인·지급을 확정하지 말고, 담당기관 확인이 필요하다고 덧붙이세요.")
 RECRUITMENT_RAG_SYSTEM = (
     "고용24 채용공고 상세 HTML에서 추출·정제한 발췌만 근거로 한국어로 답하세요. "
     "공고에 적힌 직무·기술·자격·경력 조건만 요약하고, 발췌에 없는 수치나 사실은 만들지 마세요. "
@@ -352,24 +356,32 @@ class Copilot:
         return self._attach_bizinfo(ans, biz, decision, quarter, industry)
 
     def _summarize(self, ans: CopilotAnswer, question: str, hits: list[dict], trace, usage) -> CopilotAnswer:
-        """충분한 공식 hit만 근거로 LLM 요약. 인용·숫자 검증 실패 시 결정론 목록 그대로."""
+        """충분한 공식 hit만 근거로 LLM이 숫자 없는 요약을 쓰고, 인용한 발췌는 원문 그대로 붙인다.
+        인용·검증 실패 시 결정론 목록 그대로."""
         if not self.llm.available:
             return ans
+        hits = hits[:5]
         sources = [SourceDoc(id=f"{h['document_id']}:{h.get('page') or h.get('section')}", title=h["title"],
                              text=h.get("excerpt") or "", url=h.get("source_url"), checked_at=h.get("verified_at"))
-                   for h in hits[:5]]
+                   for h in hits]
         usage["llm"] = True
         result = self.llm.generate_with_sources(question, sources, system=RAG_SYSTEM)
-        extra = (guardrails.numbers_supported(result.text, [f"{s.title} {s.text}" for s in sources])
-                 if result.ok else set())
-        ok = result.ok and not extra and not guardrails.assertive(result.text)
+        summary = " ".join(line.strip() for line in (result.text or "").splitlines() if line.strip())
+        ok, why = guardrails.check_summary(summary) if result.ok else (False, "LLM_FAILED")
         trace.append({"stage": "RAG_SUMMARY_LLM", "status": "ACCEPTED" if ok else "REJECTED",
-                      "error": result.error, "unsupported_numbers": sorted(extra)})
+                      "check": why, "error": result.error})
         if not ok:
             usage["error"] = usage["error"] or result.error
             return ans
+        quotes = []
+        for i, (hit, source) in enumerate(zip(hits, sources), 1):
+            if source.id in result.cited_ids:
+                locator = f"{hit['page']}쪽" if hit.get("page") else (hit.get("section") or "본문")
+                quotes.append(f"[S{i}] {hit['document_id']} {hit['title']} · {locator}: "
+                              f"“{' '.join(source.text.split())}”")
         listing = ans.answer.split("\n", 1)[-1]
-        ans.answer = f"{result.text}\n\n근거 원문:\n{listing}"
+        ans.answer = (f"{summary}\n\n근거 원문 발췌(수치는 원문 그대로):\n" + "\n".join(quotes)
+                      + f"\n\n문서 목록:\n{listing}")
         ans.composer = "LLM"
         return ans
 

@@ -111,6 +111,22 @@ def check_explanation(original: str, explanation: str, registered_stage: str | N
     return True, "PASS"
 
 
+CITE_MARK = re.compile(r"\[S\d+\]")
+
+
+def check_summary(summary: str) -> tuple[bool, str]:
+    """정책 원문 발췌에 붙는 LLM 요약의 수용 여부. 금액·기간 등 수치는 발췌 원문이 맡으므로 요약에는 숫자가 없어야
+    한다([S1] 같은 근거 번호 표시만 예외)."""
+    body = CITE_MARK.sub("", summary or "")
+    if not body.strip():
+        return False, "EMPTY"
+    if re.search(r"\d", body):
+        return False, "NUMBER_IN_SUMMARY"
+    if assertive(body):
+        return False, "ASSERTIVE"
+    return True, "PASS"
+
+
 def official_citations(citations: list[Citation]) -> list[Citation]:
     """외부 인용 중 공식 도메인이며 URL·기관·확인일이 모두 있는 것만."""
     kept = []
