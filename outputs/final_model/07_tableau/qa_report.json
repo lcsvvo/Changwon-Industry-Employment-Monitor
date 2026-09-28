@@ -1,0 +1,22 @@
+{
+  "status": "SUCCESS",
+  "built_at": "2026-09-28T12:20:34.806663",
+  "latest_quarter": "2026Q2",
+  "qa_checks": {
+    "total_mfg_employment": null,
+    "total_mfg_emp_delta": null,
+    "total_mfg_production_yoy": null,
+    "total_mfg_employment_yoy": null,
+    "machine_emp_delta": null,
+    "machine_stage": null,
+    "machine_employment": 58784
+  },
+  "expected_benchmarks_2026Q2": {
+    "total_mfg_emp_delta": -4332,
+    "total_mfg_employment": 114830,
+    "total_mfg_production_yoy": 0.39,
+    "total_mfg_employment_yoy": -3.64,
+    "machine_emp_delta": -3979,
+    "machine_stage": "우선점검"
+  }
+}
