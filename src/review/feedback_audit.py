@@ -11,7 +11,8 @@ from docx import Document
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "outputs/final_model/06_report_assets/professor_feedback"
 TABLES = ASSETS / "tables"
-REPORT = ROOT / "reports/창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx"
+# 최종 보고서는 검토 패키지 안에서 직접 편집한 문서다(생성 스크립트가 만들지 않음).
+REPORT = ROOT / "outputs/final_model/07_review_package/01_분석보고서/창원국가산단_산업고용전환진단_분석보고서.docx"
 NOTEBOOK = ROOT / "notebooks/07_professor_review_master.ipynb"
 
 
@@ -51,8 +52,8 @@ def run_checks() -> list[dict[str, str]]:
             and {"2022Q4", "2023Q1", "2023Q2", "2023Q3", "2025Q1", "2026Q2"} <= set(source.quarter)
             and source.not_confirmed.str.contains("한두 기업", na=False).any()
             and set(decomp.loc[decomp.quarter.str.startswith("2025"), "direction_excluding_shift"]) == {"생산↓·고용↓"}
-            and "기저효과로 보는 것이 타당하다" in report,
-            "분포기반 QA·원자료 추적표에 더해, 급변 분기를 분리한 YoY 분해로 2025년 S1 기저효과와 2022Q4 수준하락 효과를 수치화",
+            and "급증의 영향을 받았을 가능성을 고려해야" in report,
+            "분포기반 QA·원자료 추적표에 더해, 급변 분기를 분리한 YoY 분해로 2025년 S1의 급증 영향 가능성과 2022Q4 수준하락 효과를 수치화",
             "qa_level_shift_cases.csv; wood_paper_source_audit.csv; wood_paper_level_shift_decomposition.csv",
         ),
         (
@@ -69,8 +70,8 @@ def run_checks() -> list[dict[str, str]]:
             and boundary.loc["2026Q2", "E_upper_headcount_to_flip"] == 1
             and boundary.loc["2026Q1", "E_upper_headcount_to_flip"] == 4
             and ratio.set_index("size_group").loc["300인 미만", "rows_flip_within_2"] == 18
-            and "27.3%" in report and "규모게이트가 아니라 E 10% 상위경계" in report,
-            "48명/47명 감소와 E 상위경계 여유를 인원으로 제시하고, 규모별 비율경계 인원 민감도로 규모게이트 근거를 보강",
+            and "27.3%" in report and "규모 게이트가 아니라 E 10% 상위경계" in report,
+            "48명/47명 감소와 E 상위경계 여유를 인원으로 제시하고, 규모별 비율경계 인원 민감도로 규모 게이트 근거를 보강",
             "wood_paper_boundary_margin.csv; ratio_boundary_headcount_summary.csv; ratio_boundary_headcount_latest.csv",
         ),
         (
@@ -79,10 +80,10 @@ def run_checks() -> list[dict[str, str]]:
             and set(followup.stage) == {"우선점검", "추가확인", "관찰"}
             and len(external) == 3
             and cci.set_index("group").loc["우선점검 행", "emp_direction_agree"] == "9/9"
-            and "시점분리 사후 점검과 동시점 대조" in report
+            and "시점분리 사후 점검과 동일 시점 대조" in report
             and abs(mr.set_index("stage").loc["우선점검", "level_down_rate"] - 11 / 13) < 1e-9
-            and len(press) == 12 and "언론·기관 발표 12건" in report,
-            "검증을 본론(2-3)으로 옮기고, 증감률 평균회귀 분해로 균형정확도 0.5 미만의 원인을 설명하고, 창원상의 54행·언론·기관 발표 12건 동시점 대조를 보강",
+            and len(press) == 12 and "언론·기관 발표도 판정 결과와 대조" in report,
+            "검증을 본론(2-3)으로 옮기고, 증감률 평균회귀 분해를 균형 정확도 0.5 미만 해석의 고려사항으로 제시하고, 창원상의 54행·언론·기관 발표 12건 동일 시점 대조를 보강",
             "mean_reversion_by_stage.csv; mean_reversion_summary.csv; cci_concurrent_check.csv; press_concurrent_cases.csv",
         ),
         (
@@ -91,20 +92,20 @@ def run_checks() -> list[dict[str, str]]:
             and "2023년 1~3분기" in report
             and "한두 기업" in report,
             "Q1·Q2·기준선·단계격자와 원본 Streamlit 화면 2장을 배치하고 해석 문단을 추가",
-            "교수피드백반영본.docx 그림 1~7 및 본문",
+            "창원국가산단_산업고용전환진단_분석보고서.docx 그림 1~7 및 본문",
         ),
         (
             "6. 서술·용어",
             "선제점검 단계분류(Triage)" in report
-            and "우선점검 진입용 최소 고용규모(규모게이트)" in report
+            and "우선점검 진입용 최소 고용규모(규모 게이트)" in report
             and "관찰 수준(OBSERVE)" in report
             and "추가확인 수준(CHECK)" in report
             and "우선점검 수준(PRIORITY)" in report
             and "자료·모형상 단일 범주 확정 곤란(UNDETERMINED)" in report
-            and "범주수용도지수(CAI)" in report
+            and "범주 수용도 지수(CAI)" in report
             and "우선검토 수준" not in report
             and "우선점검 후보" not in report
-            and "해석 범위도 이 절에 모아 둔다" in report,
+            and "Triage 단계는 위기 여부나 지원 대상을 확정하는 판정이 아니며" in report,
             "최초 용어를 풀어 쓰고 단계명을 우선점검·추가확인·관찰로 통일, 해석범위 부정 서술은 4-1 한계 절로 모음",
             "보고서; src/app/view_models.py",
         ),
@@ -149,7 +150,7 @@ def write_log(rows: list[dict[str, str]]) -> Path:
     lines = [
         "# 교수 피드백 반영 검증 로그",
         "",
-        "자동검증일: 2026-09-28",
+        "자동검증일: 2026-09-29",
         "",
         "| 구분 | 상태 | 어떻게 수정했는가 | 검증 근거 |",
         "|---|---|---|---|",
@@ -161,7 +162,7 @@ def write_log(rows: list[dict[str, str]]) -> Path:
         "",
         "미완료: 목재·종이 2025Q1 급증의 실제 원인(기업 증원·분류/집계범위 변경)과 "
         "2026Q2 감소의 기업별 집중 여부는 공개 업종 집계표로 확인할 수 없다. 원자료 수치 대조, "
-        "수준변화 QA, 이후 분기 지속 여부와 기저효과 해석은 완료했지만 원인 규명 완료로 표시하지 않는다.",
+        "수준변화 QA, 이후 분기 지속 여부와 급증 영향 해석은 완료했지만 원인 규명 완료로 표시하지 않는다.",
     ])
     path = ASSETS / "feedback_implementation_log.md"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

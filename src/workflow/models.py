@@ -127,7 +127,7 @@ class InspectionCase(Base):
     snapshot_quarter: Mapped[str] = mapped_column(String(6))
     snapshot_version: Mapped[str] = mapped_column(String(8))
     snapshot_data_hash: Mapped[str] = mapped_column(String(64))
-    # contemporaneous = 대상 분기 실행 분석본 / reconstructed = 후속 실행으로 후향 재구성된 과거분기
+    # contemporaneous = 대상 분기가 기준분기인 분석본 / reconstructed = 이후 기준분기 분석본으로 후향 재구성된 과거분기
     snapshot_nature: Mapped[str] = mapped_column(String(16))
     triage_stage_at_open: Mapped[str] = mapped_column(String(10))
     origin: Mapped[str] = mapped_column(String(20))
@@ -153,7 +153,7 @@ class InspectionCase(Base):
 class QuarterlyReview(Base):
     """점검 시점(review scope): 최초 점검 또는 분기 재점검. 한 점검 건에 분기별로 누적된다.
 
-    각 시점은 그때 사용한 분석본과 그 성격(당시 분석본/후향 재구성)을 고정한다.
+    각 시점은 그때 사용한 분석본과 그 성격(기준분기 분석본/후향 재구성)을 고정한다.
     단계는 분석본 값을 옮긴 것이며, 이동의 의미는 기록하지 않는다.
     """
 

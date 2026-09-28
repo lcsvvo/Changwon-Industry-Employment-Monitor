@@ -39,6 +39,11 @@ def save_fig(fig, name, dir_fig):
     fig.savefig(dir_fig / f'{name}.png', dpi=300, bbox_inches='tight')
 
 
+def q_label(q):
+    """그림 표시용 분기 표기: '2026Q2' → '2026년 2분기'(계산·필터에는 원래 코드값을 쓴다)."""
+    return f'{q[:4]}년 {q[-1]}분기'
+
+
 def n_fmt(v, unit='명'):
     """증감 인원 표기: 부호 유지 + 천단위 구분."""
     if pd.isna(v):
@@ -302,16 +307,16 @@ def plot_q1_quadrant(q, ctx, dir_fig):
     handles = [Line2D([], [], marker='o', ls='', markerfacecolor='#BBBBBB', markeredgecolor='white',
                       markersize=np.sqrt(70 + 620 * np.sqrt(v / emp_max)) * 0.62,
                       label=f'{v:,}명') for v in leg_vals]
-    # 사분면 코너 라벨과 겹치지 않도록 좌측 여백(관측치가 없는 영역)에 둔다.
-    ax.legend(handles=handles, loc='center left', bbox_to_anchor=(0.015, 0.62),
+    # 우상단 S1 코너 라벨 아래(관측치가 없는 영역)에 둔다 — 좌측 여백은 S3 업종 점(석유화학)을 가린다.
+    ax.legend(handles=handles, loc='upper right', bbox_to_anchor=(0.985, 0.915),
               frameon=True, framealpha=0.95, edgecolor='#DDDDDD',
-              fontsize=8.6, title=f'점 크기 = {ctx.latest} 고용 인원', title_fontsize=8.6,
+              fontsize=8.6, title=f'점 크기 = {q_label(ctx.latest)} 고용 인원', title_fontsize=8.6,
               labelspacing=1.5, borderpad=0.9, handletextpad=1.4)
 
     ax.set_xlabel('명목 생산액 증감률 (YoY, %)', fontsize=10.5)
     ax.set_ylabel('고용 증감률 (YoY, %)', fontsize=10.5)
-    ax.set_title(f'{ctx.latest} 업종별 생산·고용 증감률과 국면 위치\n'
-                 f'(전년동기 {ctx.base_q} 대비, 중립구간 threshold={ctx.threshold})', fontsize=11.5)
+    ax.set_title(f'{q_label(ctx.latest)} 업종별 생산·고용 증감률과 국면 위치\n'
+                 f'(전년동기 {q_label(ctx.base_q)} 대비, 중립구간 threshold={ctx.threshold})', fontsize=11.5)
     style_ax(ax, ygrid=False)
     plt.tight_layout()
     save_fig(fig, 'Q1A_최신분기_사분면', dir_fig)
@@ -403,7 +408,7 @@ def plot_q2_scale(q2, net, ctx, dir_fig):
     bar_labels(ax, y, q2.증감인원.values, fmt=lambda v: f'{v:+,.0f}', fontsize=9.2)
     ax.set_yticks(y)
     ax.set_yticklabels(q2.index, fontsize=10.5)
-    ax.set_xlabel(f'고용 증감 인원 (명, {ctx.latest} vs 전년동기 {ctx.base_q})', fontsize=10.2)
+    ax.set_xlabel(f'고용 증감 인원 (명, {q_label(ctx.latest)} vs 전년동기 {q_label(ctx.base_q)})', fontsize=10.2)
     span = q2.증감인원.max() - q2.증감인원.min()
     ax.set_xlim(q2.증감인원.min() - span * 0.22, max(q2.증감인원.max(), 0) + span * 0.16)
     ax.set_title(f'① 고용 증감 인원 — 제조업 전체 {net:+,.0f}명', fontsize=11, loc='left')
@@ -412,12 +417,12 @@ def plot_q2_scale(q2, net, ctx, dir_fig):
     ax = axes[1]
     ax.barh(y, q2['고용비중%'], height=0.66, color='#9AA5B1')
     bar_labels(ax, y, q2['고용비중%'].values, fmt=lambda v: f'{v:.1f}%', fontsize=9.2)
-    ax.set_xlabel(f'제조업 전체 고용 대비 비중 (%, {ctx.latest})', fontsize=10.2)
+    ax.set_xlabel(f'제조업 전체 고용 대비 비중 (%, {q_label(ctx.latest)})', fontsize=10.2)
     ax.set_xlim(0, max(q2['고용비중%'].max() * 1.2, 1))
     ax.set_title('② 고용 비중', fontsize=11, loc='left')
     style_ax(ax, ygrid=False, xgrid=True)
 
-    fig.suptitle(f'{ctx.latest} 업종별 고용 증감 인원과 고용 비중 (같은 업종 순서 — 증감 인원 오름차순)',
+    fig.suptitle(f'{q_label(ctx.latest)} 업종별 고용 증감 인원과 고용 비중 (같은 업종 순서 — 증감 인원 오름차순)',
                  fontsize=12, y=1.02)
     plt.tight_layout()
     save_fig(fig, 'Q2A_고용증감_비중', dir_fig)
@@ -489,8 +494,8 @@ def plot_q2_baseline(q2, main_ind, net, ctx, dir_fig):
     ax.set_xticks(x)
     ax.set_xticklabels(bl.index, fontsize=10.5)
     ax.set_ylim(lo - pad * 1.3, hi + pad * 0.9)
-    ax.set_ylabel(f'고용 증감 인원 (명, {ctx.latest} vs 전년동기 {ctx.base_q})', fontsize=10.2)
-    ax.set_title(f'{ctx.latest} 규모를 통제한 비교 — 실제 증감 vs 비례배분 기준선\n'
+    ax.set_ylabel(f'고용 증감 인원 (명, {q_label(ctx.latest)} vs 전년동기 {q_label(ctx.base_q)})', fontsize=10.2)
+    ax.set_title(f'{q_label(ctx.latest)} 규모를 통제한 비교 — 실제 증감 vs 비례배분 기준선\n'
                  f'(제조업 전체 {net:+,.0f}명을 전년동기 고용비중대로 배분, 상세표시 대상 업종)', fontsize=11.5)
     ax.legend(loc='upper left', frameon=False, fontsize=9)
     style_ax(ax)

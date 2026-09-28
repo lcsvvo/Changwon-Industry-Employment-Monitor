@@ -30,7 +30,8 @@ class MigrationError(RuntimeError):
 def config(url: str) -> Config:
     cfg = Config()
     cfg.set_main_option("script_location", str(MIGRATIONS))
-    cfg.set_main_option("sqlalchemy.url", url)
+    # ConfigParser 는 % 를 보간 문법으로 읽는다 — URL 인코딩된 Windows 경로(C%3A)를 그대로 넘기면 실패한다
+    cfg.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
     return cfg
 
 

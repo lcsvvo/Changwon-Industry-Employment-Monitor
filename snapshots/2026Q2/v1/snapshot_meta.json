@@ -1,14 +1,14 @@
 {
- "run_id": "6f06118d6a@2026-09-19T18:10:39.297795+00:00",
+ "run_id": "83fdfee884@2026-09-27T15:18:49.280235+00:00",
  "quarter": "2026Q2",
  "window": [
   "2022Q1",
   "2026Q2"
  ],
- "data_hash": "3d9f6a5f5ba66329a76afc86a2d7d7437a97fbeb56fba48db99ad90267bdc5a9",
+ "data_hash": "d39462cb05b5661eccb988fd64bf5b433486a7d17b918c2a64a392e013c72deb",
  "rule_version": "changwon-triage-rule/3.1.0-audited",
  "evidence_layer_version": "context-interpretation/1.0.0",
- "export_contract_version": "dss-export/1.1.0",
+ "export_contract_version": "dss-export/1.4.1",
  "scenario_status": "draft",
  "scenario_status_basis": {
   "approved_scenario_registry": null,
@@ -97,9 +97,9 @@
  },
  "record_scope": "이 실행이 산출한 2022Q1~2026Q2 전체 업종×분기",
  "source_run": {
-  "triage_run_at_utc": "2026-09-19T18:10:39.297795+00:00",
+  "triage_run_at_utc": "2026-09-27T15:18:49.280235+00:00",
   "evidence_run_at_utc": "2026-09-19T18:10:56+00:00",
-  "git_head": "6f06118d6aeb5de49d67e566f3540199ee533b22",
+  "git_head": "83fdfee8846579063c7369f70ce468743b172b18",
   "triage_untouched_by_evidence": true
  },
  "record_count": 180,
@@ -107,7 +107,7 @@
   {
    "key": "triage_panel",
    "path": "outputs/final_model/02_triage/tables/triage_panel.csv",
-   "sha256": "0392c01d61c7ab955a545699e0ecac7f4e39e790a6b5487d83047e1d518f99c9",
+   "sha256": "cc685b37f070f61a44ecfa9e8b5f3618e68cc28c5a5637c57e2f4cb74bf0b1e3",
    "role": "Q1·Q2·Q3·Triage·E/R/A/P·자료품질·확인질문(check_question) 정본 — 180행(10업종×18분기)",
    "rows": 180
   },
@@ -128,8 +128,35 @@
   {
    "key": "handoff_cards_latest",
    "path": "outputs/final_model/05_handoff/tables/handoff_cards_latest.json",
-   "sha256": "cca6a3281192969432eefe187106aa5b67e18d765e1e6e8abe3793370c118f92",
+   "sha256": "1f4b2cf690efda1f52e03d61e44bd3ba92c178e7ec26906885f6044001b206cc",
    "role": "최신분기 인계카드(대조용)"
+  },
+  {
+   "key": "check_questions_context_panel",
+   "path": "outputs/final_model/05_handoff/tables/check_questions_context_panel.csv",
+   "sha256": "db46a4e41187d20d46848b252b6dfb0ae60835a8ae3ec3845a12e76467c41874",
+   "role": "분기별 맥락 기반 추가 확인질문(180행) — 외부근거 카드가 아니며 판정을 바꾸지 않음",
+   "rows": 180
+  },
+  {
+   "key": "external_evidence_panel",
+   "path": "outputs/final_model/04_external_evidence/external_evidence_panel.csv",
+   "sha256": "0d3c83e87507e9bff18c869babbb2edb45a9c173ed2453438b9cb574ef2b9cb6",
+   "role": "분기별 외부자료 패널(180행) — 해석층이 해당 분기에 정렬한 값 그대로, 판정 입력 아님",
+   "rows": 180
+  },
+  {
+   "key": "data_role_table",
+   "path": "outputs/final_model/04_external_evidence/data_role_table.csv",
+   "sha256": "5c0c639e55e8410e72a4343b34940d1d351cc8cd15d313cd1ff2aa44f9357aa9",
+   "role": "외부자료 역할 정의(CORE/VALIDATION/CONTEXT/EXCLUDE)",
+   "rows": 15
+  },
+  {
+   "key": "recruiting_snapshot_metadata",
+   "path": "outputs/final_model/04_external_evidence/employment_center/recruiting_snapshot_metadata.json",
+   "sha256": "dbec105c7ae18bb30c0d993f4e4cf61adfff123361bf9ba9d310dbcc2f7983aa",
+   "role": "고용24 공고 단면의 등록 분기·범위"
   },
   {
    "key": "institution_routing_map",
@@ -168,7 +195,7 @@
   {
    "key": "triage_run_metadata",
    "path": "outputs/final_model/06_report_assets/qa/triage_run_metadata.json",
-   "sha256": "26733e019af6963beee208fa15214d7b88c8fc03f73dd67b9faab7edcf4f1109",
+   "sha256": "ae754d19233ee8691c2092861ddb4db119246c1716c1a36e77b5daaa32ac7817",
    "role": "Triage 규칙 버전·임계값·실행 시점"
   },
   {
@@ -191,9 +218,9 @@
   }
  ],
  "snapshot_version": "v1",
- "created_at": "2026-09-21T10:31:14+00:00",
+ "created_at": "2026-09-28T15:24:57+00:00",
  "payload_sha256": {
-  "industry_diagnosis.json": "3e73c9f5fbf27d7e2a9b84dfb77d39e532e3df7f2d42e1d34c6b27bfa0259a34",
+  "industry_diagnosis.json": "c85a18a402dbe515400cee5ebd6c5dd5356b0d89be34994387ff70bbafb8f0a5",
   "reference.json": "abbc1b29565f54668c7d24aef98f97fb3329f739297065480b6c393ee23cc3eb"
  }
 }

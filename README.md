@@ -53,7 +53,7 @@ CORE의 자동 판정 입력은 KICOX 생산·고용에서 계산한 지표다. 
 2026Q2 고용이 감소한 7개 업종 가운데 **5개는 명목 생산이 증가**했다. 고용 감소라는 하나의 신호만으로 산업활동의 국면을 설명하기 어렵다.
 
 <p align="center">
-  <img src="outputs/final_model/01_core/figures/Q1A_최신분기_사분면.png" alt="2026Q2 업종별 명목 생산 및 고용 YoY 사분면" width="900">
+  <img src="outputs/final_model/01_core/figures/Q1A_최신분기_사분면.png" alt="2026년 2분기 업종별 명목 생산 및 고용 YoY 사분면" width="900">
 </p>
 <p align="center"><sub>Q1 — 생산·고용 YoY의 조합과 업종별 고용 규모</sub></p>
 
@@ -62,7 +62,7 @@ CORE의 자동 판정 입력은 KICOX 생산·고용에서 계산한 지표다. 
 2026Q2 창원국가산단 제조업 고용은 전년동기보다 **4,332명 감소**했고, 그중 **기계 업종이 3,979명 감소**했다. 다만 기계의 직전 분기 대비 감소는 **104명**이므로, 전년동기 대비 큰 감소와 최근 변화의 완화를 함께 제시한다. 증감률만 보면 놓치는 업종별 규모 차이를 고용 인원과 비중으로 확인한다.
 
 <p align="center">
-  <img src="outputs/final_model/01_core/figures/Q2A_고용증감_비중.png" alt="2026Q2 업종별 고용 증감 인원과 고용 비중" width="900">
+  <img src="outputs/final_model/01_core/figures/Q2A_고용증감_비중.png" alt="2026년 2분기 업종별 고용 증감 인원과 고용 비중" width="900">
 </p>
 <p align="center"><sub>Q2 — 업종별 고용 증감 인원과 산단 제조업 고용 비중</sub></p>
 
@@ -121,7 +121,7 @@ PPI는 명목 생산 방향에 가격효과가 섞였는지, EIS는 모집단이
 | **설정·정보** | 담당자·분석 버전·데이터 기준·연결 상태 확인, 방법론·데이터 기준 및 변경 기록 열람 |
 | **행정 AI 비서** | 등록 진단·공식 문서 기반 질의응답, Gemini 근거 기반 문장 작성·요약, 수치·판정·인용 검증과 실패 시 원문 복귀 |
 
-화면은 등록 분석본(`snapshots/`)을 읽고 점검 기록을 로컬 DB에 저장한다. 화면에서 Q1~Q3나 Triage를 다시 계산하지 않는다. 주요 산출물은 [최종 방법론](reports/final_methodology.md), [최종 결과 요약](reports/final_result_summary.md), [업종별 진단카드](outputs/final_model/05_handoff/tables/handoff_cards_latest.csv), [최종 결과 HTML](outputs/final_model/06_report_assets/final_results.html)에서 확인할 수 있다.
+화면은 등록 분석본(`snapshots/`)을 읽고 점검 기록을 로컬 DB에 저장한다. 화면에서 Q1~Q3나 Triage를 다시 계산하지 않는다. 개발 중 등록한 초안 분석본은 제출 전 정리했으며, 현재 분석본(2026년 2분기 v1)은 2026년 2분기까지의 자료로 2026년 9월에 등록한 첫 공식본이다. 주요 산출물은 [최종 방법론](reports/final_methodology.md), [최종 결과 요약](reports/final_result_summary.md), [업종별 진단카드](outputs/final_model/05_handoff/tables/handoff_cards_latest.csv), [최종 결과 HTML](outputs/final_model/06_report_assets/final_results.html)에서 확인할 수 있다.
 
 `진단서 보기·저장`에서 만드는 담당자 인계용 HTML·JSON에는 핵심 판정과 지표, 현재 확인상태와 다음 행동, 우선 확인사항, 지원 검토, 채용시장 보조신호, 자료 기준이 포함된다. 이 진단서는 행정처분이나 기업별 지원대상 확정 문서가 아니다.
 
@@ -195,7 +195,7 @@ logs/                 과거 실험·검증 기록
 | 진단카드 | [`handoff_cards_latest.csv`](outputs/final_model/05_handoff/tables/handoff_cards_latest.csv) |
 | 최종 보고용 HTML | [`final_results.html`](outputs/final_model/06_report_assets/final_results.html) |
 | 교수 피드백 분석표·그림 | [`professor_feedback`](outputs/final_model/06_report_assets/professor_feedback/) |
-| 교수 피드백 반영 보고서 | [`창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx`](reports/창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx) |
+| 최종 분석보고서 | [`창원국가산단_산업고용전환진단_분석보고서.docx`](outputs/final_model/07_review_package/01_분석보고서/창원국가산단_산업고용전환진단_분석보고서.docx) |
 | 교수 피드백 반영 최종 노트북 | [`07_professor_review_master.ipynb`](notebooks/07_professor_review_master.ipynb) |
 | 검토용 결과 패키지 | [`07_review_package`](outputs/final_model/07_review_package/) |
 

@@ -47,7 +47,7 @@ import pandas as pd
 # ─────────────────────────────────────────────────────────────
 # 설정
 # ─────────────────────────────────────────────────────────────
-SNAPSHOT_VERSION = "v3"
+SNAPSHOT_VERSION = "v1"
 RULE_VERSION = "stage_rule_reconstructed_v1"
 INDEX_BASE_YEAR = "2022"
 INDEX_BASE_LABEL = "2022년 평균 = 100"

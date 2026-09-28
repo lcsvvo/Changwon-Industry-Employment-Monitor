@@ -458,7 +458,7 @@ def stage_grid(panel: pd.DataFrame) -> Path:
     colors = ["#2E8B76", "#E3A72F", "#C95862", "#AAB4BC"]
     regular = ImageFont.truetype("C:/Windows/Fonts/malgun.ttf", 17)
     small = ImageFont.truetype("C:/Windows/Fonts/malgun.ttf", 13)
-    left, top, cw, ch = 112, 76, 66, 42
+    left, top, cw, ch = 112, 96, 66, 42  # 열 머리글은 '2022년/1분기' 두 줄
     image = Image.new("RGB", (left + cw * len(grid.columns) + 2,
                               top + ch * len(grid.index) + 52), "white")
     draw = ImageDraw.Draw(image)
@@ -468,7 +468,9 @@ def stage_grid(panel: pd.DataFrame) -> Path:
         draw.rectangle((x, 33, x + 16, 49), fill=colors[i])
         draw.text((x + 22, 31), label, fill="#222222", font=small)
     for j, quarter in enumerate(grid.columns):
-        draw.text((left + j * cw + 5, 56), quarter, fill="#222222", font=small)
+        for k, part in enumerate((f"{quarter[:4]}년", f"{quarter[-1]}분기")):
+            draw.text((left + j * cw + (cw - draw.textlength(part, font=small)) / 2, 56 + k * 18),
+                      part, fill="#222222", font=small)
     for i, industry in enumerate(grid.index):
         y = top + i * ch
         draw.text((8, y + 11), str(industry), fill="#222222", font=regular)
@@ -481,6 +483,56 @@ def stage_grid(panel: pd.DataFrame) -> Path:
               "자료: KICOX 업종별 분기자료 · src/review/professor_feedback.py", fill="#444444", font=small)
     path = FIGURES / "F10_Triage_단계격자.png"
     image.save(path, dpi=(180, 180))
+    return path
+
+
+SENSITIVITY = ROOT / "logs/validation/triage/sensitivity_own_rules.csv"
+# 운영경계(A 경계·규모 게이트)만 바꾼 사양. 기준 사양은 A 1/2%·규모 300인이다.
+BOUNDARY_VARIANTS = [
+    ("A 경계", "A 0.5/1", "0.5%/1%"), ("A 경계", "A 1/2", "1%/2%\n(기준)"), ("A 경계", "A 2/4", "2%/4%"),
+    ("A 경계", "A 제거", "A 신호 제거"),
+    ("규모 게이트", "규모 200", "200인"), ("규모 게이트", "규모 300", "300인\n(기준)"), ("규모 게이트", "규모 500", "500인"),
+    ("규모 게이트", "규모 1000", "1,000인"), ("규모 게이트", "gate 없음", "조건 제거"),
+]
+
+
+def triage_boundary_sensitivity() -> Path:
+    """운영경계(A 경계·300인 규모 게이트)를 바꿀 때 우선점검 건수가 어떻게 달라지는지 그린다(저장된 15개 사양 재실행 결과)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from core.analysis import config
+
+    config.setup_matplotlib()
+    FIGURES.mkdir(parents=True, exist_ok=True)
+    table = pd.read_csv(SENSITIVITY, encoding="utf-8-sig").set_index("variant")
+    base = int(table.loc["A 1/2", "우선점검"])
+    rows = [(group, label, int(table.loc[variant, "우선점검"])) for group, variant, label in BOUNDARY_VARIANTS]
+
+    fig, ax = plt.subplots(figsize=(9.2, 3.5))
+    x = np.arange(len(rows)) + np.array([0 if g == "A 경계" else 0.8 for g, _, _ in rows])
+    colors = ["#8A8F98" if "(기준)" in label else "#C95862" for _, label, _ in rows]
+    ax.bar(x, [n for _, _, n in rows], width=0.62, color=colors)
+    for xi, (_, _, n) in zip(x, rows):
+        ax.text(xi, n + 0.8, f"{n}건", ha="center", va="bottom", fontsize=9.5, color="#222222",
+                bbox={"facecolor": "white", "edgecolor": "none", "pad": 0.6})
+    ax.axhline(base, color="#555555", lw=0.9, ls="--", zorder=0)  # 기준 사양(회색 막대) 건수
+    ax.set_xticks(x)
+    ax.set_xticklabels([label for _, label, _ in rows], fontsize=9)
+    for group in ("A 경계", "규모 게이트"):
+        xs = [xi for xi, (g, _, _) in zip(x, rows) if g == group]
+        ax.text(np.mean(xs), -0.24, "A 경계(진입/상위)" if group == "A 경계" else "우선점검 최소 고용규모(규모 게이트)",
+                transform=ax.get_xaxis_transform(), ha="center", va="top", fontsize=9.5, color="#333333")
+    ax.set_ylabel("우선점검 건수 (180개 관측치)", fontsize=9.5)
+    ax.set_ylim(0, max(n for _, _, n in rows) * 1.18)
+    ax.set_title("운영경계를 바꿀 때 우선점검 건수", fontsize=11)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.grid(axis="y", alpha=0.22)
+    ax.set_axisbelow(True)
+    path = FIGURES / "F11_Triage_운영경계_민감도.png"
+    fig.savefig(path, dpi=220, bbox_inches="tight")
+    plt.close(fig)
     return path
 
 
@@ -518,6 +570,7 @@ def main() -> None:
         print("창원상의 전사본(data/raw/changwon_chamber) 없음: cci_concurrent_* 저장본 유지")
     wood_source_audit(panel)
     stage_grid(panel)
+    triage_boundary_sensitivity()
     write_summary(panel, validation)
     metadata = {
         "rule_version": tr.RULE_VERSION,

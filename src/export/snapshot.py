@@ -636,6 +636,7 @@ class Snapshot:
 
         과거 실행 산출물이 없는 분기는 reconstructed로 명시한다. 현재 등록 파일만으로는
         원천 데이터의 당시 as-of 컷오프를 완전 재현할 수 없으므로 강제 완료를 주장하지 않는다.
+        기준분기도 분기 종료 후 등록한 분석본이라, 확인한 것은 자료 끝 분기 = 기준분기(WINDOW_END_CHECKED)뿐이다.
         """
         year, q = int(target_quarter[:4]), int(target_quarter[-1])
         end = {1: "03-31", 2: "06-30", 3: "09-30", 4: "12-31"}[q]
@@ -648,9 +649,9 @@ class Snapshot:
             "model_version": self.meta.get("rule_version"),
             "code_commit": self.meta.get("source_run", {}).get("git_head"),
             "provenance": f"{self.quarter}/{self.version}",
-            "as_of_enforcement": "VERIFIED" if nature == CONTEMPORANEOUS else "NOT_VERIFIABLE_FROM_CURRENT_ARTIFACTS",
+            "as_of_enforcement": "WINDOW_END_CHECKED" if nature == CONTEMPORANEOUS else "NOT_VERIFIABLE_FROM_CURRENT_ARTIFACTS",
             "reconstruction_note": None if nature == CONTEMPORANEOUS else (
-                f"{target_quarter} 당시 실행본이 없어 {self.quarter} 실행 분석본에서 후향 재구성. "
+                f"{target_quarter} 당시 저장 분석본이 없어 {self.quarter} 기준 분석본에서 후향 재구성. "
                 "당시 원천의 완전한 as-of 컷오프를 현재 산출물만으로 검증할 수 없음."
             ),
         }
@@ -693,30 +694,33 @@ def load_bound_snapshot(quarter: str, version: str, data_hash: str | None,
     return verify_snapshot_binding(load_snapshot(quarter, version, snapshot_root), quarter, version, data_hash)
 
 
-# ---------------------------------------------------------------- 분석본 성격(당시 분석본 / 후향 재구성)
+# ---------------------------------------------------------------- 분석본 성격(기준분기 분석본 / 후향 재구성)
+# 코드값 contemporaneous 는 DB 제약에 묶여 그대로 둔다. 분석본은 기준분기 종료 후 등록하므로
+# "그 분기에 실행한 분석본"이 아니라 "기준분기(자료 끝 분기)를 대상으로 한 분석본"이라는 뜻이다.
 CONTEMPORANEOUS, RECONSTRUCTED = "contemporaneous", "reconstructed"
 NATURE_LABEL = {
-    CONTEMPORANEOUS: "당시 분석본",
+    CONTEMPORANEOUS: "기준분기 분석본",
     RECONSTRUCTED: "후향 재구성 분석",
 }
 
 
 def snapshot_nature(run_quarter: str, target_quarter: str) -> str:
-    """분석 실행 분기 = 대상 분기이면 그 분기에 실행해 보존한 당시 분석본, 아니면 후속 실행으로 재구성한 과거분기."""
+    """분석본 기준분기 = 대상 분기이면 기준분기 분석본, 아니면 이후 기준분기 분석본으로 재구성한 과거분기.
+    run_quarter 는 분석본의 기준분기(자료 끝 분기)이며 등록 시점이 아니다."""
     return CONTEMPORANEOUS if run_quarter == target_quarter else RECONSTRUCTED
 
 
 def nature_note(run_quarter: str, target_quarter: str) -> str:
-    """화면 표기. 후향 재구성이면 '당시 분석본'이라는 표현을 쓰지 않는다."""
+    """화면 표기. 등록 시점을 기준분기로 쓰지 않는다(분석본은 기준분기 종료 후 등록한다)."""
     if snapshot_nature(run_quarter, target_quarter) == CONTEMPORANEOUS:
-        return f"당시 분석본 · {run_quarter} 실행"
-    return (f"후향 재구성 분석 · {run_quarter} 실행 기준 · {target_quarter} 당시 저장 분석본 없음 · "
+        return f"{NATURE_LABEL[CONTEMPORANEOUS]} · {run_quarter} 자료 기준"
+    return (f"후향 재구성 분석 · {run_quarter} 기준 분석본으로 재계산 · {target_quarter} 당시 저장 분석본 없음 · "
             "후속 보정자료가 반영되었을 수 있음")
 
 
 def resolve_for_quarter(target_quarter: str, snapshot_root: Path = SNAPSHOT_ROOT) -> Snapshot | None:
-    """대상 분기를 볼 분석본: 그 분기 실행본(당시 분석본)이 있으면 최신 버전, 없으면 그 분기를 포함한
-    가장 최근 실행의 최신 버전(후향 재구성). 가짜 과거 분석본을 만들지 않는다."""
+    """대상 분기를 볼 분석본: 그 분기가 기준분기인 분석본이 있으면 최신 버전, 없으면 그 분기를 포함한
+    가장 최근 기준분기 분석본의 최신 버전(후향 재구성). 가짜 과거 분석본을 만들지 않는다."""
     metas = active_snapshots(snapshot_root)  # 신규 업무용(보관·무효 분석본은 고르지 않음)
     same = [m for m in metas if m["quarter"] == target_quarter]
     if same:

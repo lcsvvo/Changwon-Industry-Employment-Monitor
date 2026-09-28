@@ -159,7 +159,7 @@ def service(url: str | None, demo: bool, code_version: float | None = None) -> W
 
 @st.cache_data
 def resolved(quarter: str):
-    """대상 분기를 볼 분석본(당시 분석본 우선, 없으면 후향 재구성). 캐시된 분석본을 쓴다."""
+    """대상 분기를 볼 분석본(기준분기 분석본 우선, 없으면 후향 재구성). 캐시된 분석본을 쓴다."""
     snap_ = resolve_for_quarter(quarter)
     return None if snap_ is None else snapshot(snap_.quarter, snap_.version)
 
@@ -433,12 +433,12 @@ def nature_text(run_quarter: str, target_quarter: str) -> str:
 
 
 def nature_display(q: str) -> str:
-    """분석본 성격의 사용자용 이름. 의미(당시 분석본 / 후향 재구성)는 그대로, 용어만 쉽게 쓴다."""
+    """분석본 성격의 사용자용 이름. 의미(기준분기 분석본 / 후향 재구성)는 그대로, 용어만 쉽게 쓴다."""
     return NATURE_LABEL["contemporaneous"] if snapshot_nature(snap.quarter, q) == "contemporaneous" else "과거분기 재계산"
 
 
 def nature_line(q: str) -> str:
-    """분석본 성격 한 줄(진단서·정책 화면 등). 당시 분석본은 기존 표기, 재계산은 적용 분석기준을 함께 쓴다."""
+    """분석본 성격 한 줄(진단서·정책 화면 등). 기준분기 분석본은 기존 표기, 재계산은 적용 분석기준을 함께 쓴다."""
     if snapshot_nature(snap.quarter, q) == "contemporaneous":
         return nature_text(snap.quarter, q)
     return f"과거분기 재계산 결과 · 적용 분석기준 {quarter_label(snap.quarter)} 버전"
@@ -664,7 +664,8 @@ def timeline_chips(industry: str, current_quarter: str, rows: list[dict]):
             st.button(f"{marker}{qq[2:4]}Q{qq[5:]}", key=f"tl-{qq}", on_click=set_quarter, args=(qq,),
                       help=(f"{quarter_label(qq)} · {stage_display(row['stage'])} · "
                             + ("핵심자료 미확인" if row.get("data_missing") else
-                               "후향 재구성" if row.get("snapshot_type") == "reconstructed" else "당시 분석본")))
+                               "후향 재구성" if row.get("snapshot_type") == "reconstructed"
+                               else NATURE_LABEL["contemporaneous"])))
 
 
 def sync_field_store(industry: str, quarter: str, questions: list[dict]):
@@ -1254,10 +1255,12 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
 
     with st.container(key="dxsec-diag"):
         st.html(ui.section_anchor_html("summary"))
-        # 분석본 성격(당시/후향 재구성)은 항상 텍스트로 드러낸다 — 후향 재구성을 당시 분석본처럼 보이게 하지 않는다
+        # 분석본 성격(기준분기/후향 재구성)은 항상 텍스트로 드러낸다 — 후향 재구성을 기준분기 분석본처럼 보이게 하지 않는다.
+        # 기준분기 분석본은 분기 종료 후 등록하므로 실제 등록 시각을 함께 적는다(기준분기에 실행한 것처럼 쓰지 않는다).
+        # 등록 기록(registry.json)은 UTC라 날짜가 하루 달라 보일 수 있어 시각과 KST를 명시한다.
         nat = snapshot_nature(snap.quarter, q)
         meta_line = (f"자료 기준 {cutoff} · "
-                     f"{nature_text(snap.quarter, q) if nat == 'contemporaneous' else '후향 재구성'} · "
+                     f"{NATURE_LABEL[nat] + ' · ' + ts(snap.meta['created_at']) + ' KST 등록' if nat == 'contemporaneous' else '후향 재구성'} · "
                      f"{rank_text(t['stage'], t['rank_in_stage'])} · "
                      f"다음 검토 {quarter_label(t['next_review_quarter'] or '—')}")
         st.html(ui.header_html(q, ind, t["stage"], display, meta_line))
@@ -1360,7 +1363,7 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         st.html(ui.stage_legend_html())
         timeline_chips(ind, q, rows_all)
         st.html('<div class="dx-chip-note">표식: ↺ 후향 재구성(빗금) · × 핵심자료 미확인(흐림·점선) · '
-                '무표식 당시 분석본 · 파란 외곽선 선택 분기</div>')
+                '무표식 기준분기 분석본 · 파란 외곽선 선택 분기</div>')
 
     with st.container(key="dxsec-field"):
         st.html(ui.section_anchor_html("field"))

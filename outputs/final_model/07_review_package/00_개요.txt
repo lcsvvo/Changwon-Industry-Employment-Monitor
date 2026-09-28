@@ -8,7 +8,7 @@ https://github.com/lcsvvo/Changwon-Industry-Employment-Monitor
 [실제 구성]
 00_개요.txt
 01_분석보고서/
-  창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx
+  창원국가산단_산업고용전환진단_분석보고서.docx
 02_분석노트북/
   07_professor_review_master.ipynb
 03_핵심_보조자료/

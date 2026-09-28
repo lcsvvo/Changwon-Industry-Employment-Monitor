@@ -8,9 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "outputs/final_model/07_review_package"
 
+# 최종 보고서는 패키지 안에서 직접 편집한 문서라 복사하지 않고 있는지만 확인한다(덮어쓰기 방지).
+EDITED_FILES = ("01_분석보고서/창원국가산단_산업고용전환진단_분석보고서.docx",)
 FILES = {
-    "01_분석보고서/창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx":
-        "reports/창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx",
     "02_분석노트북/07_professor_review_master.ipynb": "notebooks/07_professor_review_master.ipynb",
     "03_핵심_보조자료/triage_panel.csv": "outputs/final_model/02_triage/tables/triage_panel.csv",
     "03_핵심_보조자료/qa_level_shift_cases.csv":
@@ -57,7 +57,7 @@ https://github.com/lcsvvo/Changwon-Industry-Employment-Monitor
 [실제 구성]
 00_개요.txt
 01_분석보고서/
-  창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx
+  창원국가산단_산업고용전환진단_분석보고서.docx
 02_분석노트북/
   07_professor_review_master.ipynb
 03_핵심_보조자료/
@@ -106,7 +106,10 @@ Triage가 주모형이며 ELECTRE TRI-B/SMAA-TRI는 추가확인군의 보조 �
 
 def main() -> None:
     PACKAGE.mkdir(parents=True, exist_ok=True)
-    expected = {"00_개요.txt", *FILES.keys()}
+    expected = {"00_개요.txt", *EDITED_FILES, *FILES.keys()}
+    for edited in EDITED_FILES:
+        if not (PACKAGE / edited).exists():
+            raise FileNotFoundError(PACKAGE / edited)
     existing = {str(p.relative_to(PACKAGE)).replace("\\", "/") for p in PACKAGE.rglob("*") if p.is_file()}
     unexpected = existing - expected
     if unexpected:

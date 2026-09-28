@@ -5,7 +5,7 @@
 - 모든 업무 기록은 담당자 행동으로만 생기며 audit_log 에 남는다.
 - 점검 건은 점검 시점(review scope: 최초 점검·재점검)으로 나뉜다. 현장확인 결과·메모·지원 필요 기능·결정·인계는
   그 시점에 묶여 추가만 되고, 이전 시점 기록은 수정할 수 없다(업무 테이블만으로 과거 조회 가능).
-- 각 점검 시점은 사용한 분석본과 그 성격(당시 분석본 contemporaneous / 후향 재구성 reconstructed)을 고정한다.
+- 각 점검 시점은 사용한 분석본과 그 성격(기준분기 분석본 contemporaneous / 후향 재구성 reconstructed)을 고정한다.
 - 결정별 점검 건 상태는 models.DECISION_RULES 를 따른다. 분석 결과로 상태를 바꾸지 않으며,
   '종결' 결정은 담당자가 종결을 명시적으로 확인했을 때 결정 기록과 점검 건 종료를 한 transaction 으로 처리한다.
 - 시연 범위(is_example)는 서비스 생성 시 실행 맥락으로 정해지며 호출자가 바꿀 수 없다.
@@ -712,7 +712,7 @@ class WorkflowService:
     def due_reviews(self, resolve) -> list[dict]:
         """재점검 예정: 열린 점검 건 중, 담당자가 기록한 다음 검토 분기의 분석 자료가 있는 것.
 
-        resolve(target_quarter) → 그 분기를 볼 분석본(당시 분석본 우선, 없으면 후향 재구성) 또는 None.
+        resolve(target_quarter) → 그 분기를 볼 분석본(기준분기 분석본 우선, 없으면 후향 재구성) 또는 None.
         우선순위를 새로 매기지 않는다(다음 검토 분기·점검 건 번호 순).
         """
         out = []
