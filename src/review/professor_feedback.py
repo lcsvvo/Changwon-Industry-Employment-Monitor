@@ -317,6 +317,144 @@ def cci_concurrent_check(panel: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     return rows, summary
 
 
+PRESS_SOURCES = OUT / "sources/press_concurrent_sources.csv"
+
+
+def press_concurrent_check(panel: pd.DataFrame) -> pd.DataFrame:
+    """[4] 언론·기관 발표와 같은 시기 판정의 대조. 근거 문장·URL은 수기 근거표(sources/)에 두고,
+    판정 패널의 단계·고용 증감률을 옆에 붙인다. 일치 판단은 근거표의 assessment(모집단 차이 설명 포함)를 그대로 쓴다."""
+    src = pd.read_csv(PRESS_SOURCES, encoding="utf-8")
+    rows = []
+    for r in src.itertuples(index=False):
+        qs = r.quarters.split(";")
+        sub = panel[(panel.industry == r.industry) & panel.quarter.isin(qs)].sort_values("quarter")
+        rows.append({
+            "case_id": r.case_id, "industry": r.industry, "quarters": r.quarters,
+            "panel_stages": " · ".join(f"{q} {s}" for q, s in zip(sub.quarter, sub.stage)),
+            "panel_emp_yoy_range": (f"{sub.e_yoy.min():.2f}% ~ {sub.e_yoy.max():.2f}%"
+                                    if sub.e_yoy.notna().any() else "—"),
+            "outlet": r.outlet, "published": r.published, "indicator": r.indicator,
+            "population": r.population, "evidence": r.evidence, "assessment": r.assessment,
+            "assessment_note": r.assessment_note, "url": r.url,
+        })
+    return _save(pd.DataFrame(rows), "press_concurrent_cases.csv")
+
+
+def mean_reversion_diagnosis() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """[4] 평균회귀 가설의 정밀 점검(사후 진단 — 사전등록 주평가를 대체하지 않는다).
+
+    주평가 양성 = 2분기 뒤 고용 수준 감소(u_E<0) AND 전년동기 대비 이동 악화(d_E<0).
+    두 조건을 나눠 보면, Triage가 고르는 '이미 전년동기 감소가 큰 행'에서 고용 수준 감소는 이어지는데
+    증감률만 평균 쪽으로 되돌아와(d_E>0) 양성이 되지 않는지 확인할 수 있다.
+    """
+    base = ROOT / "logs/validation/outputs/rolling_backtest"
+    pred = pd.read_csv(base / "predictions_long.csv")
+    out = pd.read_csv(base / "outcomes_long.csv")
+    tri = pred[pred.model.eq("triage_final")][["industry", "quarter", "stage", "e_yoy"]].drop_duplicates()
+    h2 = out[out.outcome.eq("primary") & out.horizon.eq(2) & out.outcome_valid.astype(bool)]
+    d = tri.merge(h2[["industry", "quarter", "u_E", "d_E", "label"]], on=["industry", "quarter"])
+    d["level_down"] = d.u_E.lt(0)
+    d["yoy_worse"] = d.d_E.lt(0)
+    d["label"] = d.label.astype(bool)
+
+    order = ["우선점검", "추가확인", "관찰"]
+    by_stage = (d.groupby("stage").agg(N=("industry", "size"), level_down_rate=("level_down", "mean"),
+                                       yoy_worse_rate=("yoy_worse", "mean"),
+                                       primary_positive_rate=("label", "mean"),
+                                       median_d_E_pp=("d_E", "median"))
+                .reindex(order).reset_index())
+    by_stage["reading"] = "level_down=2분기 뒤 고용 수준 감소 · yoy_worse=전년동기 대비 이동 악화 · primary=둘 다"
+    _save(by_stage, "mean_reversion_by_stage.csv")
+
+    groups = pd.cut(d.e_yoy, [-np.inf, -10, -5, 0, 5, np.inf],
+                    labels=["≤-10%", "-10~-5%", "-5~0%", "0~5%", ">5%"])
+    by_yoy = (d.groupby(groups, observed=True).agg(N=("industry", "size"), median_d_E_pp=("d_E", "median"),
+                                                   yoy_worse_rate=("yoy_worse", "mean"),
+                                                   level_down_rate=("level_down", "mean"),
+                                                   primary_positive_rate=("label", "mean"))
+              .reset_index().rename(columns={"e_yoy": "current_emp_yoy_group"}))
+    _save(by_yoy, "mean_reversion_by_current_yoy.csv")
+
+    def balanced_accuracy(y: pd.Series, alert: pd.Series) -> float:
+        tp, fn = (alert & y).sum(), (~alert & y).sum()
+        tn, fp = (~alert & ~y).sum(), (alert & ~y).sum()
+        return float(((tp / (tp + fn)) + (tn / (tn + fp))) / 2)
+
+    alert = d.stage.isin(["우선점검", "추가확인"])  # 사전등록 선별 기준(단계≥추가확인)
+    rho = d[["e_yoy", "d_E"]].corr(method="spearman").iloc[0, 1]
+    summary = pd.DataFrame([
+        {"item": "현재 고용 증감률과 2분기 뒤 증감률 변화의 순위상관(Spearman)", "value": rho,
+         "note": "음수면 현재 증감률이 나쁠수록 이후 되돌아옴(증감률의 평균회귀)"},
+        {"item": "주평가 균형정확도(수준↓ AND 증감률 악화, 사전등록)", "value": balanced_accuracy(d.label, alert),
+         "note": "사전등록 결과 — 이 표의 다른 값으로 대체하지 않음"},
+        {"item": "탐색: 고용 수준 감소 지속만 양성으로 본 균형정확도(단계≥추가확인)",
+         "value": balanced_accuracy(d.level_down, alert), "note": "사후 탐색 — 성능 주장에 쓰지 않음"},
+        {"item": "탐색: 고용 수준 감소 지속만 양성으로 본 균형정확도(우선점검만 경보)",
+         "value": balanced_accuracy(d.level_down, d.stage.eq("우선점검")), "note": "사후 탐색 — 성능 주장에 쓰지 않음"},
+        {"item": "평가 행 수(h=2 primary 유효·Triage 판정 결합)", "value": float(len(d)),
+         "note": "업종·연속 분기로 서로 독립이 아님"},
+    ])
+    _save(summary, "mean_reversion_summary.csv")
+    return by_stage, by_yoy, summary
+
+
+def purpose_aligned_validation(n_boot: int = 2000, seed: int = 20260928) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """[4] 보강(사후) 검증: Triage 목적(지금 감소가 큰 업종을 먼저 확인)에 맞춘 기준으로 부가가치를 본다.
+
+    사전등록 주평가(추가 위축)는 그대로 두고 함께 표시한다. 보강 기준 '신호 지속' = 2분기 뒤 고용 전년동기
+    감소율이 E 진입경계(5%) 이상 유지. 비교 대상은 같은 행의 단순 규칙(현재 고용 YoY<0)과 ELECTRE.
+    판정 분기 단위 묶음 부트스트랩으로 정밀도·오경보율 차이의 구간을 낸다(업종·분기 의존성 때문).
+    """
+    base = ROOT / "logs/validation/outputs/rolling_backtest"
+    pred = pd.read_csv(base / "predictions_long.csv")
+    out = pd.read_csv(base / "outcomes_long.csv")
+    h2 = out[out.outcome.eq("primary") & out.horizon.eq(2) & out.outcome_valid.astype(bool)].copy()
+    h2["signal_persist"] = ((h2.E_future / h2.E_future_lag4 - 1) * 100).le(-tr.LEVEL_ENTRY)
+    h2["primary"] = h2.label.astype(bool)
+    models = {"triage_final": "Triage(주모형)", "current_negative_e_yoy": "단순 규칙(현재 고용 YoY<0)",
+              "electre_fixed": "ELECTRE(보조모형)"}
+    frames = {}
+    for model in models:
+        d = pred[pred.model.eq(model)][["industry", "quarter", "stage_code"]].merge(
+            h2[["industry", "quarter", "primary", "signal_persist"]], on=["industry", "quarter"])
+        d["alert"] = d.stage_code.fillna(0).ge(1)  # 사전등록과 같은 선별 기준(단계≥추가확인)
+        frames[model] = d
+
+    def metrics(d: pd.DataFrame, y: str) -> dict:
+        a, t = d.alert, d[y]
+        tp, fp, fn, tn = (a & t).sum(), (a & ~t).sum(), (~a & t).sum(), (~a & ~t).sum()
+        return {"alerts": int(a.sum()), "positives": int(t.sum()), "TP": int(tp),
+                "precision": tp / (tp + fp) if tp + fp else np.nan, "recall": tp / (tp + fn) if tp + fn else np.nan,
+                "false_alarm_rate": fp / (fp + tn) if fp + tn else np.nan,
+                "balanced_accuracy": ((tp / (tp + fn)) + (tn / (tn + fp))) / 2 if (tp + fn) and (tn + fp) else np.nan,
+                "lift_vs_base_rate": (tp / (tp + fp)) / t.mean() if tp + fp and t.mean() else np.nan}
+    rows = []
+    for y, role in (("primary", "사전등록 주평가(추가 위축)"), ("signal_persist", "보강: 신호 지속(2분기 뒤 E≥5%)")):
+        for model, label in models.items():
+            rows.append({"outcome": role, "model": label, **metrics(frames[model], y)})
+    table = _save(pd.DataFrame(rows), "purpose_aligned_validation.csv")
+
+    rng = np.random.default_rng(seed)
+    quarters = frames["triage_final"].quarter.unique()
+    diffs = []
+    for _ in range(n_boot):
+        pick = rng.choice(quarters, size=len(quarters), replace=True)
+        sample = {m: pd.concat([f[f.quarter.eq(q)] for q in pick]) for m, f in frames.items()}
+        tri, naive = metrics(sample["triage_final"], "signal_persist"), metrics(sample["current_negative_e_yoy"], "signal_persist")
+        diffs.append((tri["precision"] - naive["precision"], tri["false_alarm_rate"] - naive["false_alarm_rate"],
+                      tri["recall"] - naive["recall"]))
+    diffs = pd.DataFrame(diffs, columns=["precision", "false_alarm_rate", "recall"]).dropna()
+    point_t, point_n = metrics(frames["triage_final"], "signal_persist"), metrics(frames["current_negative_e_yoy"], "signal_persist")
+    boot = pd.DataFrame([{
+        "metric": k, "triage_minus_simple_rule": point_t[k] - point_n[k],
+        "ci95_low": diffs[k].quantile(.025), "ci95_high": diffs[k].quantile(.975),
+        "share_triage_better": (diffs[k] > 0).mean() if k != "false_alarm_rate" else (diffs[k] < 0).mean(),
+        "note": f"판정 분기 단위 묶음 부트스트랩 {n_boot}회(seed {seed}) — 사후 보강 분석",
+    } for k in ("precision", "false_alarm_rate", "recall")])
+    _save(boot, "purpose_aligned_bootstrap.csv")
+    return table, boot
+
+
 def external_cases() -> pd.DataFrame:
     ext = pd.read_csv(ROOT / "outputs/final_model/04_external_evidence/external_evidence_panel.csv")
     ext["adverse_bsi"] = ext.bsi_industry_business.lt(100) & ext.bsi_industry_business.notna()
@@ -431,7 +569,10 @@ def main() -> None:
     base_peak_check(panel)
     ratio_boundary_headcount(panel)
     _, validation = validation_followup()
+    mean_reversion_diagnosis()
+    purpose_aligned_validation()
     external_cases()
+    press_concurrent_check(panel)
     if any(CCI_DIR.glob("창원국가산단_업종별현황_*.csv")):
         cci_concurrent_check(panel)
     else:  # 원자료(data/raw)는 저장소 제외 — 없으면 저장된 대조표를 그대로 둔다

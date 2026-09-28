@@ -178,6 +178,30 @@ def build_cells() -> list[dict]:
                    ["industry", "quarter", "stage", "e_yoy", "cci_emp_yoy", "emp_direction_agree",
                     "production_yoy", "cci_prod_yoy", "prod_direction_agree", "cci_export_yoy"],
                    query="stage == '우선점검' or (industry == '기계' and quarter <= '2024Q1')"),
+        markdown("### 언론·기관 발표와의 동시점 대조\n\n"
+                 "언론·기관 발표 10건을 출처 URL과 함께 수기 근거표(`professor_feedback/sources/press_concurrent_sources.csv`)로 "
+                 "정리하고 같은 시기 판정과 나란히 놓았다. 2022년 산단 고용 감소 보도, 2026년 창원상의 경기전망지수(기계·장비 "
+                 "96.4·84.6)와 가동률 하락 보도는 판정과 방향이 같았다. 반면 2026년 상반기 창원시 전역 고용보험의 ‘기타 기계 및 장비’ "
+                 "+2.6%와 창원 전기장비 고용둔화 지원 지정(2026.7, Triage 2026년 관찰)은 판정과 달랐다. 모집단·업종 정의 차이가 "
+                 "있으나 산단 밖·중소 사업장 신호를 놓칠 수 있다는 한계로 기록한다."),
+        table_cell("outputs/final_model/06_report_assets/professor_feedback/tables/press_concurrent_cases.csv",
+                   ["case_id", "industry", "quarters", "panel_stages", "panel_emp_yoy_range", "outlet", "published",
+                    "indicator", "assessment"]),
+        markdown("### 평균회귀 가설의 정밀 점검과 목적 맞춤 보강 검증(사후 분석)\n\n"
+                 "주평가 양성은 ‘고용 수준 감소 AND 전년동기 대비 이동 악화’다. 두 조건을 나누면 우선점검 13건은 2분기 뒤 고용 "
+                 "수준이 84.6% 더 줄었지만(관찰 53.6%) 증감률 악화는 46.2%였다. 현재 증감률과 이후 증감률 변화의 순위상관은 "
+                 "−0.45다. 고용 인원이 회복되는 평균회귀가 아니라 **증감률의 평균회귀**가 균형정확도 0.5 미만의 원인이다.\n\n"
+                 "Triage 목적(지금 감소가 큰 업종을 먼저 확인)에 맞춘 보강 기준 ‘2분기 뒤에도 고용 감소율 5% 이상 유지’로 보면 "
+                 "Triage 경보 48건의 정밀도 50.0%, 오경보율 20.3%로 단순 규칙(현재 고용 감소 전체 84건: 39.3%·43.2%)보다 낫다. "
+                 "판정 분기 묶음 부트스트랩 95% 구간은 정밀도 차 +2.0~+20.8%p, 오경보율 차 −29.4~−16.9%p다. 재현율은 −21.4%p로 "
+                 "낮다. Triage의 부가가치는 적은 점검 건수로 오경보를 줄이는 효율이다. 이 기준은 결과를 본 뒤 정한 사후 보강 "
+                 "분석이며 사전등록 주평가(균형정확도 0.447)를 대체하지 않는다."),
+        table_cell("outputs/final_model/06_report_assets/professor_feedback/tables/mean_reversion_by_stage.csv",
+                   ["stage", "N", "level_down_rate", "yoy_worse_rate", "primary_positive_rate", "median_d_E_pp"]),
+        table_cell("outputs/final_model/06_report_assets/professor_feedback/tables/mean_reversion_by_current_yoy.csv"),
+        table_cell("outputs/final_model/06_report_assets/professor_feedback/tables/purpose_aligned_validation.csv"),
+        table_cell("outputs/final_model/06_report_assets/professor_feedback/tables/purpose_aligned_bootstrap.csv",
+                   ["metric", "triage_minus_simple_rule", "ci95_low", "ci95_high", "share_triage_better"]),
         markdown("## 17.5 보고서 분석 그림\n\n"
                  "기존 Q1 사분면, Q2 고용 증감·비중, 비례기준선 비교와 새로 저장한 Triage 단계 격자를 본문에 순차 번호로 배치했다.\n\n"
                  "![Triage 단계 격자](../outputs/final_model/06_report_assets/professor_feedback/figures/F10_Triage_단계격자.png)\n\n"

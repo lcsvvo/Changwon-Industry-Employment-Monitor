@@ -29,6 +29,12 @@ FILES = {
         "outputs/final_model/06_report_assets/professor_feedback/tables/ratio_boundary_headcount_summary.csv",
     "03_핵심_보조자료/cci_concurrent_check.csv":
         "outputs/final_model/06_report_assets/professor_feedback/tables/cci_concurrent_check.csv",
+    "03_핵심_보조자료/mean_reversion_by_stage.csv":
+        "outputs/final_model/06_report_assets/professor_feedback/tables/mean_reversion_by_stage.csv",
+    "03_핵심_보조자료/purpose_aligned_validation.csv":
+        "outputs/final_model/06_report_assets/professor_feedback/tables/purpose_aligned_validation.csv",
+    "03_핵심_보조자료/press_concurrent_cases.csv":
+        "outputs/final_model/06_report_assets/professor_feedback/tables/press_concurrent_cases.csv",
     "03_핵심_보조자료/signal_followup_summary.csv":
         "outputs/final_model/06_report_assets/professor_feedback/tables/signal_followup_summary.csv",
     "03_핵심_보조자료/validation_model_comparison.csv":
@@ -66,6 +72,9 @@ https://github.com/lcsvvo/Changwon-Industry-Employment-Monitor
   priority_base_peak_check.csv
   ratio_boundary_headcount_summary.csv
   cci_concurrent_check.csv
+  mean_reversion_by_stage.csv
+  purpose_aligned_validation.csv
+  press_concurrent_cases.csv
   signal_followup_summary.csv
   validation_model_comparison.csv
   external_contemporaneous_cases.csv

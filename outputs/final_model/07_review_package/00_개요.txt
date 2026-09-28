@@ -21,6 +21,9 @@ https://github.com/lcsvvo/Changwon-Industry-Employment-Monitor
   priority_base_peak_check.csv
   ratio_boundary_headcount_summary.csv
   cci_concurrent_check.csv
+  mean_reversion_by_stage.csv
+  purpose_aligned_validation.csv
+  press_concurrent_cases.csv
   signal_followup_summary.csv
   validation_model_comparison.csv
   external_contemporaneous_cases.csv

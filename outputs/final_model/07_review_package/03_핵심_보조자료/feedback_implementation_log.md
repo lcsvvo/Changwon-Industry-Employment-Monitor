@@ -7,7 +7,7 @@
 | 1. 목재·종이 급변 QA | PASS | 분포기반 QA·원자료 추적표에 더해, 급변 분기를 분리한 YoY 분해로 2025년 S1 기저효과와 2022Q4 수준하락 효과를 수치화 | qa_level_shift_cases.csv; wood_paper_source_audit.csv; wood_paper_level_shift_decomposition.csv |
 | 2. 기계업종 기저효과 | PASS | YoY·QoQ·2023년 이후 고점을 병기하고 2025Q2 고기저 여부를 계산 | machine_yoy_qoq_interpretation.csv |
 | 3. 목재·종이 경계 민감도 | PASS | 48명/47명 감소와 E 상위경계 여유를 인원으로 제시하고, 규모별 비율경계 인원 민감도로 규모게이트 근거를 보강 | wood_paper_boundary_margin.csv; ratio_boundary_headcount_summary.csv; ratio_boundary_headcount_latest.csv |
-| 4. 시점분리 검증 | PASS | 검증 결과를 본론(2-3)으로 옮겨 추가 위축 예측용이 아님을 설명하고, 신호 이후 회복률·비교기준 고점·창원상의 동시점 대조를 보강 | signal_followup_summary.csv; priority_base_peak_check.csv; cci_concurrent_check.csv; external_contemporaneous_cases.csv |
+| 4. 시점분리 검증 | PASS | 검증을 본론(2-3)으로 옮기고, 증감률 평균회귀 분해·목적 맞춤 보강 검증(정밀도·오경보율 부트스트랩)·창원상의 54행·언론 10건 동시점 대조를 보강 | mean_reversion_by_stage.csv; purpose_aligned_validation.csv; purpose_aligned_bootstrap.csv; cci_concurrent_check.csv; press_concurrent_cases.csv |
 | 5. 보고서·그림 | PASS | Q1·Q2·기준선·단계격자와 원본 Streamlit 화면 2장을 배치하고 해석 문단을 추가 | 교수피드백반영본.docx 그림 1~7 및 본문 |
 | 6. 서술·용어 | PASS | 최초 용어를 풀어 쓰고 단계명을 우선점검·추가확인·관찰로 통일, 해석범위 부정 서술은 4-1 한계 절로 모음 | 보고서; src/app/view_models.py |
 | 7. 선별효과 | PASS | 2/10 선별과 고용비중 51.56%를 구분하고 80% 업무절감 표현을 제거 | 보고서 선별효과 문단 |
