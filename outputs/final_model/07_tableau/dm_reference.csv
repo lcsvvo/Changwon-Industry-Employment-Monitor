@@ -1,0 +1,159 @@
+﻿industry,quarter,quarter_date,quarter_label,indicator_id,indicator_label,value,unit,scope,geography,role_source,role_display,quality_note
+기계,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,9.899537,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,1.993271,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,3.683462,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-12.156231,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-6.895718,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-2.301727,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-3.397410,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,13.972309,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,15.753863,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,19.845585,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,14.591797,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,19.860691,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-0.915900,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,2.695268,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-10.486615,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+기계,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-20.547175,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-4.021573,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,4.256642,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,0.729977,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-52.996000,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-50.993186,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-52.606301,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-44.970020,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,19.660579,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,27.234986,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,3.387487,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,124.260606,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,132.489207,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,130.313838,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,184.662278,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-13.721460,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+목재종이,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-15.289242,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,1.157752,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-6.413934,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,15.748521,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-0.488339,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,15.470802,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,13.064103,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-12.287760,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-7.686726,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,3.977719,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-9.680958,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-31.585576,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-37.388866,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-45.905337,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,33.393569,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,42.476103,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+비금속,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,40.860668,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-11.722068,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-10.469170,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-8.826065,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,22.817319,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,69.710212,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,73.366584,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,70.830795,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-2.918793,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-13.216280,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-15.328237,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-43.672406,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-47.129687,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-42.542563,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-38.325358,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-12.084469,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+석유화학,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-35.766709,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,86.296617,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,194.978390,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,265.206972,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,639.176022,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,344.414387,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,255.876762,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,156.461886,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,18.321367,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-7.509323,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,39.786774,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-4.609597,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-2.378707,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-26.804318,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-18.715673,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-10.219301,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+섬유의복,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-15.169757,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,2.896368,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,4.695992,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,6.776602,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,36.200706,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,31.881172,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,42.126173,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,34.878584,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-0.600300,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-3.310402,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,3.683515,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,4.956149,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-2.241737,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,3.068466,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-14.872936,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,18.485505,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+운송장비,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,17.240435,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-1.638411,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-3.254183,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,3.396483,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,19.486632,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,22.235506,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,13.944841,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,13.103266,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-2.588565,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,4.584924,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,6.644247,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-14.491273,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-20.645906,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-19.879749,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-17.495134,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,1.476863,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+음식료,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-0.779317,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,20.467469,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,16.821937,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,12.042262,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-9.419049,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,3.104224,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,8.082054,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,13.329479,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,6.638692,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,0.330526,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-6.127438,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,1.729969,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-3.117501,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-0.345297,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-3.449010,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-13.565542,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+전기전자,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-10.415154,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2022Q1,2022-01-01,2022년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-2.757162,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2022Q2,2022-04-01,2022년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-2.591597,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2022Q3,2022-07-01,2022년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-1.203893,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2022Q4,2022-10-01,2022년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-15.990526,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2023Q1,2023-01-01,2023년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-10.351138,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2023Q2,2023-04-01,2023년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-5.803530,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2023Q3,2023-07-01,2023년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-3.993848,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2024Q1,2024-01-01,2024년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-1.978031,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2024Q2,2024-04-01,2024년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-5.557436,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2024Q3,2024-07-01,2024년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-7.615159,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2025Q1,2025-01-01,2025년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,-8.788122,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2025Q2,2025-04-01,2025년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,4.127045,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2025Q3,2025-07-01,2025년 3분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,15.058302,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2025Q4,2025-10-01,2025년 4분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,4.963589,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2026Q1,2026-01-01,2026년 1분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,52.381347,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+철강,2026Q2,2026-04-01,2026년 2분기,ppi_adjusted_production_yoy,PPI 보정 생산 YoY,25.280923,%,업종별,창원국가산단 명목 생산 ÷ 전국 PPI,KICOX 생산 + KOSIS PPI,EXTERNAL EVIDENCE,전국 PPI 사용·업종 대응표 미확정. 석유화학·전기전자는 두 PPI 항목 평균
+,2023Q1,2023-01-01,2023년 1분기,eis_manufacturing_yoy,EIS 제조업 YoY,1.331145,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2023Q2,2023-04-01,2023년 2분기,eis_manufacturing_yoy,EIS 제조업 YoY,1.271206,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2023Q3,2023-07-01,2023년 3분기,eis_manufacturing_yoy,EIS 제조업 YoY,2.106104,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2023Q4,2023-10-01,2023년 4분기,eis_manufacturing_yoy,EIS 제조업 YoY,2.554360,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2024Q1,2024-01-01,2024년 1분기,eis_manufacturing_yoy,EIS 제조업 YoY,1.412093,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2024Q2,2024-04-01,2024년 2분기,eis_manufacturing_yoy,EIS 제조업 YoY,1.804699,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2024Q3,2024-07-01,2024년 3분기,eis_manufacturing_yoy,EIS 제조업 YoY,1.221594,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2024Q4,2024-10-01,2024년 4분기,eis_manufacturing_yoy,EIS 제조업 YoY,0.696697,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2025Q1,2025-01-01,2025년 1분기,eis_manufacturing_yoy,EIS 제조업 YoY,0.660037,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2025Q2,2025-04-01,2025년 2분기,eis_manufacturing_yoy,EIS 제조업 YoY,-0.155331,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2025Q3,2025-07-01,2025년 3분기,eis_manufacturing_yoy,EIS 제조업 YoY,0.110672,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2025Q4,2025-10-01,2025년 4분기,eis_manufacturing_yoy,EIS 제조업 YoY,0.455970,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2026Q1,2026-01-01,2026년 1분기,eis_manufacturing_yoy,EIS 제조업 YoY,0.435678,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"
+,2026Q2,2026-04-01,2026년 2분기,eis_manufacturing_yoy,EIS 제조업 YoY,0.667118,%,지역 공통,창원시 5개 구(고용보험 피보험자),고용노동부 EIS,EXTERNAL EVIDENCE,"고용보험 피보험자 기준, KICOX 산단 고용과 모집단 다름"

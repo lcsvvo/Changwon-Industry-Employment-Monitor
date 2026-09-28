@@ -1,0 +1,126 @@
+{
+  "snapshot_quarter": "2026Q2",
+  "rows": {
+    "dm_total_quarter": 34,
+    "dm_industry_quarter": 340,
+    "dm_reference": 158,
+    "dm_meta": 1
+  },
+  "reference_indicators": {
+    "ppi_adjusted_production_yoy": 144,
+    "eis_manufacturing_yoy": 14,
+    "bsi_industry_business": "MISSING (data/external/bsi_industry_business.csv 없음)",
+    "bsi_region_business": "MISSING (data/external/bsi_region_business.csv 없음)",
+    "mfg_flow_workers_yoy": "MISSING (data/external/mfg_flow_workers_yoy.csv 없음)",
+    "power_usage_yoy": "MISSING (data/external/power_usage_yoy.csv 없음)"
+  },
+  "stage_counts_latest": {
+    "관찰": 8,
+    "우선점검": 2
+  },
+  "checks": [
+    {
+      "item": "합계 명목 생산 YoY",
+      "actual": 0.39,
+      "expected": 0.39,
+      "pass": true
+    },
+    {
+      "item": "합계 고용 YoY",
+      "actual": -3.64,
+      "expected": -3.64,
+      "pass": true
+    },
+    {
+      "item": "합계 고용 증감 인원",
+      "actual": -4332,
+      "expected": -4332,
+      "pass": true
+    },
+    {
+      "item": "합계 고용자 수",
+      "actual": 114830,
+      "expected": 114830,
+      "pass": true
+    },
+    {
+      "item": "합계 생산 지수",
+      "actual": 125.9,
+      "expected": 125.9,
+      "pass": true
+    },
+    {
+      "item": "합계 고용 지수",
+      "actual": 99.4,
+      "expected": 99.4,
+      "pass": true
+    },
+    {
+      "item": "기계 고용 증감 인원",
+      "actual": -3979,
+      "expected": -3979,
+      "pass": true
+    },
+    {
+      "item": "기계 고용자 수",
+      "actual": 58784,
+      "expected": 58784,
+      "pass": true
+    },
+    {
+      "item": "기계 고용 YoY",
+      "actual": -6.3,
+      "expected": -6.3,
+      "pass": true
+    },
+    {
+      "item": "기계 생산 YoY",
+      "actual": -19.5,
+      "expected": -19.5,
+      "pass": true
+    },
+    {
+      "item": "기계 생산 지수",
+      "actual": 118.7,
+      "expected": 118.7,
+      "pass": true
+    },
+    {
+      "item": "기계 고용 지수",
+      "actual": 95.1,
+      "expected": 95.1,
+      "pass": true
+    },
+    {
+      "item": "기계 흐름",
+      "actual": "생산↓ 고용↓ 2분기째",
+      "expected": "생산↓ 고용↓ 2분기째",
+      "pass": true
+    },
+    {
+      "item": "우선점검 업종",
+      "actual": [
+        "기계",
+        "목재종이"
+      ],
+      "expected": [
+        "기계",
+        "목재종이"
+      ],
+      "pass": true
+    },
+    {
+      "item": "추가확인 업종",
+      "actual": [],
+      "expected": [],
+      "pass": true
+    },
+    {
+      "item": "업종 emp_delta 합 = 합계",
+      "actual": -4332,
+      "expected": -4332,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}
