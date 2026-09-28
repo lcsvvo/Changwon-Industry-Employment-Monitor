@@ -1,0 +1,3 @@
+﻿model,N,positives,negatives,recall,precision,FPR,balanced_accuracy,alert_count,alert_rate,evidence_status,model_role,interpretation
+electre_fixed,140,58,82.0,0.4137931034482758,0.3582089552238806,0.524390243902439,0.4447014297729184,67.0,0.4785714285714286,DESCRIPTIVE_ONLY_NO_GENERAL_WINNER,보조 비교모형,균형정확도는 기술통계적 비교값이며 표본·사전등록 제약 때문에 우월성·정책효과를 뜻하지 않는다.
+triage_final,140,58,82.0,0.2758620689655172,0.3720930232558139,0.3292682926829268,0.4732968881412952,43.0,0.3071428571428571,DESCRIPTIVE_ONLY_NO_GENERAL_WINNER,주모형,균형정확도는 기술통계적 비교값이며 표본·사전등록 제약 때문에 우월성·정책효과를 뜻하지 않는다.

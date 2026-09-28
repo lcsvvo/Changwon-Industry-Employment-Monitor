@@ -152,6 +152,7 @@ class DecisionSupportService:
             "quarter": rec["quarter"], "stage": rec["triage"]["stage"],
             "q1_state": rec["q1"]["state"],
             "snapshot_type": self.snapshot.provenance(rec["quarter"])["snapshot_type"],
+            "data_missing": bool(rec["data_quality"].get("core_missing") or rec["q1"]["state"] == "INVALID"),
             "is_current": rec["quarter"] == current_quarter,
         } for rec in self.snapshot.history(industry, current_quarter, n=len(self.snapshot.quarters))]
 
@@ -374,7 +375,8 @@ class DecisionSupportService:
             add(f"{joined} 관련 인력이 실제로 미충원 상태입니까?", "Work24 기술 키워드 반복", "WORK24")
             add(f"{joined} 수요를 내부 재교육으로 충족할 수 있으며 필수 자격은 무엇입니까?",
                 "키워드를 훈련 가설로만 사용", "WORK24")
-        for text in [rec["questions"].get("check_question"), *(rec["questions"].get("context_questions") or [])]:
+        for text in [rec["questions"].get("trend_check_question"), rec["questions"].get("check_question"),
+                     *(rec["questions"].get("context_questions") or [])]:
             if text:
                 add(text, "기존 등록 Snapshot 확인질문", "SNAPSHOT")
         return questions

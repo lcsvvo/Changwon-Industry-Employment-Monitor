@@ -27,7 +27,8 @@ RELEVANCE_LABELS = {
     "UNKNOWN": "상세 미확인",
 }
 
-STAGE_DISPLAY = {"우선점검": "우선점검 후보", "추가확인": "추가확인", "관찰": "관찰"}
+STAGE_DISPLAY = {"우선점검": "우선점검", "추가확인": "추가확인", "관찰": "관찰"}
+WORKFLOW_LABEL_DISPLAY = {"우선점검 후보": "우선점검", "검토 후보": "추가확인"}
 
 WORK24_BASIS = {
     "LIST": "업종 매핑된 Work24 목록 전체",
@@ -94,6 +95,13 @@ def stage_display(stage: str | None) -> str:
     if stage is None:
         return "판정 없음"
     return STAGE_DISPLAY.get(stage, stage)
+
+
+def workflow_label_display(value: str | None) -> str:
+    """내부 DB 호환 라벨을 사용자 단계명으로 바꾼다. 저장값과 제약조건은 변경하지 않는다."""
+    if value is None:
+        return ""
+    return WORKFLOW_LABEL_DISPLAY.get(value, value)
 
 
 def session_scope(industry: str, quarter: str) -> str:
@@ -228,7 +236,7 @@ def rule_evidence_rows(rec: dict, rules: dict[str, dict]) -> list[dict]:
     scale_rule = _rule(rules, "scale_gate")
     scale_entry, _ = split_threshold(scale_rule.get("threshold"))
     rows.append({
-        "signal": "규모 gate(우선점검)", "current": _num(q2.get("employment"), suffix="명"),
+        "signal": "규모게이트(우선점검 최소 고용규모)", "current": _num(q2.get("employment"), suffix="명"),
         "entry_threshold": scale_entry, "upper_threshold": None,
         "verdict": _bool_verdict(t.get("scale_ok"), "통과", "미달"),
         "basis": _basis_label(scale_rule), "definition": scale_rule.get("definition", ""),
@@ -346,13 +354,13 @@ def quick_prompts(stage: str | None) -> list[str]:
     return [f"이 업종이 왜 {stage}인가?" if stage else "이 업종의 판정 근거는?", *QUICK_PROMPTS_TAIL]
 
 
-COPILOT_STAGE_QUESTION = {"우선점검": "왜 우선점검 후보인가요?", "추가확인": "왜 추가확인 상태인가요?",
+COPILOT_STAGE_QUESTION = {"우선점검": "왜 우선점검 단계인가요?", "추가확인": "왜 추가확인 상태인가요?",
                          "관찰": "왜 관찰 상태인가요?"}
 
 
 # 추천 질문 버튼의 짧은 표시명(버튼 한 줄에 맞춤). 누르면 보내는 질문은 원문 그대로 — 라우팅·답변은 바뀌지 않는다.
 CHIP_LABELS = {
-    "왜 우선점검 후보인가요?": "우선점검 이유", "왜 추가확인 상태인가요?": "추가확인 이유", "왜 관찰 상태인가요?": "관찰 판정 이유",
+    "왜 우선점검 단계인가요?": "우선점검 이유", "왜 추가확인 상태인가요?": "추가확인 이유", "왜 관찰 상태인가요?": "관찰 판정 이유",
     "이 업종의 판정 근거는?": "판정 근거", "현장에서 무엇을 확인해야 하나요?": "현장 확인 사항",
     "최근 채용 신호는 어떤가요?": "최근 채용 신호", "연결 가능한 공식 지원은?": "지원제도 검토",
     "현재 신청 가능한 지원사업은?": "모집 중 공고", "직전 분기 대비 최근 판정 변화는?": "분기 대비 변화",
@@ -455,7 +463,7 @@ def top_questions(questions: list[dict], n: int = 3) -> list[dict]:
 # ------------------------------------------------------------------ 업종 진단 상단 점검 대기열 · 5초 요약
 # 정렬은 등록 판정 단계와 등록 단계 내 순위(rank_in_stage)만 쓴다 — 새 순위 계산식 없음.
 QUEUE_GROUP = {"우선점검": 0, "추가확인": 1}  # 2 = 진행 중인 점검이 있는 관찰 업종, 3 = 나머지 관찰
-_STAGE_TO = {"우선점검": "우선점검 후보로", "추가확인": "추가확인으로", "관찰": "관찰로"}
+_STAGE_TO = {"우선점검": "우선점검으로", "추가확인": "추가확인으로", "관찰": "관찰로"}
 _SIGNAL_SHORT = {"E": "고용 감소율", "R": "산단평균 대비 열위", "A": "산단 대비 감소규모"}
 OBSERVATION_RANK_HELP = "동일 점검단계 안에서의 비교 순위이며 우선점검 대상 순위를 의미하지 않습니다."
 # 진단 → 지원 연계 흐름(업종 진단 지원체계 검토 경로·정책 화면 공용 안내 — 새 라우팅 아님)
@@ -527,7 +535,7 @@ def reason_sentence(rec: dict, rows: list[dict]) -> str:
 
 
 _SIGNAL_PLAIN = {"E": "고용 감소율", "R": "산단 평균 대비 감소", "A": "고용 감소 규모"}
-_STAGE_IS = {"우선점검": "우선점검 후보입니다", "추가확인": "추가확인 단계입니다", "관찰": "관찰 단계입니다"}
+_STAGE_IS = {"우선점검": "우선점검 단계입니다", "추가확인": "추가확인 단계입니다", "관찰": "관찰 단계입니다"}
 
 
 def reason_summary(rec: dict, rows: list[dict]) -> str:
@@ -561,7 +569,7 @@ def next_action(stage: str | None, status: str, next_review: str | None) -> str:
 
 
 def queue_rows(records: list[dict], candidates: list[dict], cases: list[dict], rules: dict[str, dict]) -> list[dict]:
-    """선택 분기의 점검 대기열: 우선점검 후보 → 추가확인 → 진행 중인 점검(관찰) → 관찰, 같은 묶음은 등록 단계 내 순위."""
+    """선택 분기의 점검 대기열: 우선점검 → 추가확인 → 진행 중인 점검(관찰) → 관찰, 같은 묶음은 등록 단계 내 순위."""
     cand = {c["industry"]: c for c in candidates}
     out = []
     for r in records:
@@ -709,7 +717,8 @@ def closed_case_vm(case: dict, label_of=None) -> dict:
 
 def closed_case_timeline(case: dict) -> list[tuple[str, str, str]]:
     """처리 흐름 — 저장된 이벤트만(개설 · 재점검 시작 · 현장확인 기록 · 결정). (시각 ISO, 단계, 내용), 시간순. 누락 단계를 추정하지 않는다."""
-    events = [(case.get("opened_at") or "", "점검 개설", f"{case.get('origin') or ''}에서 개설".strip())]
+    events = [(case.get("opened_at") or "", "점검 개설",
+               f"{workflow_label_display(case.get('origin'))}에서 개설".strip())]
     for sc in case.get("scopes") or []:
         title = f"{quarter_label(sc.get('quarter'))} {sc.get('review_kind') or ''}".strip()
         if sc.get("review_kind") == "재점검":

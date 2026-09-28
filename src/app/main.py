@@ -110,7 +110,7 @@ from app.view_models import (  # noqa: E402
     team_kpis, team_principles, top_questions, with_session_context,
     SIGNAL_EXPLANATION_TITLE, LINK_FLOW, REPORT_TYPES, build_report_vm, NOMINAL_NOTE, OBSERVATION_RANK_HELP, PRODUCTION_LABEL, REVIEW_REQUIRED_LABEL, YOY_NOTE,
     assistant_labels, case_status_label, institution_audit_label, institution_status_text, next_action, pick_case,
-    q1_plain, queue_rows, rank_text, reason_summary, run_text, checklist_text,
+    q1_plain, queue_rows, rank_text, reason_summary, run_text, checklist_text, workflow_label_display,
     CASE_SUBVIEWS, case_progress, default_check_position, CHECK_RESULT_HELP, check_result_label,
     CHECK_RESULT_ORDER, CLOSED_SUBVIEWS, closed_case_timeline, closed_case_vm, closed_subview_id,
 )
@@ -450,8 +450,11 @@ def section(title: str, helper: str | None = None, badge: str | None = None):
 
 
 def electre_line(e: dict) -> str:
-    return (f"ELECTRE: **{e['electre_stage']}** ({e['electre_stage_label']}) · "
-            f"SMAA 가능 단계: **{' | '.join(e['possible_stages_list']) or '—'}** · "
+    code = e["electre_stage"]
+    label = S.ELECTRE_LABEL.get(code, e.get("electre_stage_label") or code)
+    possible = [S.ELECTRE_LABEL.get(value, value) for value in e["possible_stages_list"]]
+    return (f"다기준 범주분류(ELECTRE): **{label}({code})** · "
+            f"민감도 분석(SMAA) 가능 단계: **{' | '.join(possible) or '—'}** · "
             f"파라미터 민감: **{fmt(e['smaa_parameter_sensitive'])}**")
 
 
@@ -649,13 +652,19 @@ def timeline_chips(industry: str, current_quarter: str, rows: list[dict]):
     if not rows:
         st.info("표시할 진단 이력이 없습니다.")
         return
-    st.html(ui.timeline_style_html([(row["quarter"], stage_code(row["stage"])) for row in rows], current_quarter))
+    st.html(ui.timeline_style_html([
+        (row["quarter"], stage_code(row["stage"]), bool(row.get("data_missing")),
+         row.get("snapshot_type") == "reconstructed") for row in rows
+    ], current_quarter))
     with st.container(key="timeline", horizontal=True, gap="small"):
         for row in rows:
             qq = row["quarter"]
             # 18개 분기를 한 줄에 — 칩은 짧은 표기(22Q1), 전체 표기(2022년 1분기)는 마우스를 올리면 보인다
-            st.button(f"{qq[2:4]}Q{qq[5:]}", key=f"tl-{qq}", on_click=set_quarter, args=(qq,),
-                      help=f"{quarter_label(qq)} · {stage_display(row['stage'])}")
+            marker = "× " if row.get("data_missing") else ("↺ " if row.get("snapshot_type") == "reconstructed" else "")
+            st.button(f"{marker}{qq[2:4]}Q{qq[5:]}", key=f"tl-{qq}", on_click=set_quarter, args=(qq,),
+                      help=(f"{quarter_label(qq)} · {stage_display(row['stage'])} · "
+                            + ("핵심자료 미확인" if row.get("data_missing") else
+                               "후향 재구성" if row.get("snapshot_type") == "reconstructed" else "당시 분석본")))
 
 
 def sync_field_store(industry: str, quarter: str, questions: list[dict]):
@@ -1003,8 +1012,10 @@ def left_panel(industries: list[str], quarters: list[str], latest_quarter: str,
         industries.index(ind) if ind in industries else None))
     cols = st.columns(2)
     for i, industry in enumerate(industries):
-        cols[i % 2].button(industry, key=f"ind-{i}",
-                          on_click=set_industry, args=(industry,), width="stretch")
+        stage = ((snap.get(industry, q) or {}).get("triage") or {}).get("stage")
+        cols[i % 2].button(industry, key=f"ind-{i}", help=f"{quarter_label(q)} · {stage_display(stage) or '자료확인'}",
+                           on_click=set_industry, args=(industry,), width="stretch")
+    st.html(ui.stage_mark_legend_html())
 
     if rec is not None:
         t = rec["triage"]
@@ -1020,9 +1031,9 @@ def left_panel(industries: list[str], quarters: list[str], latest_quarter: str,
 def aux_evidence_view(rec: dict, q: str):
     """I 보조: 기존 '판정 근거·추적' + '미확인·확인 필요' 탭 내용을 분석 담당자용으로 재사용."""
     t = rec["triage"]
-    st.markdown(f"**Triage** · {t['stage']} — {t['stage_reason']}")
+    st.markdown(f"**선제점검 단계분류(Triage)** · {t['stage']} — {t['stage_reason']}")
     st.markdown(f"진입 신호 `{t['entry_trigger']}` · 보강 `{t['reinforcement']}` · 단계 내 순위 {t['rank_in_stage']}")
-    st.markdown(f"**규모 gate** · 기준 {t['scale_threshold']}인 · 통과 {fmt(t['scale_ok'])}"
+    st.markdown(f"**규모게이트(우선점검 최소 고용규모)** · 기준 {t['scale_threshold']}인 · 통과 {fmt(t['scale_ok'])}"
                + (f" · {t['scale_flag']}" if t["scale_flag"] else ""))
     st.markdown(f"**1차 검토 기능** · {t['first_owner']}")
     if rec["explanation_trace"]:
@@ -1187,26 +1198,27 @@ def sync_queue_pick():
 def queue_view(q: str, ind: str, rows: list[dict]):
     """1. 점검 대기열 — 선택 분기 업종을 등록 판정 단계·등록 단계 내 순위로 정렬(새 순위 계산 없음).
 
-    우선점검 후보·추가확인·진행 중 점검은 카드로, 관찰 업종은 접힌 압축 표로 둔다. 업종을 고르면 dx_industry가 바뀌어
+    우선점검·추가확인·진행 중 점검은 카드로, 관찰 업종은 접힌 압축 표로 둔다. 업종을 고르면 dx_industry가 바뀌어
     왼쪽 업종 버튼·아래 진단카드가 같은 업종을 보여준다.
     """
     counts = stage_counts(snap.by_quarter(q))
     head = [r for r in rows if r["group"] < 3]
     obs = [r for r in rows if r["group"] == 3]
     with st.container(key="dxsec-queue"):
+        st.html(ui.section_anchor_html("queue"))
         section(f"{quarter_label(q)} 점검 대기열",
-                helper=f"우선점검 후보 {counts['우선점검']}개 · 추가확인 {counts['추가확인']}개 · 관찰 {counts['관찰']}개"
+                helper=f"우선점검 {counts['우선점검']}개 · 추가확인 {counts['추가확인']}개 · 관찰 {counts['관찰']}개"
                        " — 업종을 고르면 아래 진단카드가 그 업종으로 바뀝니다.")
         with st.container(key="queue", gap="small"):
             if not head:
-                st.html(ui.note_html("이번 분기 점검 후보(우선점검 후보·추가확인)와 진행 중인 점검이 없습니다."))
+                st.html(ui.note_html("이번 분기 우선점검·추가확인 업종과 진행 중인 점검이 없습니다."))
             for r in head:
                 picked = r["industry"] == ind
                 st.html(ui.queue_card_html(r, picked))
                 with st.container(horizontal=True, gap="small", vertical_alignment="center"):
-                    st.button("상세 보는 중" if picked else "상세 보기", key=f"qv-{r['industry']}",
-                              on_click=set_industry, args=(r["industry"],), disabled=picked,
-                              type="secondary" if picked else "primary")
+                    st.button("선택됨" if picked else "상세 보기", key=f"qv-{r['industry']}",
+                              on_click=set_industry, args=(r["industry"],),
+                              type="primary" if picked else "secondary")
                     if r["case_id"]:
                         st.button("점검 건 열기 →", key=f"qc-{r['industry']}", type="tertiary",
                                   on_click=go, args=("점검 관리", None, None, r["case_id"]))
@@ -1237,17 +1249,19 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
     cand = next((c for c in candidates if c["industry"] == ind), None)
     case = pick_case(cases, ind, q)
 
+    st.html(ui.section_nav_html())
     queue_view(q, ind, queue_rows(snap.by_quarter(q), candidates, cases, rules))
 
     with st.container(key="dxsec-diag"):
-        meta_line = (f"자료 기준 {cutoff} · {rank_text(t['stage'], t['rank_in_stage'])} · "
-                     f"다음 검토 {quarter_label(t['next_review_quarter'] or '—')}")
-        st.html(ui.header_html(q, ind, t["stage"], display, meta_line))
+        st.html(ui.section_anchor_html("summary"))
         # 분석본 성격(당시/후향 재구성)은 항상 텍스트로 드러낸다 — 후향 재구성을 당시 분석본처럼 보이게 하지 않는다
         nat = snapshot_nature(snap.quarter, q)
-        if nat == "contemporaneous":
-            st.caption(f":blue-badge[{nature_text(snap.quarter, q)}]")
-        else:
+        meta_line = (f"자료 기준 {cutoff} · "
+                     f"{nature_text(snap.quarter, q) if nat == 'contemporaneous' else '후향 재구성'} · "
+                     f"{rank_text(t['stage'], t['rank_in_stage'])} · "
+                     f"다음 검토 {quarter_label(t['next_review_quarter'] or '—')}")
+        st.html(ui.header_html(q, ind, t["stage"], display, meta_line))
+        if nat != "contemporaneous":
             st.html(ui.notice_html(
                 "과거분기 재계산 결과",
                 f"{quarter_label(q)} 당시 저장된 진단 결과가 없어, 현재 분석기준으로 {quarter_label(q)} 데이터를 다시 계산한 결과입니다. "
@@ -1264,9 +1278,8 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
              "sub": f"{q1['state'] or '—'} · {production}"},
             {"label": "Q2 고용 영향 규모", "value": fmt(q2["emp_delta"], suffix="명"),
              "tone": "rose" if (q2["emp_delta"] or 0) < 0 else "emerald",
-             "sub": f"고용 YoY {fmt(q2['employment_yoy'], 2, '%')}"},
-            {"label": "Q2 산단 고용 비중", "value": fmt(q2["employment_share_pct"], 2, "%"),
-             "sub": f"고용 {fmt(q2['employment'], suffix='명')}"},
+             "sub": (f"YoY {fmt(q2['employment_yoy'], 2, '%')} · 산단 비중 "
+                     f"{fmt(q2['employment_share_pct'], 2, '%')} · 전분기 {fmt(q2.get('emp_qoq_delta'), 0, '명')}")},
             # KPI 한 줄 유지: 'S4→S4 · 반복신호 없음'
             {"label": "Q3 지속·전환", "value": run_text(q3), "text": True,
              "sub": f"{(q3.get('transition') or '전환 자료 없음').replace(' → ', '→')} · {repeated}"},
@@ -1279,6 +1292,7 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         case_status_bar(ind, q, t, cand, case)
 
     with st.container(key="dxsec-reason"):
+        st.html(ui.section_anchor_html("reason"))
         section("판정 근거", helper="E 고용감소율 · R 산단평균 대비 열위 · A 산단 대비 감소규모 · "
                                   f"P {PRODUCTION_LABEL} 감소(보강) — 기준을 넘은 신호를 먼저 표시합니다.")
         explanation = signal_explanation(rows, rec["signals"], p_title="명목 생산 감소 (보강)")
@@ -1292,6 +1306,20 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
             st.html(ui.reason_cards_html("", [], "현재 점검단계 진입기준을 충족한 신호가 없습니다."))
             st.html(f'<div class="dx-footnote">등록 판정 문구 · {html.escape(t["stage_reason"] or "—")}</div>')
         st.html(ui.note_html(f"{explanation['summary']} → 등록 판정 {display}"))
+        flip = rec["signals"].get("E_upper_headcount_to_flip")
+        if flip is not None and rec["signals"].get("E_up") and flip <= 5:
+            st.html(ui.notice_html(
+                "경계 근접",
+                f"E 상위경계 이탈까지 감소인원 기준 {int(flip)}명입니다. 현재 여유는 "
+                f"{fmt(rec['signals'].get('E_upper_margin_pp'), 3, '%p')}이며 단계 해석 시 경계 민감성을 함께 봅니다.",
+                "판정은 저장된 정본 그대로이며 이 안내는 경계여유 설명입니다.", tone="amber"))
+        if rec.get("data_quality", {}).get("qa_level_shift_flag"):
+            st.html(ui.notice_html(
+                "자료 수준 급변 확인",
+                rec["data_quality"].get("qa_level_shift_reason") or
+                "전분기 대비 고용·생산 급변과 업체 수 변화가 함께 점검 기준을 충족했습니다.",
+                "오류 확정이 아니라 집계·업종분류·대형 사업체 이동 가능성을 원자료와 현장에서 확인하는 QA 표시입니다.",
+                tone="amber"))
 
         box = lazy_expander("세부 판정규칙 보기 · E/R/A/P · 경계값", "exp_rule_detail")
         with box:
@@ -1321,6 +1349,7 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
                       args=("방법론·데이터 기준",))
 
     with st.container(key="dxsec-timeline"):
+        st.html(ui.section_anchor_html("timeline"))
         section(f"최근 판정 추이 · {ind}",
                 helper="최근 4개 분기의 판정·Q1 상태를 먼저 보여줍니다. 아래 분기 칸(전체 분기)을 선택하면 그 시점의 진단을 확인할 수 있습니다.")
         rows_all = decision_support.timeline(ind, snap.quarters[-1])
@@ -1330,11 +1359,15 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
         st.html(ui.timeline_trail_html(trail_rows))
         st.html(ui.stage_legend_html())
         timeline_chips(ind, q, rows_all)
+        st.html('<div class="dx-chip-note">표식: ↺ 후향 재구성(빗금) · × 핵심자료 미확인(흐림·점선) · '
+                '무표식 당시 분석본 · 파란 외곽선 선택 분기</div>')
 
     with st.container(key="dxsec-field"):
+        st.html(ui.section_anchor_html("field"))
         field_summary_view(ind, q, field_questions_all)
 
     with st.container(key="dxsec-support"):
+        st.html(ui.section_anchor_html("support"))
         section("지원체계 검토 경로", helper="현재 진단·채용·현장 확인 신호를 바탕으로 관련 기존 지원 기능과 담당기관 검증상태를 확인합니다.")
         st.html(ui.link_flow_html(LINK_FLOW))
         st.html(ui.support_summary_html(
@@ -1346,6 +1379,7 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
                  args=("정책·지원 연계", ind, q))
 
     with st.container(key="dxsec-jobs"):
+        st.html(ui.section_anchor_html("jobs"))
         recruitment_signal_view(jobs, report_payload["recruitment_keywords"]["keywords"], q, latest_quarter,
                                 report_payload["recruitment_keywords"]["posting_count"])
 
@@ -1746,7 +1780,7 @@ def case_summary_view(case: dict, fixed, rec: dict, cur: dict | None):
         st.caption("생산자물가·고용보험·수출·전력·경기실사·노동이동·채용공고 자료입니다. 판정 입력이 아니며 판정을 바꾸지 않습니다.")
         st.markdown("\n".join(ext_compact(now_rec)))
     with st.expander("점검 기본정보"):
-        lines = [f"- 개설: {case['opened_by']} · {ts(case['opened_at'])} KST · '{case['origin']}'에서 개설",
+        lines = [f"- 개설: {case['opened_by']} · {ts(case['opened_at'])} KST · '{workflow_label_display(case['origin'])}'에서 개설",
                  f"- 분석 자료: {quarter_label(case['snapshot_quarter'])} 분석본({case['snapshot_version']}) · "
                  f"{nature_display(case['quarter'])} · 개설 시점 값으로 고정"]
         if case["is_example"]:
@@ -2144,7 +2178,7 @@ def closed_case_summary_view(case: dict, vm: dict, fixed, rec: dict):
         num_cols=(1, 2), row_classes=["", "dx-muted-row"]))
     with st.expander("개설 정보 상세"):
         st.markdown("\n".join([
-            f"- 개설: {case['opened_by']} · {ts(case['opened_at'])} KST · '{case['origin']}'에서 개설",
+            f"- 개설: {case['opened_by']} · {ts(case['opened_at'])} KST · '{workflow_label_display(case['origin'])}'에서 개설",
             f"- 개설 사유(입력 원문): {case['opening_reason'] or '기록 없음'}",
             f"- 분석 자료: {quarter_label(case['snapshot_quarter'])} 분석본({case['snapshot_version']}) · "
             f"{nature_display(case['quarter'])} · 개설 시점 값으로 고정"]))
@@ -2817,7 +2851,7 @@ def page_operations():
                        "(실제 업무 발생·종결 기준 지표만 집계).")
         st.markdown(f"**①~④ 후보와 개설** · 기준: {b['candidates']}")
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("① 우선점검 후보", o["priority_candidates"])
+        c1.metric("① 우선점검", o["priority_candidates"])
         c2.metric("② 그중 점검 건 개설", share(o["priority_opened"], "후보", short=True))
         c3.metric("③ 추가확인 후보", o["check_candidates"])
         c4.metric("④ 그중 점검 건 개설", share(o["check_opened"], "후보", short=True))
@@ -2944,18 +2978,18 @@ def page_methodology():
                 f"- 인증: {'프로토타입 · 인증 미연결(로컬 이름 입력)' if not RT.authenticated else RT.auth_mode}")
 
         with st.container(border=True):
-            st.markdown("#### 6. 선택적 재검토 — ELECTRE/SMAA")
+            st.markdown("#### 6. 선택적 재검토 — 다기준 범주분류(ELECTRE)·민감도 분석(SMAA)")
             p = snap.reference["electre_smaa_protocol"]
             st.markdown(f"- 적용 범위: **{p['scope']}**\n"
                         f"- Triage 단계 변경: **{'금지' if p['triage_stage_mutation'] == 'forbidden' else p['triage_stage_mutation']}**\n"
                         f"- ELECTRE 결과 용도: {p['electre_result_use']}\n- SMAA 결과 용도: {p['smaa_result_use']}\n"
-                        f"- CAI 해석: {p.get('cai_interpretation', '—')}")
+                        f"- 범주수용도지수(CAI) 해석: {p.get('cai_interpretation', '—')}")
             elec_spec = meta["parameter_spec"]
             st.caption(f"Triage를 대체하지 않으며 추가확인 사례의 검토 보조용입니다 · 명세 {elec_spec['electre_specification']} · "
                        f"적용 범위 {elec_spec['electre_scope']}")
 
         with st.container(border=True):
-            st.markdown("#### 7. Human-in-the-Loop")
+            st.markdown("#### 7. 담당자 검토·확정(Human-in-the-Loop)")
             st.markdown("- 점검 건 개설\n- 현장확인 결과\n- 지원 필요 기능\n- 담당 기관·인계, 발송·접수·회신 기록\n"
                         "- 재점검 판단(계속 점검·추가확인·모니터링 전환·새 인계·종결)\n- 점검 건 종결")
             st.caption("시스템은 위 항목을 자동으로 선택하거나 확정하지 않습니다. " + SELECTION_BIAS_NOTE)
@@ -2963,7 +2997,7 @@ def page_methodology():
         # 업종 진단에서 옮긴 분석 담당자용 상세(판정 경로·규모 gate·선택적 재검토·외부자료·분석 보완·자료 품질)
         ensure_dx_defaults()
         dx_ind, dx_q = st.session_state.dx_industry, st.session_state.dx_quarter
-        with st.expander(f"선택 업종 분석 상세 · {dx_ind} · {quarter_label(dx_q)} · 판정 경로·규모 gate·선택적 재검토·외부자료·자료 품질"):
+        with st.expander(f"선택 업종 분석 상세 · {dx_ind} · {quarter_label(dx_q)} · 판정 경로·규모게이트·선택적 재검토·외부자료·자료 품질"):
             dx_rec = snap.get(dx_ind, dx_q)
             if dx_rec is None:
                 st.caption("이 분석 버전에 해당 업종·분기 자료가 없습니다.")
@@ -3023,6 +3057,8 @@ def field_value(key: str, v) -> str:
         return NATURE_LABEL.get(v, v)
     if key == "status" and v in STATUS_KO:
         return STATUS_KO[v]
+    if key in ("origin", "candidate_type"):
+        return workflow_label_display(v)
     if key.endswith("_at") and isinstance(v, str) and "T" in v:
         return f"{ts(v)} KST"
     return str(v)

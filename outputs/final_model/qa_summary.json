@@ -33,7 +33,7 @@
     "external_panel_stage_matches_triage": true,
     "external_panel_latest_equals_summary": true
   },
-  "decision_panel_sha256": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a",
+  "decision_panel_sha256": "0debe8f228151ba7280048916b25ed58a40642e5e767804dc682058c48b10751",
   "stage_counts": {
     "관찰": 128,
     "추가확인": 35,

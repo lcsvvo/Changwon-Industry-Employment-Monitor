@@ -1,6 +1,6 @@
 {
   "rule_version": "changwon-triage-rule/3.1.0-audited",
-  "run_at_utc": "2026-09-19T18:10:39.297795+00:00",
+  "run_at_utc": "2026-09-27T15:18:49.280235+00:00",
   "window": [
     "2022Q1",
     "2026Q2"
@@ -118,7 +118,7 @@
       "checked_at": "2026-09-18"
     }
   ],
-  "git_head": "6f06118d6aeb5de49d67e566f3540199ee533b22",
+  "git_head": "83fdfee8846579063c7369f70ce468743b172b18",
   "working_tree_note": "Uncommitted source hashes are authoritative",
   "inputs": {
     "data\\processed\\kicox\\changwon_industry_master.csv": "4fb6f7bd85180e848813301bab43fc203a205e3c9829bf98deba4ddfe1240c28",
@@ -627,6 +627,7 @@
     "data\\raw\\kicox\\core\\15085901_20260331.csv": "2e1a903b24d9c2626dff079f4237ce0f33808472014a7382d66673f9742c17a4",
     "data\\raw\\kicox\\datagokr\\_collection_log_datagokr.json": "6977263fb09309b0fa681c0c5408725f8c0ce37463f655be345ab41d69f4b78d",
     "data\\raw\\kicox\\datagokr\\_metadata\\kicox_complex_op_rate_latest.json": "6f983a4ec78e671bab053112586359a139eca7542e8b9f4afba0771b3f784deb",
+    "data\\raw\\kicox\\datagokr\\_metadata\\kicox_factory_changwon_national_20260923.json": "b11ecd5b672fc0a7cef927b4755112dff320c593ff2dfde474774de06fb3610d",
     "data\\raw\\kicox\\datagokr\\_metadata\\kicox_industry_employment_latest.json": "9e9e5b5e0fd61beebdbffb608d63614acb71da5443bee972d9e6cd3c22953b98",
     "data\\raw\\kicox\\datagokr\\_metadata\\kicox_industry_firms_in_latest.json": "01216c4f1708e3f8deccb6e46fd96f3f64da7fe82612d35292abd6966756d4cb",
     "data\\raw\\kicox\\datagokr\\_metadata\\kicox_industry_firms_op_latest.json": "99b93a097bd5732ba3736668b7549bd6fa8240064dc97e86fef54ede4029aac0",
@@ -634,6 +635,7 @@
     "data\\raw\\kicox\\datagokr\\_metadata\\kicox_industry_production_latest.json": "0137baddd6738c9477e4fdc8fe019639920fd5af9bb063752e99d832585bb782",
     "data\\raw\\kicox\\datagokr\\_metadata\\kicox_national_complex_status_latest.json": "715583d4c3f653bf64d380a4f0f48bc67eb3c8989047e51e13cff5a40b25876c",
     "data\\raw\\kicox\\datagokr\\kicox_complex_op_rate_latest.csv": "1e93ab254071f7959123591d71bd5dfab67a0a2b2630fee713bdcdefc362ba5e",
+    "data\\raw\\kicox\\datagokr\\kicox_factory_changwon_national_20260923.csv": "fc76b12102c22b9e54f5f9be28d6743c6094867d7c7cfbadc2fcd20160731d85",
     "data\\raw\\kicox\\datagokr\\kicox_industry_employment_latest.csv": "dd42f5f2baae0f2b09a217129ec1d5e687bd59414e1e0e3b1bc835d62ddfcf00",
     "data\\raw\\kicox\\datagokr\\kicox_industry_firms_in_latest.csv": "dfa9a67bc77e008a6c40da67b508f4d61bbe8fe13555f6cb167349dbb716dcce",
     "data\\raw\\kicox\\datagokr\\kicox_industry_firms_op_latest.csv": "44e9f99076dd4ae1550512f1a90edddaff9eadd8d65a127b5bcaff2797c94c13",
@@ -668,15 +670,15 @@
   },
   "code_sha256": {
     "src\\triage\\run_triage.py": "ddbe85404d3635a1dd4a669b00f3ba43a7ed5439a8210416805cc47e6d9038e5",
-    "src\\triage\\triage_rule.py": "91bdad2cb0f03240af5154657488c34f3022e3d93d6165d4d545cd1d9986bcf4",
+    "src\\triage\\triage_rule.py": "4a5c64dd669405c3d01c14035f8220f4cb2d155e79ff1bf9a83a2594ad52cd95",
     "src\\handoff\\delivery.py": "b415179a1af1b5f3080874ca465e425ed46797608fbaa6a765e4e92275aac4c5",
     "src\\triage\\triage_audit.py": "1409c59ad0250669dabb2ac656a172fdfe6c6228f7cbdba677b0257456150dbe",
     "src\\core\\build_changwon_master.py": "8594fb0fac58412ede274aaf3399582bc2da816378d561869a765d9c875bb2b1",
     "src\\core\\build_kicox_analysis_panel.py": "95598690b20532c0de8a9d744df6ccd52330e1352715fbe519e1c68a5b42e1c7"
   },
-  "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
-  "pandas": "3.0.3",
-  "numpy": "2.4.5",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "pandas": "3.0.1",
+  "numpy": "2.3.5",
   "randomness": "none",
   "missing_policy": "partial",
   "purpose": "기존 산업동향 분석을 기업·현장 확인의 표준화된 진입점으로 전환한다.",

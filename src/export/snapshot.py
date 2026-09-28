@@ -263,6 +263,7 @@ def _record(row, trace, electre, evidence, card, ctx_row, ext_row, roles, jobs_m
     ctx_text = _native(ctx_row["check_questions_context"]) if ctx_row is not None else None
     rec["questions"] = {
         "check_question": _native(row["check_question"]),
+        "trend_check_question": _native(row.get("trend_check_question")),
         "q1_question_route": _native(row["q1_question_route"]),
         "context_questions": _split_questions(ctx_text),
         "context_available": bool(ctx_text),

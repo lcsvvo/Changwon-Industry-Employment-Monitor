@@ -1,0 +1,4 @@
+﻿industry,quarter,stage,concurrent_adverse_count,bsi_industry_business,trade_export_yoy,mfg_flow_net,insured_yoy,adverse_bsi,adverse_export,adverse_labor_flow,adverse_eis,role_note
+기계,2023Q1,우선점검,3,65.34,-4.987984364353181,-83.0,,True,True,True,False,동시기 맥락·해석 보강 전용; Triage 단계 재산정에 사용하지 않음
+기계,2022Q4,우선점검,3,74.5,-18.4388010979465,-554.0,,True,True,True,False,동시기 맥락·해석 보강 전용; Triage 단계 재산정에 사용하지 않음
+기계,2022Q3,우선점검,3,78.34,-10.269627636940438,-554.0,,True,True,True,False,동시기 맥락·해석 보강 전용; Triage 단계 재산정에 사용하지 않음

@@ -1,0 +1,3 @@
+﻿size_group,rows,median_employment,median_persons_per_E_1pp,rows_flip_within_2,share_flip_within_2_pct,reading
+300인 미만,66,180.0,1.955,18,27.27272727272727,E 경계 충족 여부가 2명 이내 변화로 바뀌는 행의 비중 — 비율 경계의 인원 민감도
+300인 이상,114,9740.0,97.4,2,1.7543859649122806,E 경계 충족 여부가 2명 이내 변화로 바뀌는 행의 비중 — 비율 경계의 인원 민감도
