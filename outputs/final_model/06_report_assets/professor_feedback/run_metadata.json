@@ -12,8 +12,6 @@
     "mean_reversion_summary.csv",
     "press_concurrent_cases.csv",
     "priority_base_peak_check.csv",
-    "purpose_aligned_bootstrap.csv",
-    "purpose_aligned_validation.csv",
     "qa_level_shift_cases.csv",
     "ratio_boundary_headcount_latest.csv",
     "ratio_boundary_headcount_summary.csv",

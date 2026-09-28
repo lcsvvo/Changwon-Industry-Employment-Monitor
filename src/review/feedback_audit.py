@@ -36,7 +36,6 @@ def run_checks() -> list[dict[str, str]]:
     ratio = pd.read_csv(TABLES / "ratio_boundary_headcount_summary.csv")
     cci = pd.read_csv(TABLES / "cci_concurrent_summary.csv")
     mr = pd.read_csv(TABLES / "mean_reversion_by_stage.csv")
-    pav = pd.read_csv(TABLES / "purpose_aligned_validation.csv")
     press = pd.read_csv(TABLES / "press_concurrent_cases.csv")
     report = _report_text()
     nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
@@ -82,10 +81,9 @@ def run_checks() -> list[dict[str, str]]:
             and cci.set_index("group").loc["우선점검 행", "emp_direction_agree"] == "9/9"
             and "시점분리 사후 점검과 동시점 대조" in report
             and abs(mr.set_index("stage").loc["우선점검", "level_down_rate"] - 11 / 13) < 1e-9
-            and pav.query("model == 'Triage(주모형)'").precision.max() == 0.5
-            and len(press) == 10 and "언론·기관 발표 10건" in report,
-            "검증을 본론(2-3)으로 옮기고, 증감률 평균회귀 분해·목적 맞춤 보강 검증(정밀도·오경보율 부트스트랩)·창원상의 54행·언론 10건 동시점 대조를 보강",
-            "mean_reversion_by_stage.csv; purpose_aligned_validation.csv; purpose_aligned_bootstrap.csv; cci_concurrent_check.csv; press_concurrent_cases.csv",
+            and len(press) == 12 and "언론·기관 발표 12건" in report,
+            "검증을 본론(2-3)으로 옮기고, 증감률 평균회귀 분해로 균형정확도 0.5 미만의 원인을 설명하고, 창원상의 54행·언론·기관 발표 12건 동시점 대조를 보강",
+            "mean_reversion_by_stage.csv; mean_reversion_summary.csv; cci_concurrent_check.csv; press_concurrent_cases.csv",
         ),
         (
             "5. 보고서·그림",
