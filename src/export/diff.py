@@ -10,6 +10,19 @@ from __future__ import annotations
 from export.snapshot import Snapshot
 
 CORE_SECTIONS = ("activity", "q1", "q2", "q3", "signals", "triage", "data_quality")
+# 판정 규칙과 단계는 그대로인 채 설명·민감도·QA를 보강한 필드다. 이 필드의
+# 추가/표시 변경만으로 과거 분석본을 "판정값 변경"으로 분류하지 않는다.
+CORE_CONTEXT_FIELDS = {
+    "activity.production_qoq_pct",
+    "q2.emp_qoq_delta", "q2.emp_qoq_pct",
+    "signals.E_upper_margin_pp", "signals.E_upper_boundary_loss_exact",
+    "signals.E_upper_boundary_loss_min_int", "signals.E_upper_headcount_margin",
+    "signals.E_upper_headcount_to_flip",
+    "triage.candidate_label", "triage.stage_label", "triage.trend_check_question",
+    "data_quality.qa_level_shift_flag", "data_quality.qa_level_shift_reason",
+    "data_quality.qa_emp_qoq_abs_p95", "data_quality.qa_production_qoq_abs_p95",
+    "data_quality.qa_firms_op_abs_median",
+}
 KEY_FIELDS = ("industry", "quarter", "quarter_end")
 META_CORE = ("rule_version", "parameter_spec", "scenario_status", "window", "record_scope")
 META_AUX = ("export_contract_version", "evidence_layer_version")
@@ -62,6 +75,9 @@ def record_diff(old: dict | None, new: dict | None) -> dict:
         return {"missing": "old" if old is None else "new", "core_changes": [], "aux_changes": []}
     aux_sections = sorted((set(old) | set(new)) - set(CORE_SECTIONS) - set(KEY_FIELDS))
     core, core_add, core_rm = _compare(old, new, CORE_SECTIONS)
+    core = [c for c in core if c["field"] not in CORE_CONTEXT_FIELDS]
+    core_add -= CORE_CONTEXT_FIELDS
+    core_rm -= CORE_CONTEXT_FIELDS
     aux, aux_add, aux_rm = _compare(old, new, aux_sections)
     return {"missing": None, "core_changes": core, "core_fields_added": sorted(core_add),
             "core_fields_removed": sorted(core_rm), "aux_changes": aux,

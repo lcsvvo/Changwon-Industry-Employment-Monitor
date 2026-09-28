@@ -201,6 +201,8 @@ class WorkflowService:
         texts: list[tuple[str, str]] = []
         if q["check_question"]:
             texts.append((q["check_question"], "check_question"))
+        if q.get("trend_check_question"):
+            texts.append((q["trend_check_question"], "check_question"))
         texts += [(t, "check_questions_context") for t in q["context_questions"]]
         unique: list[tuple[str, str]] = []
         for text, src in texts:

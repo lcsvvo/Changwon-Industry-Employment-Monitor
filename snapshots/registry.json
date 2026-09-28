@@ -36,6 +36,30 @@
    },
    "created_at": "2026-09-21T10:54:56+00:00",
    "recorded_at": "2026-09-25T11:05:12+00:00"
+  },
+  {
+   "quarter": "2026Q2",
+   "snapshot_version": "v4",
+   "data_hash": "d39462cb05b5661eccb988fd64bf5b433486a7d17b918c2a64a392e013c72deb",
+   "export_contract_version": "dss-export/1.4.0",
+   "payload_sha256": {
+    "industry_diagnosis.json": "c8e67c4555627a0629beaa610d8d746e71e18ca08089966cb432c485422116f0",
+    "reference.json": "abbc1b29565f54668c7d24aef98f97fb3329f739297065480b6c393ee23cc3eb"
+   },
+   "created_at": "2026-09-27T15:23:21+00:00",
+   "recorded_at": "2026-09-27T15:23:21+00:00"
+  },
+  {
+   "quarter": "2026Q2",
+   "snapshot_version": "v5",
+   "data_hash": "d39462cb05b5661eccb988fd64bf5b433486a7d17b918c2a64a392e013c72deb",
+   "export_contract_version": "dss-export/1.4.1",
+   "payload_sha256": {
+    "industry_diagnosis.json": "c85a18a402dbe515400cee5ebd6c5dd5356b0d89be34994387ff70bbafb8f0a5",
+    "reference.json": "abbc1b29565f54668c7d24aef98f97fb3329f739297065480b6c393ee23cc3eb"
+   },
+   "created_at": "2026-09-28T05:49:16+00:00",
+   "recorded_at": "2026-09-28T05:49:16+00:00"
   }
  ],
  "status_events": []

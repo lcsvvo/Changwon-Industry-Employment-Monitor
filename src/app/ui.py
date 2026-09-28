@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import html as _html
+import urllib.parse
 from typing import Iterable
 
 from app.view_models import REPORT_NOTICE as REPORT_NOTICE_TEXT, provenance_lines, quarter_text  # 분기 표시 '2026년 2분기'(저장값은 2026Q2)
@@ -40,7 +41,7 @@ def section_head_html(title: str, helper: str | None = None, badge: str | None =
 
 def stage_legend_html() -> str:
     """판정 추이 범례 — 칩과 같은 톤 3개 + 순서는 인과관계가 아니라는 안내 아이콘."""
-    order = (("우선점검", "우선점검 후보"), ("추가확인", "추가확인"), ("관찰", "관찰"))
+    order = (("우선점검", "우선점검"), ("추가확인", "추가확인"), ("관찰", "관찰"))
     pills = "".join(f'<span class="dx-pill dx-tone-{STAGE_TONE[stage]}">{_e(label)}</span>' for stage, label in order)
     tip = "상태 변화의 시간 순서를 보여주며 인과관계를 의미하지 않습니다."
     return f'<div class="dx-legend">{pills}<span class="dx-muted" title="{_e(tip)}">ⓘ</span></div>'
@@ -66,6 +67,7 @@ def header_html(quarter: str, industry: str, stage: str | None, stage_label: str
 
 
 def kpi_cards_html(cards: Iterable[dict]) -> str:
+    cards = list(cards)
     items = "".join(
         '<div class="dx-kpi">'
         f'<div class="dx-kpi-label">{_e(c.get("label"))}</div>'
@@ -75,7 +77,8 @@ def kpi_cards_html(cards: Iterable[dict]) -> str:
         '</div>'
         for c in cards
     )
-    return f'<div class="dx-kpi-grid">{items}</div>'
+    cls = "dx-kpi-grid dx-kpi-grid--3" if len(cards) == 3 else "dx-kpi-grid"
+    return f'<div class="{cls}">{items}</div>'
 
 
 def rule_table_html(rows: list[dict], footnote: str) -> str:
@@ -193,7 +196,7 @@ def _state_cls(state: str | None) -> str:
 
 
 def queue_card_html(row: dict, selected: bool) -> str:
-    """점검 대기열의 우선점검 후보·추가확인 카드(값은 view_models.queue_rows가 포맷한 그대로)."""
+    """점검 대기열의 우선점검·추가확인 카드(값은 view_models.queue_rows가 포맷한 그대로)."""
     cls = "dx-qcard is-selected" if selected else "dx-qcard"
     sel = '<span class="dx-qcard-sel">선택됨</span>' if selected else ""
     return (
@@ -346,25 +349,78 @@ _CHIP = {"priority": ("var(--dx-rose)", "var(--dx-rose)", "#fff"),
          "watch": ("var(--dx-emerald-bg)", "#A7F3D0", "#047857")}
 
 
+# 단계 표식: 색만으로 구분하지 않도록 단계마다 도형을 달리한다(색각 이상 대응) — ● 우선점검 · ▲ 추가확인 · ■ 관찰 · × 자료확인.
+# 테두리는 모두 회색, 안쪽은 단계 알약(dx-pill)과 같은 색. 업종 버튼과 범례가 같은 SVG를 쓴다.
+_MARK_STROKE = "#64748B"
+_MARK_FILL = {"priority": "#E11D48", "check": "#F59E0B", "watch": "#059669"}  # --dx-rose · amber · --dx-emerald
+_MARK_SHAPE = {
+    "priority": '<circle cx="7" cy="7" r="5.6" fill="{f}" stroke="{s}" stroke-width="1.4"/>',
+    "check": '<polygon points="7,1.2 12.8,12.4 1.2,12.4" fill="{f}" stroke="{s}" stroke-width="1.4" stroke-linejoin="round"/>',
+    "watch": '<rect x="1.7" y="1.7" width="10.6" height="10.6" rx="1.6" fill="{f}" stroke="{s}" stroke-width="1.4"/>',
+    "hold": '<path d="M2.5 2.5L11.5 11.5M11.5 2.5L2.5 11.5" stroke="{s}" stroke-width="2.2" stroke-linecap="round"/>',
+}
+STAGE_MARK_LABEL = {"priority": "우선점검", "check": "추가확인", "watch": "관찰", "hold": "자료확인"}
+
+
+def _mark_css(code: str, stroke: str = _MARK_STROKE, filled: bool = True) -> str:
+    fill = _MARK_FILL.get(code, "none") if filled else "none"
+    shape = _MARK_SHAPE.get(code, _MARK_SHAPE["hold"]).replace("{f}", fill).replace("{s}", stroke)
+    svg = urllib.parse.quote(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">{shape}</svg>')
+    return ("display:inline-block;width:.78rem;height:.78rem;"
+            f"background:url('data:image/svg+xml,{svg}') center/contain no-repeat;")
+
+
+def stage_mark_legend_html() -> str:
+    """업종 버튼 아래 범례 — 버튼 표식과 같은 도형을 색 없이 회색 테두리로만(도형으로 단계를 읽게 한다)."""
+    items = "".join(f'<span class="dx-mark-item"><span style="{_mark_css(code, filled=False)}"></span>{_e(label)}</span>'
+                    for code, label in STAGE_MARK_LABEL.items())
+    return f'<div class="dx-mark-legend">{items}</div>'
+
+
 def industry_style_html(codes: list[str], selected: int | None) -> str:
-    """codes[i] = i번째 업종 버튼의 stage_code. 선택 버튼은 sky 배경."""
-    rules = [f".st-key-ind-{i} button::after{{background:{_DOT[c]};}}" for i, c in enumerate(codes) if c in _DOT]
+    """codes[i] = i번째 업종 버튼의 stage_code. 업종 이름 바로 옆 표식 = 단계 도형 + 색, 선택 버튼은 sky 배경."""
+    rules = [f".st-key-ind-{i} button p::after{{content:'';margin-left:.4rem;vertical-align:-.1rem;"
+             f"{_mark_css(c)}}}" for i, c in enumerate(codes)]
     if selected is not None:
+        code = codes[selected] if 0 <= selected < len(codes) else "hold"
         rules.append(f".st-key-ind-{selected} button{{background:var(--dx-sky)!important;"
                      "border-color:var(--dx-sky)!important;}"
                      f".st-key-ind-{selected} button p{{color:#fff!important;}}"
-                     f".st-key-ind-{selected} button::after{{box-shadow:0 0 0 2px #fff;}}")
+                     f".st-key-ind-{selected} button p::after{{{_mark_css(code, '#FFFFFF')}}}")
     return "<style>" + "".join(rules) + "</style>"
 
 
-def timeline_style_html(chips: list[tuple[str, str]], current: str) -> str:
-    """chips = [(분기, stage_code)]. 현재 분기는 sky 외곽선."""
+def section_nav_html() -> str:
+    """업종 진단의 긴 단일 페이지에서 주요 장으로 바로 이동하는 고정 순서 내비게이션."""
+    items = (("queue", "대기열"), ("summary", "진단 요약"), ("reason", "판정 근거"),
+             ("timeline", "판정 추이"), ("field", "현장 확인"), ("support", "지원 경로"),
+             ("jobs", "채용 신호"))
+    return '<nav class="dx-section-nav" aria-label="업종 진단 섹션">' + "".join(
+        f'<a href="#dx-{key}">{label}</a>' for key, label in items) + "</nav>"
+
+
+def section_anchor_html(key: str) -> str:
+    # id는 접두어를 붙인다: st.html 정화(DOMPurify)가 document 속성과 같은 id(예: timeline)를 지운다
+    return f'<span class="dx-section-anchor" id="dx-{_e(key)}" aria-hidden="true"></span>'
+
+
+def timeline_style_html(chips: list[tuple[str, str, bool, bool]], current: str) -> str:
+    """chips = [(분기, stage_code, 결측, 후향재구성)]. 현재 분기는 sky 외곽선."""
     rules = []
-    for quarter, code in chips:
+    for chip in chips:
+        quarter, code = chip[:2]
+        missing = bool(chip[2]) if len(chip) > 2 else False
+        reconstructed = bool(chip[3]) if len(chip) > 3 else False
         if code in _CHIP:
             bg, border, fg = _CHIP[code]
             rules.append(f".st-key-tl-{quarter} button{{background:{bg};border-color:{border};}}"
                          f".st-key-tl-{quarter} button p{{color:{fg};}}")
+        if reconstructed:
+            rules.append(f".st-key-tl-{quarter} button{{background-image:repeating-linear-gradient("
+                         "135deg,rgba(255,255,255,.00) 0 5px,rgba(255,255,255,.28) 5px 9px);}")
+        if missing:
+            # 단계 색은 유지하고 흐리게 + 진한 점선 테두리 — 채도 필터는 빨강을 다른 색처럼 보이게 해 쓰지 않는다
+            rules.append(f".st-key-tl-{quarter} button{{opacity:.55;border:1.5px dashed #475569!important;}}")
     rules.append(f".st-key-tl-{current} button{{outline:2px solid var(--dx-sky);outline-offset:1px;}}")
     return "<style>" + "".join(rules) + "</style>"
 
@@ -429,6 +485,10 @@ def status_pills_html(items: list[tuple[str, str]]) -> str:
     ) + "</div>"
 
 
+def _count_text(count, unit: str = "건") -> str:
+    return "상세 미확인" if count is None else f"{int(count):,}{unit}"
+
+
 def _level_tile(label: str, count, sub: str | None, unit: str = "건") -> str:
     value = "상세 미확인" if count is None else f"{int(count):,}{unit}"
     return ('<div class="dx-level">'
@@ -459,11 +519,13 @@ def recruitment_summary_html(jobs: dict, keywords: list[dict], is_latest: bool, 
     levels = {lv.get("key"): lv for lv in jobs.get("evidence_levels") or []}
     lst, active = levels.get("LIST") or {}, levels.get("ACTIVE_CONFIRMED") or {}
     detail = levels.get("DETAIL_VERIFIED") or {}
-    # KPI 칸에는 숫자만 — 각 수준의 정의는 아래 한 줄(자세한 기준·한계는 방법론·데이터 기준 화면)
+    # KPI 칸은 실제로 포개지는 순서(목록 ⊇ 현재 유효 ⊇ 그중 상세 검증)만 놓는다. 상세 검증 전체는 현재 유효와
+    # 별개로 집계되므로(마감 지난 공고 포함) 칸이 아니라 아래 설명줄에 둔다. 값은 백엔드 집계를 그대로 쓴다.
+    nested = jobs.get("confirmed_active_detail_verified_posting_count")
     tiles = (_level_tile("목록 데이터", lst.get("count"), None)
-            + _level_tile("현재 유효", active.get("count"), None)
-            + _level_tile("상세 검증", detail.get("count"), None)
-            + _level_tile("확인 기업", detail.get("company_count"), None, unit="개"))
+             + _level_tile("현재 유효", active.get("count"), None)
+             + _level_tile("그중 상세 검증", nested, None)
+             + _level_tile("확인 기업", detail.get("company_count"), None, unit="개"))
     kw = [(k["term"], k["count"]) for k in keywords]
     # 현재 유효·상세 검증이 모두 0건(또는 미확인)이면 목록 키워드를 채용수요 근거처럼 보이지 않게 한다
     unverified = not active.get("count") and not detail.get("count")
@@ -473,8 +535,9 @@ def recruitment_summary_html(jobs: dict, keywords: list[dict], is_latest: bool, 
     return (
         f'<div class="dx-report-meta">{meta}</div>{warn}'
         f'<div class="dx-level-grid">{tiles}</div>'
-        '<div class="dx-note">현재 유효 = 저장된 목록 마감일 기준 · 상세 검증 = 상세 페이지까지 확인한 공고 · '
-        '확인 기업 = 상세 검증 공고의 기업 수</div>'
+        '<div class="dx-note">포함관계: 목록 데이터 ⊇ 현재 유효 ⊇ 그중 상세 검증 · 현재 유효 = 저장된 목록 마감일 기준으로 '
+        f'유효 기준일에 마감되지 않은 산단 공장등록 확인 공고 · 상세 검증 전체 {_e(_count_text(detail.get("count")))}(마감 지난 공고 포함)과 '
+        '확인 기업 수는 상세 페이지까지 확인한 공고 기준입니다.</div>'
         f'<div class="dx-sub-title">{"목록 키워드 (참고)" if unverified else "주요 키워드"}</div>'
         f'{chip_row_html(kw, "muted" if unverified else "sky")}'
         # '관찰된 표현'은 observations가 있을 때만(업종 진단 화면은 빈 목록을 넘겨 그리지 않는다)
@@ -657,7 +720,7 @@ def support_function_card_html(function: dict, cards: list[dict]) -> str:
 
 
 def distribution_pills_html(counts: dict[str, int]) -> str:
-    order = (("우선점검", "우선점검 후보", "rose"), ("추가확인", "추가확인", "amber"), ("관찰", "관찰", "emerald"))
+    order = (("우선점검", "우선점검", "rose"), ("추가확인", "추가확인", "amber"), ("관찰", "관찰", "emerald"))
     items = "".join(
         f'<span class="dx-pill dx-tone-{tone}">{_e(display)} {counts.get(stage, 0)}</span>'
         for stage, display, tone in order

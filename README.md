@@ -59,7 +59,7 @@ CORE의 자동 판정 입력은 KICOX 생산·고용에서 계산한 지표다. 
 
 ### Q2 · 업종별 고용 변화 규모
 
-2026Q2 창원국가산단 제조업 고용은 전년동기보다 **4,332명 감소**했고, 그중 **기계 업종이 3,979명 감소**했다. 증감률만 보면 놓치는 업종별 규모 차이를 고용 인원과 비중으로 확인한다.
+2026Q2 창원국가산단 제조업 고용은 전년동기보다 **4,332명 감소**했고, 그중 **기계 업종이 3,979명 감소**했다. 다만 기계의 직전 분기 대비 감소는 **104명**이므로, 전년동기 대비 큰 감소와 최근 변화의 완화를 함께 제시한다. 증감률만 보면 놓치는 업종별 규모 차이를 고용 인원과 비중으로 확인한다.
 
 <p align="center">
   <img src="outputs/final_model/01_core/figures/Q2A_고용증감_비중.png" alt="2026Q2 업종별 고용 증감 인원과 고용 비중" width="900">
@@ -121,7 +121,7 @@ PPI는 명목 생산 방향에 가격효과가 섞였는지, EIS는 모집단이
 | **설정·정보** | 담당자·분석 버전·데이터 기준·연결 상태 확인, 방법론·데이터 기준 및 변경 기록 열람 |
 | **행정 AI 비서** | 등록 진단·공식 문서 기반 질의응답, Gemini 근거 기반 문장 작성·요약, 수치·판정·인용 검증과 실패 시 원문 복귀 |
 
-화면은 등록 분석본(`snapshots/`)을 읽고 점검 기록을 로컬 DB에 저장한다. 화면에서 Q1~Q3나 Triage를 다시 계산하지 않는다. 주요 산출물은 [최종 방법론](reports/final_methodology.md), [최종 결과 요약](reports/final_result_summary.md), [업종별 진단카드](outputs/final_model/05_handoff/tables/industry_diagnostic_cards_2026Q2.csv), [최종 결과 HTML](outputs/final_model/06_report_assets/final_results.html)에서 확인할 수 있다.
+화면은 등록 분석본(`snapshots/`)을 읽고 점검 기록을 로컬 DB에 저장한다. 화면에서 Q1~Q3나 Triage를 다시 계산하지 않는다. 주요 산출물은 [최종 방법론](reports/final_methodology.md), [최종 결과 요약](reports/final_result_summary.md), [업종별 진단카드](outputs/final_model/05_handoff/tables/handoff_cards_latest.csv), [최종 결과 HTML](outputs/final_model/06_report_assets/final_results.html)에서 확인할 수 있다.
 
 `진단서 보기·저장`에서 만드는 담당자 인계용 HTML·JSON에는 핵심 판정과 지표, 현재 확인상태와 다음 행동, 우선 확인사항, 지원 검토, 채용시장 보조신호, 자료 기준이 포함된다. 이 진단서는 행정처분이나 기업별 지원대상 확정 문서가 아니다.
 
@@ -161,7 +161,7 @@ PPI는 명목 생산 방향에 가격효과가 섞였는지, EIS는 모집단이
 - **Q1:** 생산·고용 YoY 부호로 S1 동반확대, S2 생산확대·고용감소, S3 생산감소·고용증가, S4 동반감소를 구분한다. 정확히 0인 축은 `N`, 결측·비교불가는 `INVALID`다. S번호는 위험 순위가 아니다.
 - **Q2:** 고용 증감 인원, 고용 비중, 산단 전체 변화 기여를 계산한다. 전체 순변화가 작으면 기여율 해석을 제한한다.
 - **Q3:** 동일 상태 연속분기와 인접 분기 전환을 계산한다. 결측을 건너 연결하지 않고 관측 경계 절단을 표시한다.
-- **Triage:** 고용감소율 `E`, 산단 제조업 평균 대비 열위 `R`, 감소인원의 산단 제조업 고용 대비 비율 `A`를 사용한다. 진입경계는 **5%·5%p·1%**, 상위경계는 **10%·10%p·2%**다. 상위경계에 생산감소 `P≥5%` 또는 직전 분기 반복신호가 더해지면 우선점검 후보가 되고, 우선점검에는 **고용 300인 이상** 규모 게이트가 적용된다. 핵심 고용정보가 없으면 자료확인으로 분리한다.
+- **Triage:** 고용감소율 `E`, 산단 제조업 평균 대비 열위 `R`, 감소인원의 산단 제조업 고용 대비 비율 `A`를 사용한다. 진입경계는 **5%·5%p·1%**, 상위경계는 **10%·10%p·2%**다. 상위경계에 생산감소 `P≥5%` 또는 직전 분기 반복신호가 더해지면 **우선점검**이 되고, 우선점검에는 **고용 300인 이상** 규모 게이트가 적용된다. 핵심 고용정보가 없으면 자료확인으로 분리한다.
 - **ELECTRE TRI-B / SMAA-TRI:** Triage 추가확인 35행만 선택적으로 재검토한다. 결과는 모형 불일치·파라미터 민감성을 표시할 뿐 원 Triage 단계를 바꾸지 않으며 위기확률도 아니다.
 
 경계값은 법정 위기 지정 기준이 아닌 프로젝트의 점검 운영규칙이다. [규칙 코드](src/triage/triage_rule.py), [최종 방법론](reports/final_methodology.md), [과거 실험 기록](logs/README.md)에 채택·제외 과정을 기록했다.
@@ -192,10 +192,14 @@ logs/                 과거 실험·검증 기록
 | Triage 패널 | [`triage_panel.csv`](outputs/final_model/02_triage/tables/triage_panel.csv) |
 | 선택적 재검토 | [`electre_smaa_review_cases.csv`](outputs/final_model/03_electre_smaa/tables/electre_smaa_review_cases.csv) |
 | 외부근거 | [`external_evidence_summary.csv`](outputs/final_model/04_external_evidence/external_evidence_summary.csv) |
-| 진단카드 | [`industry_diagnostic_cards_2026Q2.csv`](outputs/final_model/05_handoff/tables/industry_diagnostic_cards_2026Q2.csv) |
+| 진단카드 | [`handoff_cards_latest.csv`](outputs/final_model/05_handoff/tables/handoff_cards_latest.csv) |
 | 최종 보고용 HTML | [`final_results.html`](outputs/final_model/06_report_assets/final_results.html) |
+| 교수 피드백 분석표·그림 | [`professor_feedback`](outputs/final_model/06_report_assets/professor_feedback/) |
+| 교수 피드백 반영 보고서 | [`창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx`](reports/창원국가산단_산업고용전환진단_분석보고서_교수피드백반영본.docx) |
+| 교수 피드백 반영 최종 노트북 | [`07_professor_review_master.ipynb`](notebooks/07_professor_review_master.ipynb) |
+| 검토용 결과 패키지 | [`07_review_package`](outputs/final_model/07_review_package/) |
 
-노트북은 [데이터 준비](notebooks/00_data_preparation.ipynb) → [EDA](notebooks/01_eda.ipynb) → [Q1~Q3](notebooks/02_q1_q2_q3_integrated_analysis.ipynb) → [Triage](notebooks/03_triage.ipynb) → [모형 실험](notebooks/04_model_evolution_and_experiments.ipynb) → [외부근거](notebooks/05_external_evidence.ipynb) → [최종 결과](notebooks/06_final_results.ipynb) 순서다. [RUNBOOK](outputs/final_model/RUNBOOK.md)에 실행 순서가 있다.
+노트북은 [데이터 준비](notebooks/00_data_preparation.ipynb) → [EDA](notebooks/01_eda.ipynb) → [Q1~Q3](notebooks/02_q1_q2_q3_integrated_analysis.ipynb) → [Triage](notebooks/03_triage.ipynb) → [모형 실험](notebooks/04_model_evolution_and_experiments.ipynb) → [외부근거](notebooks/05_external_evidence.ipynb) → [최종 결과](notebooks/06_final_results.ipynb) → [교수 피드백 반영 최종본](notebooks/07_professor_review_master.ipynb) 순서다. [RUNBOOK](outputs/final_model/RUNBOOK.md)에 실행 순서가 있다.
 
 ## 부록 D. 실행과 저장된 검증
 
@@ -209,5 +213,14 @@ streamlit run src/app/main.py
 ```
 
 브라우저에서 `http://localhost:8501`을 연다. API 키 없이 등록 진단과 공식 정책·채용공고 RAG를 사용할 수 있다. Gemini 문장 작성·공식기관 최신검색과 기업마당 최신 공고가 필요하면 [`.env.example`](.env.example)을 `.env.txt` 또는 `.env`로 복사해 `GEMINI_API_KEY`, `BIZINFO_API_KEY`를 설정한다. 외부 최신검색은 `COPILOT_WEB_PROVIDER=off`로 끌 수 있다. 키와 로컬 업무기록 DB는 Git에 올리지 않는다. 분석 파이프라인 재실행 명령은 `python src/pipeline/run_final_pipeline.py`이다.
+
+교수 피드백 보완 결과는 계산 코드와 노트북을 분리한다. 아래 순서로 분석표·그림을 저장한 뒤 노트북과 검토 패키지를 갱신한다. 노트북은 저장된 결과만 읽으며 분석 코드를 중복 실행하지 않는다. 교수 피드백 반영 보고서(docx)는 편집 문서라 이 명령으로 다시 만들지 않는다.
+
+```powershell
+python src/review/professor_feedback.py
+python src/review/update_professor_notebook.py
+python src/review/feedback_audit.py
+python src/review/build_review_package.py
+```
 
 [분석 파이프라인 QA 요약](reports/final_qa_summary.md)은 2026-09-19 기준 활성 테스트 **63 passed**, CORE 180행, 선택적 재검토 35행, 최종 노트북 6/6 실행 통과와 핵심 CSV 해시 일치를 기록한다. 이 기록은 분석 규칙·재현성과 근거 경로의 검증이며, 이후 진행된 Streamlit 화면 개편의 자동 UI 테스트 결과나 현장 효과·예측 정확도 검증을 뜻하지 않는다.

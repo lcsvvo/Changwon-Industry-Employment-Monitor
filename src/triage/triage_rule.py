@@ -12,6 +12,7 @@
 기존 ELECTRE/MRSort 산출물은 건드리지 않는다.
 """
 from __future__ import annotations
+import math
 import numpy as np
 import pandas as pd
 
@@ -67,7 +68,25 @@ def compute_axes(master: pd.DataFrame) -> pd.DataFrame:
     lag['quarter'] = (pd.PeriodIndex(lag.quarter, freq='Q') + 4).astype(str)
     lag = lag.rename(columns={'employment':'employment_lag4','production':'production_lag4'})
     m = m.merge(lag,on=['industry','quarter'],how='left',validate='one_to_one')
+    # 전분기 변화는 설명·QA 전용이다. Triage 판정 축에는 쓰지 않는다.
+    lag1_cols = ['industry', 'quarter', 'employment', 'production']
+    for optional in ('firms_op', 'classification_break'):
+        if optional in m.columns:
+            lag1_cols.append(optional)
+    lag1 = m[lag1_cols].copy()
+    lag1['quarter'] = (pd.PeriodIndex(lag1.quarter, freq='Q') + 1).astype(str)
+    lag1 = lag1.rename(columns={c: f'{c}_lag1' for c in lag1_cols if c not in {'industry', 'quarter'}})
+    m = m.merge(lag1, on=['industry', 'quarter'], how='left', validate='one_to_one')
     m['emp_delta'] = m['employment'] - m['employment_lag4']
+    m['emp_qoq_delta'] = m['employment'] - m['employment_lag1']
+    m['emp_qoq_pct'] = (m['employment'] / m['employment_lag1'] - 1) * 100
+    m['production_qoq_pct'] = (m['production'] / m['production_lag1'] - 1) * 100
+    if 'firms_op_lag1' in m:
+        m['firms_op_qoq_delta'] = m['firms_op'] - m['firms_op_lag1']
+    else:
+        m['firms_op_qoq_delta'] = np.nan
+    m[['emp_qoq_pct', 'production_qoq_pct']] = m[['emp_qoq_pct', 'production_qoq_pct']].replace(
+        [np.inf, -np.inf], np.nan)
     m['e_yoy'] = (m['employment'] / m['employment_lag4'] - 1) * 100
     m['p_yoy'] = (m['production'] / m['production_lag4'] - 1) * 100
     m[['e_yoy', 'p_yoy']] = m[['e_yoy', 'p_yoy']].replace([np.inf, -np.inf], np.nan)
@@ -89,6 +108,46 @@ def compute_axes(master: pd.DataFrame) -> pd.DataFrame:
     gross = m.groupby('quarter')['emp_delta'].agg(lambda x: x.abs().sum(min_count=10))
     m['net_gross_ratio'] = m['mfg_emp_delta'].abs()/m.quarter.map(gross)
     m['contribution_pct'] = (m.emp_delta/m.mfg_emp_delta*100).where(m.net_gross_ratio >= .30)
+
+    # E 상위경계(10%)와의 여유: 연속 %p와 실제 정수 인원 기준을 함께 제공한다.
+    # 예: 기준 476명일 때 48명 감소는 10.084%, 47명 감소는 9.874%다.
+    loss = (-m['emp_delta']).clip(lower=0)
+    exact_boundary_loss = m['employment_lag4'] * (LEVEL_UP / 100.0)
+    minimum_integer_loss = exact_boundary_loss.map(
+        lambda x: math.ceil(x - COMPARISON_ATOL) if pd.notna(x) else np.nan)
+    m['E_upper_margin_pp'] = m['E'] - LEVEL_UP
+    m['E_upper_boundary_loss_exact'] = exact_boundary_loss
+    m['E_upper_boundary_loss_min_int'] = minimum_integer_loss
+    m['E_upper_headcount_margin'] = loss - exact_boundary_loss
+    m['E_upper_headcount_to_flip'] = np.where(
+        reached(m['E'], LEVEL_UP),
+        loss - (minimum_integer_loss - 1),
+        minimum_integer_loss - loss,
+    )
+
+    # 분포 기반 수준변화 QA. 분류단절 전후는 기준분포와 플래그 대상에서 제외한다.
+    # 고용 또는 생산의 |QoQ|가 유효분포 95백분위 이상인데 기업 수 변화가 중앙값 이하이면
+    # 집계·분류·사업체 구성 변화 가능성을 검토한다. 판정(stage)은 절대 변경하지 않는다.
+    current_break = m.get('classification_break', pd.Series(False, index=m.index)).fillna(False).astype(bool)
+    previous_break = m.get('classification_break_lag1', pd.Series(False, index=m.index)).fillna(False).astype(bool)
+    qa_eligible = ~(current_break | previous_break)
+    emp_abs = m.loc[qa_eligible, 'emp_qoq_pct'].abs().dropna()
+    prod_abs = m.loc[qa_eligible, 'production_qoq_pct'].abs().dropna()
+    firms_abs = m.loc[qa_eligible, 'firms_op_qoq_delta'].abs().dropna()
+    emp_cut = emp_abs.quantile(.95) if not emp_abs.empty else np.nan
+    prod_cut = prod_abs.quantile(.95) if not prod_abs.empty else np.nan
+    firms_cut = firms_abs.quantile(.50) if not firms_abs.empty else np.nan
+    m['qa_emp_qoq_abs_p95'] = emp_cut
+    m['qa_production_qoq_abs_p95'] = prod_cut
+    m['qa_firms_op_abs_median'] = firms_cut
+    extreme_level = m['emp_qoq_pct'].abs().ge(emp_cut) | m['production_qoq_pct'].abs().ge(prod_cut)
+    stable_firms = m['firms_op_qoq_delta'].abs().le(firms_cut)
+    m['qa_level_shift_flag'] = qa_eligible & extreme_level & stable_firms
+    m['qa_level_shift_reason'] = np.where(
+        m['qa_level_shift_flag'],
+        '전분기 수준변화가 유효분포 95백분위 이상이지만 운영업체 수 변화는 중앙값 이하 — 집계·분류·사업체 구성 확인',
+        '',
+    )
     return m
 
 
@@ -181,4 +240,13 @@ def add_routing(d: pd.DataFrame) -> pd.DataFrame:
     d = d.sort_values(['quarter', '_o', '_loss', 'industry'], ascending=[True, True, False, True])
     d['rank_in_stage'] = d.groupby(['quarter', 'stage']).cumcount() + 1
     d['scale_flag'] = np.where(d['scale_ok'], '', '규모기준 미만')
+    d['trend_check_question'] = ''
+    negative_yoy = d['emp_delta'].lt(0)
+    recent_smaller = negative_yoy & d['emp_qoq_delta'].abs().lt(d['emp_delta'].abs())
+    d.loc[recent_smaller, 'trend_check_question'] = d.loc[recent_smaller].apply(
+        lambda r: (
+            f"전년동기 대비 {abs(r['emp_delta']):,.0f}명 감소했지만 최근 전분기 변화는 "
+            f"{r['emp_qoq_delta']:+,.0f}명입니다. 비교기준 고점 이후 조정인지, 최근 안정화인지, "
+            "기업 단위 감원이 계속되는지 확인합니다."
+        ), axis=1)
     return d.drop(columns=['_o', '_loss'])

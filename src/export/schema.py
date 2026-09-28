@@ -6,7 +6,7 @@
 """
 from __future__ import annotations
 
-EXPORT_CONTRACT_VERSION = "dss-export/1.3.0"
+EXPORT_CONTRACT_VERSION = "dss-export/1.4.1"  # 1.4.1: ELECTRE 범주 라벨을 우선점검·추가확인·관찰 용어로 통일(값 불변)
 
 # 규칙 시나리오의 승인 상태. 원천에 시나리오 등록·승인 기록이 없으면 draft.
 SCENARIO_STATUSES = ("draft", "registered", "approved")
@@ -94,13 +94,13 @@ KEY = ("industry", "quarter")
 TRIAGE_STAGES = ("우선점검", "추가확인", "관찰")
 
 # 코드 → 라벨 (업무 용어)
-CANDIDATE_LABEL = {"우선점검": "우선점검 후보", "추가확인": "검토 후보", "관찰": None}
-QUEUE_LABEL = {"우선점검": "우선점검 후보", "추가확인": "추가확인 검토", "관찰": "정기 모니터링(관찰)"}
+CANDIDATE_LABEL = {"우선점검": "우선점검", "추가확인": "추가확인", "관찰": None}
+QUEUE_LABEL = {"우선점검": "우선점검", "추가확인": "추가확인", "관찰": "관찰"}
 ELECTRE_LABEL = {
     "OBSERVE": "관찰 수준",
     "CHECK": "추가확인 수준",
-    "PRIORITY": "우선검토 수준",
-    "UNDETERMINED": "판단 유보",
+    "PRIORITY": "우선점검 수준",
+    "UNDETERMINED": "자료·모형상 단일 범주 확정 곤란",
 }
 
 # 섹션별 필드 매핑: (snapshot 필드, triage_panel 컬럼)
@@ -117,6 +117,8 @@ TRIAGE_SECTIONS = {
         ("employment", "employment"),
         ("employment_lag4", "employment_lag4"),
         ("emp_delta", "emp_delta"),
+        ("emp_qoq_delta", "emp_qoq_delta"),
+        ("emp_qoq_pct", "emp_qoq_pct"),
         ("employment_yoy", "q2_employment_yoy"),
         ("employment_share_pct", "employment_share_pct"),
         ("contribution_pct", "contribution_pct"),
@@ -147,6 +149,7 @@ TRIAGE_SECTIONS = {
         ("next_review_quarter", "next_review_quarter"),
         ("data_quality_minimum_only", "data_quality_minimum_only"),
         ("prod_only_decline", "prod_only_decline"),
+        ("trend_check_question", "trend_check_question"),
     ],
     "signals": [
         ("E", "E"), ("R", "R"), ("A", "A"), ("P", "P"),
@@ -156,11 +159,17 @@ TRIAGE_SECTIONS = {
         ("P_support", "P_support"),
         ("n_entry", "n_entry"), ("n_up", "n_up"),
         ("emp_entry", "emp_entry"), ("emp_up", "emp_up"),
+        ("E_upper_margin_pp", "E_upper_margin_pp"),
+        ("E_upper_boundary_loss_exact", "E_upper_boundary_loss_exact"),
+        ("E_upper_boundary_loss_min_int", "E_upper_boundary_loss_min_int"),
+        ("E_upper_headcount_margin", "E_upper_headcount_margin"),
+        ("E_upper_headcount_to_flip", "E_upper_headcount_to_flip"),
     ],
     "activity": [
         ("production", "production"),
         ("production_lag4", "production_lag4"),
         ("production_yoy", "production_yoy"),
+        ("production_qoq_pct", "production_qoq_pct"),
         ("op_rate_official", "op_rate_official"),
         ("op_rate_approx", "op_rate_approx"),
         ("firms_in", "firms_in"),
@@ -175,6 +184,11 @@ TRIAGE_SECTIONS = {
         ("classification_break", "classification_break"),
         ("production_yoy_reason", "production_yoy_reason"),
         ("employment_yoy_reason", "employment_yoy_reason"),
+        ("qa_level_shift_flag", "qa_level_shift_flag"),
+        ("qa_level_shift_reason", "qa_level_shift_reason"),
+        ("qa_emp_qoq_abs_p95", "qa_emp_qoq_abs_p95"),
+        ("qa_production_qoq_abs_p95", "qa_production_qoq_abs_p95"),
+        ("qa_firms_op_abs_median", "qa_firms_op_abs_median"),
     ],
 }
 QUALITY_FIELDS = ("production", "employment", "op_rate", "firms_in", "firms_op")
@@ -184,6 +198,7 @@ QUALITY_ATTRS = ("source", "is_revised", "masked", "invalid_source", "note")
 INT_FIELDS = {
     "employment", "employment_lag4", "emp_delta", "mfg_emp", "mfg_emp_lag4",
     "mfg_emp_delta", "firms_in", "firms_op", "state_run_length",
+    "E_upper_boundary_loss_min_int", "E_upper_headcount_to_flip",
 }
 
 ELECTRE_FIELDS = [

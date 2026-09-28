@@ -1,0 +1,24 @@
+{
+  "rule_version": "changwon-triage-rule/3.1.0-audited",
+  "stage_unchanged": true,
+  "qa_changes_stage": false,
+  "generated_tables": [
+    "cci_concurrent_check.csv",
+    "cci_concurrent_summary.csv",
+    "external_contemporaneous_cases.csv",
+    "machine_yoy_qoq_interpretation.csv",
+    "mean_reversion_by_current_yoy.csv",
+    "mean_reversion_by_stage.csv",
+    "mean_reversion_summary.csv",
+    "press_concurrent_cases.csv",
+    "priority_base_peak_check.csv",
+    "qa_level_shift_cases.csv",
+    "ratio_boundary_headcount_latest.csv",
+    "ratio_boundary_headcount_summary.csv",
+    "signal_followup_summary.csv",
+    "validation_model_comparison.csv",
+    "wood_paper_boundary_margin.csv",
+    "wood_paper_level_shift_decomposition.csv",
+    "wood_paper_source_audit.csv"
+  ]
+}
