@@ -1,0 +1,112 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.audit_deps/
+outputs/independent_audit/baseline/snapshot/
+
+# Tests and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets and local configuration
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
+secrets*.json
+*_api_key.txt
+*_apikey.txt
+
+# Editors and local tools
+.vscode/
+.idea/
+.claude/
+
+# Operating systems
+Thumbs.db
+.DS_Store
+
+# Local scratch files
+tmp/
+temp/
+*.tmp
+*.log
+
+# Archives
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# 원자료와 수집 기록은 로컬 보관
+/data/raw/
+
+# 고용24 공고 단위 파일과 수집 품질 로그는 로컬 보관
+/data/processed/work24/
+
+# 재실행 시 자동 보관되는 이전 가공본
+data/processed/kicox/_previous/**
+
+# 보관 자료
+archive/**
+!archive/*/.gitkeep
+
+# 빌드 로그 (산출 CSV/JSON 은 커밋)
+logs/**/*.log
+
+# 로컬 전용 조사메모
+private/
+
+# 모형 실행별 산출물 보관(로컬). canonical 산출물과 outputs/current_run_manifest.json만 공유
+outputs/runs/
+
+# Final verification recreates these local intermediates; canonical results remain shared.
+outputs/final_model/06_report_assets/qa/jupyter/
+outputs/final_model/06_report_assets/qa/jupyter_runtime/
+logs/validation/final_qa/*tests.xml
+
+# 점검 업무 기록 로컬 DB(사용자가 화면에서 만든 기록만 저장)
+app_state/
+
+# Tests are kept locally only (not published to GitHub)
+tests/
+
+# Internal collaboration and repository cleanup records
+/CONTRIBUTING.md
+/PROJECT_STRUCTURE.md
+/logs/validation/repository_cleanup/
+
+# Local planning files and superseded experiment entry points
+/logs/experiments/documentation/
+/logs/experiments/legacy_notebooks/
+/logs/experiments/legacy_scripts/
+/logs/experiments/notebooks/
+/logs/experiments/outputs/
+/logs/experiments/code/
+/logs/experiments/electre_mrsort/tests/
+
+# Local submission copies, rendered notebook copies and internal QA records
+/outputs/final_model/07_review_package/00_개요.txt
+/outputs/final_model/07_review_package/02_분석노트북/
+/outputs/final_model/07_review_package/03_핵심_보조자료/
+/outputs/final_model/06_report_assets/notebooks/
+/outputs/final_model/06_report_assets/qa/artifact_hashes.json
+/outputs/final_model/06_report_assets/qa/delivery_verification.json
+/outputs/final_model/06_report_assets/qa/notebook_execution.json
+/outputs/final_model/06_report_assets/qa/verification.json
+/logs/validation/documentation/
+/logs/validation/final_qa/
+/logs/validation/tests/

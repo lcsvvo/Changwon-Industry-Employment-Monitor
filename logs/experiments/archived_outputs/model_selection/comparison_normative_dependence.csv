@@ -1,0 +1,9 @@
+﻿family,layer,rows_changed_vs_no_preference,mean_width_no_preference,mean_width_layer
+MRSORT,rc,18,1.525,1.4125
+MRSORT,rc_vrc_no4,18,1.525,1.4125
+MRSORT,rc_vrc,60,1.525,1.1375
+ROR,rc,68,3.0,2.23125
+ROR,rc_vrc,116,3.0,1.8375
+ROR,rc_vrc_no4,82,3.0,2.05
+ROR,rc_vrc_bounded,116,3.0,1.8375
+MRSORT,vrc4_marginal_effect,43,1.4125,1.1375

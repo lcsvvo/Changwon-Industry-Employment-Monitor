@@ -1,0 +1,12 @@
+{
+  "prediction_sha256": "813b6bb0a403b34fbc9485e6f0193454a37da4cce594be0c361e9aea2e2eb617",
+  "overlap_sha256": "035ef64f22f3d1aa6e121dd39931c90ce091761a50f7997317d9ad8dd6312f8c",
+  "execution_lock_sha256": "54cc2b7691d25e77941ba42b639c0ec271a5cae0fa0205fe77bcb39484a02a5c",
+  "locked_before_hybrid_metrics": true,
+  "external_label_usable_true_count": 0,
+  "outcome_join_used_for_overlap_only": true,
+  "hybrid_combine_inputs": [
+    "electre_fixed_stage",
+    "triage_final_stage"
+  ]
+}

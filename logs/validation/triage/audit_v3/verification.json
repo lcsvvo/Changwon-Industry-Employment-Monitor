@@ -1,0 +1,17 @@
+{
+  "historical_reference_rows": 180,
+  "independent_scalar_axes_match": true,
+  "independent_scalar_stages_match": true,
+  "original_v3_distribution": {
+    "관찰": 113,
+    "추가확인": 32,
+    "자료확인": 20,
+    "우선점검": 15
+  },
+  "final_distribution": {
+    "관찰": 128,
+    "추가확인": 35,
+    "우선점검": 17
+  },
+  "baseline_to_final_changes": 21
+}

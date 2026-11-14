@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>창원특례시 국가산단 산업·고용 전환진단 AI 코파일럿</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0f7ff', 100: '#e0effe', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 800: '#0c4a6e', 900: '#082f49' },
+            slate: { 850: '#152238' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    @media print { aside, header { display: none !important; } body { overflow: visible; height: auto; } }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-850 h-screen flex flex-col overflow-hidden">
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="bg-slate-900 text-white border-b border-slate-700 px-6 py-3.5 flex items-center justify-between shrink-0 shadow-md">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/30">
+        <i class="fa-solid fa-microchip text-white text-lg"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-lg tracking-tight">창원국가산단 산업·고용 전환진단 AI 코파일럿</h1>
+          <span class="bg-sky-500/20 text-sky-300 text-xs px-2 py-0.5 rounded-full border border-sky-400/30 font-medium">Standalone Engine · v3 규칙</span>
+        </div>
+        <p class="text-xs text-slate-400">KICOX 업종×분기 패널(CORE) + Triage 판정 + 고용24 채용 스냅샷 기반 Human-in-the-Loop 행정비서</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-xs">
+      <div class="hidden md:flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="data-source-label" class="text-slate-300">내장 지식베이스 & 규칙엔진 (No-API)</span>
+      </div>
+      <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-600 flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-print"></i> 진단서 출력
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 레이아웃 (3단 분할 그리드) -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- 1. 좌측 컨트롤 패널 -->
+    <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0 p-5 overflow-y-auto custom-scrollbar shadow-sm">
+      <div class="space-y-5">
+        <div>
+          <label for="select-quarter" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">진단 기준 분기</label>
+          <select id="select-quarter" onchange="onQuarterChange()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none transition"></select>
+          <div id="quarter-summary" class="mt-2 text-[11px] text-slate-600 leading-relaxed"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">진단 대상 제조업종 (10개)</label>
+          <div class="grid grid-cols-2 gap-2" id="industry-btn-group"></div>
+        </div>
+
+        <!-- 선택 분기·업종 지표 -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+            <span class="text-xs font-bold text-slate-600">선택 업종 지표 (CORE)</span>
+            <span id="badge-triage" class="text-xs font-black px-2.5 py-1 rounded-full border">—</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">Q1 상태 (국면):</span><span id="metric-q1" class="font-bold text-slate-800 text-right">—</span></div>
+            <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">Q2 고용증감 (YoY):</span><span id="metric-emp-delta" class="font-bold text-slate-800 text-right">—</span></div>
+            <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">E 고용감소율:</span><span id="metric-E" class="font-bold text-slate-800 text-right">—</span></div>
+            <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">R 산단평균 대비 열위:</span><span id="metric-R" class="font-bold text-slate-800 text-right">—</span></div>
+            <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">A 산단 대비 감소규모:</span><span id="metric-A" class="font-bold text-slate-800 text-right">—</span></div>
+            <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">P 생산감소(보강):</span><span id="metric-P" class="font-bold text-slate-800 text-right">—</span></div>
+            <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0">Q3 반복 진입신호:</span><span id="metric-q3" class="font-bold text-slate-800 text-right">—</span></div>
+          </div>
+        </div>
+
+        <button onclick="renderDiagnosticCard(); triggerAgentIntroduction();" class="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-sky-600/20 flex items-center justify-center gap-2 transition active:scale-[0.98]">
+          <i class="fa-solid fa-file-waveform"></i>
+          <span>1페이지 진단카드 발급</span>
+        </button>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5 shrink-0"></i>
+          <p class="leading-relaxed">
+            <strong class="font-semibold">원칙 엄수:</strong> 본 AI는 원인을 단정하거나 지원사업을 자동 선정하지 않으며, 공무원의 현장 확인 질문을 표준화합니다.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 2. 중앙 진단카드 -->
+    <main class="flex-1 bg-slate-100 p-6 overflow-y-auto custom-scrollbar flex flex-col">
+      <div class="max-w-4xl w-full mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-7 space-y-6" id="report-container"></div>
+    </main>
+
+    <!-- 3. 우측 챗봇 -->
+    <aside class="w-96 bg-white border-l border-slate-200 flex flex-col shrink-0 shadow-lg">
+      <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-sky-500"></div>
+          <h2 class="text-sm font-bold text-slate-800">지능형 행정 챗봇 비서</h2>
+        </div>
+        <button onclick="clearChatHistory()" class="text-xs text-slate-400 hover:text-slate-600 transition" title="대화 초기화">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+
+      <div class="p-3 bg-slate-100/70 border-b border-slate-200 flex flex-wrap gap-1.5 text-xs">
+        <button onclick="askQuickPrompt('기계와 목재종이 둘 다 우선점검인데 성격이 어떻게 달라?')" class="bg-white hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded-md px-2.5 py-1 text-slate-700 transition">⚖️ 기계 vs 목재종이 차이</button>
+        <button onclick="askQuickPrompt('현장 방문 시 공무원이 물어봐야 할 핵심 질문은?')" class="bg-white hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded-md px-2.5 py-1 text-slate-700 transition">📋 현장 실사 필수 질문</button>
+        <button onclick="askQuickPrompt('국립창원대 글로컬 및 제조 AX 청년 정책 연계 방안 알려줘.')" class="bg-white hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded-md px-2.5 py-1 text-slate-700 transition">🎓 청년 제조AX 정책 연계</button>
+        <button onclick="askQuickPrompt('PPI와 KEPCO 전력 데이터는 진단에 어떻게 쓰였어?')" class="bg-white hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded-md px-2.5 py-1 text-slate-700 transition">🔍 PPI·전력 검증 맥락</button>
+      </div>
+
+      <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 custom-scrollbar text-sm"></div>
+
+      <div class="p-3.5 border-t border-slate-200 bg-white">
+        <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
+          <input type="text" id="chat-input" placeholder="업종 진단 및 정책 연계에 대해 질문하세요..." class="flex-1 bg-slate-100 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition" autocomplete="off">
+          <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition flex items-center justify-center" aria-label="전송">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 업종×분기 패널(선택). build_panel_data.py 가 만든 파일. 없으면 내장 2026Q2 시드로 동작 -->
+  <script src="panel_data.js"></script>
+
+  <script>
+    // =====================================================================
+    // 0. 규칙 상수 — final_result_summary.md §G (v3 최종 규칙 사양)
+    // =====================================================================
+    const TH = {
+      E_entry: 5,  E_up: 10,   // 고용 YoY 감소율(%)
+      R_entry: 5,  R_up: 10,   // 산단 제조업 평균 대비 열위(%p)
+      A_entry: 1,  A_up: 2,    // 현재 산단 고용 100명당 전년동기 대비 감소인원(%)
+      P: 5,                    // 명목 생산 YoY 감소율(%) — 상위단계 보강
+      scale: 300               // 우선점검 진입 규모 게이트(인)
+    };
+
+    const STAGE_META = {
+      '우선점검': { code: 'priority', badge: 'bg-rose-100 text-rose-800 border-rose-200',   dot: 'bg-rose-500',    chip: 'bg-rose-500 text-white border-rose-500' },
+      '추가확인': { code: 'check',    badge: 'bg-amber-100 text-amber-800 border-amber-200', dot: 'bg-amber-500',   chip: 'bg-amber-400 text-white border-amber-400' },
+      '관찰':     { code: 'watch',    badge: 'bg-blue-100 text-blue-800 border-blue-200',   dot: 'bg-emerald-400', chip: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+      '자료확인': { code: 'hold',     badge: 'bg-slate-200 text-slate-700 border-slate-300', dot: 'bg-slate-400',   chip: 'bg-slate-300 text-slate-700 border-slate-300' }
+    };
+
+    const Q1_LABEL = {
+      S1: '생산↑·고용 유지/증가',
+      S2: '생산↑·고용↓ (고용 없는 성장)',
+      S3: '생산↓·고용 유지/증가',
+      S4: '생산↓·고용↓ (동반감소)'
+    };
+
+    const INDUSTRIES = ['기계','목재종이','운송장비','철강','전기전자','석유화학','비금속','음식료','섬유의복','기타'];
+    const INDUSTRY_ALIAS = { '목재':'목재종이', '종이':'목재종이', '운송':'운송장비', '석유':'석유화학', '섬유':'섬유의복', '의복':'섬유의복' };
+
+    // v3 최종 결과의 분기별 판정 분포 (final_result_summary.md §H) — 업종 상세가 없어도 18분기 요약은 사실 그대로 표시
+    const QUARTER_SUMMARY = {
+      '2022Q1': { watch: 8, priority: 1, check: 1 }, '2022Q2': { watch: 8, priority: 1, check: 1 },
+      '2022Q3': { watch: 8, priority: 1, check: 1 }, '2022Q4': { watch: 8, priority: 1, check: 1 },
+      '2023Q1': { watch: 8, priority: 1, check: 1 }, '2023Q2': { watch: 8, priority: 1, check: 1 },
+      '2023Q3': { watch: 7, priority: 1, check: 2 }, '2023Q4': { watch: 7, priority: 1, check: 2 },
+      '2024Q1': { watch: 8, priority: 0, check: 2 }, '2024Q2': { watch: 7, priority: 0, check: 3 },
+      '2024Q3': { watch: 7, priority: 0, check: 3 }, '2024Q4': { watch: 8, priority: 0, check: 2 },
+      '2025Q1': { watch: 5, priority: 1, check: 4 }, '2025Q2': { watch: 4, priority: 2, check: 4 },
+      '2025Q3': { watch: 6, priority: 1, check: 3 }, '2025Q4': { watch: 5, priority: 1, check: 4 },
+      '2026Q1': { watch: 8, priority: 2, check: 0 }, '2026Q2': { watch: 8, priority: 2, check: 0 }
+    };
+
+    // =====================================================================
+    // 1. 분기와 무관한 업종 정보 (문구는 분기 시점 표현을 뺀 중립형으로 정리)
+    // =====================================================================
+    const INDUSTRY_STATIC = {
+      '기계': {
+        category: '주력 4대 업종',
+        limit: 'KICOX 통계만으로는 대기업 수주 지연 때문인지, 공정 자동화(AX) 도입에 따른 감원인지 단정할 수 없음.',
+        recruitment: { active_count: 48, firms: ['OO정밀가공','XX테크놀로지','AA중공업 1차 협력사'], career_req: '경력 3~5년 중심 모집 (72.4%)', keywords: ['CNC/MCT 정밀가공','스마트팩토리 설비보전','PLC 자동제어'], wage: '월급 280만 ~ 360만 원 선', mismatch: '기업은 즉시 투입 가능한 고숙련 AX 테크니션을 요구하나, 청년 구직자는 전공 지식 부족으로 미스매치 발생.' },
+        checklist: ['주요 앵커기업(한화에어로, 두산에너빌리티, 현대로템 등) 1·2차 협력사의 신규 수주 잔고 추이 실사','공정 자동화(AX) 설비 도입에 따른 인력 재배치 및 자연감소 여부 확인','청년 기능직 채용 미충원율 및 숙련공 퇴직 현황 확인','기업별 고용유지지원금 및 경영안정자금 신청 의향 파악'],
+        policy_link: '2026 창원 스마트그린산단 AI 자율제조(216억) 재직자 직무전환 트랙 및 국립창원대 글로컬 제조AX 부트캠프 연계 검토'
+      },
+      '목재종이': {
+        category: '영세 소비재 업종',
+        limit: '업종 규모가 작아 산단 전체 일자리에 미치는 영향은 제한적일 수 있으며, 원자재 가격·영세성 등 원인은 통계로 단정할 수 없음.',
+        recruitment: { active_count: 3, firms: ['OO제지공업','대림포장'], career_req: '신입 및 단순노무 중심 (85%)', keywords: ['포장 박스 가공','물류 지게차 운전','원자재 입출고'], wage: '시급 10,030원 ~ 월 220만 원', mismatch: '열악한 작업 환경 및 저임금 구조로 인한 내국인 청년 기피 현상 심화.' },
+        checklist: ['원자재(펄프, 고지) 수급 및 단가 급등에 따른 채산성 악화 여부','공장 가동 중단 또는 휴업 사업장 발생 실태 조사','외국인 인력 수급 애로 및 대체 인력 수요 확인'],
+        policy_link: '중소기업 경영안정자금 융자 및 영세사업장 고용유지지원금 안내 검토'
+      },
+      '운송장비': {
+        category: '주력 4대 업종',
+        limit: '업종 평균에 가려진 하청 협력사의 납품 단가·가동률 변화는 집계자료에 드러나지 않음.',
+        recruitment: { active_count: 35, firms: ['현대로템 협력 F사','방산 유압밸브 G사','자동차 조립 H테크'], career_req: '품질관리/설계 경력직 및 생산 숙련공 동시 채용', keywords: ['CATIA 3D설계','품질보증(QA)','궤도차량 용접'], wage: '월급 320만 ~ 450만 원 선', mismatch: '방산 특수 규격 자격 보유자 및 정밀 품질 엔지니어 공급 부족.' },
+        checklist: ['방산 및 전기차 전장 부품 수주 확대에 따른 신규 채용 계획 점검','하청 협력사의 납품 가동률 추이 모니터링'],
+        policy_link: '경남 방위산업 청년 전문인력 양성 트랙 및 R&D 바우처 연계 검토'
+      },
+      '철강': {
+        category: '주력 4대 업종',
+        limit: '명목 생산액에는 가격효과가 포함되어 물량 변화와 구분할 수 없고, 고용 변화의 원인(자동화·수요 등)도 집계자료로 단정할 수 없음.',
+        recruitment: { active_count: 12, firms: ['창원특수강 열처리','코일가공 제철사'], career_req: '현장 숙련 기능사 및 천마크레인 조종사', keywords: ['특수강 열처리','크레인 운전','비파괴검사'], wage: '월급 310만 ~ 420만 원 선', mismatch: '중대재해 우려 및 고온 작업 환경 기피로 인한 신규 인력 유입 정체.' },
+        checklist: ['KOSIS 미충원율 데이터를 대조하여 구인난인지 고용 조정인지 확인','공정 스마트화 및 안전 설비 전환 투자 현황 점검'],
+        policy_link: '창원형 강소기업 육성 패키지 및 스마트 안전 작업장 구축 보조금 안내 검토'
+      },
+      '전기전자': {
+        category: '주력 4대 업종',
+        limit: '업종 내 세부 품목별 수요·가동률 차이는 집계자료에 드러나지 않음.',
+        recruitment: { active_count: 22, firms: ['LG전자 협력 PCB사','센서 모듈사'], career_req: 'SMT 조작원 및 전자회로 설계', keywords: ['SMT 오퍼레이터','임베디드','품질검사'], wage: '월급 270만 ~ 340만 원 선', mismatch: '단기 파견 및 교대근무 선호도 저하로 인한 청년 이탈.' },
+        checklist: ['신제품 출시 일정에 따른 협력사 조업 변동 여부 파악'],
+        policy_link: '디지털 전환(DX) 스마트공장 고도화 지원 안내 검토'
+      },
+      '석유화학': {
+        category: '기타 소재 업종',
+        limit: '가동률 변동성이 존재하므로 생산·고용 방향이 엇갈리는 분기에는 정기 모니터링 유지.',
+        recruitment: { active_count: 5, firms: ['정밀화학 K사'], career_req: '화공 자격증 소지자', keywords: ['위험물관리','배합'], wage: '월 280만 원', mismatch: '양호' },
+        checklist: ['유가 변동에 따른 마진율 추이 확인'],
+        policy_link: '친환경 소재 전환 컨설팅 안내 검토'
+      },
+      '비금속': {
+        category: '기타 소재 업종',
+        limit: '업체수 감소 신호가 관측될 수 있으나 폐업 사유는 통계로 확인할 수 없음.',
+        recruitment: { active_count: 2, firms: ['세라믹 M사'], career_req: '생산직', keywords: ['성형','소성'], wage: '최저시급', mismatch: '단순 구인난' },
+        checklist: ['건설 경기 둔화 영향 여부 점검'],
+        policy_link: '소상공인·소기업 경영 애로 상담 안내 검토'
+      },
+      '음식료': {
+        category: '소비재 업종',
+        limit: '산단 내 비중이 작아 전체 파급은 제한적일 수 있으나, 명목 생산에는 가격효과가 포함되어 실질 물량과 방향이 다를 수 있음.',
+        recruitment: { active_count: 4, firms: ['식품제조 N사'], career_req: '위생관리원', keywords: ['HACCP','조리'], wage: '월 230만 원', mismatch: '구인 진행 중' },
+        checklist: ['식자재 원가 상승 부담 여부'],
+        policy_link: 'HACCP 시설 개선 바우처 안내 검토'
+      },
+      '섬유의복': {
+        category: '영세 사양 업종',
+        limit: '생산과 고용의 방향이 다를 때는 사업체 수·가동 여부를 함께 확인해야 하며, 집계자료만으로는 판단할 수 없음.',
+        recruitment: { active_count: 1, firms: ['봉제사'], career_req: '재봉 경력직', keywords: ['미싱'], wage: '최저시급', mismatch: '고령화' },
+        checklist: ['사업장 폐업 여부 확인'],
+        policy_link: '업종 전환 컨설팅 안내 검토'
+      },
+      '기타': {
+        category: '기타 잡화',
+        limit: '규모가 작아 산단 전체에 미치는 영향은 제한적이며 정기 모니터링 대상.',
+        recruitment: { active_count: 2, firms: ['모형제작'], career_req: '신입', keywords: ['가공'], wage: '기본급', mismatch: '없음' },
+        checklist: ['정기 통계 모니터링'],
+        policy_link: '표준 창업보육 연계 검토'
+      }
+    };
+
+    // =====================================================================
+    // 2. 업종×분기 패널 데이터
+    //    - 정식: panel_data.js (window.PANEL_ROWS, 180행) ← build_panel_data.py 산출
+    //    - 대체: 아래 내장 시드(2026Q2 10행). final_result_summary.md §I, 03_06 통합 분석 보고서에서 확인된 값만 사용.
+    //      확인되지 않은 값은 null 로 두었고 화면에는 '—'로 표시됨.
+    // =====================================================================
+    const SEED_ROWS = [
+      { quarter:'2026Q2', industry:'기계',     stage:'우선점검', rank_in_stage:1, employment:58784, emp_delta:-3979, prod_yoy:-19.547, P:19.547, prod_ppi_adj:-20.55, q1_state:'S4', state_run:2 },
+      { quarter:'2026Q2', industry:'목재종이', stage:'우선점검', rank_in_stage:2, employment:428,   emp_delta:-48,   prod_yoy:-12.897, P:12.897, prod_ppi_adj:-15.29, q1_state:'S4', state_run:2, repeat:true },
+      { quarter:'2026Q2', industry:'운송장비', stage:'관찰',     rank_in_stage:1, employment:16308, emp_delta:-129,  prod_yoy:19.64,   P:0,      prod_ppi_adj:17.24,  q1_state:'S1', state_run:2 },
+      { quarter:'2026Q2', industry:'전기전자', stage:'관찰',     rank_in_stage:2, employment:27979, emp_delta:-116,  prod_yoy:null,    P:0,      prod_ppi_adj:null,   q1_state:null, state_run:1 },
+      { quarter:'2026Q2', industry:'철강',     stage:'관찰',     rank_in_stage:3, employment:9689,  emp_delta:-112,  prod_yoy:32.65,   P:0,      prod_ppi_adj:25.28,  q1_state:'S2', state_run:4 },
+      { quarter:'2026Q2', industry:'음식료',   stage:'관찰',     rank_in_stage:4, employment:635,   emp_delta:-25,   prod_yoy:0.87,    P:0,      prod_ppi_adj:-0.78,  q1_state:'S4', state_run:2 },
+      { quarter:'2026Q2', industry:'비금속',   stage:'관찰',     rank_in_stage:5, employment:183,   emp_delta:-2,    prod_yoy:45.67,   P:0,      prod_ppi_adj:40.86,  q1_state:null, state_run:3 },
+      { quarter:'2026Q2', industry:'기타',     stage:'관찰',     rank_in_stage:6, employment:171,   emp_delta:25,    prod_yoy:null,    P:0,      prod_ppi_adj:null,   q1_state:'S1', state_run:2 },
+      { quarter:'2026Q2', industry:'석유화학', stage:'관찰',     rank_in_stage:7, employment:619,   emp_delta:54,    prod_yoy:-6.73,   P:6.73,   prod_ppi_adj:null,   q1_state:'S3', state_run:1 },
+      { quarter:'2026Q2', industry:'섬유의복', stage:'관찰',     rank_in_stage:8, employment:34,    emp_delta:0,     prod_yoy:-12.32,  P:12.32,  prod_ppi_adj:-15.17, q1_state:'S4', state_run:null }
+    ];
+
+    const HAS_PANEL_FILE = Array.isArray(window.PANEL_ROWS) && window.PANEL_ROWS.length > 0;
+    const RAW_ROWS = HAS_PANEL_FILE ? window.PANEL_ROWS : SEED_ROWS;
+
+    // ---------- 분기 산술 ----------
+    function prevQuarter(q) { const y = +q.slice(0,4), n = +q.slice(5); return n === 1 ? `${y-1}Q4` : `${y}Q${n-1}`; }
+    function quarterLabel(q) { return `${q.slice(0,4)}년 ${q.slice(5)}분기`; }
+
+    // ---------- 파생지표 계산: employment·emp_delta 만으로 E/R/A/share 재계산 ----------
+    // E = max(0, -업종 YoY) / R = max(0, 산단 제조업 전체 YoY - 업종 YoY) / A = max(0, -증감)/현재 산단 고용×100
+    function buildPanel(rows) {
+      const panel = {}, qstat = {};
+      rows.forEach(r => { (panel[r.quarter] = panel[r.quarter] || {})[r.industry] = Object.assign({}, r); });
+
+      Object.keys(panel).forEach(q => {
+        const list = Object.values(panel[q]);
+        const total = list.reduce((s, r) => s + r.employment, 0);
+        const prev  = list.reduce((s, r) => s + (r.employment - r.emp_delta), 0);
+        const dYoy  = prev > 0 ? (total / prev - 1) * 100 : null;
+        qstat[q] = { total, prev, districtYoy: dYoy, n: list.length, complete: list.length === INDUSTRIES.length };
+        list.forEach(r => {
+          const pv = r.employment - r.emp_delta;
+          r.yoy   = pv > 0 ? r.emp_delta / pv * 100 : null;
+          r.share = total > 0 ? r.employment / total * 100 : null;
+          r.E = r.yoy == null ? null : Math.max(0, -r.yoy);
+          r.R = (r.yoy == null || dYoy == null) ? null : Math.max(0, dYoy - r.yoy);
+          r.A = total > 0 ? Math.max(0, -r.emp_delta) / total * 100 : null;
+          if (r.P == null) r.P = r.prod_yoy == null ? null : Math.max(0, -r.prod_yoy);
+          const known = r.E != null && r.R != null && r.A != null;
+          r.entry = known && (r.E >= TH.E_entry || r.R >= TH.R_entry || r.A >= TH.A_entry);
+          r.upper = known && (r.E >= TH.E_up    || r.R >= TH.R_up    || r.A >= TH.A_up);
+        });
+      });
+
+      // Q3 반복: 현재와 '실제 직전 달력분기'가 모두 진입신호. 파이프라인이 준 값(repeat)이 있으면 그것을 우선.
+      Object.keys(panel).forEach(q => {
+        const pq = panel[prevQuarter(q)];
+        Object.values(panel[q]).forEach(r => {
+          if (r.repeat == null && pq && pq[r.industry]) r.repeat = !!(r.entry && pq[r.industry].entry);
+          if (r.repeat == null) r.repeat = null;
+          r.engine_stage = engineStage(r);
+          r.stage_shown  = r.stage || r.engine_stage;
+        });
+      });
+      return { panel, qstat };
+    }
+
+    // 사다리: 상위 고용신호 AND (P OR 반복) AND 규모 → 우선점검 / 진입신호 → 추가확인 / 그 외 관찰
+    function engineStage(r) {
+      if (r.E == null || r.R == null || r.A == null) return '자료확인';
+      const prodOk = r.P != null && r.P >= TH.P;
+      if (r.upper && (prodOk || r.repeat === true) && r.employment >= TH.scale) return '우선점검';
+      if (r.entry) return '추가확인';
+      return '관찰';
+    }
+
+    const { panel: PANEL, qstat: QSTAT } = buildPanel(RAW_ROWS);
+    const QUARTERS_ASC  = Array.from(new Set([...Object.keys(QUARTER_SUMMARY), ...Object.keys(PANEL)])).sort();
+    const QUARTERS_DESC = QUARTERS_ASC.slice().reverse();
+    const LATEST_QUARTER = QUARTERS_DESC[0];
+
+    let currentQuarter  = QUARTERS_DESC.find(q => PANEL[q]) || LATEST_QUARTER;
+    let currentIndustry = '기계';
+
+    const getRow = (q, ind) => (PANEL[q] && PANEL[q][ind]) || null;
+
+    // ---------- 포맷터 ----------
+    const nf  = n => n == null ? '—' : Math.round(n).toLocaleString('ko-KR');
+    const sg  = n => n == null ? '—' : (n > 0 ? '+' : '') + nf(n);
+    const pc  = (n, d = 2) => n == null ? '—' : n.toFixed(d);
+    const spc = (n, d = 2) => n == null ? '—' : (n > 0 ? '+' : '') + n.toFixed(d);
+    const q1Text = r => r.q1_state ? `${r.q1_state} (${Q1_LABEL[r.q1_state] || ''})` : '—';
+    const repeatText = r => r.repeat === true ? '있음 (연속 2분기)' : r.repeat === false ? '없음' : '미확인';
+
+    // =====================================================================
+    // 3. 초기화 / 분기·업종 선택 UI
+    // =====================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('data-source-label').textContent = HAS_PANEL_FILE
+        ? `panel_data.js 적재 · ${Object.keys(PANEL).length}개 분기 ${RAW_ROWS.length}행`
+        : '내장 시드(2026Q2만) · panel_data.js 없음';
+      renderQuarterSelect();
+      renderAll();
+      addSystemChatMessage('반갑습니다. 창원국가산단 산업·고용 전환진단 AI 행정비서입니다.\n\n좌측에서 분기와 업종을 고르면 그 분기 자료로 판정과 진단카드가 다시 계산됩니다. 업종별 상세가 적재되지 않은 분기는 다른 분기 수치를 빌려 쓰지 않고 “자료 없음”으로 표시합니다.' + (HAS_PANEL_FILE ? '' : '\n\n⚠ panel_data.js 가 없어 현재 2026Q2 업종 상세만 조회할 수 있습니다.'));
+    });
+
+    function renderQuarterSelect() {
+      const sel = document.getElementById('select-quarter');
+      sel.innerHTML = QUARTERS_DESC.map(q => {
+        const tag = (q === LATEST_QUARTER ? ' (최신)' : '') + (PANEL[q] ? '' : ' · 업종 상세 없음');
+        return `<option value="${q}">${quarterLabel(q)}${tag}</option>`;
+      }).join('');
+      sel.value = currentQuarter;
+    }
+
+    function renderAll() {
+      renderQuarterSummary();
+      renderIndustryButtons();
+      updateSelectedData();
+      renderDiagnosticCard();
+    }
+
+    function onQuarterChange() {
+      currentQuarter = document.getElementById('select-quarter').value;
+      renderAll();
+      const r = getRow(currentQuarter, currentIndustry);
+      addBotResponse(r
+        ? `📅 진단 기준을 ${quarterLabel(currentQuarter)}로 바꿨습니다. ${currentIndustry}: ${r.stage_shown} · 고용 ${sg(r.emp_delta)}명 (${spc(r.yoy)}%).`
+        : `📅 ${quarterLabel(currentQuarter)}의 업종 상세는 적재되어 있지 않습니다. 분기 요약만 표시합니다.`);
+    }
+
+    function setQuarter(q) {
+      currentQuarter = q;
+      document.getElementById('select-quarter').value = q;
+      renderAll();
+    }
+
+    function renderQuarterSummary() {
+      const s = QUARTER_SUMMARY[currentQuarter];
+      const el = document.getElementById('quarter-summary');
+      let html = '';
+      if (s) {
+        html += `<div class="flex gap-1.5 flex-wrap">
+          <span class="px-2 py-0.5 rounded-full border ${STAGE_META['우선점검'].badge}">우선점검 ${s.priority}</span>
+          <span class="px-2 py-0.5 rounded-full border ${STAGE_META['추가확인'].badge}">추가확인 ${s.check}</span>
+          <span class="px-2 py-0.5 rounded-full border ${STAGE_META['관찰'].badge}">관찰 ${s.watch}</span></div>`;
+      }
+      const qs = QSTAT[currentQuarter];
+      if (!PANEL[currentQuarter]) {
+        html += `<div class="mt-1 text-amber-700">업종 상세 미적재 — 위 분포는 v3 최종 결과 요약입니다.</div>`;
+      } else {
+        if (!qs.complete) html += `<div class="mt-1 text-amber-700">⚠ 업종 ${qs.n}/10개만 적재됨 — 산단 합계 기반 지표(R·A)가 왜곡될 수 있음</div>`;
+        const shown = { watch: 0, priority: 0, check: 0 };
+        Object.values(PANEL[currentQuarter]).forEach(r => { const m = STAGE_META[r.stage_shown]; if (m && shown[m.code] != null) shown[m.code]++; });
+        if (s && qs.complete && (shown.watch !== s.watch || shown.priority !== s.priority || shown.check !== s.check)) {
+          html += `<div class="mt-1 text-rose-700">⚠ 적재 데이터 집계(우선 ${shown.priority}·추가 ${shown.check}·관찰 ${shown.watch})가 v3 요약과 다릅니다. 입력 파일을 확인하세요.</div>`;
+        }
+      }
+      el.innerHTML = html;
+    }
+
+    function renderIndustryButtons() {
+      const container = document.getElementById('industry-btn-group');
+      container.innerHTML = '';
+      INDUSTRIES.forEach(ind => {
+        const r = getRow(currentQuarter, ind);
+        const isSelected = ind === currentIndustry;
+        const dot = r ? STAGE_META[r.stage_shown].dot : 'bg-slate-200';
+        const btn = document.createElement('button');
+        btn.onclick = () => selectIndustry(ind);
+        btn.title = r ? `${quarterLabel(currentQuarter)} ${r.stage_shown}` : '이 분기 자료 없음';
+        btn.className = `text-left px-3 py-2 rounded-lg text-xs font-semibold border transition flex items-center justify-between ${
+          isSelected ? 'bg-sky-600 text-white border-sky-600 shadow-sm' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'}`;
+        btn.innerHTML = `<span>${ind}</span><span class="w-2 h-2 rounded-full ${dot}"></span>`;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectIndustry(ind) {
+      currentIndustry = ind;
+      renderIndustryButtons();
+      updateSelectedData();
+      renderDiagnosticCard();
+      addBotResponse(`📌 [${ind}] 업종으로 전환했습니다. ${quarterLabel(currentQuarter)} 기준 진단카드를 갱신했습니다. 무엇이 궁금하신가요?`);
+    }
+
+    function updateSelectedData() {
+      const r = getRow(currentQuarter, currentIndustry);
+      const set = (id, v, cls) => { const el = document.getElementById(id); el.textContent = v; if (cls != null) el.className = cls; };
+      const badge = document.getElementById('badge-triage');
+      if (!r) {
+        badge.textContent = '자료 없음';
+        badge.className = `text-xs font-black px-2.5 py-1 rounded-full border ${STAGE_META['자료확인'].badge}`;
+        ['metric-q1','metric-emp-delta','metric-E','metric-R','metric-A','metric-P','metric-q3'].forEach(id => set(id, '—', 'font-bold text-slate-800 text-right'));
+        return;
+      }
+      badge.textContent = r.stage_shown;
+      badge.className = `text-xs font-black px-2.5 py-1 rounded-full border ${STAGE_META[r.stage_shown].badge}`;
+      set('metric-q1', q1Text(r));
+      set('metric-emp-delta', `${sg(r.emp_delta)}명 (${spc(r.yoy)}%)`, `font-bold text-right ${r.emp_delta < 0 ? 'text-rose-600' : 'text-emerald-600'}`);
+      set('metric-E', `${pc(r.E)}%  (경계 ${TH.E_entry}/${TH.E_up})`);
+      set('metric-R', `${pc(r.R)}%p  (경계 ${TH.R_entry}/${TH.R_up})`);
+      set('metric-A', `${pc(r.A)}%  (경계 ${TH.A_entry}/${TH.A_up})`);
+      set('metric-P', r.P == null ? '생산 미확인' : `${pc(r.P)}%  (경계 ${TH.P})`);
+      set('metric-q3', repeatText(r));
+    }
+
+    // =====================================================================
+    // 4. 판정 근거 서술 (선택 분기의 값으로 매번 생성)
+    // =====================================================================
+    function level(v, entry, up) {
+      if (v == null) return '미확인';
+      if (up != null && v >= up) return '상위';
+      return v >= entry ? '진입' : '미달';
+    }
+
+    function explain(r) {
+      const parts = [];
+      if (r.E >= TH.E_entry) parts.push(`고용감소 ${pc(r.E, 1)}%(진입경계 ${TH.E_entry}% 통과${r.E >= TH.E_up ? ` · 상위경계 ${TH.E_up}% 통과` : ''})`);
+      if (r.R >= TH.R_entry) parts.push(`산단 제조업 평균 대비 ${pc(r.R, 1)}%p 열위(진입경계 통과${r.R >= TH.R_up ? ' · 상위경계 통과' : ''})`);
+      if (r.A >= TH.A_entry) parts.push(`산단 제조업 고용의 ${pc(r.A, 2)}% 감소(진입경계 ${TH.A_entry}% 통과${r.A >= TH.A_up ? ` · 상위경계 ${TH.A_up}.0% 통과` : ''})`);
+      if (!parts.length) parts.push('고용 축 진입신호 없음');
+      const support = [];
+      if (r.P != null && r.P >= TH.P) support.push(`생산 ${pc(r.P, 1)}% 감소`);
+      if (r.repeat === true && r.entry) support.push('직전 분기에도 진입신호(지속)');
+      let text = parts.join(' · ');
+      if (support.length) text += ` → 보강: ${support.join(' / ')}`;
+      else if (!r.entry && r.P != null && r.P >= TH.P) text += ` (생산 ${pc(r.P, 1)}% 단독 감소 — 확인질문에 반영)`;
+      return text;
+    }
+
+    function stageFlags(r) {
+      const flags = [];
+      const prodOk = r.P != null && r.P >= TH.P;
+      if (r.P == null) flags.push('생산 YoY 미확인(data_quality_production_missing) — 상위 단계 보강조건을 판정하지 못했고, 알려진 신호로 최소 판정함');
+      if (r.upper && r.P == null && r.repeat !== true) flags.push('상위 고용신호가 있으나 보강조건 미확정 — 상향 여부 미확정');
+      if (r.upper && (prodOk || r.repeat === true) && r.employment < TH.scale) flags.push(`규모 게이트(${TH.scale}인) 미달로 우선점검이 아닌 추가확인에 머묾`);
+      if (!QSTAT[r.quarter].complete) flags.push(`이 분기는 업종 ${QSTAT[r.quarter].n}/10개만 적재되어 R·A 계산이 부정확할 수 있음`);
+      if (r.stage && r.stage !== r.engine_stage) flags.push(`재계산 단계(${r.engine_stage})가 파이프라인 단계(${r.stage})와 다름 — 입력 컬럼 또는 규칙 버전 확인 필요`);
+      return flags;
+    }
+
+    // =====================================================================
+    // 5. 1페이지 진단카드
+    // =====================================================================
+    function renderDiagnosticCard() {
+      const container = document.getElementById('report-container');
+      const st = INDUSTRY_STATIC[currentIndustry];
+      const r = getRow(currentQuarter, currentIndustry);
+
+      if (!r) {
+        const s = QUARTER_SUMMARY[currentQuarter];
+        container.innerHTML = `
+          <div class="border-b border-slate-200 pb-4">
+            <h2 class="text-2xl font-black text-slate-900">[${currentQuarter}] 창원산단 산업·고용 행정 진단카드: ${currentIndustry}</h2>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-950 leading-relaxed space-y-2">
+            <p><strong>${quarterLabel(currentQuarter)} ${currentIndustry}</strong>의 업종별 자료가 적재되어 있지 않아 수치를 표시하지 않습니다. 다른 분기 값을 대신 보여 주지 않습니다.</p>
+            ${s ? `<p class="text-xs text-amber-900">v3 최종 결과 요약(업종 미상): 우선점검 ${s.priority}건 · 추가확인 ${s.check}건 · 관찰 ${s.watch}건</p>` : ''}
+            <p class="text-xs text-amber-900">python build_panel_data.py &lt;triage 결과 CSV&gt; 로 panel_data.js 를 만들어 이 파일과 같은 폴더에 두면 전체 분기가 조회됩니다.</p>
+          </div>
+          <div>${renderTimeline(currentIndustry)}</div>`;
+        return;
+      }
+
+      const meta = STAGE_META[r.stage_shown];
+      const flags = stageFlags(r);
+      const isLatest = currentQuarter === LATEST_QUARTER;
+      const rec = st.recruitment;
+      const prodText = r.prod_yoy != null ? `생산 ${spc(r.prod_yoy)}%` : (r.P === 0 ? '생산 감소 없음(P=0)' : '생산 미확인');
+
+      const rows = [
+        ['E 고용감소율',           r.E == null ? '—' : `${pc(r.E)}%`,   `${TH.E_entry}%`,  `${TH.E_up}%`,   level(r.E, TH.E_entry, TH.E_up)],
+        ['R 산단평균 대비 열위',   r.R == null ? '—' : `${pc(r.R)}%p`,  `${TH.R_entry}%p`, `${TH.R_up}%p`, level(r.R, TH.R_entry, TH.R_up)],
+        ['A 산단 고용 대비 감소규모', r.A == null ? '—' : `${pc(r.A)}%`, `${TH.A_entry}%`,  `${TH.A_up}%`,   level(r.A, TH.A_entry, TH.A_up)],
+        ['P 생산감소 (상위 보강)', r.P == null ? '미확인' : `${pc(r.P)}%`, `${TH.P}% 이상`, '—', r.P == null ? '미확인' : (r.P >= TH.P ? '충족' : '미달')],
+        ['반복 진입신호 (상위 보강)', repeatText(r), '연속 2분기', '—', r.repeat === true ? '충족' : r.repeat === false ? '미달' : '미확인'],
+        ['규모 게이트 (우선점검)', `${nf(r.employment)}명`, `${TH.scale}명 이상`, '—', r.employment >= TH.scale ? '통과' : '미달']
+      ];
+      const lvCls = { '상위': 'text-rose-700 font-bold', '진입': 'text-amber-700 font-bold', '충족': 'text-rose-700 font-bold', '통과': 'text-slate-700 font-semibold', '미달': 'text-slate-400', '미확인': 'text-slate-400 italic' };
+
+      container.innerHTML = `
+        <div class="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-200">KICOX-EVI-2026-06</span>
+              <span class="text-xs text-slate-400">행정 보고 규격 제4호</span>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 mt-1">[${currentQuarter}] 창원산단 산업·고용 행정 진단카드: ${currentIndustry}</h2>
+            <p class="text-xs text-slate-500 mt-0.5">분석 분류: ${st.category} | 산단 제조업 고용의 ${pc(r.share)}% (${nf(r.employment)}명)${r.rank_in_stage ? ` | 같은 단계 내 확인순서 ${r.rank_in_stage}위` : ''}</p>
+          </div>
+          <div class="text-right">
+            <span class="inline-block text-sm font-black px-4 py-1.5 rounded-full border shadow-sm ${meta.badge}">조치등급: ${r.stage_shown}</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-medium block">Q1 국면 (상태)</span>
+            <strong class="text-base font-bold text-slate-800">${r.q1_state || '—'}</strong>
+            <span class="text-[11px] text-slate-400 block mt-0.5">${prodText}</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-medium block">Q2 고용증감 (규모)</span>
+            <strong class="text-base font-bold ${r.emp_delta < 0 ? 'text-rose-600' : 'text-emerald-600'}">${sg(r.emp_delta)}명</strong>
+            <span class="text-[11px] text-slate-400 block mt-0.5">YoY ${spc(r.yoy)}%</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-medium block">A 산단 대비 감소규모</span>
+            <strong class="text-base font-bold text-slate-800">${pc(r.A)}%</strong>
+            <span class="text-[11px] text-slate-400 block mt-0.5">R ${pc(r.R)}%p 열위</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-medium block">Q3 시간 (반복·지속)</span>
+            <strong class="text-base font-bold text-slate-800">${repeatText(r).split(' ')[0]}</strong>
+            <span class="text-[11px] text-slate-400 block mt-0.5">동일 국면 ${r.state_run != null ? r.state_run + '분기' : '—'}</span>
+          </div>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700 border-b border-slate-200">판정 근거 — ${quarterLabel(currentQuarter)} 값과 규칙 경계 비교</div>
+          <table class="w-full text-xs">
+            <thead class="text-slate-500"><tr class="text-left"><th class="px-4 py-1.5 font-medium">신호</th><th class="px-2 py-1.5 font-medium">현재값</th><th class="px-2 py-1.5 font-medium">진입 경계</th><th class="px-2 py-1.5 font-medium">상위 경계</th><th class="px-2 py-1.5 font-medium">판정</th></tr></thead>
+            <tbody>
+              ${rows.map(x => `<tr class="border-t border-slate-100"><td class="px-4 py-1.5 text-slate-700">${x[0]}</td><td class="px-2 py-1.5 font-semibold text-slate-800">${x[1]}</td><td class="px-2 py-1.5 text-slate-500">${x[2]}</td><td class="px-2 py-1.5 text-slate-500">${x[3]}</td><td class="px-2 py-1.5 ${lvCls[x[4]]}">${x[4]}</td></tr>`).join('')}
+            </tbody>
+          </table>
+          <div class="px-4 py-2 text-[11px] text-slate-600 bg-slate-50 border-t border-slate-200">규칙: 상위 고용신호 AND (생산감소 OR 반복) AND 규모 → 우선점검 / 진입신호 → 추가확인 / 그 외 관찰. 경계값은 프로젝트 운영규칙이며 최적값·법정기준이 아닙니다.</div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-emerald-50/60 border border-emerald-200 rounded-xl p-4">
+            <div class="flex items-center gap-1.5 text-emerald-800 font-bold text-xs mb-2"><i class="fa-solid fa-circle-check"></i><span>데이터로 직접 확인된 사실 (Fact)</span></div>
+            <p class="text-xs text-emerald-950 leading-relaxed">고용 ${sg(r.emp_delta)}명 (YoY ${spc(r.yoy)}%). ${explain(r)}.</p>
+            ${r.prod_ppi_adj != null && r.prod_yoy != null ? `<div class="mt-2.5 pt-2 border-t border-emerald-200/60 text-[11px] text-emerald-700">• PPI 조정 생산 ${spc(r.prod_ppi_adj)}% (명목 ${spc(r.prod_yoy)}%) — 참고 맥락이며 판정 변수 아님</div>` : ''}
+          </div>
+          <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-4">
+            <div class="flex items-center gap-1.5 text-amber-800 font-bold text-xs mb-2"><i class="fa-solid fa-circle-exclamation"></i><span>현재 통계로 단정할 수 없는 한계 (Caveat)</span></div>
+            <p class="text-xs text-amber-950 leading-relaxed">${st.limit}</p>
+            <div class="mt-2.5 pt-2 border-t border-amber-200/60 text-[11px] text-amber-700">• 인과성 단정 금지: 자동화·폐업 여부는 반드시 현장 확인으로 검증</div>
+            ${flags.map(f => `<div class="mt-1.5 text-[11px] text-rose-700">⚠ ${f}</div>`).join('')}
+          </div>
+        </div>
+
+        <div>
+          <div class="text-xs font-bold text-slate-600 mb-2">${currentIndustry} 분기별 판정 추이 <span class="font-normal text-slate-400">(칸을 누르면 그 분기로 이동)</span></div>
+          ${renderTimeline(currentIndustry)}
+        </div>
+
+        <details class="bg-slate-50 border border-slate-200 rounded-xl p-4" ${isLatest ? 'open' : ''}>
+          <summary class="cursor-pointer flex items-center justify-between gap-2">
+            <span class="flex items-center gap-2 text-xs font-bold text-slate-800"><i class="fa-solid fa-briefcase text-sky-600 text-sm"></i>고용24 채용시장 스냅샷 (Recruitment Layer)</span>
+            <span class="text-[11px] text-slate-500">조회 시점 기준 · 선택 분기와 무관 · 구인 ${rec.active_count}건</span>
+          </summary>
+          <div class="mt-3 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+              <div class="bg-white p-2.5 rounded-lg border border-slate-200"><span class="text-slate-400 block text-[11px]">구인 표본 기업</span><strong class="text-slate-700 text-[11px]">${rec.firms.join(', ')}</strong></div>
+              <div class="bg-white p-2.5 rounded-lg border border-slate-200"><span class="text-slate-400 block text-[11px]">요구 경력 및 급여</span><strong class="text-slate-700 text-[11px]">${rec.career_req}<br>${rec.wage}</strong></div>
+              <div class="bg-white p-2.5 rounded-lg border border-slate-200"><span class="text-slate-400 block text-[11px]">주요 기술/자격 키워드</span><div class="flex flex-wrap gap-1 mt-1">${rec.keywords.map(k => `<span class="bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded text-[10px] font-medium border border-sky-200">${k}</span>`).join('')}</div></div>
+            </div>
+            <div class="text-[11px] text-slate-600 bg-white/70 p-2.5 rounded-lg border border-slate-200/80"><strong class="text-slate-700">미스매치 관찰:</strong> ${rec.mismatch}</div>
+            ${isLatest ? '' : '<div class="text-[11px] text-amber-700">이 스냅샷은 과거 분기 시점의 자료가 아닙니다. 과거 분기 진단의 근거로 쓰지 마세요.</div>'}
+          </div>
+        </details>
+
+        <div class="border border-indigo-100 bg-indigo-50/40 rounded-xl p-4 space-y-3">
+          <div class="flex items-center gap-2 text-indigo-900 font-bold text-xs"><i class="fa-solid fa-list-check text-indigo-600"></i><span>현장 확인 질문 체크리스트 (담당 공무원 휴대용)</span></div>
+          <ul class="space-y-2 text-xs text-slate-700">
+            ${st.checklist.map((q, i) => `<li class="flex items-start gap-2 bg-white p-2.5 rounded-lg border border-indigo-100"><input type="checkbox" class="mt-0.5 text-indigo-600 rounded focus:ring-0 cursor-pointer"><span class="leading-relaxed"><strong>[질문 ${i + 1}]</strong> ${q}</span></li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="bg-slate-900 text-white rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-semibold text-sky-400 block">기존 지원체계 검토 경로 (참고)</span>
+            <p class="text-xs text-slate-300 mt-1">${st.policy_link}. 지원 여부는 담당자의 현장 검토 이후에만 결정합니다.</p>
+          </div>
+          <span class="shrink-0 text-xs bg-slate-800 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 font-medium">인계 부서: 산업정책과 / 일자리경제과</span>
+        </div>`;
+    }
+
+    function renderTimeline(ind) {
+      return `<div class="flex flex-wrap gap-1">` + QUARTERS_ASC.map(q => {
+        const r = getRow(q, ind);
+        const cls = r ? STAGE_META[r.stage_shown].chip : 'bg-slate-100 text-slate-400 border-slate-200';
+        const ring = q === currentQuarter ? 'ring-2 ring-sky-500 ring-offset-1' : '';
+        const label = `${q.slice(2, 4)}Q${q.slice(5)}`;
+        return `<button onclick="setQuarter('${q}')" title="${q} · ${r ? r.stage_shown : '자료 없음'}" class="text-[10px] font-semibold px-1.5 py-1 rounded border ${cls} ${ring}">${label}</button>`;
+      }).join('') + `</div>`;
+    }
+
+    // =====================================================================
+    // 6. 챗봇 (선택 분기·업종의 실제 값으로 답변 생성)
+    // =====================================================================
+    function addSystemChatMessage(text) {
+      const chatBox = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'flex items-start gap-2.5';
+      const html = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 text-xs shadow-sm"><i class="fa-solid fa-robot"></i></div>
+        <div class="bg-slate-100 border border-slate-200 rounded-2xl rounded-tl-none p-3 text-slate-800 leading-relaxed text-xs sm:text-sm whitespace-pre-line shadow-2xs">${html}</div>`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addUserChatMessage(text) {
+      const chatBox = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'flex items-start justify-end gap-2.5';
+      div.innerHTML = `
+        <div class="bg-sky-600 text-white rounded-2xl rounded-tr-none p-3 leading-relaxed text-xs sm:text-sm shadow-sm max-w-[85%]"></div>
+        <div class="w-7 h-7 rounded-lg bg-slate-300 text-slate-700 flex items-center justify-center shrink-0 text-xs"><i class="fa-solid fa-user"></i></div>`;
+      div.firstElementChild.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function triggerAgentIntroduction() {
+      const r = getRow(currentQuarter, currentIndustry);
+      if (!r) { addBotResponse(`📋 ${quarterLabel(currentQuarter)} ${currentIndustry}의 업종별 자료가 없어 진단카드를 만들지 못했습니다.`); return; }
+      addBotResponse(`📋 [${currentIndustry}] ${quarterLabel(currentQuarter)} 진단카드를 발급했습니다.\n\n조치등급은 **'${r.stage_shown}'**입니다. ${explain(r)}.\n체크리스트 [질문 1]번부터 확인하세요.`);
+    }
+
+    function askQuickPrompt(question) {
+      document.getElementById('chat-input').value = question;
+      handleChatSubmit(new Event('submit'));
+    }
+
+    function clearChatHistory() {
+      document.getElementById('chat-messages').innerHTML = '';
+      addSystemChatMessage('대화 기록이 초기화되었습니다. 추가로 진단하고자 하는 내용이나 비교 분석을 입력해 주세요.');
+    }
+
+    function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const query = input.value.trim();
+      if (!query) return;
+      addUserChatMessage(query);
+      input.value = '';
+      showTypingIndicator();
+      setTimeout(() => {
+        removeTypingIndicator();
+        addBotResponse(generateIntelligentResponse(query));
+      }, 400);
+    }
+
+    function showTypingIndicator() {
+      const chatBox = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.id = 'typing-indicator';
+      div.className = 'flex items-center gap-2 text-slate-400 text-xs';
+      div.innerHTML = `<div class="w-6 h-6 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center text-xs"><i class="fa-solid fa-ellipsis animate-pulse"></i></div><span>팩트 대조 및 행정 답변 작성 중...</span>`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    function removeTypingIndicator() { const el = document.getElementById('typing-indicator'); if (el) el.remove(); }
+    function addBotResponse(text) { addSystemChatMessage(text); }
+
+    function mentionedIndustries(query) {
+      const hit = [];
+      INDUSTRIES.forEach(n => { if (query.includes(n) && !hit.includes(n)) hit.push(n); });
+      Object.keys(INDUSTRY_ALIAS).forEach(a => { const n = INDUSTRY_ALIAS[a]; if (query.includes(a) && !hit.includes(n)) hit.push(n); });
+      return hit;
+    }
+
+    function signalProfile(r) {
+      const p = [];
+      if (r.A >= TH.A_up) p.push(`규모 신호 A ${pc(r.A)}%가 상위경계 이상 — 절대 감소 인원의 영향이 큼`);
+      else if (r.A >= TH.A_entry) p.push(`규모 신호 A ${pc(r.A)}%가 진입경계 이상`);
+      if (r.E >= TH.E_up) p.push(`감소율 E ${pc(r.E, 1)}%가 상위경계 이상`);
+      else if (r.E >= TH.E_entry) p.push(`감소율 E ${pc(r.E, 1)}%가 진입경계 이상`);
+      if (r.R >= TH.R_entry) p.push(`산단평균 대비 ${pc(r.R, 1)}%p 열위`);
+      if (r.P != null && r.P >= TH.P) p.push(`생산 ${pc(r.P, 1)}% 감소`);
+      if (r.repeat === true && r.entry) p.push('직전 분기에도 진입신호(반복)');
+      return p.length ? p.join(' / ') : '고용 축 진입신호 없음';
+    }
+
+    function compareResponse(a, b) {
+      const ra = getRow(currentQuarter, a), rb = getRow(currentQuarter, b);
+      if (!ra || !rb) return `${quarterLabel(currentQuarter)}에는 ${!ra ? a : b}의 업종 상세가 적재되어 있지 않아 비교할 수 없습니다.`;
+      const block = (n, r) => `**${n}** — ${r.stage_shown}\n• 고용 ${sg(r.emp_delta)}명 (YoY ${spc(r.yoy)}%), 산단 비중 ${pc(r.share)}%\n• ${signalProfile(r)}`;
+      const same = ra.stage_shown === rb.stage_shown ? `둘 다 '${ra.stage_shown}'이지만 신호 구성이 다릅니다.` : `단계가 다릅니다(${a} ${ra.stage_shown} / ${b} ${rb.stage_shown}).`;
+      return `⚖️ [${currentQuarter}] ${a} vs ${b}\n\n${same}\n\n${block(a, ra)}\n\n${block(b, rb)}\n\n같은 단계라도 신호의 성격이 다르므로 동일한 원인으로 해석하지 않고, 업종별로 현장 확인질문을 따로 적용합니다. 원인은 이 자료로 단정할 수 없습니다.`;
+    }
+
+    function industryBriefing(ind) {
+      const r = getRow(currentQuarter, ind);
+      if (!r) return `${quarterLabel(currentQuarter)} ${ind}의 업종 상세가 적재되어 있지 않습니다.`;
+      const hyp = {
+        S1: '생산·고용 모두 유지/증가 국면입니다. 정기 모니터링과 하청 단계의 변동 여부 확인으로 충분한지 점검합니다.',
+        S2: '생산은 늘었는데 고용은 줄었습니다. 명목 생산에 가격효과가 섞였는지(PPI 조정 비교), 자동화·외주화 등으로 인력 구조가 바뀌었는지를 현장에서 확인할 가설로 둡니다.',
+        S3: '생산은 줄었으나 고용은 유지·증가했습니다. 고용유지형인지, 가동률·재고 조정 중인지 확인합니다.',
+        S4: '생산·고용이 함께 줄었습니다. 수주·가동 감소인지, 감원·휴업인지 기업별로 확인합니다.'
+      }[r.q1_state] || 'Q1 국면 정보가 없어 생산·고용 방향의 조합은 판단하지 못했습니다.';
+      return `📌 [${ind}] ${quarterLabel(currentQuarter)} 브리핑\n\n• 조치등급: ${r.stage_shown}\n• 고용: ${sg(r.emp_delta)}명 (YoY ${spc(r.yoy)}%), 산단 비중 ${pc(r.share)}%\n• 근거: ${explain(r)}\n\n**확인 가설 (원인 단정 아님):** ${hyp}`;
+    }
+
+    function generateIntelligentResponse(query) {
+      const q = query.toLowerCase();
+      const named = mentionedIndustries(query);
+      const r = getRow(currentQuarter, currentIndustry);
+
+      // 두 업종 비교
+      if (named.length >= 2 || (q.includes('차이') && named.length === 0)) {
+        if (named.length >= 2) return compareResponse(named[0], named[1]);
+        const pri = INDUSTRIES.map(n => getRow(currentQuarter, n)).filter(x => x && x.stage_shown === '우선점검');
+        if (pri.length >= 2) return compareResponse(pri[0].industry, pri[1].industry);
+        return '비교할 업종 두 개를 함께 적어 주세요. 예: “기계와 철강의 차이”';
+      }
+
+      // 현장 실사 질문
+      if (q.includes('질문') || q.includes('현장') || q.includes('체크리스트') || q.includes('방문')) {
+        const list = INDUSTRY_STATIC[currentIndustry].checklist.map((c, i) => `${i + 1}. ${c}`).join('\n');
+        return `📋 [${currentIndustry}] ${quarterLabel(currentQuarter)} 현장 확인 질문:\n\n${list}\n\n공통 질문\n• 최근 수주 잔고와 가동일수는 어떻게 변했습니까?\n• 인력 변화는 감원·자연감소·자동화·외주화 중 무엇에 가깝습니까?\n• 채용이 어려운 직무가 있다면 필요한 훈련은 무엇입니까?\n\n⚠ 통계만으로 원인을 단정하지 말고, 답변을 진단카드에 기록해 담당 부서로 인계하십시오.`;
+      }
+
+      // 청년·제조AX 정책 (분기와 무관한 참고 답변)
+      if (q.includes('청년') || q.includes('교육') || q.includes('ax') || q.includes('창원대') || q.includes('글로컬')) {
+        return `🎓 **창원특례시 × 국립창원대 글로컬 연계 제조AX 청년정책 검토안** (분기와 무관한 참고 답변)\n\n고용24 채용공고 스냅샷에서는 'PLC 제어, 스마트설비보전, CNC 가공' 등 제조 AX 숙련 인력 수요가 확인되고 경력 요구 비중이 높습니다. 청년 구직자와의 미스매치는 현장 확인이 필요한 가설입니다.\n\n1. 창원 스마트그린산단 AI 자율제조(216억) 사업 연계: 협력사 재직자 단기 AI/데이터 직무전환 트랙 검토\n2. 국립창원대 글로컬대학 '제조 AX 청년 부트캠프': 기계공학+AI 융합 3~6개월 실무 과정 검토\n3. 청년행복더하기통장 매칭: 교육 이수 후 산단 중소제조기업 취업자 대상 우대 검토\n\n지원 대상과 사업 선정은 담당자 검토 이후에만 결정됩니다.`;
+      }
+
+      // 외부 증거 (03_06 통합 분석 §05 결과)
+      if (q.includes('ppi') || q.includes('전력') || q.includes('eis') || q.includes('물가') || q.includes('한국은행') || q.includes('kepco')) {
+        const own = r && r.prod_yoy != null && r.prod_ppi_adj != null
+          ? `\n• 선택 업종(${currentIndustry}, ${currentQuarter}): 명목 ${spc(r.prod_yoy)}% → PPI 조정 ${spc(r.prod_ppi_adj)}%`
+          : `\n• 선택 업종(${currentIndustry}, ${currentQuarter}): 적재된 PPI 조정값 없음`;
+        return `🔍 **외부 증거 레이어 요약** — 판정 변수가 아니라 현장 확인질문을 만드는 맥락 자료입니다.\n\n1. **PPI 보정:** 2026Q2 기준 PPI 조정이 가능한 업종은 7개입니다. 음식료는 명목 +0.87%가 PPI 조정 −0.78%로 방향이 바뀌어, 명목 생산만으로 물량 변화를 단정하기 어렵습니다.${own}\n\n2. **KEPCO 전력:** 생산-전력 부호 일치 54.5%, 고용-전력 50.0%였고 업종×지표 20회 검정에서 BH 보정 후 유의한 결과는 0건이었습니다. 판정변수로 승격하지 않았고, 전력자료 결합 전후 단계 분포도 같습니다.\n\n3. **고용보험(EIS):** 비교 가능한 14개 분기 중 8개(57.1%)만 방향이 일치했습니다. 2026Q2는 EIS 창원시 제조업 +0.67%, KICOX 산단 −3.64%로 방향이 다르며, 모집단 차이(창원시 전체 vs 국가산단 입주기업)를 확인해야 합니다.`;
+      }
+
+      // 특정 업종 질의
+      if (named.length === 1) return industryBriefing(named[0]);
+
+      // 기본 브리핑
+      if (!r) return `📌 ${quarterLabel(currentQuarter)}에는 ${currentIndustry}의 업종 상세가 적재되어 있지 않습니다. 분기를 바꾸거나 panel_data.js 를 확인해 주세요.`;
+      return `📌 [${currentIndustry}] ${quarterLabel(currentQuarter)} 브리핑\n\n• 조치등급: ${r.stage_shown} (Q1 ${r.q1_state || '—'})\n• 고용: ${sg(r.emp_delta)}명 (YoY ${spc(r.yoy)}%)\n• 근거: ${explain(r)}\n\n업종 이름을 넣어 질문하거나 상단 칩을 눌러 보세요.`;
+    }
+  </script>
+</body>
+</html>

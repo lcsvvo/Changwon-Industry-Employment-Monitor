@@ -1,0 +1,13 @@
+﻿industry,code_suffix,ppi_item,mapping_reason,C1,mapping_use,main_analysis_eligible,sensitivity_eligible,series_level_digits
+기계,311,기계및장비,분류가 가까운 단일 후보,13102134604ACC_CD.311AA,sensitivity_only,False,True,3.0
+운송장비,312,운송장비,전국 운송장비 전체 후보; 산단 품목 비중 미확인,13102134604ACC_CD.312AA,sensitivity_only,False,True,3.0
+비금속,306,비금속광물제품,분류가 가까운 단일 후보,13102134604ACC_CD.306AA,sensitivity_only,False,True,3.0
+음식료,301,음식료품,분류가 가까운 단일 후보,13102134604ACC_CD.301AA,sensitivity_only,False,True,3.0
+목재종이,303,목재및종이제품,분류가 가까운 단일 후보,13102134604ACC_CD.303AA,sensitivity_only,False,True,3.0
+섬유의복,3021,섬유및의복,가죽을 포함하는 상위 항목 대신 하위 후보,13102134604ACC_CD.3021AA,sensitivity_only,False,True,4.0
+철강,3071,철강1차제품,비철금속을 포함하는 상위 지수 대신 철강 후보; 가공품 구성 미확인,13102134604ACC_CD.3071AA,sensitivity_only,False,True,4.0
+석유화학,304,석탄및석유제품,품목별 가중치 없이 두 후보를 각각 적용,13102134604ACC_CD.304AA,sensitivity_only,False,True,3.0
+석유화학,305,화학제품,품목별 가중치 없이 두 후보를 각각 적용,13102134604ACC_CD.305AA,sensitivity_only,False,True,3.0
+전기전자,309,컴퓨터전자및광학기기,품목별 가중치 없이 두 후보를 각각 적용,13102134604ACC_CD.309AA,sensitivity_only,False,True,3.0
+전기전자,310,전기장비,품목별 가중치 없이 두 후보를 각각 적용,13102134604ACC_CD.310AA,sensitivity_only,False,True,3.0
+기타,,,대응 범위 근거 부족,,excluded,False,False,

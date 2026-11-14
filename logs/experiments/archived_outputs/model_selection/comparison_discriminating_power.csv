@@ -1,0 +1,10 @@
+﻿model,singleton_share_complete,singleton_share_discriminating,mean_possible_stages,n_observe_only,n_check_or_higher_only,n_all_three,n_empty
+MRSORT_box_only,0.51875,0.1348314606741573,1.525,79,9,7,0
+MRSORT_rc,0.60625,0.29213483146067415,1.4125,79,26,3,0
+MRSORT_rc_vrc,0.8625,0.7528089887640449,1.1375,79,67,0,0
+MRSORT_rc_vrc_no4,0.60625,0.29213483146067415,1.4125,79,26,3,0
+ROR_no_preference,0.0,0.0,3.0,0,0,160,0
+ROR_rc,0.34375,0.0,2.23125,55,13,92,0
+ROR_rc_vrc,0.4375,0.011235955056179775,1.8375,69,47,44,0
+ROR_rc_vrc_bounded,0.4375,0.011235955056179775,1.8375,69,47,44,0
+PARETO_boundary,0.3875,0.02247191011235955,2.175,61,9,90,0

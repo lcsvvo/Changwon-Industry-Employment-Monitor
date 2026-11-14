@@ -1,0 +1,11 @@
+﻿industry,quarter,q1_state,g1,g2,g3,g4,complete_case,discriminating,pass_g1_b1,pass_g2_b1,pass_g3_b1,pass_g4_b1,k_b1,employment_evidence_b1,pass_g1_b2,pass_g2_b2,pass_g3_b2,pass_g4_b2,k_b2,employment_evidence_b2
+기계,2026Q2,S4,3979.0,6.339722447939078,19.547350877543444,2.0,True,True,True,True,True,True,4,True,True,True,True,False,3,True
+기타,2026Q2,S1,0.0,0.0,0.0,0.0,True,False,False,False,False,False,0,False,False,False,False,False,0,False
+목재종이,2026Q2,S4,48.0,10.084033613445376,12.897127553431709,2.0,True,True,False,True,True,True,3,True,False,True,True,False,2,True
+비금속,2026Q2,S2,2.0,1.0810810810810811,0.0,19.0,True,True,False,False,False,True,1,True,False,False,False,True,1,True
+석유화학,2026Q2,S3,0.0,0.0,6.729849384858399,0.0,True,False,False,False,True,False,1,False,False,False,False,False,0,False
+섬유의복,2026Q2,N,0.0,-0.0,12.319670818395734,0.0,True,False,False,False,True,False,1,False,False,False,True,False,1,False
+운송장비,2026Q2,S2,129.0,0.7848147472166445,0.0,6.0,True,True,True,False,False,True,2,True,False,False,False,True,1,True
+음식료,2026Q2,S2,25.0,3.7878787878787845,0.0,6.0,True,True,False,True,False,True,2,True,False,False,False,True,1,True
+전기전자,2026Q2,S2,116.0,0.4128848549563968,0.0,6.0,True,True,True,False,False,True,2,True,False,False,False,True,1,True
+철강,2026Q2,S2,112.0,1.1427405366799315,0.0,4.0,True,True,True,False,False,True,2,True,False,False,False,True,1,True

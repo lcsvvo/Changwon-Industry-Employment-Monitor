@@ -1,0 +1,221 @@
+{
+  "pre": {
+    "raw_hashes": {
+      "data\\raw\\kepco\\(제공) 2501_03_산업분류별-법정동별 전력데이터.xlsx": "919c9b08f4ffe418cea736459fa98d6410fff89262585e3465bc06d824269877",
+      "data\\raw\\kepco\\(제공) 2504_06_산업분류별-법정동별 전력데이터.xlsx": "02f393b9383bbcfdce0f506856e493b4b1455bc76b1f93a54b9c7f910110836c",
+      "data\\raw\\kepco\\(제공) 2507_09_산업분류별-법정동별 전력데이터.xlsx": "49c0c21816fd7fddc3e704732e3f5d7eb28029092c359a6823d9fa1859c98a7f",
+      "data\\raw\\kepco\\(제공) 2510_12_산업분류별-법정동별 전력데이터.xlsx": "aa5bc70260ae774435eda5f685a0cacfd37328b3e3c971ac9d3b182957a31cb7",
+      "data\\raw\\kepco\\(제공) 2601_03 산업분류-법정동별 전력데이터.xlsx": "09e6b6a5362a19b1b8226da62044593788b2f0e7f98e4e27ca134f239549ed3c",
+      "data\\raw\\kepco\\(제공)2022_12345월_산업분류별-법정동별 전력데이터.xlsx": "6f74bce5ba9b770a679e9c649f33e27f0f80ff2e99b10bfefc444bfd183c4491",
+      "data\\raw\\kepco\\(제공)2204_산업분류별-법정동별 전력데이터_v1.xlsx": "67bc8be8cbd10d3c2601edfd5c85a43b5ffadd399d930cb06a1547ef16b7f62a",
+      "data\\raw\\kepco\\(제공)2205_산업분류별-법정동별 전력데이터_v1.xlsx": "29e6d5b7c86e63e87b4b960d0db920b0f59a02216606792b21dc087789119e7b",
+      "data\\raw\\kepco\\(제공)2206_산업분류별-법정동별 전력데이터.xlsx": "53cff9fee758df1afdba319068abccc6a51b80f405d1fbe8df490812d70eb2b2",
+      "data\\raw\\kepco\\(제공)2207_산업분류별-법정동별 전력데이터.xlsx": "8eeb68a239b20db1fe76536e48497b127fae44642ab72cfa00e2e131d4a664c3",
+      "data\\raw\\kepco\\(제공)2208_산업분류별-법정동별 전력데이터.xlsx": "0cfce65e8b7cbc7e68826035f5588f4ce848e0913e5280508f3837a62f21ee84",
+      "data\\raw\\kepco\\(제공)2209_12_산업분류별-법정동별 전력데이터.xlsx": "7d505f733f1fa0f1c199b60f78371f361129c10a53f21a5a7e13dceaadb5b46b",
+      "data\\raw\\kepco\\(제공)2301_03_산업분류별-법정동별 전력데이터.xlsx": "4d28dea77be5de9f51b5a20811027e5f5eb5b63ad2e1126d5c3e74df0217948a",
+      "data\\raw\\kepco\\(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx": "16ddffa6ce6a967fc609224523acadd336c5730bb14483880ea00032fd9c6752",
+      "data\\raw\\kepco\\(제공)2310_12_산업분류별-법정동별 전력데이터.xlsx": "03dd93a80a59a922bb6618534e4b2e6153698ba879c993b2b5a23a61ccb9d300",
+      "data\\raw\\kepco\\(제공)2401_03_산업분류별-법정동별 전력데이터.xlsx": "d0d49069ad578bbb275184f29e850e2f9039dc72c3b99128515e06b43a086eda",
+      "data\\raw\\kepco\\(제공)2404_06_산업분류별-법정동별 전력데이터.xlsx": "989d0ac2c4f9e4fbf1cf03b6e2e7066af2384209ecd827c0675edbbe4383da4f",
+      "data\\raw\\kepco\\(제공)2407_09_산업분류별-법정동별 전력데이터.xlsx": "51f09479d01d8a83cee4604b89d6c2c77aa985884e1a43852c9949e718c93fd3",
+      "data\\raw\\kepco\\(제공)2410_12_산업분류별-법정동별 전력데이터.xlsx": "de456b411e159bfa0153fd40ca836c477360be0b01c6679448ccfecc10aaa486",
+      "data\\raw\\kepco\\2307_09산업분류별-법정동별 전력사용량.xlsx": "a3f3fae092cd33b101fb020827904769fc8056ab37fdd7e59424a2d88ae304c9",
+      "data\\raw\\kepco\\api\\_metadata\\changwon_business_type_power_monthly.json": "f7f008b48a0862d42df973d353a13c001b0203a6c75d8c65679809b036f7f128",
+      "data\\raw\\kepco\\api\\_metadata\\changwon_custnum_change_monthly.json": "1057533bf33f6d84b43634ca8a05a80f9a94ae38c3a7e7da77522dde18101da0",
+      "data\\raw\\kepco\\api\\_metadata\\changwon_industry_type_power_monthly.json": "ea16db31b41a57c95c7e02fb8f08fac04eb0074dcf38743f6139093468b8f428",
+      "data\\raw\\kepco\\api\\_metadata\\collection_status.json": "931a1153b077f297b48f55ff89f6c9db4b02bf3b3b05f4917bfa9ec01ca5238d",
+      "data\\raw\\kepco\\api\\_metadata\\kepco_open_api_manual.json": "81ead1f02bac9ee74ba2c8c40e579bb450c87c61b4c09a9c3832a8216b2e9617",
+      "data\\raw\\kepco\\api\\_metadata\\portal_verification_20260919.json": "a7753ac46c9c4228013a9eca51dbd672eb0f64df163d84dfe9a62f656d2ce56b",
+      "data\\raw\\kepco\\api\\_metadata\\request_failures.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "data\\raw\\kepco\\api\\changwon_business_type_power_monthly.csv": "930205cd51ccdf4545961a6d07015db7035df55ec7430789eba4b177261537c8",
+      "data\\raw\\kepco\\api\\changwon_custnum_change_monthly.csv": "6ff9174f397a09e70d5e571645e628e4ade1b54e626b74bdafb584ec6d0a564d",
+      "data\\raw\\kepco\\api\\changwon_industry_type_power_monthly.csv": "c1760a52c97ee971213635eed6f4ab7a4fbd333d9583a10a1195f3304bc7272e",
+      "data\\raw\\kepco\\api\\kepco_open_api_manual.pptx": "33a6efad9dda497b0f634900fe3b746c5527db2be019e9b49282c396277c36b5",
+      "data\\raw\\kepco\\api\\kepco_raw_responses.json": "58a03661855922826bd651b163dbdf3e26ce56ee472ac66081c636170f846120",
+      "data\\raw\\kepco\\api\\legal_dong\\_metadata\\legal_dong_2021_verification.json": "e3a75140a6d7eb15402322ac74e6eb08665ad87a8d8aee5d283ffca4a0ca772a",
+      "data\\raw\\kepco\\api\\legal_dong\\kepco_2021_industry_legal_dong_power.xlsx": "311fd8426228bea8932de5c3881147f97f266d5b0f1a57ec1f0488c75664ff93",
+      "data\\raw\\kepco\\api\\legal_dong\\kepco_2026_01_03_industry_legal_dong.xlsx": "09e6b6a5362a19b1b8226da62044593788b2f0e7f98e4e27ca134f239549ed3c"
+    },
+    "decision_hash": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a",
+    "decision_rows": 180,
+    "stage_counts": {
+      "관찰": 128,
+      "추가확인": 35,
+      "우선점검": 17
+    },
+    "business_hashes": {
+      "data\\processed\\kepco\\kepco_power_monthly_panel.csv": "9203604c35d2a708a174dd9ea16c9dfd99249b8c2f78406617ab5ada4e1ea320",
+      "data\\processed\\kepco\\kepco_power_quarterly_panel.csv": "830dd787732c0d0baf2b0a3fd44307c969f5126345947d5713a0902134fa5094"
+    }
+  },
+  "post": {
+    "raw_hashes": {
+      "data\\raw\\kepco\\(제공) 2501_03_산업분류별-법정동별 전력데이터.xlsx": "919c9b08f4ffe418cea736459fa98d6410fff89262585e3465bc06d824269877",
+      "data\\raw\\kepco\\(제공) 2504_06_산업분류별-법정동별 전력데이터.xlsx": "02f393b9383bbcfdce0f506856e493b4b1455bc76b1f93a54b9c7f910110836c",
+      "data\\raw\\kepco\\(제공) 2507_09_산업분류별-법정동별 전력데이터.xlsx": "49c0c21816fd7fddc3e704732e3f5d7eb28029092c359a6823d9fa1859c98a7f",
+      "data\\raw\\kepco\\(제공) 2510_12_산업분류별-법정동별 전력데이터.xlsx": "aa5bc70260ae774435eda5f685a0cacfd37328b3e3c971ac9d3b182957a31cb7",
+      "data\\raw\\kepco\\(제공) 2601_03 산업분류-법정동별 전력데이터.xlsx": "09e6b6a5362a19b1b8226da62044593788b2f0e7f98e4e27ca134f239549ed3c",
+      "data\\raw\\kepco\\(제공)2022_12345월_산업분류별-법정동별 전력데이터.xlsx": "6f74bce5ba9b770a679e9c649f33e27f0f80ff2e99b10bfefc444bfd183c4491",
+      "data\\raw\\kepco\\(제공)2204_산업분류별-법정동별 전력데이터_v1.xlsx": "67bc8be8cbd10d3c2601edfd5c85a43b5ffadd399d930cb06a1547ef16b7f62a",
+      "data\\raw\\kepco\\(제공)2205_산업분류별-법정동별 전력데이터_v1.xlsx": "29e6d5b7c86e63e87b4b960d0db920b0f59a02216606792b21dc087789119e7b",
+      "data\\raw\\kepco\\(제공)2206_산업분류별-법정동별 전력데이터.xlsx": "53cff9fee758df1afdba319068abccc6a51b80f405d1fbe8df490812d70eb2b2",
+      "data\\raw\\kepco\\(제공)2207_산업분류별-법정동별 전력데이터.xlsx": "8eeb68a239b20db1fe76536e48497b127fae44642ab72cfa00e2e131d4a664c3",
+      "data\\raw\\kepco\\(제공)2208_산업분류별-법정동별 전력데이터.xlsx": "0cfce65e8b7cbc7e68826035f5588f4ce848e0913e5280508f3837a62f21ee84",
+      "data\\raw\\kepco\\(제공)2209_12_산업분류별-법정동별 전력데이터.xlsx": "7d505f733f1fa0f1c199b60f78371f361129c10a53f21a5a7e13dceaadb5b46b",
+      "data\\raw\\kepco\\(제공)2301_03_산업분류별-법정동별 전력데이터.xlsx": "4d28dea77be5de9f51b5a20811027e5f5eb5b63ad2e1126d5c3e74df0217948a",
+      "data\\raw\\kepco\\(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx": "16ddffa6ce6a967fc609224523acadd336c5730bb14483880ea00032fd9c6752",
+      "data\\raw\\kepco\\(제공)2310_12_산업분류별-법정동별 전력데이터.xlsx": "03dd93a80a59a922bb6618534e4b2e6153698ba879c993b2b5a23a61ccb9d300",
+      "data\\raw\\kepco\\(제공)2401_03_산업분류별-법정동별 전력데이터.xlsx": "d0d49069ad578bbb275184f29e850e2f9039dc72c3b99128515e06b43a086eda",
+      "data\\raw\\kepco\\(제공)2404_06_산업분류별-법정동별 전력데이터.xlsx": "989d0ac2c4f9e4fbf1cf03b6e2e7066af2384209ecd827c0675edbbe4383da4f",
+      "data\\raw\\kepco\\(제공)2407_09_산업분류별-법정동별 전력데이터.xlsx": "51f09479d01d8a83cee4604b89d6c2c77aa985884e1a43852c9949e718c93fd3",
+      "data\\raw\\kepco\\(제공)2410_12_산업분류별-법정동별 전력데이터.xlsx": "de456b411e159bfa0153fd40ca836c477360be0b01c6679448ccfecc10aaa486",
+      "data\\raw\\kepco\\2307_09산업분류별-법정동별 전력사용량.xlsx": "a3f3fae092cd33b101fb020827904769fc8056ab37fdd7e59424a2d88ae304c9",
+      "data\\raw\\kepco\\api\\_metadata\\changwon_business_type_power_monthly.json": "f7f008b48a0862d42df973d353a13c001b0203a6c75d8c65679809b036f7f128",
+      "data\\raw\\kepco\\api\\_metadata\\changwon_custnum_change_monthly.json": "1057533bf33f6d84b43634ca8a05a80f9a94ae38c3a7e7da77522dde18101da0",
+      "data\\raw\\kepco\\api\\_metadata\\changwon_industry_type_power_monthly.json": "ea16db31b41a57c95c7e02fb8f08fac04eb0074dcf38743f6139093468b8f428",
+      "data\\raw\\kepco\\api\\_metadata\\collection_status.json": "931a1153b077f297b48f55ff89f6c9db4b02bf3b3b05f4917bfa9ec01ca5238d",
+      "data\\raw\\kepco\\api\\_metadata\\kepco_open_api_manual.json": "81ead1f02bac9ee74ba2c8c40e579bb450c87c61b4c09a9c3832a8216b2e9617",
+      "data\\raw\\kepco\\api\\_metadata\\portal_verification_20260919.json": "a7753ac46c9c4228013a9eca51dbd672eb0f64df163d84dfe9a62f656d2ce56b",
+      "data\\raw\\kepco\\api\\_metadata\\request_failures.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "data\\raw\\kepco\\api\\changwon_business_type_power_monthly.csv": "930205cd51ccdf4545961a6d07015db7035df55ec7430789eba4b177261537c8",
+      "data\\raw\\kepco\\api\\changwon_custnum_change_monthly.csv": "6ff9174f397a09e70d5e571645e628e4ade1b54e626b74bdafb584ec6d0a564d",
+      "data\\raw\\kepco\\api\\changwon_industry_type_power_monthly.csv": "c1760a52c97ee971213635eed6f4ab7a4fbd333d9583a10a1195f3304bc7272e",
+      "data\\raw\\kepco\\api\\kepco_open_api_manual.pptx": "33a6efad9dda497b0f634900fe3b746c5527db2be019e9b49282c396277c36b5",
+      "data\\raw\\kepco\\api\\kepco_raw_responses.json": "58a03661855922826bd651b163dbdf3e26ce56ee472ac66081c636170f846120",
+      "data\\raw\\kepco\\api\\legal_dong\\_metadata\\legal_dong_2021_verification.json": "e3a75140a6d7eb15402322ac74e6eb08665ad87a8d8aee5d283ffca4a0ca772a",
+      "data\\raw\\kepco\\api\\legal_dong\\kepco_2021_industry_legal_dong_power.xlsx": "311fd8426228bea8932de5c3881147f97f266d5b0f1a57ec1f0488c75664ff93",
+      "data\\raw\\kepco\\api\\legal_dong\\kepco_2026_01_03_industry_legal_dong.xlsx": "09e6b6a5362a19b1b8226da62044593788b2f0e7f98e4e27ca134f239549ed3c"
+    },
+    "decision_hash": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a",
+    "decision_rows": 180,
+    "stage_counts": {
+      "관찰": 128,
+      "추가확인": 35,
+      "우선점검": 17
+    },
+    "business_hashes": {
+      "data\\processed\\kepco\\kepco_power_monthly_panel.csv": "9203604c35d2a708a174dd9ea16c9dfd99249b8c2f78406617ab5ada4e1ea320",
+      "data\\processed\\kepco\\kepco_power_quarterly_panel.csv": "830dd787732c0d0baf2b0a3fd44307c969f5126345947d5713a0902134fa5094"
+    }
+  },
+  "duplicate_resolution": {
+    "exact_duplicate_rows_removed": 0,
+    "conflicting_duplicate_source_rows": 12,
+    "conflicting_duplicate_keys_resolved_as_incomplete": 6
+  },
+  "checks": {
+    "raw_files_unchanged": {
+      "pass": true,
+      "detail": "35 files"
+    },
+    "xlsx_files_readable": {
+      "pass": true,
+      "detail": "21/21 in-scope XLSX files"
+    },
+    "final_month_source_unique": {
+      "pass": true,
+      "detail": {
+        "2022-04": "(제공)2022_12345월_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-05": "(제공)2022_12345월_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-06": "(제공)2206_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-07": "(제공)2207_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-08": "(제공)2208_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-09": "(제공)2209_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-10": "(제공)2209_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-11": "(제공)2209_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2022-12": "(제공)2209_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-01": "(제공)2301_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-02": "(제공)2301_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-03": "(제공)2301_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-04": "(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-05": "(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-06": "(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-07": "2307_09산업분류별-법정동별 전력사용량.xlsx",
+        "2023-08": "2307_09산업분류별-법정동별 전력사용량.xlsx",
+        "2023-09": "2307_09산업분류별-법정동별 전력사용량.xlsx",
+        "2023-10": "(제공)2310_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-11": "(제공)2310_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2023-12": "(제공)2310_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-01": "(제공)2401_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-02": "(제공)2401_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-03": "(제공)2401_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-04": "(제공)2404_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-05": "(제공)2404_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-06": "(제공)2404_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-07": "(제공)2407_09_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-08": "(제공)2407_09_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-09": "(제공)2407_09_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-10": "(제공)2410_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-11": "(제공)2410_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2024-12": "(제공)2410_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-01": "(제공) 2501_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-02": "(제공) 2501_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-03": "(제공) 2501_03_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-04": "(제공) 2504_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-05": "(제공) 2504_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-06": "(제공) 2504_06_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-07": "(제공) 2507_09_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-08": "(제공) 2507_09_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-09": "(제공) 2507_09_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-10": "(제공) 2510_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-11": "(제공) 2510_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2025-12": "(제공) 2510_12_산업분류별-법정동별 전력데이터.xlsx",
+        "2026-01": "kepco_2026_01_03_industry_legal_dong.xlsx",
+        "2026-02": "kepco_2026_01_03_industry_legal_dong.xlsx",
+        "2026-03": "kepco_2026_01_03_industry_legal_dong.xlsx"
+      }
+    },
+    "final_duplicate_rows_absent": {
+      "pass": true,
+      "detail": 0
+    },
+    "strict_legal_dong_normalization": {
+      "pass": true,
+      "detail": 18
+    },
+    "suppression_not_zero": {
+      "pass": true,
+      "detail": 0
+    },
+    "quarterly_power_flow_sum": {
+      "pass": true,
+      "detail": "checked 8206 COMPLETE rows"
+    },
+    "customer_count_not_summed": {
+      "pass": true,
+      "detail": "quarter-end and mean only"
+    },
+    "crosswalk_version_recorded": {
+      "pass": true,
+      "detail": "9af85f34bdeba21745b5e4a681aef4bed53e91b42db000e08e9c7ac6583d5bd6"
+    },
+    "proxy_18_unchanged": {
+      "pass": true,
+      "detail": "9cf55982d3acdeeffbd5eefcba619a9474ddd4ae951ba2e493fdb557bebf8910"
+    },
+    "triage_counts_unchanged": {
+      "pass": true,
+      "detail": {
+        "관찰": 128,
+        "추가확인": 35,
+        "우선점검": 17
+      }
+    },
+    "decision_panel_hash_unchanged": {
+      "pass": true,
+      "detail": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a"
+    },
+    "triage_columns_absent": {
+      "pass": true,
+      "detail": []
+    },
+    "business_type_outputs_unchanged": {
+      "pass": true,
+      "detail": {
+        "data\\processed\\kepco\\kepco_power_monthly_panel.csv": "9203604c35d2a708a174dd9ea16c9dfd99249b8c2f78406617ab5ada4e1ea320",
+        "data\\processed\\kepco\\kepco_power_quarterly_panel.csv": "830dd787732c0d0baf2b0a3fd44307c969f5126345947d5713a0902134fa5094"
+      }
+    }
+  }
+}

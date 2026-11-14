@@ -1,0 +1,977 @@
+/* 창원국가산단 산업·고용 진단 — 3패널 행정 의사결정지원 워크스페이스 스타일.
+   모든 규칙은 .st-key-* 클래스(또는 특정 data-testid)로 범위를 좁힌다.
+   광범위 selector로 다른 화면(점검 건·정책 근거 등)의 위젯 모양을 바꾸지 않는다.
+
+   Streamlit DOM 메모: 키 컨테이너(.st-key-x)는 [data-testid="stLayoutWrapper"] 안에 들어 있고,
+   고정폭(width=px)과 flex 배치는 그 wrapper에 걸린다. sticky·폭 재정의는 wrapper에 해야 동작한다. */
+
+:root {
+  --dx-bg: #F1F5F9;
+  --dx-panel: #FFFFFF;
+  --dx-border: #E2E8F0;
+  --dx-text: #0F172A;
+  --dx-text-2: #334155;
+  --dx-muted: #64748B;
+  --dx-header: #0F172A;
+  --dx-header-2: #1E293B;
+  --dx-sky: #0284C7;
+  --dx-sky-bg: #F0F9FF;
+  --dx-emerald: #059669;
+  --dx-emerald-bg: #ECFDF5;
+  --dx-amber: #B45309;
+  --dx-amber-bg: #FFFBEB;
+  --dx-rose: #E11D48;
+  --dx-rose-bg: #FFF1F2;
+  --dx-indigo: #4338CA;
+  --dx-indigo-bg: #EEF2FF;
+  --dx-violet: #6D28D9;
+  --dx-violet-bg: #F5F3FF;
+  --dx-top: 5.6rem;          /* sticky 상단 헤더 높이 */
+  --dx-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+  --dx-space-xs: .375rem;
+  --dx-space-sm: .625rem;
+  --dx-space-md: 1rem;
+  --dx-space-lg: 1.5rem;
+  --dx-space-xl: 2rem;
+}
+
+/* ---------------------------------------------------------------- Streamlit chrome 정리 */
+header[data-testid="stHeader"],
+#MainMenu,
+footer,
+[data-testid="stSidebar"],
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] {
+  display: none !important;
+}
+[data-testid="stMainBlockContainer"] {
+  padding: 0 0 2rem 0 !important;
+  max-width: none !important;
+}
+body, [data-testid="stAppViewContainer"] { background: var(--dx-bg); }
+
+/* ---------------------------------------------------------------- 상단 헤더 (sticky) */
+[data-testid="stLayoutWrapper"]:has(> .st-key-topbar) {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+.st-key-topbar {
+  background: var(--dx-header);
+  color: #F8FAFC;
+  padding: 0.55rem 1.25rem 0 1.25rem;
+  gap: 0.35rem !important;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, .25);
+}
+.dx-brand { display: flex; align-items: center; gap: 0.7rem; }
+.dx-brand-icon {
+  width: 2.1rem; height: 2.1rem; flex: 0 0 2.1rem;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, #0EA5E9, #4F46E5);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.dx-brand-title { font-weight: 750; font-size: 1.02rem; color: #F8FAFC; letter-spacing: -0.01em; }
+/* 좁은 데스크톱에서도 헤더가 2줄 이상으로 늘어나지 않게 제목·부제는 한 줄 + 말줄임 */
+.dx-brand-text { min-width: 0; }
+.dx-brand-title, .dx-brand-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dx-brand-tag {
+  margin-left: 0.5rem; padding: 0.05rem 0.5rem; border-radius: 999px;
+  font-size: 0.68rem; font-weight: 600; vertical-align: middle;
+  color: #7DD3FC; background: rgba(14, 165, 233, .15); border: 1px solid rgba(56, 189, 248, .3);
+}
+.dx-brand-sub { font-size: 0.74rem; color: #94A3B8; margin-top: 0.1rem; }
+
+.dx-status-row { display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: flex-end; }
+.dx-status {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.72rem; color: #CBD5E1; white-space: nowrap;
+  background: var(--dx-header-2); border: 1px solid #334155; border-radius: 0.5rem;
+  padding: 0.25rem 0.55rem;
+}
+.dx-status i { width: 7px; height: 7px; border-radius: 50%; background: #94A3B8; display: inline-block; }
+.dx-status--ok i { background: #34D399; }
+.dx-status--warn i { background: #FBBF24; }
+.dx-status--info i { background: #38BDF8; }
+
+/* 헤더 안 버튼(설정·정보) — 어두운 바탕용 */
+.st-key-topactions button {
+  background: var(--dx-header-2) !important;
+  border: 1px solid #475569 !important;
+  color: #E2E8F0 !important;
+  min-height: 2rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.78rem;
+}
+.st-key-topactions button:hover { background: #334155 !important; }
+.st-key-topactions button p { font-size: 0.78rem; color: #E2E8F0; }
+.st-key-topactions [data-testid="stIconMaterial"] { color: #E2E8F0; }
+
+/* 페이지 탭(헤더 2행) */
+.st-key-topnav { gap: 0.1rem !important; }
+.st-key-topnav button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  min-height: 2rem;
+  padding: 0.1rem 0.75rem;
+}
+.st-key-topnav button p { font-size: 0.8rem; color: #94A3B8; }
+.st-key-topnav button:hover p { color: #E2E8F0; }
+.st-key-topnav [class*="st-key-navcur-"] button { border-bottom-color: #38BDF8 !important; }
+.st-key-topnav [class*="st-key-navcur-"] button p { color: #FFFFFF; font-weight: 650; }
+/* 설정·정보 popover 안 버튼(방법론·변경 기록 이동) — 밝은 기본 버튼으로 초기화. topactions 버튼 규칙 뒤에 와야 한다 */
+[data-testid="stPopoverBody"] button {
+  background: #fff !important; border: 1px solid var(--dx-border) !important; border-radius: 0.5rem !important;
+  justify-content: flex-start;
+}
+[data-testid="stPopoverBody"] button p { color: var(--dx-text) !important; font-size: 0.82rem; }
+[data-testid="stPopoverBody"] [class*="st-key-navcur-"] button { border-color: var(--dx-sky) !important; background: var(--dx-sky-bg) !important; }
+
+/* 헤더 아래 본문 영역(모든 화면 공통) — 좌우 여백은 여기서만 준다 */
+.st-key-pagebody { padding: 0.5rem 1rem 0 1rem; }
+.st-key-topnav [data-testid="stElementContainer"]:has(.dx-status-row) { align-self: center; }
+
+/* ---------------------------------------------------------------- 3패널 shell */
+/* flex-wrap: nowrap — 3패널은 900px 미만에서만 쌓인다(그 위에서는 폭을 줄여서라도 한 줄 유지)
+   align-items: stretch — 세 column wrapper가 가장 긴 중앙 콘텐츠 높이까지 함께 늘어난다(고정 높이값 없음). */
+.st-key-shell { align-items: stretch !important; gap: 0.9rem !important; flex-wrap: nowrap !important; }
+/* 좌·우 column wrapper는 중앙 높이까지 늘어나 아주 옅은 배경을 잇고(빈 카드 없음), 그 안의 카드(선택 패널·AI 비서)만
+   sticky로 화면에 남는다 — 스크롤하면 중앙 콘텐츠만 움직인다(JS 없이 CSS sticky, 스크롤 컨테이너는 Streamlit stMain).
+   Streamlit이 카드에 flex: 1 1 0%를 주므로 0 0 auto로 되돌려야 카드가 wrapper 높이까지 늘어나지 않는다. */
+.st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-leftpanel),
+.st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilot),
+.st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilotrail) {
+  position: static;
+  align-self: stretch;
+  background: #F8FAFC;
+  border-radius: 16px;
+}
+.st-key-leftpanel, .st-key-copilot, .st-key-copilotrail { flex: 0 0 auto !important; height: auto !important; }
+@media (min-width: 901px) {  /* 3열일 때만 sticky — 900px 이하(세로 쌓임)에서는 해제 */
+  /* sticky top = 두 패널의 원래 위치(헤더 + 여백) — 스크롤을 시작해도 패널이 움직이지 않는다 */
+  .st-key-leftpanel, .st-key-copilot, .st-key-copilotrail {
+    position: sticky;
+    top: calc(var(--dx-top) + 1.75rem);
+  }
+  /* 왼쪽(진단 기준): 높이는 내용대로. 화면이 아주 낮을 때만 패널 안에서 스크롤(진단서 발급까지 닿게 하는 안전장치) */
+  .st-key-leftpanel { max-height: calc(100vh - var(--dx-top) - 2.5rem); overflow-y: auto; }
+  /* 오른쪽(행정 AI 비서): 항상 헤더 아래부터 창 끝까지 — 머리(맥락·추천 질문) / 대화(남는 높이, 이것만 스크롤) / 입력(맨 아래) */
+  .st-key-copilot {
+    height: calc(100vh - var(--dx-top) - 1.75rem) !important;
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    overflow-y: auto;  /* 머리 영역을 모두 펼친 아주 낮은 화면에서만 쓰인다 */
+  }
+  .st-key-copilot > [data-testid="stLayoutWrapper"]:has(> .st-key-chatlog) {
+    flex: 1 1 0 !important; min-height: 320px; height: auto !important;
+  }
+  .st-key-chatlog { height: 100% !important; max-height: none !important; overflow-y: auto !important; }
+  /* 대화 전: 안내 한 줄 + 입력창을 패널 맨 아래로(빈 대화 상자는 만들지 않음) */
+  .st-key-copilot:not(:has(.st-key-chatlog)) > [data-testid="stElementContainer"]:has([data-testid="stCaptionContainer"]) {
+    margin-top: auto;
+  }
+  /* 창 끝까지 닿도록 페이지 하단 여백은 중앙 column 안으로 옮긴다(좌·우 column 배경도 페이지 끝까지 이어짐) */
+  [data-testid="stMainBlockContainer"]:has(.st-key-shell) { padding-bottom: 0 !important; }
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-center) { padding-bottom: 2rem; }
+}
+@media (max-width: 900px) {  /* 세로로 쌓인 좁은 화면: 대화가 아주 길 때만 메시지 영역 안에서 스크롤 */
+  .st-key-chatlog { height: auto !important; max-height: min(78vh, 720px) !important; overflow-y: auto !important; }
+}
+/* 중앙 패널은 항상 줄어들 수 있어야 좌·우 패널이 밀려나 Copilot이 아래로 떨어지지 않는다 */
+.st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-center) { flex: 1 1 0 !important; min-width: 0 !important; }
+.st-key-leftpanel, .st-key-copilot, .st-key-center, .st-key-copilotrail {
+  background: var(--dx-panel);
+  border: 1px solid var(--dx-border);
+  border-radius: 14px;
+  box-shadow: var(--dx-shadow);
+  gap: 0.6rem !important;
+}
+.st-key-leftpanel { padding: 0.9rem; }
+/* Copilot 패널 자체는 스크롤 컨테이너가 아니다 — 메시지 영역(.st-key-chatlog)만 스크롤한다(§F) */
+.st-key-copilot { padding: 0.9rem; }
+/* Copilot 접힘 레일 — "‹ AI" 버튼 하나만 보이는 좁은 세로 패널 */
+.st-key-copilotrail {
+  padding: 0.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+}
+.st-key-center { padding: 1.3rem 1.4rem; container-type: inline-size; }
+/* 업종 진단 chapter 시스템 — center는 회색 페이지가 되고, 각 dxsec-*가 흰 chapter 카드가 된다(2단 중첩만 허용) */
+[class*="st-key-dxsec-"] {
+  background: var(--dx-panel); border: 1px solid var(--dx-border); border-radius: 14px;
+  padding: var(--dx-space-lg); gap: var(--dx-space-md) !important; box-shadow: none;
+}
+.st-key-center:has([class*="st-key-dxsec-"]) {
+  background: transparent; border: none; box-shadow: none; padding: 0; gap: var(--dx-space-lg) !important;
+}
+[class*="st-key-dxsec-"] .dx-section-head { margin-top: 0; }
+
+/* 섹션 바로가기 — 아래 chapter 카드와 같은 테두리·간격(카드 사이 간격은 .st-key-center의 gap 하나만 쓴다) */
+.dx-section-nav {
+  display: flex; gap: .35rem; overflow-x: auto; padding: .45rem .55rem; margin: 0;
+  border: 1px solid var(--dx-border); border-radius: 14px; background: var(--dx-panel);
+  scrollbar-width: thin;
+}
+.dx-section-nav a {
+  flex: 0 0 auto; color: #345667; text-decoration: none; font-size: .78rem;
+  font-weight: 700; padding: .32rem .52rem; border-radius: 8px; background: #f1f6f8;
+}
+.dx-section-nav a:hover { color: #fff; background: var(--dx-sky); }
+.dx-section-anchor { display: block; position: relative; top: -5.2rem; visibility: hidden; }
+/* 앵커 칸이 카드 안에서 요소 간격(gap)을 하나 더 차지하지 않게 흐름에서 뺀다.
+   카드를 기준 위치로 삼아야 앵커가 스크롤 영역 안에 남아 바로가기 이동이 동작한다. */
+[class*="st-key-dxsec-"]:has(.dx-section-anchor) { position: relative; }
+[class*="st-key-dxsec-"] [data-testid="stElementContainer"]:has(.dx-section-anchor) {
+  top: 0; left: 0;
+  position: absolute; width: 0; height: 0; margin: 0; overflow: visible;
+}
+/* 관리 화면(분기 사후검토·투명성·방법론·변경 기록) — 중앙 카드와 같은 모양 */
+.st-key-adminpage {
+  background: var(--dx-panel); border: 1px solid var(--dx-border); border-radius: 14px;
+  box-shadow: var(--dx-shadow); padding: 1.3rem 1.4rem;
+}
+.st-key-center h3 { font-weight: 700; padding: 0.4rem 0 1.15rem 0; }  /* stMarkdownContainer의 -1rem 여백 상쇄. 폰트 크기는 아래에서 지정 */
+
+/* 1600px 이하: 좌·우 패널을 조금 좁혀 중앙 보고서 폭 확보 */
+@media (max-width: 1600px) {
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-leftpanel) {
+    flex: 0 0 285px !important; width: 285px !important; max-width: 285px !important;  /* = 행정 AI 비서 */
+  }
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilot) {
+    flex: 0 0 285px !important; width: 285px !important; max-width: 285px !important;  /* = 왼쪽 패널 */
+  }
+}
+
+/* ---------------------------------------------------------------- 좌측 control panel */
+/* 섹션 라벨(st.markdown)만 — 버튼 라벨(p)은 건드리지 않는다 */
+.st-key-leftpanel [data-testid="stMarkdown"] p {
+  font-size: 0.76rem; font-weight: 700; color: var(--dx-muted);
+}
+.st-key-leftpanel [data-testid="stHorizontalBlock"] { gap: 0.45rem !important; }
+.st-key-leftpanel [data-testid="stColumn"] > div { gap: 0.45rem !important; }
+
+[class*="st-key-ind-"] button {
+  position: relative;
+  justify-content: center;
+  min-height: 2.1rem;
+  padding: 0.25rem 0.7rem;  /* 표식이 이름 옆에 붙으므로 좌우 여백 대칭 — 이름+도형이 가운데 */
+  border-color: var(--dx-border);
+}
+[class*="st-key-ind-"] button p { font-size: 0.8rem; font-weight: 600; }
+/* 단계 표식(도형+색)은 업종 이름 바로 옆 — ui.industry_style_html()이 button p::after로 주입 */
+.dx-mark-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem .7rem; font-size: .72rem; color: var(--dx-muted); }
+.dx-mark-item { display: inline-flex; align-items: center; gap: .3rem; }
+/* 단계별 dot 색·선택 표시는 main.py가 ui.industry_style_html()로 매 실행 주입한다(key 고정) */
+
+
+.st-key-noticecard {
+  background: var(--dx-amber-bg);
+  border: 1px solid #FDE68A;
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+}
+.st-key-noticecard [data-testid="stCaptionContainer"] p { color: #92400E; font-size: 0.74rem; line-height: 1.5; }
+
+/* ---------------------------------------------------------------- 공통 조각 */
+.dx-badge {
+  display: inline-block; padding: 0.3rem 0.8rem; border-radius: 999px;
+  font-size: 0.85rem; font-weight: 750; border: 1px solid transparent; white-space: nowrap;
+}
+.dx-badge--rose { background: var(--dx-rose-bg); color: var(--dx-rose); border-color: #FECDD3; }
+.dx-badge--amber { background: var(--dx-amber-bg); color: var(--dx-amber); border-color: #FDE68A; }
+.dx-badge--emerald { background: var(--dx-emerald-bg); color: var(--dx-emerald); border-color: #A7F3D0; }
+.dx-badge--muted { background: #F1F5F9; color: var(--dx-muted); border-color: var(--dx-border); }
+.dx-muted { color: var(--dx-muted); }
+
+.dx-pill-row { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.dx-pill { font-size: 0.72rem; font-weight: 700; padding: 0.12rem 0.55rem; border-radius: 999px; }
+.dx-pill.dx-tone-rose { background: var(--dx-rose-bg); color: var(--dx-rose); }
+.dx-pill.dx-tone-amber { background: var(--dx-amber-bg); color: var(--dx-amber); }
+.dx-pill.dx-tone-emerald { background: var(--dx-emerald-bg); color: var(--dx-emerald); }
+
+.dx-chip {
+  display: inline-block; font-size: 0.72rem; font-weight: 600;
+  padding: 0.1rem 0.45rem; border-radius: 0.35rem; border: 1px solid transparent;
+}
+.dx-chip b { font-weight: 750; opacity: .75; margin-left: 0.15rem; }
+.dx-chip--sky { background: var(--dx-sky-bg); color: #0369A1; border-color: #BAE6FD; }
+.dx-chip--violet { background: var(--dx-violet-bg); color: var(--dx-violet); border-color: #DDD6FE; }
+.dx-chip-row { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.3rem 0 0.6rem 0; }
+
+.dx-metric-card {
+  background: #F8FAFC; border: 1px solid var(--dx-border); border-radius: 12px; padding: 0.7rem 0.8rem;
+}
+.dx-metric-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.4rem;
+  font-weight: 700; font-size: 0.8rem; color: var(--dx-text-2);
+  padding-bottom: 0.45rem; margin-bottom: 0.3rem; border-bottom: 1px solid var(--dx-border);
+}
+.dx-metric-head .dx-badge { font-size: 0.72rem; padding: 0.15rem 0.55rem; }
+.dx-metric-row {
+  display: flex; justify-content: space-between; gap: 0.6rem;
+  font-size: 0.76rem; padding: 0.18rem 0; color: var(--dx-muted);
+}
+.dx-metric-row span { flex: 0 0 auto; }
+.dx-metric-row strong { color: var(--dx-text); text-align: right; font-weight: 650; }
+
+/* ---------------------------------------------------------------- 중앙 진단카드 */
+.dx-report-header {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+  border-bottom: 1px solid var(--dx-border); padding-bottom: 0.8rem;
+}
+.dx-report-title { font-size: 1.75rem; font-weight: 750; color: var(--dx-text); letter-spacing: -0.02em; }
+.dx-report-meta { font-size: 0.78rem; color: var(--dx-muted); margin-top: 0.2rem; }
+
+/* 화면 안 소제목(section()) — 업종 진단·정책 연계·점검 관리 공용 */
+.dx-section-head {
+  display: flex; align-items: baseline; column-gap: var(--dx-space-sm); row-gap: 0; flex-wrap: wrap;
+  margin: var(--dx-space-md) 0 0;  /* 아래 여백은 Streamlit 요소 간격(md)이 맡는다 → helper→내용 ≈16px */
+}
+.dx-section-title { font-size: 1.25rem; font-weight: 700; color: var(--dx-text); line-height: 1.35; }
+.dx-section-helper { display: block; flex-basis: 100%; font-size: 0.8rem; color: var(--dx-muted); margin-top: var(--dx-space-xs); }
+.dx-report-stage .dx-badge { font-size: 0.9rem; padding: 0.4rem 1rem; box-shadow: var(--dx-shadow); }
+
+.dx-kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.6rem; }
+.dx-kpi-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }  /* 업종 진단 Q1·Q2·Q3 세 관점 */
+/* 제목·값·보조 문장을 가로·세로 모두 가운데로, 줄 사이는 넉넉하게 */
+.dx-kpi {
+  background: #F8FAFC; border: 1px solid var(--dx-border); border-radius: 12px;
+  padding: 0.85rem 0.7rem; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
+}
+/* KPI 문구는 절대 두 줄로 넘기지 않는다 — 줄바꿈 금지 + 칸이 좁으면 칸 폭(cqi)에 맞춰 글씨를 줄임 */
+.dx-kpi-label { font-size: min(0.9rem, 8.5cqi); color: var(--dx-text-2); font-weight: 600; line-height: 1.35; white-space: nowrap; }
+.dx-kpi { container-type: inline-size; }
+/* 값은 한 줄: 칸이 좁으면 칸 폭(cqi)에 맞춰 글씨가 줄어든다(넓을 때는 1.45rem 그대로) */
+.dx-kpi-value { font-size: min(1.45rem, 11.5cqi); font-weight: 750; margin: 0; color: var(--dx-text); line-height: 1.3; white-space: nowrap; }
+.dx-kpi-value.dx-tone-rose { color: var(--dx-rose); }
+.dx-kpi-value.dx-tone-emerald { color: var(--dx-emerald); }
+.dx-kpi-value.dx-tone-amber { color: var(--dx-amber); }
+.dx-kpi-sub { font-size: min(0.78rem, 7.2cqi); color: var(--dx-muted); line-height: 1.4; white-space: nowrap; }
+
+.st-key-center [data-testid="stMarkdown"] p { font-size: 0.9rem; }
+.st-key-center h3 { font-size: 1.25rem !important; font-weight: 700; padding: 0.4rem 0 1.15rem 0; }
+
+.dx-rule-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.dx-rule-table th {
+  text-align: left; color: var(--dx-muted); font-weight: 600; background: #F8FAFC;
+  border-bottom: 1px solid var(--dx-border); padding: 0.4rem 0.6rem;
+}
+.dx-rule-table td { border-bottom: 1px solid #F1F5F9; padding: 0.35rem 0.6rem; color: var(--dx-text-2); }
+.dx-rule-table td:nth-child(2) { font-weight: 650; color: var(--dx-text); }
+/* 세부 판정규칙 현재값 — 판정 색과 맞춤(진단 판정 근거 카드와 같은 빨강·주황) */
+.dx-rule-table td.dx-cur--rose { color: var(--dx-rose); }
+.dx-rule-table td.dx-cur--amber { color: #D97706; }
+.dx-rule-table td.dx-cur--emerald { color: var(--dx-emerald); }
+.dx-verdict { display: inline-block; padding: 0.05rem 0.5rem; border-radius: 999px; font-weight: 700; font-size: 0.74rem; }
+.dx-verdict.dx-tone-rose { background: var(--dx-rose-bg); color: var(--dx-rose); }
+.dx-verdict.dx-tone-amber { background: var(--dx-amber-bg); color: var(--dx-amber); }
+.dx-verdict.dx-tone-emerald { background: var(--dx-emerald-bg); color: var(--dx-emerald); }
+.dx-verdict.dx-tone-muted { background: #F1F5F9; color: #94A3B8; }
+.dx-footnote {
+  font-size: 0.78rem; color: var(--dx-muted); background: #F8FAFC;
+  border-top: 1px solid var(--dx-border); padding: 0.45rem 0.6rem;
+}
+
+.dx-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.dx-panel-card { border-radius: 12px; padding: 0.6rem 0.8rem; font-size: 0.78rem; border: 1px solid transparent; }
+.dx-panel-card--emerald { background: #F0FDF4; border-color: #A7F3D0; }
+.dx-panel-card--amber { background: var(--dx-amber-bg); border-color: #FDE68A; }
+.dx-panel-title { font-weight: 650; font-size: 0.95rem; margin-bottom: 0.35rem; }
+.dx-panel-card--emerald .dx-panel-title { color: #047857; }
+.dx-panel-card--amber .dx-panel-title { color: #92400E; }
+.dx-panel-card ul { margin: 0; padding-left: 1rem; }
+.dx-panel-card li { margin-bottom: 0.2rem; line-height: 1.45; font-size: 0.86rem; }
+.dx-panel-card--emerald li { color: #064E3B; }
+.dx-panel-card--amber li { color: #78350F; }
+
+/* 분기별 판정 추이 칩 — 단계 색·현재 분기 표시는 ui.timeline_style_html()이 주입 */
+/* 한 줄 유지: 칩들이 가로폭을 똑같이 나눠 가진다(줄바꿈 없음). 아주 좁은 화면에서만 가로 스크롤 */
+.st-key-timeline { gap: 0.15rem !important; flex-wrap: nowrap !important; overflow-x: auto; padding: 3px; }  /* 현재 분기 외곽선이 잘리지 않게 */
+.st-key-timeline > [data-testid="stElementContainer"] { flex: 1 1 0 !important; min-width: 1.7rem !important; width: auto !important; }
+.st-key-timeline [data-testid="stButton"], .st-key-timeline [data-testid="stButton"] > div { width: 100% !important; }
+[class*="st-key-tl-"] button {
+  width: 100%; min-width: 0; min-height: 1.7rem; padding: 0.1rem 0.05rem; border-radius: 0.35rem;
+  background: #F1F5F9; border-color: var(--dx-border);
+}
+.dx-chip-note { font-size: .72rem; color: var(--dx-muted); margin-top: -.35rem; }  /* 판정 추이 띠 아래 표식 설명 */
+[class*="st-key-tl-"] button p { font-size: 0.64rem; font-weight: 650; color: #94A3B8; white-space: nowrap; letter-spacing: -0.01em; }
+
+/* Recruitment Layer */
+.dx-level-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0.5rem 0; }
+.dx-level { background: #fff; border: 1px solid var(--dx-border); border-radius: 10px; padding: 0.45rem 0.6rem; }
+.dx-level-label { font-size: 0.85rem; color: var(--dx-muted); font-weight: 600; }
+.dx-level-value { font-size: 1.35rem; font-weight: 700; color: var(--dx-text); }
+.dx-level-sub { font-size: 0.78rem; color: var(--dx-muted); }
+.dx-sub-title {
+  font-size: 0.95rem; font-weight: 650; color: var(--dx-text); margin: var(--dx-space-lg) 0 var(--dx-space-sm);
+}
+.dx-sub-title:first-child { margin-top: 0; }
+/* 소제목 바로 아래 옅은 안내문 */
+.dx-sub-helper {
+  font-size: 0.78rem; color: var(--dx-muted); margin: calc(-1 * var(--dx-space-xs)) 0 var(--dx-space-sm);
+}
+/* 카드 안 한 줄짜리 옅은 안내문(회색 스트립 아님) — 왜인가 요약줄, 키워드 근거, 지원기능 안내 등 */
+.dx-note { font-size: 0.8rem; color: var(--dx-muted); margin-top: var(--dx-space-sm); }
+.dx-table-wrap { overflow-x: auto; margin-top: 0.3rem; }
+.dx-detail-table { font-size: 0.72rem; }
+.dx-detail-table td { vertical-align: top; }
+.dx-warn {
+  font-size: 0.74rem; color: #92400E; background: var(--dx-amber-bg);
+  border: 1px solid #FDE68A; border-radius: 8px; padding: 0.3rem 0.55rem; margin-top: 0.35rem;
+}
+.dx-empty {
+  font-size: 0.8rem; color: var(--dx-text-2); background: #F8FAFC;
+  border: 1px dashed #CBD5E1; border-radius: 10px; padding: 0.7rem 0.8rem;
+}
+/* 대표 공고 빈 상태 — 유일하게 옅은 배경을 쓰는 요소(카드가 아니라 빈 상태 표시) */
+.dx-empty-note {
+  font-size: 0.85rem; color: var(--dx-text-2); background: #F8FAFC;
+  border-radius: 8px; padding: var(--dx-space-sm) var(--dx-space-md);
+}
+/* 대표 공고 표 — 학력·자격·산단 확인 칸은 단어 중간에서 줄바꿈하지 않는다 */
+/* 대표·전체 공고 표 — 열 폭은 ui.posting_table_html의 colgroup(21/21/13/10/20/15%)으로 고정.
+   한국어는 단어 단위로만 줄바꿈(keep-all) → '최소 2년 이상'이 한 글자씩 세로로 깨지지 않는다. 좁은 화면은 표만 가로 스크롤 */
+.dx-detail-table { table-layout: fixed; min-width: 680px; }
+.dx-detail-table th, .dx-detail-table td { word-break: keep-all; overflow-wrap: break-word; }
+
+/* 현장 확인 체크리스트(indigo) */
+.st-key-fieldcheck {
+  background: var(--dx-indigo-bg);
+  border: 1px solid #C7D2FE;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  gap: 0.3rem !important;
+}
+.st-key-fieldcheck [data-testid="stCheckbox"] {
+  background: #fff; border: 1px solid #E0E7FF; border-radius: 8px; padding: 0.35rem 0.55rem;
+}
+.st-key-fieldcheck [data-testid="stCheckbox"] p { font-size: 0.8rem; line-height: 1.45; }
+
+/* 지원체계 검토 경로 — 업종 진단과 같은 bright card(정책·지원 연계 화면) */
+.dx-handoff-card {
+  background: #F8FAFC; color: var(--dx-text-2); border: 1px solid var(--dx-border); border-radius: 12px;
+  padding: 0.9rem 1rem; font-size: 0.78rem;
+}
+.dx-handoff-title { font-weight: 750; color: var(--dx-text); margin-bottom: 0.45rem; font-size: 0.8rem; }
+.dx-handoff-row { display: flex; gap: 0.6rem; margin-bottom: 0.2rem; }
+.dx-handoff-row span { color: var(--dx-muted); flex: 0 0 6.2rem; }
+.dx-handoff-row strong { color: var(--dx-text); font-weight: 650; }
+.dx-route-kw { color: var(--dx-muted); font-size: 0.72rem; margin: 0.15rem 0 0.4rem 0; }
+.dx-route-caveat { color: var(--dx-amber); font-size: 0.72rem; margin-top: 0.2rem; }
+.dx-link { color: var(--dx-sky) !important; text-decoration: underline; margin-left: 0.25rem; white-space: nowrap; }
+/* 참고 기관 — 공식 지원사업보다 한 단계 낮은 보조정보(작은 제목·기관명 semibold·기능 muted·작은 링크) */
+.dx-inst-head { font-size: 0.8rem; font-weight: 650; color: var(--dx-text-2); margin-top: var(--dx-space-sm); }
+.dx-inst-list { list-style: none; margin: var(--dx-space-xs) 0 0; padding: 0; }
+.dx-inst-list li { padding: 0.3rem 0; border-top: 1px solid #F1F5F9; }
+.dx-inst-name { display: block; font-size: 0.88rem; font-weight: 600; color: var(--dx-text); }
+.dx-inst-fn { font-size: 0.8rem; color: var(--dx-muted); }
+.dx-inst-list .dx-link { font-size: 0.75rem; }
+
+.dx-handoff-note { color: var(--dx-muted); font-size: 0.72rem; margin-top: 0.5rem; border-top: 1px solid var(--dx-border); padding-top: 0.45rem; }
+
+/* 업종 진단 — 지원 기능 요약 카드 */
+.dx-support-card {
+  background: #F8FAFC; border: 1px solid var(--dx-border); border-radius: 12px; padding: 0.75rem 0.9rem;
+  font-size: 0.78rem;
+}
+.dx-support-card .dx-panel-title { color: var(--dx-text); }
+/* dxsec 안에서는 section()이 이미 카드 제목을 그리므로 안쪽 카드 배경을 없애 2단 중첩만 남긴다(1번 규칙) */
+[class*="st-key-dxsec-"] .dx-support-card { background: none; border: none; padding: 0; }
+.dx-support-row {
+  display: flex; justify-content: space-between; gap: 0.6rem; padding: 0.42rem 0;
+  border-bottom: 1px solid #F1F5F9; color: var(--dx-text); font-weight: 600; font-size: 0.86rem;
+}
+.dx-support-count { color: var(--dx-muted); font-weight: 500; }
+
+/* 정책·지원 연계 — 기능별 공식 요건 카드 */
+.dx-fn-group { margin-top: 0.8rem; }
+.dx-fn-group-head { display: flex; justify-content: space-between; gap: 0.6rem; font-size: 0.86rem; color: var(--dx-text); }
+.dx-support-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.dx-fn-card {
+  background: #fff; border: 1px solid var(--dx-border); border-radius: 10px; padding: 0.6rem 0.7rem;
+  font-size: 0.76rem; color: var(--dx-text-2); box-shadow: var(--dx-shadow);
+}
+.dx-fn-card-title { font-weight: 750; color: var(--dx-text); font-size: 0.95rem; }
+.dx-fn-card-inst { color: var(--dx-muted); margin-top: 0.1rem; }
+/* 요건 카드 CTA — 공식 근거(보조) · 상세 보기(주 버튼) 를 한 줄에 */
+.dx-fn-card-links { margin-top: 0.3rem; display: inline-block; }
+.dx-fn-card-links .dx-link {
+  margin-left: 0; display: inline-block; padding: 0.15rem 0.6rem; border-radius: 0.45rem;
+  border: 1px solid var(--dx-border); color: var(--dx-sky) !important; text-decoration: none !important;
+}
+details.dx-more {
+  margin-top: 0.3rem; margin-left: 0.4rem; color: var(--dx-text-2); display: inline-block; vertical-align: middle;
+}
+details.dx-more summary {
+  cursor: pointer; color: #fff; font-weight: 600; list-style: none;
+  background: var(--dx-sky); border-radius: 0.45rem; padding: 0.15rem 0.6rem; display: inline-block;
+}
+details.dx-more summary::-webkit-details-marker { display: none; }
+details.dx-more div { padding: 0.12rem 0 0 0.4rem; line-height: 1.45; }
+
+/* 왜 {단계}인가? 근거 카드 */
+.dx-reason-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.6rem; }
+.dx-reason {
+  background: #fff; border: 1px solid var(--dx-border); border-left: 4px solid var(--dx-amber);
+  border-radius: 10px; padding: 0.55rem 0.7rem;
+}
+.dx-reason.dx-tone-rose { border-left-color: var(--dx-rose); }
+.dx-reason.dx-tone-amber { border-left-color: #F59E0B; }
+.dx-reason--empty { border-left-color: #CBD5E1; font-size: 0.8rem; }
+.dx-reason-no { font-size: 0.8rem; color: var(--dx-muted); font-weight: 700; }
+/* 근거 카드 문구도 절대 두 줄로 넘기지 않는다 — 줄바꿈 금지 + 카드가 좁으면 카드 폭(cqi)에 맞춰 글씨를 줄임 */
+.dx-reason { container-type: inline-size; }
+.dx-reason-title { font-size: min(0.9rem, 8.5cqi); color: var(--dx-text-2); font-weight: 600; white-space: nowrap; }
+.dx-reason-value { font-size: min(1.4rem, 11.5cqi); font-weight: 700; color: var(--dx-text); margin: 0.1rem 0; white-space: nowrap; }
+.dx-reason.dx-tone-rose .dx-reason-value { color: var(--dx-rose); }
+/* 주황 테두리 카드는 값도 주황(테두리 #F59E0B보다 한 단계 진하게 — 흰 바탕 가독성) */
+.dx-reason.dx-tone-amber .dx-reason-value { color: #D97706; }
+/* 문장형 값(예: '연속 진입신호'): 숫자 값보다 작게, 최대 1.05rem */
+.dx-reason-value--text { font-size: min(1.05rem, 8.2cqi); line-height: 1.75; }
+.dx-reason-rule { font-size: min(0.78rem, 7.2cqi); color: var(--dx-muted); white-space: nowrap; }
+.dx-reason.dx-tone-muted { border-left-color: #CBD5E1; }
+.dx-reason.dx-tone-muted .dx-reason-value { color: var(--dx-text-2); }
+
+/* 후향 재구성 등 공지 */
+.dx-notice { border-radius: 10px; padding: 0.55rem 0.75rem; font-size: 0.78rem; border: 1px solid transparent; }
+.dx-notice--violet { background: var(--dx-violet-bg); border-color: #DDD6FE; color: #4C1D95; }
+.dx-notice-title { font-weight: 750; margin-bottom: 0.15rem; }
+.dx-notice-source { font-size: 0.7rem; opacity: .75; margin-top: 0.15rem; }
+
+/* 판정 추이 한 줄(현재 ← 과거) */
+.dx-trail { font-size: 0.78rem; color: var(--dx-text-2); display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+
+/* 현장 확인 질문 요약(indigo, 체크리스트와 같은 톤) */
+.dx-qlist {
+  background: var(--dx-indigo-bg); border: 1px solid #C7D2FE; border-radius: 12px; padding: 0.65rem 0.9rem;
+}
+.dx-qlist .dx-footnote { background: transparent; border-top-color: #C7D2FE; padding-left: 0; }
+/* dxsec 안에서는 section()이 제목을 그리므로 질문 목록의 indigo 박스 배경도 없앤다(1번 규칙) */
+[class*="st-key-dxsec-"] .dx-qlist { background: none; border: none; padding: 0; }
+.dx-qlist-items { margin: 0.3rem 0; padding-left: 1.2rem; font-size: 0.88rem; color: var(--dx-text); }
+.dx-qlist-items li { margin-bottom: 0.2rem; line-height: 1.45; }
+.dx-tag-line {
+  display: inline-block; font-size: 0.7rem; font-weight: 700; color: #0369A1; background: var(--dx-sky-bg);
+  border: 1px solid #BAE6FD; border-radius: 999px; padding: 0.05rem 0.55rem; margin: 0.2rem 0;
+}
+
+/* 점검 후보 카드 */
+.dx-cand-head { display: flex; align-items: center; justify-content: space-between; gap: 0.55rem; }
+.dx-cand-name { font-size: 1.05rem; font-weight: 700; color: var(--dx-text); }
+.dx-cand-head .dx-badge { font-size: 0.72rem; padding: 0.15rem 0.55rem; }
+.dx-cand-metrics { font-size: 0.86rem; color: var(--dx-text-2); margin-top: 0.3rem; }
+.dx-cand-q { margin-top: 0.3rem; }
+.dx-cand-q-label { font-size: 0.8rem; font-weight: 650; color: var(--dx-text-2); }
+.dx-cand-q ul { margin: 0.15rem 0 0.2rem 0; padding-left: 1.1rem; }
+.dx-cand-q li { font-size: 0.86rem; color: var(--dx-text-2); }
+
+/* 판정 추이 범례 — 칩과 같은 톤 */
+.dx-legend { display: flex; align-items: center; gap: 0.4rem; margin: 0.3rem 0; flex-wrap: wrap; }
+.dx-legend .dx-pill.dx-tone-rose { background: var(--dx-rose); color: #fff; }
+.dx-legend .dx-pill.dx-tone-amber { background: #FBBF24; color: #fff; }
+.dx-legend .dx-pill.dx-tone-emerald { background: var(--dx-emerald-bg); color: #047857; }
+.dx-legend [title] { cursor: help; }
+
+/* 점검 상태 액션 바(§6) — 업종 진단 chapter들 바깥, 분석 상세 보기 expander 앞 */
+.st-key-casebar {
+  background: var(--dx-panel); border: 1px solid var(--dx-border); border-radius: 10px;
+  padding: var(--dx-space-sm) var(--dx-space-md);
+}
+.st-key-casebar [data-testid="stMarkdown"] p { font-size: 0.86rem; color: var(--dx-text-2); }
+
+/* 진단서(인계용 요약) 섹션 */
+.dx-sec-title {
+  font-size: 0.86rem; font-weight: 750; color: var(--dx-text); margin: 0.9rem 0 0.35rem 0;
+  padding-bottom: 0.25rem; border-bottom: 1px solid var(--dx-border);
+}
+
+/* 중앙 카드 폭에 맞춘 재배치(컨테이너 쿼리) */
+@container (max-width: 780px) {  /* KPI 4칸이 좁아지면 2×2로 — 문구가 두 줄로 넘어가지 않게 */
+  .dx-kpi-grid, .dx-level-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dx-two-col, .dx-support-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------------- 우측 AI Copilot */
+.dx-copilot-title { font-weight: 750; font-size: 0.92rem; color: var(--dx-text); display: flex; align-items: center; gap: 0.45rem; }
+.dx-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dx-sky); display: inline-block; }
+.dx-copilot-sub { font-size: 0.72rem; color: var(--dx-muted); line-height: 1.45; }
+/* AI 비서 맥락 줄(업종 · 분기 + 태그)은 항상 한 줄 — 글씨 크기 = min(기본, 패널 폭 ÷ 문구 폭) */
+.dx-ctx-wrap { container-type: inline-size; }
+.dx-ctx-line { white-space: nowrap; font-size: min(0.72rem, calc(100cqi / var(--ctx-units, 20))); }
+.dx-ctx-line .dx-chip { font-size: 1em; padding: 0.1em 0.4em; margin-left: 0.2em; }
+/* 패널이 좁으면 일반 태그(진단·현장·정책)는 숨기고 업종·분기 제목을 기본 크기로 */
+@container (max-width: 250px) {
+  .dx-chip--opt { display: none; }
+  .dx-ctx-line--opt { font-size: min(0.72rem, calc(100cqi / var(--ctx-units-min, 14))); }
+}
+.st-key-copilot [data-testid="stSelectbox"] label p { font-size: 0.72rem; color: var(--dx-muted); }
+/* 빈 대화 안내문(두 문장) — 기본 16px가 아니라 본문 톤에 맞춘다 */
+.st-key-copilot [data-testid="stMarkdown"] p { font-size: 0.86rem; line-height: 1.55; }
+/* 추천 질문·되묻기 바로가기 — compact quick action(기본 4개·더보기·되묻기 모두 같은 모양) */
+.st-key-chips, .st-key-chipsmore, .st-key-clarifyacts { gap: 0.45rem !important; }
+/* 추천 질문: 한 줄에 2개씩(칸 너비를 반씩 나눠 가짐, 긴 질문은 칸 안에서 줄바꿈) */
+.st-key-chips, .st-key-chipsmore { flex-wrap: wrap !important; }
+.st-key-chips > [data-testid="stElementContainer"], .st-key-chipsmore > [data-testid="stElementContainer"] {
+  flex: 0 0 calc(50% - 0.225rem) !important; width: calc(50% - 0.225rem) !important; max-width: calc(50% - 0.225rem) !important;
+}
+.st-key-chips [data-testid="stButton"], .st-key-chips [data-testid="stButton"] > div,
+.st-key-chipsmore [data-testid="stButton"], .st-key-chipsmore [data-testid="stButton"] > div { width: 100% !important; }
+/* 버튼마다 한 줄: 표시명은 짧게(view_models.CHIP_LABELS), 글씨는 조금 작게. 그래도 넘치면 말줄임(원문은 마우스 오버) */
+.st-key-chips button, .st-key-chipsmore button {
+  width: 100%; min-height: 1.9rem; padding: 0.2rem 0.4rem !important; justify-content: flex-start; overflow: hidden;
+}
+.st-key-chips button > div, .st-key-chipsmore button > div { min-width: 0; overflow: hidden; }
+.st-key-chips button p, .st-key-chipsmore button p {
+  font-size: 0.7rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;
+}
+[class*="st-key-chip-"] button, [class*="st-key-act-"] button {
+  min-height: 1.7rem; padding: 0.2rem 0.55rem; border-radius: 0.45rem;
+  background: #fff; border-color: var(--dx-border);
+}
+[class*="st-key-chip-"] button p, [class*="st-key-act-"] button p { font-size: 0.74rem; color: var(--dx-text-2); }
+[class*="st-key-chip-"] button:hover, [class*="st-key-act-"] button:hover { background: var(--dx-sky-bg); border-color: #7DD3FC; }
+
+/* 답변 본문 — 결론 한 줄 → 근거 목록 → 다음 확인(수치·문장은 backend 원문 그대로) */
+.dx-ans { font-size: 0.8rem; line-height: 1.55; color: var(--dx-text); }
+.dx-ans-lead { font-weight: 650; margin-bottom: var(--dx-space-xs); }
+.dx-ans-points { margin: 0 0 var(--dx-space-xs); padding-left: 1.05rem; }
+.dx-ans-points li { margin-bottom: 0.15rem; font-size: 0.8rem; line-height: 1.5; }  /* Streamlit 전역 li(16px)보다 우선 */
+.dx-ans-lead, .dx-ans-next, .dx-cmp-name, .dx-cmp-label { line-height: 1.5; }
+.dx-ans-next { font-size: 0.74rem; color: var(--dx-muted); margin-top: var(--dx-space-xs); }
+/* 업종 비교 — 좁은 Copilot 폭에서는 두 업종을 위아래로(중첩 카드 없이 구분선만) */
+.dx-cmp { display: grid; grid-template-columns: 1fr; gap: var(--dx-space-sm); margin: var(--dx-space-sm) 0; }
+.dx-cmp-side { border-top: 1px solid var(--dx-border); padding-top: var(--dx-space-sm); }
+.dx-cmp-name { font-weight: 700; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.2rem; }
+.dx-cmp-name .dx-badge { font-size: 0.66rem; padding: 0.05rem 0.45rem; }
+.dx-cmp-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+.dx-cmp-table td { padding: 0.1rem 0; color: var(--dx-text-2); }
+.dx-cmp-table td:last-child { text-align: right; }
+.dx-cmp-table td.dx-cmp-hit { font-weight: 700; color: var(--dx-text); }
+.dx-cmp-label { font-size: 0.74rem; font-weight: 650; color: var(--dx-text-2); margin-top: var(--dx-space-xs); }
+/* 메시지 영역만 스크롤한다(§F) — 대화가 없으면 이 컨테이너 자체를 만들지 않는다(main.py) */
+.st-key-chatlog {
+  border: 1px solid var(--dx-border);
+  border-radius: 10px;
+  background: #fff;
+  padding: var(--dx-space-xs);
+}
+/* 머리 영역(맥락·비교 업종·추천 질문) — 옅은 회색 띠로 대화 영역과 구분(참고 이미지의 추천 질문 영역) */
+.st-key-copilothead {
+  background: #F8FAFC; border: 1px solid var(--dx-border); border-radius: 10px;
+  padding: var(--dx-space-sm); gap: 0.6rem !important;  /* 맥락·비교 업종·추천 질문·더보기 블럭 간격(대화 영역 높이 확보) */
+}
+/* 질문 입력 — 안내문(muted) 아래 여백을 두고 별도 action area처럼(구분선 없음). 넓은 입력칸 + 파란 전송 버튼 */
+.st-key-copilot [data-testid="stElementContainer"]:has([data-testid="stChatInput"]) {
+  margin-top: 0.9rem;  /* flex gap 0.6rem과 합쳐 안내문 글자 아래 ≈24px */
+}
+.st-key-copilot [data-testid="stCaptionContainer"] p { color: var(--dx-muted); }
+.st-key-copilot [data-testid="stChatInput"] {
+  background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 14px;
+}
+.st-key-copilot [data-testid="stChatInput"]:focus-within { border-color: var(--dx-sky); box-shadow: 0 0 0 3px rgba(2, 132, 199, .12); }
+.st-key-copilot [data-testid="stChatInputSubmitButton"] {
+  background: var(--dx-sky) !important; color: #fff !important; border-radius: 10px !important;
+  min-width: 2.4rem; min-height: 2.4rem;
+}
+.st-key-copilot [data-testid="stChatInputSubmitButton"] svg { fill: #fff; color: #fff; }
+.st-key-copilot [data-testid="stChatInputSubmitButton"]:disabled { opacity: .55; }
+.st-key-chatlog [data-testid="stChatMessage"] { padding: 0.5rem 0.6rem; gap: 0.5rem; }
+.st-key-chatlog [data-testid="stChatMessage"] p { font-size: 0.8rem; line-height: 1.5; }
+.st-key-copilot [data-testid="stChatInput"] textarea { font-size: 0.82rem; }
+/* chat_input은 기본적으로 내용에 맞춰 늘어난다(height="content") — 위아래 한도만 둔다 */
+.st-key-copilot [data-testid="stChatInput"] textarea {
+  min-height: 2.6rem !important; max-height: 7.5rem !important; overflow-y: auto !important;
+}
+
+/* ---------------------------------------------------------------- 반응형 */
+/* 1280px 이하: 여전히 한 줄 유지 — 좌·우 패널을 1600px보다 더 좁혀 중앙 폭을 확보한다(쌓지 않음) */
+@media (max-width: 1280px) {
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-leftpanel) {
+    flex: 0 0 265px !important; width: 265px !important; max-width: 265px !important;  /* = 행정 AI 비서 */
+  }
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilot) {
+    flex: 0 0 265px !important; width: 265px !important; max-width: 265px !important;  /* = 왼쪽 패널 */
+  }
+}
+/* 900px 미만에서만 세로로 쌓는다 */
+@media (max-width: 900px) {
+  .st-key-shell { flex-wrap: wrap !important; }
+  /* 1280/1600 규칙과 같은 :has() 선택자로 써야 우선순위에서 이긴다(그렇지 않으면 좁은 화면에서도 3열이 유지됨) */
+  .st-key-shell > [data-testid="stLayoutWrapper"],
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-leftpanel),
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-center),
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilot),
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilotrail) {
+    flex: 1 1 100% !important; width: 100% !important; max-width: none !important; position: static !important;
+  }
+  .st-key-topactions { flex-wrap: wrap; }
+  .dx-report-header { flex-direction: column; }
+}
+
+@media print {
+  [data-testid="stLayoutWrapper"]:has(> .st-key-topbar),
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-leftpanel),
+  .st-key-shell > [data-testid="stLayoutWrapper"]:has(> .st-key-copilot) { display: none !important; }
+  .st-key-center { border: none; box-shadow: none; }
+}
+
+/* ---------------------------------------------------------------- 정책·지원 연계(공식 지원 연계 / 공모전 팀 제안)
+   공식 = blue·neutral, 팀 제안 = 아주 약한 violet accent. 강한 shadow·gradient 없음. */
+.dx-labeled { display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  font-size: .8rem; color: var(--dx-muted); padding: .1rem 0; }
+.dx-guide { margin-top: var(--dx-space-sm); border-top: 1px solid var(--dx-border); padding-top: var(--dx-space-sm); }
+.dx-guide-head { font-size: .72rem; font-weight: 650; color: var(--dx-muted); margin-bottom: .35rem; }
+.dx-guide-row { border-radius: 8px; padding: .45rem .6rem; margin-bottom: .25rem; }
+.dx-guide-row.is-active { background: var(--dx-sky-bg); }
+.dx-guide-row.is-active.is-team { background: var(--dx-violet-bg); }
+.dx-guide-name { font-size: .84rem; font-weight: 650; color: var(--dx-text); }
+.dx-guide-row.is-active .dx-guide-name { color: var(--dx-sky); }
+.dx-guide-row.is-active.is-team .dx-guide-name { color: var(--dx-violet); }
+.dx-guide-desc, .dx-guide-note { font-size: .74rem; color: var(--dx-muted); line-height: 1.4; }
+
+.st-key-policytab { margin: var(--dx-space-xs) 0 var(--dx-space-sm); }
+.st-key-policytab [data-testid="stButtonGroup"] button { font-size: .86rem; padding: .3rem 1rem; }
+.dx-pctx { border: 1px solid var(--dx-border); border-radius: 10px; padding: .6rem .8rem; background: #F8FAFC; }
+.dx-pctx-label { font-size: .72rem; color: var(--dx-muted); }
+.dx-pctx-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: .95rem; color: var(--dx-text); margin-top: .15rem; }
+.dx-pctx-sep { color: #CBD5E1; }
+.dx-pctx-help { font-size: .74rem; color: var(--dx-muted); margin-top: .25rem; }
+
+.dx-count-head { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; margin-top: var(--dx-space-sm); }
+.dx-count { font-size: .8rem; color: var(--dx-muted); white-space: nowrap; }
+.st-key-proghead [data-testid="stButtonGroup"] button { font-size: .76rem; min-height: 1.8rem; padding: .1rem .7rem; }
+.dx-prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: .6rem; align-items: start; }
+.dx-prog { background: #fff; border: 1px solid var(--dx-border); border-radius: 10px; padding: .75rem .85rem; color: var(--dx-text-2); }
+.dx-prog-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.dx-prog-fn { font-size: .72rem; font-weight: 650; color: var(--dx-sky); background: var(--dx-sky-bg);
+  border-radius: 999px; padding: .05rem .55rem; }
+.dx-prog-status { font-size: .72rem; font-weight: 650; border-radius: 999px; padding: .05rem .55rem; white-space: nowrap; }
+.dx-prog-status.is-open { color: var(--dx-emerald); background: var(--dx-emerald-bg); }
+.dx-prog-status.is-unknown { color: var(--dx-amber); background: var(--dx-amber-bg); }
+.dx-prog-title { font-size: .98rem; font-weight: 700; color: var(--dx-text); margin-top: .45rem; }
+.dx-prog-inst { font-size: .8rem; color: var(--dx-muted); }
+.dx-prog-desc { font-size: .78rem !important; color: var(--dx-text-2); margin-top: .3rem; line-height: 1.45; }
+.dx-prog-rows { display: grid; grid-template-columns: 4.6rem 1fr; gap: .2rem .5rem; margin: .5rem 0 0; padding: 0; font-size: .8rem; }
+.dx-prog-rows dt { color: var(--dx-muted); margin: 0; padding: 0; }
+.dx-prog-rows dd { margin: 0; color: var(--dx-text); }
+.dx-prog-actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: .4rem; margin-top: .6rem; }
+details.dx-prog-more summary { cursor: pointer; list-style: none; display: inline-block; background: var(--dx-sky);
+  color: #fff; font-size: .78rem; font-weight: 600; border-radius: .45rem; padding: .22rem .75rem; }
+details.dx-prog-more summary::-webkit-details-marker { display: none; }
+details.dx-prog-more[open] { flex-basis: 100%; order: 2; }
+.dx-prog-detail { font-size: .78rem; line-height: 1.5; padding: .4rem 0 0; }
+.dx-prog-detail b { color: var(--dx-muted); font-weight: 600; margin-right: .3rem; }
+.dx-link.dx-prog-src { margin-left: 0; font-size: .78rem; text-decoration: none !important; border: 1px solid var(--dx-border);
+  border-radius: .45rem; padding: .18rem .7rem; background: #fff; }
+.dx-prog-empty { font-size: .82rem; color: var(--dx-muted); padding: .6rem 0; }
+
+/* 현재 모집 중인 관련 공고 — 지원제도 카드와 같은 모양. 출처(기업마당)는 작은 메타데이터로만 */
+.dx-notice-badges { display: flex; gap: .3rem; flex-wrap: wrap; }
+.dx-notice-src { font-size: .72rem; color: var(--dx-muted); background: #F1F5F9; border-radius: 999px; padding: .02rem .45rem; }
+.dx-notice-why { margin-top: .5rem; font-size: .78rem; }
+.dx-notice-why-h { color: var(--dx-muted); font-size: .72rem; font-weight: 650; }
+.dx-notice-why ul { margin: .15rem 0 0 1rem; padding: 0; }
+.dx-notice-why li { font-size: .78rem !important; line-height: 1.45; color: var(--dx-text-2); margin: 0; }
+
+.dx-team-intro { font-size: .82rem; color: var(--dx-text-2); background: var(--dx-violet-bg); border-left: 3px solid #C4B5FD;
+  border-radius: 6px; padding: .55rem .75rem; margin-bottom: var(--dx-space-sm); line-height: 1.5; }
+.dx-flow-wrap { margin: var(--dx-space-sm) 0; }
+.dx-flow-head { font-size: .8rem; font-weight: 650; color: var(--dx-text-2); margin-bottom: .35rem; }
+.dx-flow { display: flex; align-items: stretch; gap: .3rem; overflow-x: auto; padding-bottom: .2rem; }
+.dx-flow-step { flex: 1 0 6.4rem; border: 1px solid #E9E3FB; border-radius: 8px; padding: .4rem .5rem; background: #fff; }
+.dx-flow-name { font-size: .82rem; font-weight: 700; color: var(--dx-violet); }
+.dx-flow-help { font-size: .7rem; color: var(--dx-muted); line-height: 1.35; }
+.dx-flow-arrow { align-self: center; color: #C4B5FD; font-size: .85rem; }
+
+.dx-tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: .6rem; align-items: start; margin-top: .3rem; }
+.dx-tcard { background: #fff; border: 1px solid var(--dx-border); border-top: 3px solid #DDD6FE; border-radius: 10px;
+  padding: .7rem .85rem; color: var(--dx-text-2); }
+.dx-tcard-badges { display: flex; gap: .3rem; flex-wrap: wrap; }
+.dx-tkind { font-size: .7rem; font-weight: 700; color: var(--dx-violet); background: var(--dx-violet-bg); border-radius: 999px; padding: .03rem .5rem; }
+.dx-tstage { font-size: .7rem; font-weight: 600; color: var(--dx-text-2); background: #F1F5F9; border-radius: 999px; padding: .03rem .5rem; }
+.dx-tcard-title { font-size: .95rem; font-weight: 700; color: var(--dx-text); margin-top: .4rem; }
+.dx-tcard-summary { font-size: .8rem; line-height: 1.5; margin-top: .2rem; }
+.dx-tcard-effect { font-size: .78rem; line-height: 1.45; margin-top: .4rem; color: var(--dx-text); }
+.dx-tcard-effect span { font-weight: 650; color: var(--dx-violet); margin-right: .3rem; }
+details.dx-tmore { margin-top: .45rem; }
+details.dx-tmore summary { cursor: pointer; font-size: .78rem; font-weight: 600; color: var(--dx-violet); }
+.dx-tsec { margin-top: .5rem; font-size: .78rem; line-height: 1.5; }
+.dx-tsec-h { font-weight: 700; color: var(--dx-text); font-size: .78rem; }
+.dx-tsec p { margin: .1rem 0; font-size: .78rem !important; line-height: 1.5 !important; }  /* Streamlit 전역 p(16px)보다 우선 */
+.dx-tsec ul, .dx-tsteps { margin: .15rem 0 0 1.1rem; padding: 0; }
+.dx-tsec li { font-size: .78rem !important; margin: 0; line-height: 1.5; }
+
+/* 왼쪽 패널 하단 — 담당자 인계용 진단서(선택 패널 카드 안, 그림자·장식 없음) */
+.st-key-reportcard { border-top: 1px solid var(--dx-border); padding-top: var(--dx-space-sm); gap: .45rem !important; }
+
+/* ---------------------------------------------------------------- 업종 진단 상단 점검 대기열 · 5초 요약 */
+.dx-qcard {
+  border: 1px solid var(--dx-border); border-left: 4px solid #CBD5E1; border-radius: 10px;
+  padding: .6rem .8rem; background: #fff; font-size: .82rem; color: var(--dx-text-2);
+}
+.dx-qcard:has(.dx-badge--rose) { border-left-color: var(--dx-rose); }
+.dx-qcard:has(.dx-badge--amber) { border-left-color: #F59E0B; }
+.dx-qcard.is-selected { border-color: var(--dx-sky); box-shadow: 0 0 0 1px var(--dx-sky); }
+.dx-qcard-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.dx-qcard-name { font-size: 1rem; font-weight: 750; color: var(--dx-text); }
+.dx-qcard-status { font-size: .74rem; color: var(--dx-muted); }
+.dx-qcard-sel { margin-left: auto; font-size: .72rem; font-weight: 700; color: var(--dx-sky); }
+.dx-qcard-state { margin-top: .25rem; font-weight: 600; color: var(--dx-text); }
+.dx-qcard-metrics { display: flex; flex-wrap: wrap; gap: .2rem .9rem; margin-top: .2rem; }
+.dx-qcard-metrics b { color: var(--dx-text); font-weight: 700; }
+.dx-qcard-reason { margin-top: .3rem; line-height: 1.5; overflow-wrap: anywhere; }
+.st-key-queue [data-testid="stButton"] button { min-height: 2.25rem; }
+.dx-queue-table { font-size: .76rem; min-width: 640px; }
+.dx-queue-table td, .dx-queue-table th { word-break: keep-all; }
+.dx-queue-table tr.is-selected td { background: var(--dx-sky-bg); }
+.dx-brief { display: grid; gap: .3rem; font-size: .86rem; }
+.dx-brief-row { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: .5rem; line-height: 1.5; }
+.dx-brief-k { color: var(--dx-muted); font-weight: 650; font-size: .8rem; padding-top: .05rem; }
+.dx-brief-v { color: var(--dx-text); overflow-wrap: anywhere; }
+.dx-lflow { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .3rem; font-size: .74rem; color: var(--dx-text-2); }
+.dx-lflow-step { background: #F8FAFC; border: 1px solid var(--dx-border); border-radius: 999px; padding: .08rem .5rem; }
+.dx-lflow-arrow { color: var(--dx-muted); }
+.dx-disclaimer {
+  font-size: .8rem; color: #92400E; background: var(--dx-amber-bg); border: 1px solid #FDE68A;
+  border-radius: 8px; padding: .45rem .65rem; margin-bottom: .5rem; line-height: 1.5;
+}
+.dx-copilot-mode {
+  font-size: .68rem; font-weight: 600; color: var(--dx-muted); background: #F1F5F9;
+  border-radius: 999px; padding: .05rem .45rem;
+}
+.dx-support-inst { display: block; font-size: .74rem; font-weight: 500; color: var(--dx-muted); margin-top: .1rem; }
+.dx-inst-status { display: inline-block; font-size: .7rem; font-weight: 600; border-radius: 999px; padding: .02rem .45rem; margin: .1rem 0; }
+.dx-inst-status.is-ok { background: var(--dx-emerald-bg); color: var(--dx-emerald); }
+.dx-inst-status.is-warn { background: var(--dx-amber-bg); color: var(--dx-amber); }
+.dx-chip--muted { background: #F1F5F9; color: var(--dx-muted); border-color: var(--dx-border); }
+.dx-answer-ctx { font-size: .7rem; color: var(--dx-muted); }
+
+/* AI 패널 머리 한 줄 — 제목은 남는 폭, [↻][»]는 오른쪽에 나란히(줄바꿈 없음) */
+.st-key-copilottop { flex-wrap: nowrap !important; }
+/* 패널이 좁으면 응답 방식 표시는 이름 아래 줄로(잘리지 않게) */
+.st-key-copilottop .dx-copilot-title { flex-wrap: wrap; row-gap: 0.15rem; min-width: 0; }
+.st-key-copilotacts { flex-wrap: nowrap !important; flex: 0 0 auto !important; gap: 0.3rem !important; }
+.st-key-copilotacts button { min-height: 1.9rem; height: 1.9rem; width: 1.9rem; padding: 0 !important; border-radius: 0.45rem; }
+.dx-note--tight { margin-top: 0.15rem; }
+
+/* 정책·지원 연계 — 블럭 구분(회색 구분선 + 간격)과 지원제도 카드 높이 맞춤 */
+.st-key-dxsec-policy-main .dx-lflow { margin: .35rem 0 .2rem; }
+.st-key-dxsec-policy-main .dx-section-head {
+  margin-top: .6rem; padding-top: 1.1rem; border-top: 1px solid var(--dx-border);
+}
+.st-key-fnpills, .st-key-proghead { margin-bottom: .35rem; }
+.dx-prog-grid { align-items: stretch; grid-auto-rows: 1fr; }  /* 모든 카드를 그 목록에서 가장 긴 카드 높이에 맞춘다 */
+.dx-prog { display: flex; flex-direction: column; }
+.dx-prog-actions { margin-top: auto; padding-top: .6rem; }  /* 상세 보기·공식 근거 버튼을 카드 바닥에 정렬 */
+/* Q1 국면별 글자색(대기열 카드·관찰 업종 표) — 문구와 S코드를 함께 표시하므로 색만으로 구분하지 않는다 */
+.dx-state--S1 { color: var(--dx-emerald) !important; }
+.dx-state--S2 { color: var(--dx-amber) !important; }
+.dx-state--S3 { color: var(--dx-indigo) !important; }
+.dx-state--S4 { color: var(--dx-rose) !important; }
+.dx-state--muted { color: var(--dx-text-2) !important; }
+td.dx-state { font-weight: 600; }
+/* 문장형 KPI 값(예: Q1 '생산·고용 동반감소') — 숫자 KPI와 시각적 크기를 맞춘 작은 글씨, 높이는 숫자 칸과 같게 */
+.dx-kpi-value.dx-kpi-value--text { font-size: min(1.1rem, 8.6cqi); line-height: 1.3; padding: 0.12rem 0; }
+/* KPI 세 줄(항목명·값·보조) 사이 간격 */
+.dx-kpi-label { margin-bottom: 0.3rem; }
+.dx-kpi-sub { margin-top: 0.3rem; }
+/* 점검 대기열 카드 — 줄 사이 간격 */
+.dx-qcard { padding: .75rem .9rem; }
+.dx-qcard-state { margin-top: .5rem; }
+.dx-qcard-metrics { margin-top: .4rem; }
+.dx-qcard-reason { margin-top: .45rem; }
+/* KPI 값 네 칸은 같은 글자 크기(숫자·문장 공통) — 카드 폭이 같으므로 cqi 기준도 같다 */
+.dx-kpi-value, .dx-kpi-value.dx-kpi-value--text { font-size: min(1.3rem, 8.2cqi); line-height: 1.3; padding: 0; }
+/* KPI 값(세 칸 같은 크기) — 진단카드 제목(.dx-report-title 1.75rem)보다 한 단계 작게, 긴 문장형 값도 칸 안에 들어가도록 폭 기준 상한 */
+.dx-kpi-value, .dx-kpi-value.dx-kpi-value--text { font-size: min(1.5rem, 9.6cqi); }
+
+/* ---------------------------------------------------------------- 점검 관리 · 진행 중 점검 상세 */
+.dx-cprog {
+  border: 1px solid #BAE6FD; border-left: 4px solid var(--dx-sky); border-radius: 10px;
+  background: var(--dx-sky-bg); padding: .75rem .9rem;
+}
+.dx-cprog-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; }
+.dx-cprog-title { font-size: 1.05rem; font-weight: 750; color: var(--dx-text); }
+.dx-cprog-status { font-size: .78rem; font-weight: 650; color: #0369A1; }
+.dx-cprog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .35rem .9rem; margin-top: .55rem; }
+.dx-cprog-item { display: flex; flex-direction: column; font-size: .8rem; }
+.dx-cprog-item span { color: var(--dx-muted); font-size: .72rem; }
+.dx-cprog-item b { color: var(--dx-text); font-weight: 650; overflow-wrap: anywhere; }
+.dx-cprog-next { margin-top: .6rem; font-size: .9rem; color: var(--dx-text); font-weight: 600; }
+.dx-cprog-next span { color: #0369A1; font-weight: 750; margin-right: .3rem; }
+.st-key-caseprog { gap: .95rem !important; margin-bottom: .3rem; }
+.st-key-casetabs { margin: .2rem 0 .4rem; }
+.dx-chk-table { font-size: .78rem; min-width: 560px; table-layout: fixed; }
+.dx-chk-table td { vertical-align: top; }
+.dx-chk-q { line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
+.dx-chk-table tr.is-done .dx-chk-state { color: var(--dx-emerald); font-weight: 650; }
+.dx-chk-table tr.is-pending .dx-chk-state { color: var(--dx-amber); font-weight: 650; }
+.st-key-checkpanel, .st-key-decisionpanel { border-color: #BAE6FD !important; background: #FCFEFF; }
+.st-key-checkpanel [data-testid="stMarkdown"] p { line-height: 1.55; }
+/* 점검 상세 — 블럭 사이 회색 구분선과 간격(목록·진행 요약·하위 화면 탭·각 절) */
+.st-key-caseview { border-top: 1px solid var(--dx-border); padding-top: 1.1rem; margin-top: .4rem; gap: 1.05rem !important; }
+.st-key-casetabs { border-top: 1px solid var(--dx-border); padding-top: .9rem; }
+.st-key-caseview .dx-section-head { margin-top: .5rem; padding-top: 1.1rem; border-top: 1px solid var(--dx-border); }
+.st-key-caseview [data-testid="stExpander"] { margin-top: .15rem; }
+/* 입력칸 테두리 — 누르기 전에도 입력 영역이 보이게(포커스 시 기존 강조색 유지) */
+[data-testid="stTextInput"] [data-baseweb="input"],
+[data-testid="stTextArea"] [data-baseweb="textarea"],
+[data-testid="stDateInput"] [data-baseweb="input"],
+[data-testid="stTimeInput"] [data-baseweb="select"] > div { border: 1px solid #CBD5E1 !important; background: #fff !important; }
+[data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
+[data-testid="stTextArea"] [data-baseweb="textarea"]:focus-within { border-color: var(--dx-sky) !important; }
+/* 주관식 입력칸 테두리(Streamlit 1.6x DOM) — 입력 전에도 칸이 보이게, 포커스 시 강조색 */
+[data-testid="stTextInputRootElement"], [data-testid="stTextAreaRootElement"], [data-testid="stDateInputField"] {
+  border: 1px solid #94A3B8 !important; border-radius: 0.5rem !important; background: #fff !important;
+}
+[data-testid="stTextInputRootElement"]:focus-within, [data-testid="stTextAreaRootElement"]:focus-within,
+[data-testid="stDateInputField"]:focus { border-color: var(--dx-sky) !important; box-shadow: 0 0 0 2px rgba(2, 132, 199, .12); }
+/* 관찰 업종 표 — 업종 열만 국면 색, 나머지 열은 회색 */
+.dx-queue-table td { color: var(--dx-muted); }
+.dx-queue-table td.dx-state--S1, .dx-queue-table td.dx-state--S2, .dx-queue-table td.dx-state--S3,
+.dx-queue-table td.dx-state--S4 { font-weight: 700; }
+.dx-queue-table td.dx-state--muted { color: var(--dx-text) !important; }
+/* 종결 점검 건 — 종결 결과 요약(회색 띠) · 읽기 전용 표 */
+.dx-cprog--closed { border-color: var(--dx-border); border-left-color: #475569; background: #F8FAFC; }
+.dx-cprog--closed .dx-cprog-status { color: #475569; }
+.dx-simple-table { font-size: .8rem; table-layout: fixed; min-width: 520px; }
+.dx-simple-table td { vertical-align: top; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; color: var(--dx-text-2); }
+.dx-simple-table td.num, .dx-simple-table th.num { text-align: right; }
+.dx-simple-table tr.is-final td { background: #F1F5F9; font-weight: 650; color: var(--dx-text); }
+.dx-clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dx-simple-table tr.dx-muted-row td { color: var(--dx-muted); font-size: .74rem; }
+.st-key-closedcheck { border-color: var(--dx-border) !important; }
+
+/* ---------------------------------------------------------------- 진단서 미리보기 dialog(전용 wrapper .st-key-reportdlg만) */
+[role="dialog"]:has(.st-key-reportdlg) {
+  width: min(1240px, 90vw) !important; max-width: min(1240px, 90vw) !important;
+  max-height: 92vh !important; background: #F8FAFC !important; overflow: hidden !important;
+}
+[role="dialog"]:has(.st-key-reportdlg) > div { max-height: 92vh; }
+.st-key-reportdlg { gap: 0 !important; }
+.st-key-reporthead { padding: 0 0 .75rem; border-bottom: 1px solid #E8EDF3; margin-bottom: 1rem; flex-wrap: wrap !important; }
+.st-key-reporthead [data-testid="stRadio"] label p { font-size: .85rem; }
+/* 미리보기 칸만 세로 스크롤 — 머리(제목·발급 유형·닫기)는 그대로 보인다 */
+.st-key-reportpreview {
+  max-height: calc(92vh - 11rem); overflow-y: auto; background: #F6F8FB;
+  padding: 1.25rem clamp(.75rem, 2.4vw, 2.25rem) 1.75rem; border-radius: 4px;
+}
+/* 문서는 종이처럼 아주 미세하게만 구분(화면 미리보기 전용 — 저장 HTML·인쇄용 CSS는 그대로) */
+.st-key-reportpreview .rp-doc {
+  max-width: none; width: 100%; background: #fff; border: 1px solid #E8EDF3; border-radius: 3px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, .06); padding: 28px clamp(16px, 3vw, 40px) 32px;
+}
+@media (max-width: 640px) {
+  [role="dialog"]:has(.st-key-reportdlg) { width: calc(100vw - 24px) !important; max-width: calc(100vw - 24px) !important; }
+  .st-key-reportpreview { max-height: calc(92vh - 15rem); }
+}
+.st-key-copilot [data-testid="stChatInput"] textarea::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 선택 상자 테두리 — 누르기 전에도 선택 칸이 보이게 */
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div { border: 1px solid #94A3B8 !important; background: #fff !important; }
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within { border-color: var(--dx-sky) !important; }
+/* 선택 상자(react-aria combobox, Streamlit 1.6x) — 누르기 전에도 테두리 */
+[data-testid="stSelectbox"] div[role="group"] { border: 1px solid #94A3B8 !important; border-radius: 0.5rem !important; background: #fff !important; }
+[data-testid="stSelectbox"] div[role="group"]:focus-within { border-color: var(--dx-sky) !important; }

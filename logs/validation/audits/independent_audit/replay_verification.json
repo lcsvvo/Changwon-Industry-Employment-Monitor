@@ -1,0 +1,32 @@
+[
+  {
+    "artifact": "revision_metrics",
+    "rows": 72,
+    "reproduced": true
+  },
+  {
+    "artifact": "parameter_spaces",
+    "rows": 8,
+    "reproduced": true
+  },
+  {
+    "artifact": "point_decisions",
+    "rows": 180,
+    "reproduced": true
+  },
+  {
+    "artifact": "criterion_decision_effects",
+    "rows": 1280,
+    "reproduced": true
+  },
+  {
+    "artifact": "continuous_space_certificates",
+    "rows": 180,
+    "reproduced": true
+  },
+  {
+    "artifact": "action_latest",
+    "rows": 10,
+    "reproduced": true
+  }
+]

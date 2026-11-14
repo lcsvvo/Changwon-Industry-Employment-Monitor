@@ -1,0 +1,54 @@
+{
+  "analysis_name": "재구축 패널 기반 사후적 시간외 정합성 검증(retrospective reconstructed-panel temporal validation)",
+  "protocol_id": "CW-RBT-1.0",
+  "protocol_deviations": [],
+  "performance_computed": true,
+  "prediction_lock_sha256": "49093badd55ad91c363fe23c2fcfcab44aa572c7c3c21606479614beddc62f24",
+  "executable_sha256": "1cb51ec52711b7590cf4b819afff878c2ecf9d4a1277c9a9e9b38491f3488212",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "pandas": "3.0.1",
+  "numpy": "2.3.5",
+  "completed_at_utc": "2026-09-18T11:37:55.934539+00:00",
+  "protected_files_unchanged": true,
+  "protected_file_count": 105,
+  "final_interpretation": "TRADE_OFF / NO_GENERAL_WINNER",
+  "qa": {
+    "test_command": "python -m unittest discover -s tests -p test_temporal_validation.py -v",
+    "tests_passed": 10,
+    "tests_failed": 0,
+    "test_source_sha256": "7c028015ab1fc4ad79a26f9210cad31ffc23d9d0c8620c420297fb75bf42f53c",
+    "checks": ["810 outcome rows independently recalculated from raw levels", "All exported ordinary confusion matrices and denominator-zero handling", "All 6003 parameter specifications independently evaluated at primary cutoff", "Protected files and CSV output hashes rechecked after reporting"],
+    "definitions_changed": false
+  },
+  "report_sha256": "ecf635db0a350b2f243b91815eccd8371d25ce8dba0cf577d38c0b093b002fd7",
+  "runtime_executable": "C:/Users/jiwoo/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe",
+  "consolidated_csv_files": 7,
+  "per_parameter_draw_files": 0,
+  "source_provenance": [
+    {
+      "employment_source": "data_portal_monthly",
+      "production_source": "data_portal_monthly",
+      "rows": 190
+    },
+    {
+      "employment_source": "data_portal_quarterly",
+      "production_source": "data_portal_quarterly",
+      "rows": 30
+    },
+    {
+      "employment_source": "kicox_annual_revision",
+      "production_source": "kicox_annual_revision",
+      "rows": 120
+    }
+  ],
+  "output_hashes": {
+    "evaluation_long.csv": "6213faba87e3f31f727f95dc6efef52bc95c5315d1b68829499cbb87cb491839",
+    "metrics_long.csv": "c0e854376aeac3fdc5a1f26fa49057d45a7bc70abdcb8789d65f5395ad1b1988",
+    "operational_coverage.csv": "18cb5d8f18b6638b9932bc442a1575dddee95780786e3717e5c9572c1fc3234c",
+    "outcomes_long.csv": "598f9d277ca67585010de7b3b0d9dfde8df6d49c421d11da691d73b2c81b0409",
+    "parameter_robustness_long.csv": "be00fac3a1839cce79b528ee3cd8baa8d4849a0898ccbb729242e47c00c7b734",
+    "predictions_long.csv": "310c8598076cc1424afa095033c42beb075f74eaf28dd5d000445bc999b5dd21",
+    "sample_membership.csv": "9eb2244499919239ee2cd615c30850d79c8370764fb1eaa660ad01f50284d335"
+  }
+}

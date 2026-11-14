@@ -1,0 +1,30 @@
+{
+  "triage_tests": {
+    "tests": 15,
+    "skipped": 0,
+    "passed": 15,
+    "skip_reasons": []
+  },
+  "full_tests": {
+    "tests": 313,
+    "skipped": 2,
+    "passed": 311,
+    "skip_reasons": [
+      {
+        "test": "test_empirical_assignment_blocked_without_parameters",
+        "reason": "파라미터 파일이 존재하는 환경입니다."
+      },
+      {
+        "test": "test_electre_py_is_append_only_since_head",
+        "reason": "git show HEAD:src/model/electre.py 실패(HEAD에 없는 파일): fatal: path 'src/model/electre.py' exists on disk, but not in 'HEAD'"
+      }
+    ]
+  },
+  "panel_rows": 180,
+  "latest_cards": 10,
+  "executed_code_cells": 16,
+  "protected_files": 504,
+  "protected_changes": 0,
+  "metadata_hashes_match": true,
+  "cards_match": true
+}

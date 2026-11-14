@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "scope": "Triage 추가확인 사례만",
+  "triage_stage_mutation": "forbidden",
+  "electre_result_use": "추가확인군 내부 검토순서·불일치 표시",
+  "smaa_result_use": "호환 파라미터 표집에서의 배정 민감도 표시",
+  "external_data_as_criteria": false,
+  "no_retuning": true,
+  "electre_specification": "D_small_indifference",
+  "electre_assignment_source": "data\\processed\\final_model\\electre_smaa_check_cases.csv:electre_stage",
+  "electre_assignment_source_sha256": "c78ecb669e5f632c2dbab4a3765e080b5ad32e0c64e39564ce58a0e32a206132",
+  "g4_auxiliary_source": "data\\processed\\final_model\\electre_smaa_check_cases.csv",
+  "g4_auxiliary_source_sha256": "c78ecb669e5f632c2dbab4a3765e080b5ad32e0c64e39564ce58a0e32a206132",
+  "smaa_source": "data\\processed\\final_model\\electre_smaa_check_cases.csv",
+  "smaa_source_sha256": "c78ecb669e5f632c2dbab4a3765e080b5ad32e0c64e39564ce58a0e32a206132",
+  "cai_interpretation": "위기확률·정답률이 아니라 명시한 호환 파라미터 표집에서의 범주 배정 비중"
+}

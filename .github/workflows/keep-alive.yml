@@ -1,0 +1,44 @@
+name: Keep Streamlit app awake
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # UTC 기준 6시간마다 (KST 03:17/09:17/15:17/21:17)
+  workflow_dispatch:         # Actions 탭에서 수동 실행
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Visit app and wake if sleeping
+        env:
+          APP_URL: https://changwon-industry-employment-monitor-cyfkaj7ycpbpdxofbxcjkt.streamlit.app/?page=%EC%97%85%EC%A2%85+%EC%A7%84%EB%8B%A8
+        run: |
+          python - <<'PY'
+          import os
+          from playwright.sync_api import sync_playwright
+          url = os.environ["APP_URL"]
+          with sync_playwright() as p:
+              b = p.chromium.launch()
+              pg = b.new_page()
+              pg.goto(url, timeout=90000)
+              pg.wait_for_timeout(10000)
+              btn = pg.get_by_role("button", name="Yes, get this app back up!")
+              if btn.count() > 0:
+                  print("앱이 잠들어 있음 - 깨우기 버튼 클릭")
+                  btn.first.click()
+                  pg.wait_for_timeout(120000)
+              else:
+                  print("앱 깨어 있음 - 세션 유지 방문")
+                  pg.wait_for_timeout(30000)
+              b.close()
+          PY

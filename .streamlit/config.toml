@@ -1,0 +1,33 @@
+[theme]
+base = "light"
+primaryColor = "#0284C7"
+backgroundColor = "#F1F5F9"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#172033"
+linkColor = "#0369A1"
+borderColor = "#D7E0EA"
+dataframeBorderColor = "#D7E0EA"
+dataframeHeaderBackgroundColor = "#F8FAFC"
+font = "'Pretendard':https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css, sans-serif"
+headingFont = "'Pretendard':https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css, sans-serif"
+baseFontSize = 16
+baseFontWeight = 400
+headingFontSizes = ["2rem", "1.6rem", "1.3rem", "1.1rem", "1rem", "0.9rem"]
+headingFontWeights = [750, 700, 700, 650, 650, 600]
+metricValueFontSize = "2.25rem"
+metricValueFontWeight = 500
+baseRadius = "0.75rem"
+buttonRadius = "0.75rem"
+chartCategoricalColors = ["#0284C7", "#6366F1", "#0F766E", "#D97706", "#BE123C", "#64748B"]
+
+[theme.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8FAFC"
+textColor = "#1E293B"
+primaryColor = "#0284C7"
+borderColor = "#D7E0EA"
+headingFontSizes = ["1.45rem", "1.25rem", "1.1rem", "1rem", "0.9rem", "0.8rem"]
+headingFontWeights = [750, 700, 700, 650, 600, 600]
+
+[server]
+headless = true

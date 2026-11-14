@@ -1,0 +1,5 @@
+﻿path,role,sha256
+data\processed\kicox\changwon_state_panel.csv,공유된 KICOX 입력,9eab0a418a59d45db45d451cd60b05233a7a4f1c756a49150fbd3e50c78ddd6a
+data\processed\kicox\changwon_total_master.csv,공유된 KICOX 입력,ab10371089602700e95d18da0dafd7cbaf43d4d39cb197475952abface32be36
+data\raw\ppi\ppi_raw.csv,공유된 PPI 원자료,7a3b526d7d4f118073c2264e393af9b5d256b511f9f08a16dce6022c6cf8e8eb
+data\processed\eis\eis_validation_panel.csv,기존 EIS 검증 패널,5f80071320155b8c0fcae2605dd5c6940a08fb7f842265aafa2549ef0bc6728c

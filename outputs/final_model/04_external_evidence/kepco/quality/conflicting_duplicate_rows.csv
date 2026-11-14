@@ -1,0 +1,13 @@
+﻿period,district,legal_dong,ksic_major_code,ksic_major_name,ksic_mid_code,ksic_mid_name,customer_count,power_usage,charge_won,suppression_flag,missing_flag,coverage_flag,source_file,source_sheet,kicox_industry,mapping_grade,mapping_type,mapping_rationale
+2023-04,의창구,대산면,A,"농업, 임업 및 어업",01,농업,2198.0,3269007.0,224709139.0,0,0,COMPLETE,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-04,의창구,대산면,A,"농업, 임업 및 어업",01,농업,,,,1,0,SUPPRESSED,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-04,의창구,동읍,A,"농업, 임업 및 어업",01,농업,2825.0,2310643.0,145520263.0,0,0,COMPLETE,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-04,의창구,동읍,A,"농업, 임업 및 어업",01,농업,,,,1,0,SUPPRESSED,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-05,의창구,대산면,A,"농업, 임업 및 어업",01,농업,2146.0,1574093.0,118291448.0,0,0,COMPLETE,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-05,의창구,대산면,A,"농업, 임업 및 어업",01,농업,,,,1,0,SUPPRESSED,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-05,의창구,동읍,A,"농업, 임업 및 어업",01,농업,2823.0,1646513.0,109329612.0,0,0,COMPLETE,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-05,의창구,동읍,A,"농업, 임업 및 어업",01,농업,,,,1,0,SUPPRESSED,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-06,의창구,대산면,A,"농업, 임업 및 어업",01,농업,2065.0,949468.0,74488700.0,0,0,COMPLETE,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-06,의창구,대산면,A,"농업, 임업 및 어업",01,농업,,,,1,0,SUPPRESSED,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-06,의창구,동읍,A,"농업, 임업 및 어업",01,농업,2827.0,1566425.0,101946329.0,0,0,COMPLETE,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음
+2023-06,의창구,동읍,A,"농업, 임업 및 어업",01,농업,,,,1,0,SUPPRESSED,(제공)2304_06_산업분류별-법정동별 전력데이터.xlsx,Sheet1,,D,unavailable,기존 crosswalk에 중분류 코드 없음; 강제 배정하지 않음

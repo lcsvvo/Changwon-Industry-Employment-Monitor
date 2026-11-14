@@ -1,0 +1,10 @@
+﻿signal,signal_label,baseline_threshold,alternative_threshold,n_true_baseline,n_true_alternative,n_rows_changed,pct_rows_changed,n_industries_changed,top_industry,top_industry_rows,changed_rows_in_small_industries,small_industry_share_pct
+firms_op_decline_signal,업체수 감소 신호,-3.0,-2.0,26,31,5,2.78,3,목재종이,3,2,40.0
+firms_op_decline_signal,업체수 감소 신호,-3.0,-3.0,26,26,0,0.0,0,,0,0,
+firms_op_decline_signal,업체수 감소 신호,-3.0,-5.0,26,23,3,1.67,1,기타,3,3,100.0
+operating_rate_decline_signal,가동 위축 신호,-3.0,-2.0,63,69,6,3.33,4,음식료,2,0,0.0
+operating_rate_decline_signal,가동 위축 신호,-3.0,-3.0,63,63,0,0.0,0,,0,0,
+operating_rate_decline_signal,가동 위축 신호,-3.0,-5.0,63,51,12,6.67,7,전기전자,4,3,25.0
+ppi_adjusted_production_decline_signal,실질생산 위축 신호(PPI 조정),-5.0,-3.0,33,39,6,3.33,6,목재종이,1,2,33.3
+ppi_adjusted_production_decline_signal,실질생산 위축 신호(PPI 조정),-5.0,-5.0,33,33,0,0.0,0,,0,0,
+ppi_adjusted_production_decline_signal,실질생산 위축 신호(PPI 조정),-5.0,-7.0,33,29,4,2.22,3,철강,2,1,25.0

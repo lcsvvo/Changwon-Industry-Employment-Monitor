@@ -1,0 +1,114 @@
+{
+  "pipeline": "offline_reproducible",
+  "main_period": [
+    "2022Q1",
+    "2026Q2"
+  ],
+  "reference_period": [
+    "2018Q1",
+    "2026Q2"
+  ],
+  "rows": 180,
+  "columns": 123,
+  "industries": 10,
+  "valid_state": 160,
+  "invalid_state": 20,
+  "states": {
+    "S1": 54,
+    "S4": 46,
+    "S2": 43,
+    "INVALID": 20,
+    "S3": 13,
+    "N": 4
+  },
+  "exact_zero": 4,
+  "valid_transition4": 126,
+  "valid_transition5": 130,
+  "changed_transition4": 40,
+  "review_rows": 52,
+  "missing": {
+    "production": 10,
+    "employment": 0,
+    "production_yoy": 20,
+    "employment_yoy": 0,
+    "op_rate_official": 90,
+    "op_rate_approx": 90
+  },
+  "run_total_length_distribution": {
+    "1": 31,
+    "2": 14,
+    "3": 14,
+    "4": 7,
+    "6": 1,
+    "7": 3
+  },
+  "near_zero_distribution": {
+    "production": {
+      "0": 0,
+      "0.5": 2,
+      "1": 5,
+      "2": 12
+    },
+    "employment": {
+      "0": 4,
+      "0.5": 9,
+      "1": 18,
+      "2": 37
+    }
+  },
+  "yoy_quantiles": {
+    "production": {
+      "0.0": -52.43016966733348,
+      "0.01": -50.965646624756346,
+      "0.25": -9.296305591761685,
+      "0.5": 4.445918638700597,
+      "0.75": 20.442757597049876,
+      "0.99": 327.84333333333313,
+      "1.0": 698.1666666666666
+    },
+    "employment": {
+      "0.0": -40.625,
+      "0.01": -30.906252956509537,
+      "0.25": -4.658779533541885,
+      "0.5": -0.8672411332225238,
+      "0.75": 4.173880502804373,
+      "0.99": 104.88629283489111,
+      "1.0": 123.22274881516586
+    }
+  },
+  "sensitivity": {
+    "0.5": {
+      "states": {
+        "S1": 51,
+        "S4": 46,
+        "S2": 41,
+        "INVALID": 20,
+        "N": 11,
+        "S3": 11
+      },
+      "transitions4": 115
+    },
+    "1.0": {
+      "states": {
+        "S1": 50,
+        "S4": 43,
+        "S2": 33,
+        "N": 23,
+        "INVALID": 20,
+        "S3": 11
+      },
+      "transitions4": 100
+    },
+    "2.0": {
+      "states": {
+        "N": 47,
+        "S1": 41,
+        "S4": 36,
+        "S2": 29,
+        "INVALID": 20,
+        "S3": 7
+      },
+      "transitions4": 78
+    }
+  }
+}

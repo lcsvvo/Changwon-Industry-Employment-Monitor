@@ -1,0 +1,7 @@
+﻿review_queue_group,electre_stage,smaa_parameter_sensitive,case_count
+1 자료·모형 불확실 확인,UNDETERMINED,False,4
+2 Triage-ELECTRE 불일치 확인,OBSERVE,True,2
+3 파라미터 민감 우선검토 후보,PRIORITY,True,19
+4 안정 우선검토 후보,PRIORITY,False,1
+5 파라미터 민감 추가확인,CHECK,True,8
+6 추가확인,CHECK,False,1

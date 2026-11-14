@@ -1,0 +1,41 @@
+{
+  "analysis_name": "재구축 패널 기반 사후적 시간외 정합성 검증(retrospective reconstructed-panel temporal validation)",
+  "protocol_id": "CW-HYB-1.0",
+  "protocol_deviations": [],
+  "new_labels": false,
+  "model_tuning": false,
+  "parameter_search": false,
+  "RC_VRC_used": false,
+  "hybrid_candidates": 2,
+  "base_model_metrics_reproduced": true,
+  "protected_files_unchanged": true,
+  "protected_file_count": 125,
+  "final_recommendation": "Keep Primary Hybrid as a workflow pilot/extension candidate; defer replacement of current final model",
+  "finding": "Role separation, not predictive improvement; both Hybrid candidates are identical on the observed panel",
+  "qa": {
+    "command": "python -X utf8 -m unittest discover -s tests -p '*validation.py' -v",
+    "hybrid_tests_passed": 12,
+    "existing_temporal_tests_passed": 10,
+    "total_passed": 22,
+    "failed": 0,
+    "skipped": 0,
+    "hybrid_test_source_sha256": "905761e3c486f25321b38e386fb339857341d25498a81b34aa42c7afe798bac1",
+    "protected_and_csv_hashes_rechecked_after_report": true
+  },
+  "report_sha256": "646b561513ebb3b9d50d1d02a664620e1a2a716322beb181c8ea42388304ada5",
+  "consolidated_csv_files": 4,
+  "per_parameter_industry_quarter_files": 0,
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "pandas": "3.0.1",
+  "numpy": "2.3.5",
+  "completed_at_utc": "2026-09-18T11:59:56.716517+00:00",
+  "executable_sha256": "3261fcf2bfd8012bc97450c2da9c9b8bb8361183715cdb520deb70b956fd0082",
+  "execution_lock_sha256": "54cc2b7691d25e77941ba42b639c0ec271a5cae0fa0205fe77bcb39484a02a5c",
+  "prediction_lock_sha256": "5c3252368995d17192a42dabe2de61e55b81ca5ea696d4ada70ab258dac474eb",
+  "output_hashes": {
+    "hybrid_case_comparison.csv": "0970d5a810cd0c9d38f5df4e09bdb9f578a6b63f6e9642c1c62924aa673dfb2a",
+    "hybrid_metrics.csv": "b84e22daee968b935483502cfc3c6ce6ae93714c62a55f1e8bd48f19edf8805e",
+    "hybrid_overlap.csv": "035ef64f22f3d1aa6e121dd39931c90ce091761a50f7997317d9ad8dd6312f8c",
+    "hybrid_predictions.csv": "813b6bb0a403b34fbc9485e6f0193454a37da4cce594be0c361e9aea2e2eb617"
+  }
+}

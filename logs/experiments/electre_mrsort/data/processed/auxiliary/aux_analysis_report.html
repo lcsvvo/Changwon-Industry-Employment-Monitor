@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>보조분석 — 가동률·업체 수·PPI·EIS 비교</title>
+<style>
+:root{
+  --bg:#f8fafc; --ink:#1e2430; --sub:#5f6b7a; --card:#ffffff; --line:#e2e8f0;
+  --s1:#28355f; --s1t:#ffffff; --s2:#4aab9f; --s2t:#08312b; --s3:#eec84d; --s3t:#5c4300;
+  --s4:#a04f8a; --s4t:#ffffff; --nA:#b7bec7; --nAt:#2b2f36; --inv:#f1f5f9; --invt:#94a3b8;
+  --accent:#2563eb;
+}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  line-height:1.72;-webkit-font-smoothing:antialiased}
+.hero{background:linear-gradient(135deg,#07111f,#172554 58%,#2563eb);color:#fff;padding:56px 0 44px}
+.wrap{max-width:980px;margin:0 auto;padding:0 24px}
+.hero h1{font-size:28px;margin:0 0 10px}
+.hero p{color:#cbd5e1;margin:0;font-size:15px}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:700;margin-right:6px}
+.S1{background:var(--s1);color:var(--s1t)} .S2{background:var(--s2);color:var(--s2t)}
+.S3{background:var(--s3);color:var(--s3t)} .S4{background:var(--s4);color:var(--s4t)}
+.N{background:var(--nA);color:var(--nAt)} .INVALID{background:var(--inv);color:var(--invt)}
+section{padding:34px 0;border-bottom:1px solid var(--line)}
+h2{font-size:20px;margin:0 0 6px}
+h3{font-size:16px;margin:22px 0 8px}
+.lead{color:var(--sub);font-size:14.5px;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat .num{font-size:26px;font-weight:800}
+.stat .lab{font-size:12.5px;color:var(--sub)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0;background:var(--card)}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--sub);font-weight:600;font-size:12.5px;background:#f1f5f9}
+.note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;font-size:13.5px;color:#78350f;margin:14px 0}
+.callout{background:#eff6ff;border-left:3px solid var(--accent);padding:10px 14px;font-size:14px;margin:14px 0;border-radius:0 8px 8px 0}
+.pos{color:#0f6e56;font-weight:700}.neg{color:#993c1d;font-weight:700}
+footer{padding:30px 0;color:var(--sub);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="hero"><div class="wrap">
+<h1>보조분석 — 가동률·업체 수·PPI·EIS 비교</h1>
+<p>Q1 국면(S1~S4)과 함께 읽을 보조정보를 정리한다. 분석 기간은 2022Q1–2026Q2이며, Q1 표시는 threshold=0 결과다.</p>
+</div></div>
+
+<div class="wrap">
+
+<section>
+<h2>한눈에 보기</h2>
+<p class="lead">네 지표는 Q1 국면을 재판정하거나 원인을 확정하는 근거가 아니다. 진단카드의 확인질문과 데이터 품질 주석에 사용한다.</p>
+<div class="grid">
+<div class="stat"><div class="num">58.6%</div><div class="lab">가동률·생산 증감 방향 일치율 (68/116)</div></div>
+<div class="stat"><div class="num">약 0</div><div class="lab">가동업체 수 YoY 중앙값 (모든 국면)</div></div>
+<div class="stat"><div class="num">13.2%</div><div class="lab">PPI 적용 시 생산 방향 민감 관측 (19/144)</div></div>
+<div class="stat"><div class="num">57.1%</div><div class="lab">EIS·KICOX 고용 방향 일치율 (8/14)</div></div>
+</div>
+<div class="callout">활용 결론: 가동률과 업체 수는 개별 업종의 추가 확인사항으로 표시한다. PPI는 미확정 매핑에 따른 민감도 범위로 표시한다. EIS는 모집단 차이 때문에 참고 시계열로만 둔다.</div>
+</section>
+
+<section>
+<h2>① 가동률 — 생산 방향과의 동행 여부</h2>
+<p class="lead">공식 가동률(op_rate_official)을 우선하고, 결측이면 근사 가동률(op_rate_approx)을 사용했다. 사용값의 전년동기 대비 %p 변화와 생산 YoY의 부호를 비교했다.</p>
+<table>
+<tr><th>국면</th><th>관측치(n)</th><th>가동률·생산 방향 일치율</th></tr>
+<tr><td><span class="badge S1">S1</span> 동반확대</td><td>35</td><td>48.6%</td></tr>
+<tr><td><span class="badge S2">S2</span> 생산↑고용↓</td><td>30</td><td>66.7%</td></tr>
+<tr><td><span class="badge S3">S3</span> 생산↓고용↑</td><td>13</td><td>61.5%</td></tr>
+<tr><td><span class="badge S4">S4</span> 동반감소</td><td>38</td><td>60.5%</td></tr>
+</table>
+<p>전체 116건 중 68건(58.6%)에서 방향이 같았다. 이 비율만으로 가동률을 Q1의 검증변수로 보기 어렵다. 진단카드에는 생산과 가동률 방향이 다를 때 설비 증설, 제품구성, 외주·재고 변화 등을 확인하는 질문을 제시하되, 어느 원인도 데이터만으로 확정하지 않는다.</p>
+</section>
+
+<section>
+<h2>② 가동업체 수 — 사업체 수 변화 확인</h2>
+<p class="lead">가동업체 수(firms_op)의 전년동기 대비 증감률을 국면별로 비교했다.</p>
+<table>
+<tr><th>국면</th><th>업체 수 감소 비중</th><th>YoY 중앙값</th></tr>
+<tr><td><span class="badge S1">S1</span></td><td>29.6%</td><td>0.0%</td></tr>
+<tr><td><span class="badge S2">S2</span></td><td>30.2%</td><td>0.0%</td></tr>
+<tr><td><span class="badge S3">S3</span></td><td>38.5%</td><td>0.0%</td></tr>
+<tr><td><span class="badge S4">S4</span></td><td>28.3%</td><td>0.0%</td></tr>
+</table>
+<p>모든 국면의 중앙값이 0.0%이고 감소 비중은 28.3~38.5%다. 이 집계에서는 국면별 차이가 뚜렷하지 않다. 따라서 업체 수 변화로 생산·고용 변화의 원인을 설명하지 않고, 비금속의 2026Q2 가동업체 수 YoY −20.0%처럼 큰 개별 변화만 진단카드에 표시한다.</p>
+</section>
+
+<section>
+<h2>③ PPI — 가격 조정에 따른 생산 방향 민감도</h2>
+<p class="lead">PPI 조정 생산 YoY는 ((1 + 생산YoY/100) ÷ (1 + PPI YoY/100) − 1) × 100으로 계산한다. ‘실질 생산’의 확정치가 아니라, 업종-PPI 매핑 가정에 따른 민감도 값이다.</p>
+
+<h3>매핑 검토유형</h3>
+<table>
+<tr><th>유형</th><th>기준</th><th>해당 업종</th></tr>
+<tr><td>단일 후보·근접 분류</td><td>비교적 가까운 단일 PPI 후보를 사용</td><td>기계·비금속·음식료·목재종이</td></tr>
+<tr><td>단일 후보·범위 주의</td><td>단일 후보지만 PPI 범위가 산단 업종보다 넓을 수 있음</td><td>운송장비</td></tr>
+<tr><td>단일 후보·분류 선택</td><td>상위 후보 대신 범위가 더 가까운 하위 후보를 선택</td><td>섬유의복</td></tr>
+<tr><td>단일 후보·분류단계 민감</td><td>상위·하위 분류 값의 차이가 커 하위 후보를 선택</td><td>철강</td></tr>
+<tr><td>복수 후보·범위 제시</td><td>두 후보 중 하나를 고를 가중치 근거가 없어 하한·상한을 제시</td><td>석유화학·전기전자</td></tr>
+<tr><td>매핑 불가</td><td>업종을 대표할 비교 가능한 후보가 없음</td><td>기타</td></tr>
+</table>
+<div class="note">모든 업종-PPI 매핑은 원자료상 confirmed=False다. 따라서 A~D 같은 신뢰등급을 부여하지 않으며, 본모형의 점검등급이나 ELECTRE 기준에는 넣지 않는다.</div>
+<div class="grid">
+<div class="stat"><div class="num">125/144</div><div class="lab">모든 후보에서 원자료 생산 방향 유지</div></div>
+<div class="stat"><div class="num">13/144</div><div class="lab">모든 후보에서 생산 방향 반전</div></div>
+<div class="stat"><div class="num">6/144</div><div class="lab">후보에 따라 방향이 달라짐</div></div>
+<div class="stat"><div class="num">19/144</div><div class="lab">방향 민감 관측 합계 (13.2%)</div></div>
+</div>
+<p>144개 비교 가능 업종·분기 중 19건은 PPI 후보를 적용하면 방향이 반전되거나 후보에 따라 달라졌다. 이는 가격요인이 생산액 증감 방향에 영향을 줄 수 있음을 보여주는 민감도 결과다. 생산량 변화나 원인을 직접 입증하지 않는다.</p>
+</section>
+
+<section>
+<h2>④ EIS — 창원시 제조업 고용과의 범위 비교</h2>
+<p class="lead">EIS는 창원시 전체 제조업 피보험자 수이고, KICOX는 창원국가산단 고용이다. 모집단이 달라 수준·비중을 직접 비교하지 않고 분기별 증감 방향만 참고했다.</p>
+<div class="grid">
+<div class="stat"><div class="num">57.1%</div><div class="lab">분기별 증감 방향 일치율 (8/14)</div></div>
+<div class="stat"><div class="num">−0.09</div><div class="lab">YoY 상관계수</div></div>
+</div>
+<p>관측된 14개 분기에서 방향 일치율은 57.1%, YoY 상관계수는 −0.09였다. 이 결과는 두 시계열의 동행성이 약하다는 관측일 뿐, 산단 밖 제조업의 변화나 차이의 원인을 설명하지 않는다. EIS는 Q1 판정 검증이나 ELECTRE 기준이 아니라 지역 전체 고용 맥락을 보여주는 참고정보로 사용한다.</p>
+</section>
+
+<section>
+<h2>종합 — 업종별 보조지표 (2026Q2)</h2>
+<table style="font-size:12.5px">
+<tr><th>업종</th><th>국면</th><th>생산YoY</th><th>고용YoY</th><th>가동률 사용값</th><th>가동률YoY</th><th>가동업체YoY</th><th>PPI 조정 생산YoY</th><th>매핑 검토유형</th></tr>
+<tr><td>목재종이</td><td><span class="badge S4">S4</span></td><td class="neg">−12.9%</td><td class="neg">−10.1%</td><td>74.7%</td><td class="pos">+6.0pp</td><td>−2.2%</td><td class="neg">−15.29%</td><td>단일 후보·근접 분류</td></tr>
+<tr><td>기계</td><td><span class="badge S4">S4</span></td><td class="neg">−19.5%</td><td class="neg">−6.3%</td><td>80.6%</td><td class="neg">−4.9pp</td><td>+0.3%</td><td class="neg">−20.55%</td><td>단일 후보·근접 분류</td></tr>
+<tr><td>음식료</td><td><span class="badge S2">S2</span></td><td class="pos">+0.9%</td><td class="neg">−3.8%</td><td>92.3%</td><td class="neg">−1.4pp</td><td>0.0%</td><td class="neg">−0.78% (반전)</td><td>단일 후보·근접 분류</td></tr>
+<tr><td>철강</td><td><span class="badge S2">S2</span></td><td class="pos">+32.6%</td><td class="neg">−1.1%</td><td>63.7%</td><td>+0.2pp</td><td>−1.3%</td><td class="pos">+25.28%</td><td>단일 후보·분류단계 민감</td></tr>
+<tr><td>비금속</td><td><span class="badge S2">S2</span></td><td class="pos">+45.7%</td><td class="neg">−1.1%</td><td>57.3%</td><td class="pos">+14.1pp</td><td class="neg">−20.0%</td><td class="pos">+40.86%</td><td>단일 후보·근접 분류</td></tr>
+<tr><td>운송장비</td><td><span class="badge S2">S2</span></td><td class="pos">+19.6%</td><td class="neg">−0.8%</td><td>92.3%</td><td>+1.0pp</td><td>+0.4%</td><td class="pos">+17.24%</td><td>단일 후보·범위 주의</td></tr>
+<tr><td>전기전자</td><td><span class="badge S2">S2</span></td><td class="pos">+2.7%</td><td class="neg">−0.4%</td><td>76.7%</td><td>−0.4pp</td><td>+3.3%</td><td class="neg">−15.11%~−5.17% (모든 후보 반전)</td><td>복수 후보·범위 제시</td></tr>
+<tr><td>섬유의복</td><td><span class="badge N">N</span></td><td class="neg">−12.3%</td><td>0.0%</td><td>64.0%</td><td class="neg">−9.0pp</td><td class="pos">+14.3%</td><td class="neg">−15.17%</td><td>단일 후보·분류 선택</td></tr>
+<tr><td>석유화학</td><td><span class="badge S3">S3</span></td><td class="neg">−6.7%</td><td class="pos">+9.6%</td><td>76.3%</td><td>−3.3pp</td><td class="pos">+9.8%</td><td class="neg">−45.54%~−21.72%</td><td>복수 후보·범위 제시</td></tr>
+<tr><td>기타</td><td><span class="badge S1">S1</span></td><td class="pos">+3.0%</td><td class="pos">+17.1%</td><td>69.1%</td><td>+1.6pp</td><td class="neg">−7.4%</td><td>비교불가</td><td>매핑 불가</td></tr>
+</table>
+<p style="font-size:13px;color:var(--sub)">이 표는 진단카드의 보조정보 원천이다. PPI 조정값은 내부 계산의 비반올림 수치를 사용해 표시했으므로, 화면에 반올림된 생산YoY·PPI YoY로 다시 계산하면 소수점 차이가 날 수 있다.</p>
+</section>
+
+<footer>보조분석 · Q1 국면(threshold=0, 2022Q1–2026Q2) 기준 · 데이터: KICOX 마스터패널, KOSIS PPI, 고용노동부 EIS</footer>
+</div>
+</body>
+</html>

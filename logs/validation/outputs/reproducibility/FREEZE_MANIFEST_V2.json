@@ -1,0 +1,2054 @@
+{
+  "policy_version": "changwon-protection-policy/2.5.0",
+  "policy_document": "docs/reproducibility/PROTECTION_POLICY_V2.md",
+  "created_at": "2026-09-19T11:15:53+00:00",
+  "parent_manifest": [
+    {
+      "path": "outputs/rolling_backtest_protocol/FREEZE_MANIFEST.json",
+      "exists": true,
+      "sha256": "08bdaf13cf78a97291afe40c6e6a6e5febd1e279711eb2c305ea41ecc6ef287b",
+      "treatment": "역사적 감사기록 — 수정·삭제하지 않는다"
+    },
+    {
+      "path": "outputs/rolling_backtest/EXECUTION_LOCK.json",
+      "exists": true,
+      "sha256": "a8a638c4db002bb075724c82ca922a2d6d379e788c826c9b19ce6271d58a6d67",
+      "treatment": "역사적 감사기록 — 수정·삭제하지 않는다"
+    },
+    {
+      "path": "outputs/rolling_backtest/PREDICTION_LOCK.json",
+      "exists": true,
+      "sha256": "49093badd55ad91c363fe23c2fcfcab44aa572c7c3c21606479614beddc62f24",
+      "treatment": "역사적 감사기록 — 수정·삭제하지 않는다"
+    },
+    {
+      "path": "outputs/hybrid_validation/EXECUTION_LOCK.json",
+      "exists": true,
+      "sha256": "54cc2b7691d25e77941ba42b639c0ec271a5cae0fa0205fe77bcb39484a02a5c",
+      "treatment": "역사적 감사기록 — 수정·삭제하지 않는다"
+    },
+    {
+      "path": "outputs/hybrid_validation/PREDICTION_LOCK.json",
+      "exists": true,
+      "sha256": "5c3252368995d17192a42dabe2de61e55b81ca5ea696d4ada70ab258dac474eb",
+      "treatment": "역사적 감사기록 — 수정·삭제하지 않는다"
+    }
+  ],
+  "reason_for_policy_revision": "기존 QA에서 deterministic output과 무관한 runtime timestamp 및 mutable documentation이 byte-level protection에 포함되어 재실행 시 false failure를 발생시킴. 과거 실패를 삭제하지 않고 보호범위를 역할별로 분리함.",
+  "hash_protected_categories": [
+    "IMMUTABLE_PROTOCOL",
+    "DETERMINISTIC_PROTECTED"
+  ],
+  "hash_method": "sha256 over raw file bytes",
+  "runtime_keys_excluded_from_canonical_hash": [
+    "checked_at_utc",
+    "completed_at_utc",
+    "duration_seconds",
+    "executed_at",
+    "execution_path",
+    "git_head",
+    "hostname",
+    "locked_at_utc",
+    "numpy",
+    "pandas",
+    "platform",
+    "python",
+    "retrieved_at",
+    "run_at_utc",
+    "runtime_executable"
+  ],
+  "immutable_protocol_files": [
+    {
+      "path": "outputs/rolling_backtest_protocol/PROTOCOL.md",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "CW-RBT-1.0 사전등록 프로토콜",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "ef9c4edca39d59306e981fe39ba2d189b2cf56f970416a7f4f2b4aa3e53f3994"
+    },
+    {
+      "path": "outputs/rolling_backtest_protocol/FREEZE_MANIFEST.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "V1 동결 매니페스트(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "08bdaf13cf78a97291afe40c6e6a6e5febd1e279711eb2c305ea41ecc6ef287b"
+    },
+    {
+      "path": "outputs/rolling_backtest/EXECUTION_LOCK.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "CW-RBT 실행잠금",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a8a638c4db002bb075724c82ca922a2d6d379e788c826c9b19ce6271d58a6d67"
+    },
+    {
+      "path": "outputs/rolling_backtest/PREDICTION_LOCK.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "CW-RBT 예측잠금",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "49093badd55ad91c363fe23c2fcfcab44aa572c7c3c21606479614beddc62f24"
+    },
+    {
+      "path": "outputs/hybrid_validation/PROTOCOL.md",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "CW-HYB-1.0 사전등록 프로토콜",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "04e00df767ca5f605c0c1c8b0373f09ab2d4c0e50190db3d8f13c14b7a533400"
+    },
+    {
+      "path": "outputs/hybrid_validation/EXECUTION_LOCK.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "CW-HYB 실행잠금(V1 보호목록 125건 포함)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "54cc2b7691d25e77941ba42b639c0ec271a5cae0fa0205fe77bcb39484a02a5c"
+    },
+    {
+      "path": "outputs/hybrid_validation/PREDICTION_LOCK.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "CW-HYB 예측잠금",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "5c3252368995d17192a42dabe2de61e55b81ca5ea696d4ada70ab258dac474eb"
+    },
+    {
+      "path": "outputs/decision_support_final/audit_v3/artifact_hashes.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "v3 인도 당시 산출물 해시 기록. 이 안에 runtime 파일(run_metadata.json) 해시가 포함되어 있다는 점이 V1 설계의 문제를 보여주는 증거라 그대로 보존한다",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9027a737fcbe643ef09b6ef7279ea0930f9a48d5d77757e5467747c4c02ba396"
+    },
+    {
+      "path": "outputs/robustness_extension/PROTECTED_HASH_AMENDMENT.md",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "V1 보호대상 2건 불일치의 경위 기록. 수정 금지",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "52a2cf22a4c3cec01873098a9ff020378926cb5a16439e423170f265b6c9b697"
+    },
+    {
+      "path": "logs/audits/independent_audit/REPORT.md",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "독립감사 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "e19fe6b0fca90661408871fb7fab314f7c79039e7b203d6834f4dbe7917140f1"
+    },
+    {
+      "path": "logs/audits/independent_audit/findings.csv",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "독립감사 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "21d82bf14ecd7eb37d9b709234eace8f0e8693d1b60c6a055a79f9d53348aedf"
+    },
+    {
+      "path": "logs/audits/independent_audit/summary.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "독립감사 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "7ef62260accf25565fb44e04587db1cbd383552b3ba699eed831ce437c1348b7"
+    },
+    {
+      "path": "logs/audits/independent_audit/replay_verification.json",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "독립감사 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "f4fa1a4e21d4b9d4b236c3fe15b263d71e2497d74ceaa632c717e7dfdab83dca"
+    },
+    {
+      "path": "logs/audits/independent_audit/parameter_spaces.csv",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "독립감사 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a42ad59c7149d237551162717c6e88f756b85ddeef922825e6451bd1daafcd34"
+    },
+    {
+      "path": "logs/audits/independent_audit/criterion_decision_effects.csv",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "독립감사 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "689d32e860e0477389802ab37dde125f28945abd48c9c1ee8a537e7deca3a434"
+    },
+    {
+      "path": "logs/audits/independent_audit/alternative_changed_cases.csv",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "독립감사 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "30110e2c36be2e7512042051fdff4cae55e771590dbc3beb8547b70cc14bdc9e"
+    },
+    {
+      "path": "docs/02_competition/공고문(2026년 창원시 AI_데이터 활용 공모전).pdf",
+      "category": "IMMUTABLE_PROTOCOL",
+      "role": "protocol",
+      "rationale": "외부에서 확정된 공모 사양",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "2d4c38e02f8065acc770e9a332aba305039833a27e884449b55ff6c2ad6c420a"
+    }
+  ],
+  "deterministic_protected_files": [
+    {
+      "path": "data/processed/kicox/changwon_industry_master.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "Triage 1차 입력",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "4fb6f7bd85180e848813301bab43fc203a205e3c9829bf98deba4ddfe1240c28"
+    },
+    {
+      "path": "data/processed/kicox/changwon_state_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "Q1 국면 입력",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9eab0a418a59d45db45d451cd60b05233a7a4f1c756a49150fbd3e50c78ddd6a"
+    },
+    {
+      "path": "data/processed/ppi/ppi_industry_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "해석층 PPI 조정 생산 입력",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "538f011ca99475eb4d7de2091269ddf00cf95ce71ab6144700f72ae144f48777"
+    },
+    {
+      "path": "data/processed/ppi/ppi_industry_mapping_resolved.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "PPI 매핑 등급 확정본",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "97956ee946761a8b57bd0bdb79ba5461cc0e38d341502f79148fec4bfabae1b3"
+    },
+    {
+      "path": "data/reference/triage_history/legacy_point.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "과거 비교 기준표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "29b3fb963cfe33b47f37a0006f41871361423e6adb747597dbeb70fc0c4015b4"
+    },
+    {
+      "path": "data/reference/triage_history/legacy_action.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "과거 비교 기준표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "2c441ecfad55db094eec475be5eecfadbbb737505c108662be2ac939507b6864"
+    },
+    {
+      "path": "data/reference/triage_history/legacy_time_definition.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "과거 비교 기준표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "b20fc8bd0fc259fe06e58cd1e97fbb5249cbec9e0ece8aa9f10a1b7db1c5da34"
+    },
+    {
+      "path": "data/reference/triage_history/original_v3_stages.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "과거 비교 기준표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "6760583d7558f67943975d05a752897edeb8ce73460f5cb184c451866a05a7d7"
+    },
+    {
+      "path": "data/reference/external_event_audit/event_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "외부사건 감사 동결자료",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "272596f70f680799fabeb1e95a10f0179a7e05471318c1df7d83ee0c7fd6ddbb"
+    },
+    {
+      "path": "data/reference/external_event_audit/event_panel_coverage.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "외부사건 감사 동결자료",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a2d5da3010c4b2fa4981c8744919a57cd8a272525d5734c49048d977bf036fa5"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/employment_insurance_to_kicox.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "업종 대응표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "f26c16cf143eae3ea9e0c4932150c2dd40241379f0e25ec96c64005d02ea0f97"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/ksic_to_kicox.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "업종 대응표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9af85f34bdeba21745b5e4a681aef4bed53e91b42db000e08e9c7ac6583d5bd6"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/hs_to_kicox.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "업종 대응표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "39f5bb9773c59b2065d314b8c56697b62994b2c9aeff295f906c0fcf065640ec"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/ppi_to_kicox.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "업종 대응표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "659763b4f9a5c6dcbca87390ff9e2d3f01b267d673ff075ab7efa206b7cdef09"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/hs6_verified_to_kicox.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "관세청 API 로 존재를 확인한 HS6 → KICOX 대응표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "fa9807ce94f87438f2f3be87083eece1056ef4b2b1ac6084c5a40ed3da9e1214"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/ecos_bsi_to_kicox.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "ECOS 업종코드 → KICOX 대응표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "b4a9b405b1e92c04f5958c50c23317d0e435205fa74fb9ba3d4d50b10d08d9ba"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/labor_force_survey_to_kicox.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "사업체노동력조사 산업분류 → KICOX 대응표(전부 등급 D)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "c22044c8844eb105daa5a7c8da1d7645c57b919aba5d99070828ae90d3aab150"
+    },
+    {
+      "path": "data/reference/external_data_inventory.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "외부자료 탐색·재판정 결과표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "21750cde674b986d7a2c15234773896a84872e6dfa11e1e0a05b1c0753c8cf69"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/hs6_universe_customs.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "관세청 HS부호 원본에서 만든 유효 HS6 모집단 + 류 단위 KICOX 대응",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "4bb2cfaf37d12e1ea3c943e64cba003e8518cc78a3ddd20cc518d9a74d9fc64d"
+    },
+    {
+      "path": "logs/experiments/electre_mrsort/data/processed/model/electre_input_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "ELECTRE 후보모형 입력(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "092a606b1b5689581563f9911a8e4169cf2acaec645ff7bd28c562d766fd6b5a"
+    },
+    {
+      "path": "logs/audits/independent_audit/continuous_space_certificates.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "CW-RBT 동결 입력",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "729109a558fe74089849cce001eb03f4869592aa77e6d7140e105e0638ceaadf"
+    },
+    {
+      "path": "logs/archived_outputs/candidate_models/electre_class_acceptability_index_compatible.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "선택적 ELECTRE/SMAA 경계검토 입력 — 동일 실행의 d_stage와 compatible CAI",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "f30d2ac8c49d36b542226e3fdf19c94788add3a8ea1951ec91b075b777877ef7"
+    },
+    {
+      "path": "data/processed/kepco/legal_dong_ksic_monthly_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "KEPCO 법정동×KSIC 품질·기간 검증 입력",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "761d52fe7cd1eb31a6ad13c232b1b12afc01e560d4027f636460c78091efa8ea"
+    },
+    {
+      "path": "data/processed/kepco/legal_dong_ksic_quarterly_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "KEPCO 법정동×KSIC 분기 품질 검증 입력",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "72283f782a8da8816f5e482bac7f0b1b52d6cbbde41c4968291472784f837714"
+    },
+    {
+      "path": "outputs/kepco_legal_dong_ksic/kicox_coverage.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "KEPCO 10업종별 매핑·비식별·완전성 품질표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a2c430014cd2d6a3e2c275173a5fd8351a52f53c6ef86ec80681d43d13377e01"
+    },
+    {
+      "path": "data/raw/external/changwon_jobs/changwon_jobs_20260918.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "input",
+      "rationale": "채용정보 기준 스냅샷. 업종 신호가 아닌 context QA 입력",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "f33f36a335dfaf335095ad31ab7778b09eeb63ed0770731d41be2ee8ce8c5028"
+    },
+    {
+      "path": "src/model/triage_rule.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "판정 규칙",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "02d8312ce24eb4f1bf67e4f9eb66f9d4bcf98134f2216bc809706bc2df3adc63"
+    },
+    {
+      "path": "src/model/triage_delivery.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "판정 인도·진단카드",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "d347dadac7b2a10a9515fb625ec4e2424cd279f3de4714250831533fe2969ede"
+    },
+    {
+      "path": "src/model/triage_audit.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "판정 감사",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "7208bd31a59ea398a2b0e29399b0ce406d63f0b32dfa23921c80a1a1a8df7d5e"
+    },
+    {
+      "path": "src/run_triage_rule.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "판정 실행 진입점",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "118ccc4d0f5101518d9fefb1fbde4731fb4b92f7187e3ebda8c02b1b047b9b08"
+    },
+    {
+      "path": "src/build_changwon_master.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "마스터 구축",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "b44077521168b04644646b542d7e4f62ff3248970d4d0e15a59b6f5a49f4bf72"
+    },
+    {
+      "path": "src/build_kicox_analysis_panel.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "분석패널 구축",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a8b7fd672f54a69cd1d0ef1df792d713cec72ebe32b230f83a5e8f35c05309a8"
+    },
+    {
+      "path": "src/build_ppi_industry_panel.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "PPI 패널 구축",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "31a739a5b2d9e248435a7b1f882030c3d80c29b9b6407b3b9e157c80f06dab0f"
+    },
+    {
+      "path": "src/build_validation_panels.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "보조 검증패널 구축",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "e6583c0709b378f80f491f891e6171468deea0083745818b4c6e8257402161f1"
+    },
+    {
+      "path": "src/build_context_layer.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "해석층·신뢰도층 실행 진입점",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "29cda15b11d505a2e6b2223ffcfb902dd6d5402e6a53c809e39e55117960a3fa"
+    },
+    {
+      "path": "src/context/config.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "해석층 설정(경계값)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "f5778577d76ed6ec653437ff1d4b0187fee937352de79669d13b68cd50e0593b"
+    },
+    {
+      "path": "src/context/monthly_panel.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "월별 지속성",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "78fcb225499800775287de8fcc754c1fd1c39b5271ffad9a1e0858d77aa97507"
+    },
+    {
+      "path": "src/context/ppi_adjusted.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "PPI 조정 생산",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "97a8df85e15ab1f0a4f700643eb52889927751703d1102d9630f61fa1e0488ce"
+    },
+    {
+      "path": "src/context/firm_activity.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "업체수·가동률·소규모 트랙",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9f1796899494821b5f66f0133e6446843a07543eb8b22f08ab61f57b96ab29df"
+    },
+    {
+      "path": "src/context/cross_source.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "고용 교차확인",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "6f001fe9e0dd5ff018e61f1eec0501411df6bbfe7cbb06e89639cd99d46e9167"
+    },
+    {
+      "path": "src/context/signals.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "확인신호 프로필·민감도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "8f429a46b975eef880e1d121b520affd478fb1edf325011e67ae3874ac3e4892"
+    },
+    {
+      "path": "src/context/quality.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "신뢰도 플래그",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "b35f35016858ab1acccf711003bd410cf857cf64b72d85f377828d8b5b644968"
+    },
+    {
+      "path": "src/context/questions.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "확인질문 생성",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "47315b27ac755d6a57cbca2945324b7ae46fa40263ec69258c8315ca7f608aea"
+    },
+    {
+      "path": "src/context/external_panels.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "외부 수집자료 → 보조패널",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "1db7f924ccc2c829d777667b39039a80768e5af85f376eb49533788bc970cb2e"
+    },
+    {
+      "path": "src/context/external_signals.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "외부자료 확인신호·맥락 플래그",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a2371e8276c4d43681c3729d6d8d06c5c772736d190505d80c6727b9d3325331"
+    },
+    {
+      "path": "src/data_collection/secrets.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "인증정보 로딩·마스킹",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "8989d12e941fd1880b0cd9393ba18e7e101f54bb7efe5d2700dc3fcbed6b7b68"
+    },
+    {
+      "path": "src/data_collection/http_client.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "수집용 HTTP 클라이언트",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "bf3724747252d3442b2031c4ab155bc63412d4ec4c04fc01c6e91a80c7ab4258"
+    },
+    {
+      "path": "src/data_collection/metadata.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "수집 metadata 스키마",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "c29050fca6a31f4d20f61cb469e8a0eaa6fd46cd5b7e60dba2774e6d5332d838"
+    },
+    {
+      "path": "src/data_collection/datagokr.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "공공데이터포털 파일데이터 수집",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "3e8a918164cab7ef3c6fc080cb3f3ca6c8724bcaadc16e1ff4bb5c8f47ba2cf8"
+    },
+    {
+      "path": "src/data_collection/collect_kosis_employment_insurance.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "KOSIS 고용 flow 수집기",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "54f68285bc66412aa09db48a835110542d764b31314a05f5debeb3e71fdb2128"
+    },
+    {
+      "path": "src/data_collection/collect_customs_exports.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "관세청 수출입 수집기",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "f49f4edf9de2728cfceaf050d8d875da4ce51409ab4b2c4fe11c816fd7005a58"
+    },
+    {
+      "path": "src/data_collection/collect_customs_hs_reference.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "관세청 HS부호 기준자료 수집기",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "1edf61fd7c3663ad38ba0c991a435ff61499d5a69f46d41133e3c86ce035238e"
+    },
+    {
+      "path": "scripts/build_hs6_universe.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "관세청 원본 → 유효 HS6 모집단 생성",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a4fad4ba044c337a383a9a9ecfee0c44cae3ce54aced9cc8419157d0b15df0b8"
+    },
+    {
+      "path": "scripts/resume_customs_collection.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "관세청 호출한도 해제 시 자동 이어받기",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "0534c706136c414a28a24fdec9843aaa0c8c52a600ce14d216809b5cc2b6db40"
+    },
+    {
+      "path": "scripts/register_customs_resume_task.ps1",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "이어받기 작업 스케줄러 등록(기본 미적용)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "8b20bd6cfaf0a969541cf91dadd04cea4a9cd982606c1559ec46fef8a7e35431"
+    },
+    {
+      "path": "src/data_collection/collect_ecos_bsi.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "ECOS BSI 수집기",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "bda5da1e12bf9d0adeccddddc7cfb5ce718eeb1f37b9f34b7834bf12df481a41"
+    },
+    {
+      "path": "src/data_collection/collect_kepco_power.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "한국전력 수집기(엔드포인트 미확정)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "cf257ccb0b8a9a5a1a2c69bbec486f2862eb5e2b08255bd3edd95bee77601f60"
+    },
+    {
+      "path": "src/data_collection/collect_changwon_jobs.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "창원고용복지+센터 채용정보 수집기",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "64bfbe880047ed7394a333ffafb482529620ecd4c42c93a9c3790ea37fb47331"
+    },
+    {
+      "path": "src/data_collection/collect_datagokr_files.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "포털 파일데이터 수집기",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "5c781debd600a58905422b670bc81fe9da030bd48caabdd1a5a8f44259d63388"
+    },
+    {
+      "path": "src/reproducibility/policy.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "보호정책 V2 정의 자체",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "377a74e101dddf740f47bf882e1a6d018a350449b4bf70bcb317de99c898b3e4"
+    },
+    {
+      "path": "scripts/run_hybrid_validation.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "CW-HYB 실행 스크립트",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "3261fcf2bfd8012bc97450c2da9c9b8bb8361183715cdb520deb70b956fd0082"
+    },
+    {
+      "path": "scripts/run_temporal_validation.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "CW-RBT 실행 스크립트",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "1cb51ec52711b7590cf4b819afff878c2ecf9d4a1277c9a9e9b38491f3488212"
+    },
+    {
+      "path": "scripts/build_kepco_legal_dong_ksic_panel.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "KEPCO 법정동×KSIC 패널·QA 구축",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "759087d8ea08e4b95b07d0cb71b282b2e080f2971dd9e59f9bc21a8606896b70"
+    },
+    {
+      "path": "src/build_final_delivery.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "최종 역할표·경계검토·evidence·trace 구축",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9c17fe2d50335c44da13f9316333a9f10bf3ec130e35f788a2f5b05c461d04a5"
+    },
+    {
+      "path": "logs/experiments/electre_mrsort/src/model/electre.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "ELECTRE 후보모형(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "984c372aefd86b23dff351f8f198c8b9c52a527f3e32571a4c4dd5343bced1a8"
+    },
+    {
+      "path": "logs/experiments/electre_mrsort/src/model/derive.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "ELECTRE 후보모형(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "56a766cd1a9822b3e74371f3453dfcea9639b0058a8621ee94e8161f3cdbfc61"
+    },
+    {
+      "path": "logs/experiments/electre_mrsort/src/model/audit_tools.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "ELECTRE 후보모형(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "607c08975d9f14ac4254223877c4cd60afe3dd590d99a1c129b8d34327d20640"
+    },
+    {
+      "path": "logs/experiments/electre_mrsort/src/model/robust.py",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "ELECTRE 후보모형(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "75fe7db0d89bc26afe0ccd136a264c73694f38eacbe8a00c3a51900b4ea62f74"
+    },
+    {
+      "path": "logs/legacy_configs/electre_tri_b_params.yaml",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "후보모형 설정(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "1e5ad0fbcd45c718d441ab8496f952634e046cbec1195aa490e108d1f1add04b"
+    },
+    {
+      "path": "logs/legacy_configs/model_revalidation_prereg.yaml",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "code",
+      "rationale": "사전등록 설정(역사기록)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "220ef8bc93b0764c77f47cf765c338e3d686aa967e3c11b8c5f3724316a7997d"
+    },
+    {
+      "path": "outputs/decision_support_final/decision_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최종 판정 180행",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a328c9677d851b7b066e00eadc7ecf7fdd59f9297149dd2ea5952b4770fa3c1a"
+    },
+    {
+      "path": "outputs/decision_support_final/decision_latest.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최신 분기 판정",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "2aa74d772b931109f520bad2674c739609cac5f8d5bc48de72aa344ad01a6e46"
+    },
+    {
+      "path": "outputs/decision_support_final/stage_distribution_by_quarter.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "단계 분포",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "fb98d0baff0fd58d7801cb450e731ddcedce965a1fc7e857ec7e306596346d72"
+    },
+    {
+      "path": "outputs/decision_support_final/stage_distribution_by_industry.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "단계 분포",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "7aa319513558001770b2999cb1a108efc922ec2187718cba3e300a6b1fad9348"
+    },
+    {
+      "path": "outputs/decision_support_final/diagnostic_cards_latest.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "진단카드",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "325481eb9f499d5c2f94dcde1feb8faf81a40386074518a0675d99f4730912a1"
+    },
+    {
+      "path": "outputs/decision_support_final/diagnostic_cards_latest.json",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "진단카드",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "99188d47c95e180432d72de7371378ec74e0e1a8448ab916889c0ec5a53492e4"
+    },
+    {
+      "path": "outputs/decision_support_final/diagnostic_cards_latest.md",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "진단카드",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9005f8760ab413e23340fdde7c3239e792df6edd9c0eb6b1f7e046ad861f0222"
+    },
+    {
+      "path": "outputs/decision_support_final/rule_provenance.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "규칙 출처",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "857ab9617317c3aec589e8d3287291c68efe2b775d319cbe4ba8e1eca85adcf7"
+    },
+    {
+      "path": "outputs/decision_support_final/institution_handoff_map.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "인계 지도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "4129276cc7b64ef02405c1b4a5039c2d42d665c377fb2625d1c521011f3102ee"
+    },
+    {
+      "path": "outputs/decision_support_final/sensitivity_own_rules.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "민감도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "5231db9294f5faf6793e45d1256380706ef1e39502c68062e1366931d8e359b7"
+    },
+    {
+      "path": "outputs/decision_support_final/sensitivity_latest.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "민감도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a43f71dbea6f38341373d163668f7a0858df8c480e1cc8410f00a81a9d3034b1"
+    },
+    {
+      "path": "outputs/decision_support_final/sensitivity_by_industry.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "민감도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "c4e8cae78730478b1743ec9845f2c4bcbff2ad869a6701c038c2e7329560cb71"
+    },
+    {
+      "path": "outputs/decision_support_final/sensitivity_by_quarter.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "민감도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "eee04f2c114259dc7ac4fbf44447dced396c0aca9c0ed54056af30277a9f01ea"
+    },
+    {
+      "path": "outputs/decision_support_final/sensitivity_changed_rows.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "민감도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "a6f9488254a090d1cb90cd1439b9d13f02ac791b1a8e8acf8eaa704d1ff0edc7"
+    },
+    {
+      "path": "outputs/decision_support_final/baseline_to_final.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "기준선 대비 변화",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "81672396c6c1de444520a2541f62e6bc93ca5751eba60c18279f44a9a878502d"
+    },
+    {
+      "path": "outputs/decision_support_final/comparison_vs_legacy.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "과거 비교",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "745e5c9aace703f366b0fa1d69e4d7c1a3a55f75e3d30783fd0ff0294dead09c"
+    },
+    {
+      "path": "outputs/decision_support_final/history_boundary_changed_rows.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "경계 변화",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "bb7cde4a121aa96691ac825e2c9f42541c5d592944b032a0842b36230a005486"
+    },
+    {
+      "path": "outputs/decision_support_final/independent_scalar_reproduction.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "독립 검산",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "84788bb13b2ddf72322c1eef452e09c06b583c5b3a9557e26de9bae128324e3a"
+    },
+    {
+      "path": "outputs/decision_support_final/missingness_summary.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "결측 요약",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "5884781d51e919eefa4ed2d4fef0e9c3ba603c2b1238b9dee10478370c3b7281"
+    },
+    {
+      "path": "outputs/decision_support_final/missingness_comparison.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "결측 비교",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "012c3fced5afe770cf9022ad56c9c9f0d352628b39094d4d3542704bf0e07c61"
+    },
+    {
+      "path": "outputs/decision_support_final/q3_decisive_rows.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "Q3 결정행",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "83a8bec1bfe4dc90bb105694f78edcc8dc10ad0019fa2b81c4d1dc0640d78031"
+    },
+    {
+      "path": "outputs/decision_support_final/q3_definition_comparison.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "Q3 정의 비교",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "c86f6d3d14b3eb31203319f48be997c40cfa0cd76648de21fb93c3e452276538"
+    },
+    {
+      "path": "outputs/decision_support_final/audit_v3/verification.json",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "판정 분포 검증결과",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "200786dfc7a02c6d3cfe8a477f5bc3c3ded411e01eb400c9bd080ec82224e317"
+    },
+    {
+      "path": "outputs/decision_support_final/audit_v3/raw_rebuild_verification.json",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "원자료 재구축 검증결과",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "d4b9e99b909e049832786dc1942bbc797049fb070abce11143353c1a81989a8c"
+    },
+    {
+      "path": "outputs/rolling_backtest/predictions_long.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "310c8598076cc1424afa095033c42beb075f74eaf28dd5d000445bc999b5dd21"
+    },
+    {
+      "path": "outputs/rolling_backtest/outcomes_long.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "598f9d277ca67585010de7b3b0d9dfde8df6d49c421d11da691d73b2c81b0409"
+    },
+    {
+      "path": "outputs/rolling_backtest/metrics_long.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "c0e854376aeac3fdc5a1f26fa49057d45a7bc70abdcb8789d65f5395ad1b1988"
+    },
+    {
+      "path": "outputs/rolling_backtest/evaluation_long.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "6213faba87e3f31f727f95dc6efef52bc95c5315d1b68829499cbb87cb491839"
+    },
+    {
+      "path": "outputs/rolling_backtest/sample_membership.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9eb2244499919239ee2cd615c30850d79c8370764fb1eaa660ad01f50284d335"
+    },
+    {
+      "path": "outputs/rolling_backtest/parameter_robustness_long.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "be00fac3a1839cce79b528ee3cd8baa8d4849a0898ccbb729242e47c00c7b734"
+    },
+    {
+      "path": "outputs/rolling_backtest/operational_coverage.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "18cb5d8f18b6638b9932bc442a1575dddee95780786e3717e5c9572c1fc3234c"
+    },
+    {
+      "path": "outputs/rolling_backtest/REPORT.md",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-RBT 스크립트 생성 결과보고",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "ecf635db0a350b2f243b91815eccd8371d25ce8dba0cf577d38c0b093b002fd7"
+    },
+    {
+      "path": "outputs/hybrid_validation/hybrid_predictions.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-HYB 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "813b6bb0a403b34fbc9485e6f0193454a37da4cce594be0c361e9aea2e2eb617"
+    },
+    {
+      "path": "outputs/hybrid_validation/hybrid_overlap.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-HYB 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "035ef64f22f3d1aa6e121dd39931c90ce091761a50f7997317d9ad8dd6312f8c"
+    },
+    {
+      "path": "outputs/hybrid_validation/hybrid_metrics.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-HYB 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "b84e22daee968b935483502cfc3c6ce6ae93714c62a55f1e8bd48f19edf8805e"
+    },
+    {
+      "path": "outputs/hybrid_validation/hybrid_case_comparison.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-HYB 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "0970d5a810cd0c9d38f5df4e09bdb9f578a6b63f6e9642c1c62924aa673dfb2a"
+    },
+    {
+      "path": "outputs/hybrid_validation/REPORT.md",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "CW-HYB 스크립트 생성 결과보고",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "646b561513ebb3b9d50d1d02a664620e1a2a716322beb181c8ea42388304ada5"
+    },
+    {
+      "path": "data/processed/context/industry_context_signals.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "해석층 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "b520802629bd6a4841f751e3aa9e06dfeee3a793dbb7e53fb02859ad63b06d26"
+    },
+    {
+      "path": "data/processed/context/employment_crosscheck_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "해석층 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9676dc180a0cbb987d9769bd5f7b79528da2eb8378451c26229502485da0d86a"
+    },
+    {
+      "path": "data/processed/context/monthly_persistence_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "해석층 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "ec5cece6367776a212e1f068dacee971619c4e0a41e7bfc0e9e3195a15cb4be5"
+    },
+    {
+      "path": "data/processed/context/ppi_adjusted_production_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "해석층 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "167c51a862b379d5442a51e20f7e8acc73f7f054e6f28f75c31b5902ee0b3e35"
+    },
+    {
+      "path": "data/processed/context/data_quality_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "신뢰도층 결정적 산출",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "93c77327ddebd32534d4871bedf0731e254b8916ad2a86cf4c02517575abacc3"
+    },
+    {
+      "path": "data/processed/context/employment_flow_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "고용 flow 보조패널",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "45e055f27f02c3265db29907b266b9dfa59b17f7c360bfffdbe879d6902f40cc"
+    },
+    {
+      "path": "data/processed/context/trade_context_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "수출입 맥락 보조패널",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "ab7c0ff4ef2e9261249f18aff2da0fca1a4fcd0e20fcf4e2e434fc531a336000"
+    },
+    {
+      "path": "data/processed/context/business_sentiment_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "경기심리 보조패널",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "70ff389f5e464264b12d9394fd47d8305e62a9a37771f6ce410e295d37b16975"
+    },
+    {
+      "path": "data/processed/context/electricity_activity_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "창원시 제조업 전력사용 활동 보조패널",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "f20365186bd8bc27d9da6e91d8ae011bbb0afe54a37bc2741028126844ae0b21"
+    },
+    {
+      "path": "data/processed/context/trade_coverage_by_industry.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "업종별 수출입 수집 커버리지 — '대응 품목 없음'과 '수집 미완'을 구분",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "9b6ffa8decdf0da4d11a097d536d4e6012d5d92dd41869fddf0353ef10633ed5"
+    },
+    {
+      "path": "outputs/robustness_extension/context_signal_summary.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "해석층 요약",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "3f8f97cee931d3b4f5e770a0ca7600b187ff9660c1ab82576cfe2cfd58014b9d"
+    },
+    {
+      "path": "outputs/robustness_extension/cross_source_summary.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "교차확인 요약",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "807b7cea13c9e42194b18d56529748d4d5b1799bc1bacc684dc3398a0fd1f338"
+    },
+    {
+      "path": "outputs/robustness_extension/nominal_real_disagreement.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "명목·조정 불일치",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "cdeb1a921475c1311e81e877f98757b134d4f49337b6d16a09cf26035afb6c45"
+    },
+    {
+      "path": "outputs/robustness_extension/signal_threshold_sensitivity.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "경계 민감도",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "16a47319a3033ea1146de4f8a5166320ee37c5e018a8805bbb18ffa39693be0f"
+    },
+    {
+      "path": "outputs/robustness_extension/signal_threshold_sensitivity_changed_rows.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "경계 민감도 상세",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "1463e47e7ad7b73747251455d93be38a94fbaf3c1d66ed74aaa98237038ea1d3"
+    },
+    {
+      "path": "outputs/robustness_extension/small_industry_track.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "소규모 트랙",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "dbaa1f396e339791c9ed6aea1872fbff292ba1fb2244176f4fbe77a8ef4d64aa"
+    },
+    {
+      "path": "outputs/robustness_extension/diagnostic_card_preview.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "진단카드 preview",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "7e20e8414a8ad4eb0c522f3f2cd50100c7b63e609038a87bc5844f2280f4e61d"
+    },
+    {
+      "path": "outputs/robustness_extension/source_vintage_check.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "포털 공표본 대조",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "26d488053d0b2bfb7d45aa0bd79095440506f955af7bde9596ef00d36d14b268"
+    },
+    {
+      "path": "outputs/reproducibility/run_metadata_static.json",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "run_metadata.json 에서 뽑아낸 결정적 부분(파생 산출물)",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "d0b9a395c3229e0b07c2cd5597301d006a16bb1c42161575de1f5388ea4bbd21"
+    },
+    {
+      "path": "outputs/final_model/data_role_table.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최종 데이터 역할표",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "3f5b57d6e44c7d68797704a8120d90c73d5980f5a724d36ca04bd5707e0ce7a5"
+    },
+    {
+      "path": "outputs/final_model/core_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최종 core panel",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "3b10a04a1ab5f41e5c370b3b9132572b4d972376c97cb8d6ed24a68b684ce222"
+    },
+    {
+      "path": "outputs/final_model/triage_latest.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최신 Triage",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "4021bd114abb1032cb8d85bc389d46297101149d70dd44aefd8cff8731cb61fd"
+    },
+    {
+      "path": "outputs/final_model/boundary_electre_smaa_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "추가확인 35행의 선택적 ELECTRE/SMAA 경계검토",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "e80d04c86c999c1cf9c31aa39f6fd4a987e47d1e093e507771706b704d0c7f17"
+    },
+    {
+      "path": "outputs/final_model/boundary_review_summary.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "선택적 ELECTRE/SMAA 담당자 검토 큐 요약",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "fcd72975d263f356513d2da614d65b6edc93dfb0ad454a6284cbd4cbe6ee4ce7"
+    },
+    {
+      "path": "outputs/final_model/external_evidence_panel.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최신 업종별 외부 evidence",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "56da97bb25e30d69a69c6e5509d59734e7c4ebe040d3521cedb2ededc8671e78"
+    },
+    {
+      "path": "outputs/final_model/explanation_trace.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "업종별 판정·evidence·인계 trace",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "6e82b898e831386e03b9a2f78ac7d3c6fb6f7812b3c15508b9724233edf98e05"
+    },
+    {
+      "path": "outputs/final_model/recruiting_snapshot_summary.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "채용 스냅샷 지역별 QA 요약",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "6405561e244b1513007a6e2330a7b2695e7b7017483ac977caff6303bd3baeb5"
+    },
+    {
+      "path": "outputs/final_model/recruiting_snapshot_metadata.json",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "채용 스냅샷 해시·중복 QA",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "fce8a09a2f7401a9a49d1b520289d3ef4176514f0aba799901fd75c3250bff25"
+    },
+    {
+      "path": "outputs/final_model/boundary_review_protocol.json",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "선택적 ELECTRE/SMAA 비변경·비튜닝 실행규약",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "113242042654e3111d1d4719d6e373ea4f23d8e6224fa5c56aa956874900cd60"
+    },
+    {
+      "path": "outputs/final_model/cleanup_actions.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최종 정리 작업 기록",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "ba279aa245a48f7a82738ca5e7125fc84b61b78faf74ea65353f07de72bc360b"
+    },
+    {
+      "path": "outputs/final_model/deliverables_index.csv",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최종 13개 산출물 색인",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "25761619b525fce996d819c05f023dfc9f4c31e635cef9a52ffcdc853a3f9933"
+    },
+    {
+      "path": "outputs/final_model/qa_summary.json",
+      "category": "DETERMINISTIC_PROTECTED",
+      "role": "output",
+      "rationale": "최종 전달 QA 결과",
+      "hash_protected": true,
+      "exists": true,
+      "sha256": "bb453dcd45216cbca66f451e5112d46b38cf98f178e840d1b7b693185ad9dab6"
+    }
+  ],
+  "runtime_metadata_files": [
+    {
+      "path": "outputs/decision_support_final/run_metadata.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "run_at_utc·git_head·라이브러리 버전이 매 실행 갱신됨",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "rule_version",
+        "window",
+        "rows",
+        "rules",
+        "inputs",
+        "code_sha256",
+        "randomness",
+        "missing_policy",
+        "numeric_comparison_atol_percentage_units"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "d8694590145eb4030b42fcce743aa3a649051b8cecca8d632b33cdc3c1d07314"
+    },
+    {
+      "path": "outputs/robustness_extension/run_metadata.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "해석층 실행 metadata. 동일 구조",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "layer",
+        "window",
+        "rows",
+        "triage_rule_version",
+        "frozen_columns",
+        "inputs",
+        "code_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "0fec16cb67165cc03c8eb8fa3cae8f34c7c6b42cfc98de5d1e305e7b0f825a31"
+    },
+    {
+      "path": "outputs/rolling_backtest/RUN_METADATA.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "completed_at_utc·platform·runtime_executable 포함(역사기록, 수정 금지)",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "output_hashes",
+        "report_sha256",
+        "prediction_lock_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "5e6d273110e776943772663e6a07df024ea6e667186db597edeea8bfa99be903"
+    },
+    {
+      "path": "outputs/hybrid_validation/RUN_METADATA.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "completed_at_utc·python 버전 포함(역사기록, 수정 금지)",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "output_hashes",
+        "report_sha256",
+        "execution_lock_sha256",
+        "prediction_lock_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "0008a443ad0d57690f1d4acd063914c730ef34d48cdb0d8c6e10b2d82d83d564"
+    },
+    {
+      "path": "outputs/reproducibility/run_metadata_runtime.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "분리 저장한 runtime 영역(파생 산출물)",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "e8a733dadbfcb1d62c2a9d3749bb10439ad29717aec254b59aedb21eeb5d74a9"
+    },
+    {
+      "path": "outputs/decision_support_final/audit_v3/full_tests.xml",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "pytest junit — timestamp·hostname·소요시간 포함. 테스트가 늘면 건수도 바뀐다",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "f9e3dfb3efcb32ce443b78dda485182e227db49ccf498da5a87e7828e987976e"
+    },
+    {
+      "path": "outputs/decision_support_final/audit_v3/triage_tests.xml",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "pytest junit — 위와 동일",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "4cd0ebf7c278e830e5d4704066d86ae616ca1c362cb10b1e18c56842b949c18f"
+    },
+    {
+      "path": "outputs/decision_support_final/audit_v3/delivery_verification.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "테스트 건수 집계. 테스트를 추가하면 바뀌며 모형 결과와 무관하다",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "411441dd9b483c1041131d35911c39522173265d603b0f28e66f595970434d49"
+    },
+    {
+      "path": "outputs/decision_support_final/audit_v3/notebook_execution.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "executed_at 및 로컬 파이썬 경로 포함",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "f7f50d1ea022b604f4bfe4e3746667dbf6501396b81e77ebc0c2bd4674edb54a"
+    },
+    {
+      "path": "outputs/decision_support_final/decision_support_final.html",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "노트북 렌더 산출물. nbconvert·matplotlib 버전에 따라 바이트가 달라질 수 있다. 내용의 수치는 B 범주 CSV 로 검증한다",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "8e5ac3d028b1f77e86227a300ca4e00f524a8e2db6468a675d989ba6e11ccb2c"
+    },
+    {
+      "path": "notebooks/11_decision_support_final.ipynb",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "실행 결과가 셀에 저장되는 노트북. 재실행하면 바이트가 달라진다",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "88ef8b2415ef0e8a819455700763a3f3e4b05a5e01051277ea07d139c3e32118"
+    },
+    {
+      "path": "data/raw/external/_collection_log_datagokr.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "외부 수집 실행 로그(run_at 포함)",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "6977263fb09309b0fa681c0c5408725f8c0ce37463f655be345ab41d69f4b78d"
+    },
+    {
+      "path": "data/raw/external/employment_insurance/_metadata/changwon_labor_force_flow_halfyear.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "KOSIS 수집 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256",
+        "raw_response_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "e76b2e31ca43dbbc24665186cc97a714748f09b5a945275c51e4fc61828ebd12"
+    },
+    {
+      "path": "data/raw/external/customs_trade/_metadata/changwon_hs6_trade_monthly.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "관세청 수집 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256",
+        "raw_response_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "8624763d52685ebe3f457b0ad580ce0810eee8fe3f88a6bf517819139eeda749"
+    },
+    {
+      "path": "data/raw/external/ecos/_metadata/bsi_gyeongnam_and_industry_monthly.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "ECOS 수집 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256",
+        "raw_response_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "d515ca87a1ba666e0f232c05a391816a55a470b898922bce9edbd5120441b310"
+    },
+    {
+      "path": "data/raw/external/kepco/_metadata/collection_status.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "한국전력 PARTIAL 사유 기록 — checked_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "931a1153b077f297b48f55ff89f6c9db4b02bf3b3b05f4917bfa9ec01ca5238d"
+    },
+    {
+      "path": "data/raw/external/customs_reference/_metadata/customs_hs_code_20260101.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "관세청 HS부호 원본 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "b3578739f9b86dbd6bf7c6c453f5d83844588e9f9b123b757259ef954de10afe"
+    },
+    {
+      "path": "data/raw/external/customs_reference/_metadata/customs_hsk_nature_classification_20260101.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "관세청 성질분류 원본 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "3356b7d76ad665c1d4f123a42140abc2c8fb9952f32f4aa3696a777d72f72e04"
+    },
+    {
+      "path": "data/raw/external/kepco/_metadata/kepco_open_api_manual.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "한국전력 공식 매뉴얼 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "81ead1f02bac9ee74ba2c8c40e579bb450c87c61b4c09a9c3832a8216b2e9617"
+    },
+    {
+      "path": "data/raw/external/kepco/_metadata/changwon_industry_type_power_monthly.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "한국전력 산업분류별 전력사용량 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "ea16db31b41a57c95c7e02fb8f08fac04eb0074dcf38743f6139093468b8f428"
+    },
+    {
+      "path": "data/raw/external/kepco/_metadata/changwon_business_type_power_monthly.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "한국전력 업종별 전력사용량 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "f7f008b48a0862d42df973d353a13c001b0203a6c75d8c65679809b036f7f128"
+    },
+    {
+      "path": "data/raw/external/kepco/_metadata/changwon_custnum_change_monthly.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "한국전력 고객 증감 metadata — retrieved_at 포함. 단위 미확정으로 패널 제외",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "1057533bf33f6d84b43634ca8a05a80f9a94ae38c3a7e7da77522dde18101da0"
+    },
+    {
+      "path": "data/raw/external/customs_trade/_metadata/coverage_manifest.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "관세청 수집 커버리지 — run_at 포함. 결손 집계는 결정적 필드로 검사",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "hs6_complete",
+        "hs6_partial",
+        "missing_combinations",
+        "windows"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "b97934885e30a6562e01fdf3f77058a8a5a53d4f033f4686399b0bc4f0860595"
+    },
+    {
+      "path": "data/raw/external/customs_trade/_metadata/pagination_checks.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "호출별 페이지 검증 누적기록 — run_at 포함. 누적 요약은 결정적 필드",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "cumulative"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "4810f6524bbca8ba7ef77987386a1d708c2c3af360230a01baaa46e88e0a4dd2"
+    },
+    {
+      "path": "data/raw/external/customs_trade/_metadata/resume_log.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "이어받기 시도 기록 — 시각 포함",
+      "hash_protected": false,
+      "deterministic_fields": [],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "76c042a6dd0c2747bc5b04574927f8b1d0cb83d6f2216f846175ff05d63d6aa5"
+    },
+    {
+      "path": "data/raw/external/customs_reference/_metadata/customs_query_codes_v1.3.json",
+      "category": "RUNTIME_METADATA",
+      "role": "runtime",
+      "rationale": "관세청 조회코드 참고문서 metadata — retrieved_at 포함",
+      "hash_protected": false,
+      "deterministic_fields": [
+        "file_hash_sha256"
+      ],
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "5276af4efe58f102290ca0843cc04cd7936a38d1d90c9b6282981985595e84ee"
+    }
+  ],
+  "mutable_documentation_files": [
+    {
+      "path": "README.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "프로젝트 설명 문서. 개발 중 계속 고쳐진다",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "b400415e50fc4bd2452f2c18701a80326d43e7d56acc6c36dcac267d8e8efdd4"
+    },
+    {
+      "path": "PROJECT_STRUCTURE.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "구조 설명 문서",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "98eff5f7134b620e3ba24f0cccd9a79b5403d610dc6c25ddbc5eda535cef1fe9"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "기여 안내",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "49577e4ae1018508d90ceecab0e8ef689ba411a3f4183c3030c38fc61a404a1c"
+    },
+    {
+      "path": "docs/expression_audit.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "표현 감사 문서",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "39214166c573e2839fe0081261ac67400daa5270efefcdc5b27686b5a4aa2c3f"
+    },
+    {
+      "path": "docs/robustness_extension_report.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "강건성 보완 보고서",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "ec865fae5534920e3409622b1f787c255b49f7513300588f1e86c4633485ad23"
+    },
+    {
+      "path": "docs/reproducibility/PROTECTION_POLICY_V2.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "보호정책 V2 문서",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "407a71bf0519d58e442145dc872bff44a32bcf6c12d6cb0f65c9c2c93ab79dae"
+    },
+    {
+      "path": "docs/external_data_integration_report.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "외부데이터 통합 보고서",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "ab89722d3d41f420e423ab5deb4a2cca5e6661ec490648eadd3677514be3df95"
+    },
+    {
+      "path": "data/raw/external/README.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "외부 수집 안내",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "09ef62826b61329a0c785931552a972c12bdfa7a08693110f4fcb211bd6d6d7c"
+    },
+    {
+      "path": "outputs/decision_support_final/REPORT.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "최종 보고서(서술). 수치 주장은 B 범주 CSV 로 검증한다",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "cd32b5bbc31929b780fd68be5278ae8c04f1f9c18415943c16399395c76cb6f2"
+    },
+    {
+      "path": "outputs/decision_support_final/MODEL_ROLE_CLARIFICATION.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "모형 역할 설명",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "4ae0787b9aa97b8865e903e6b37d105910d4ec8248048c93639a84a8b7469b6c"
+    },
+    {
+      "path": "outputs/robustness_extension/REPORT.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "해석층 결과보고(서술). 수치 주장은 B 범주 CSV 로 검증한다",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "f5fe6258a7875ce24188c4fad4342e855843af9cfa6e4fa0e164d9f450d4ef76"
+    },
+    {
+      "path": "outputs/reproducibility/V2_QA_REPORT.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "V2 QA 결과 기록",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "efead313cbfdcf8daea40ad7a0e939f56deb3599eb30c329e9af5926f24b23b2"
+    },
+    {
+      "path": "data/reference/external_event_audit/README.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "외부사건 감사 안내",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "092235d79dc1bcd1d787ce95b1d71fa4dfb3abb6409bbb19896df263f0d83123"
+    },
+    {
+      "path": "data/reference/external_reference_candidate_audit.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "외부 준거 후보 심사",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "a5f497e54c3aa2e7f1fb9af88a25abdab843ac16a8dc2f646e7a359217b52fbd"
+    },
+    {
+      "path": "data/reference/industry_crosswalk/README.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "업종 대응표 안내",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "07d28590af8d859a23dd328658de44c0d58b27fac46cea866932e62f9b57f743"
+    },
+    {
+      "path": "logs/README.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "역사자료 안내",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "3f43c1f4b26b59e669151c6648235a5f825640ee6895bd1cb10357f97c1f202c"
+    },
+    {
+      "path": "docs/final_methodology.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "최종 방법론·구조도",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "42489fcf01d922636ee38d5145132c32cacc6653341b896fb34439162964d318"
+    },
+    {
+      "path": "outputs/final_model/RUNBOOK.md",
+      "category": "MUTABLE_DOCUMENTATION",
+      "role": "documentation",
+      "rationale": "최종 실행방법",
+      "hash_protected": false,
+      "exists": true,
+      "sha256": null,
+      "sha256_informational": "71544114bf8b4570a6b8301415326f2a92e98fc98d00a4839d2fad260feb0a0d"
+    }
+  ],
+  "run_metadata_split": {
+    "source": "outputs/decision_support_final/run_metadata.json",
+    "source_file_sha256": "d8694590145eb4030b42fcce743aa3a649051b8cecca8d632b33cdc3c1d07314",
+    "static_file": "outputs/reproducibility/run_metadata_static.json",
+    "runtime_file": "outputs/reproducibility/run_metadata_runtime.json",
+    "static_keys": [
+      "code_sha256",
+      "inputs",
+      "missing_policy",
+      "numeric_comparison_atol_percentage_units",
+      "purpose",
+      "randomness",
+      "rows",
+      "rule_version",
+      "rules",
+      "scope",
+      "window",
+      "working_tree_note"
+    ],
+    "runtime_keys": [
+      "git_head",
+      "numpy",
+      "pandas",
+      "python",
+      "run_at_utc"
+    ],
+    "canonical_static_sha256": "7818de037782d3f57fa53f6913cdb6858055370272e7a6642b568b7faf22d6d5",
+    "canonical_note": "sha256(json.dumps(static, sort_keys=True, ensure_ascii=False, separators=(',',':')).encode('utf-8')). 파일 전체 바이트 해시가 아니다."
+  },
+  "v1_lock_state_at_v2_creation": {
+    "v1_lock": "outputs/hybrid_validation/EXECUTION_LOCK.json",
+    "v1_protected_file_count": 125,
+    "matched": 123,
+    "mismatched": 2,
+    "missing": [],
+    "mismatched_files": [
+      {
+        "path": "outputs/decision_support_final/run_metadata.json",
+        "locked_sha256": "c847972de505171cb7106aa20afd76aa69e1ae2f07c4cdc6653703da96e15115",
+        "current_sha256": "d8694590145eb4030b42fcce743aa3a649051b8cecca8d632b33cdc3c1d07314",
+        "v2_category": "RUNTIME_METADATA"
+      },
+      {
+        "path": "README.md",
+        "locked_sha256": "1f5c63afa231fde7d163618a4599e2035abe513a666c875dce0176ee430a9eb3",
+        "current_sha256": "b400415e50fc4bd2452f2c18701a80326d43e7d56acc6c36dcac267d8e8efdd4",
+        "v2_category": "MUTABLE_DOCUMENTATION"
+      }
+    ],
+    "status": "V1 정책 기준으로 여전히 실패 상태다. 이 기록을 성공으로 바꾸지 않는다. 경위는 outputs/robustness_extension/PROTECTED_HASH_AMENDMENT.md 참조."
+  },
+  "missing_files": [],
+  "notes": [
+    "A(IMMUTABLE_PROTOCOL)·B(DETERMINISTIC_PROTECTED) 만 바이트 해시 보호 대상이다.",
+    "C(RUNTIME_METADATA)·D(MUTABLE_DOCUMENTATION) 의 해시 불일치는 모형 결과 불일치로 처리하지 않는다. sha256_informational 은 참고값이다.",
+    "C 파일 중 일부는 내부에 결정적 필드를 갖는다. 그 필드만 deterministic_fields 로 지정해 따로 검사한다.",
+    "기존 V1 잠금은 그대로 두었고, 당시 불일치 2건도 지우지 않았다.",
+    "이 매니페스트는 성능·판정 결과를 바꾸지 않는다. 보호 범위만 정의한다."
+  ]
+}

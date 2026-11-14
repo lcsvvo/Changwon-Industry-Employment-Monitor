@@ -1,0 +1,13 @@
+﻿kicox_industry,grade,ppi_level,component_id,ppi_item,aux_usable,confirmed,basis
+기계,A,lv3,,기계및장비,True,False,대분류 직접 대응
+운송장비,A,lv3,,운송장비,True,False,대분류 직접 대응(자동차+기타운송장비)
+비금속,A,lv3,,비금속광물제품,True,False,시멘트·유리·요업 등 매칭 양호
+음식료,A,lv3,,음식료품,True,False,대분류 직접 대응
+목재종이,A,lv3,,목재및종이제품,True,False,대분류에 목재+종이가 이미 통합 존재 — 후보표의 '2개 합산 필요'는 불성립
+섬유의복,A,lv4,,섬유및의복,True,False,lv3 '섬유및가죽제품'은 가죽 포함으로 범위 과대 → lv4로 정밀화
+철강,B,lv4,,철강1차제품,True,False,lv3 '1차금속제품'은 비철금속 포함으로 범위 과대(2026Q2 +14.4% vs +5.9%) → lv4로 정밀화
+석유화학,C,lv3,c1,화학제품,True,False,상위 통합 항목 없음. 가중치 근거가 없어 밴드로만 제시
+석유화학,C,lv3,c2,석탄및석유제품,True,False,상위 통합 항목 없음. 가중치 근거가 없어 밴드로만 제시
+전기전자,C,lv3,c1,전기장비,True,False,상위 통합 항목 없음. 가중치 근거가 없어 밴드로만 제시
+전기전자,C,lv3,c2,컴퓨터전자및광학기기,True,False,상위 통합 항목 없음. 가중치 근거가 없어 밴드로만 제시
+기타,D,,,,False,False,PPI '기타제조업제품'과 정의 이질 — 보조분석 제외(고용비중 0.15%)

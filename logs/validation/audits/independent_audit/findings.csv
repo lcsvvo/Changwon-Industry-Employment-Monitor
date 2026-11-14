@@ -1,0 +1,15 @@
+﻿지적,판정,구분,심각도,근거,파일
+RC/VRC 독립성,CONFIRMED,검증설계,중대,prereg AM3·AM4·AM6의 선행 결과 인지 기록. 다만 작성자의 인지 상태와 실제 등록 시각은 파일만으로 독립 검증 불가.,config/model_revalidation_prereg.yaml; baseline/snapshot
+VRC4 단일 규범 의존,CONFIRMED,정책선호,중대,양립 표본 1745→447. 지속 2·3·4분기 모두 899/6000 통과로 동일.,parameter_spaces.csv; summary.json
+합격선의 운영 근거,PARTIALLY_CONFIRMED,검증설계,중대,합격선·개정 이력은 명시. 실제 담당자 비용·점검 용량에 따른 도출 근거 없음.,config/model_revalidation_prereg.yaml
+I3/Jaccard 정합,CONFIRMED,구현/평가대상,치명적,I3 고정 6조합 일부는 양립공간 밖. C3c는 무제약 1000표본. 같은 최종 구간 검증으로 취급할 수 없음.,i3_zero_noise.csv; src/model/revalidation_phase5.py
+필연배정 명칭,CONFIRMED,추론,치명적,표본 공통 배정을 필연/확정으로 표기. 실제 feasible witness가 표본 누락 배정 5건을 확인.,continuous_space_certificates.csv; feasible_witnesses.json
+MRSort 추가 효용 부재,PARTIALLY_CONFIRMED,방법선택,중대,count2와 실제 차이는 2/160행. 다만 중요성을 판정할 현장 정답은 없으므로 무용함까지 입증되지 않음.,alternative_changed_cases.csv
+g1·g2·g4 중복,PARTIALLY_CONFIRMED,지표설계,중대,공통 원계열이나 각각 배정을 바꾸는 행 존재. 규모/강도/지속 차원이 완전히 동일하지 않음.,criterion_decision_effects.csv
+교란의 비현실성,PARTIALLY_CONFIRMED,구현/자료생성,중대,g 자체 독립교란은 아님. 원 수준과 lag의 독립 복원추출로 같은 분기 두 값이 불일치. 원파일 오류 정정이 pool에 혼입.,src/model/perturb.py; vintage_by_quarter.csv
+기존 예측 검증의 과장,CONFIRMED,해석,중대,관측된 Spearman 차이로 원리적 열위·모든 파라미터 불가능을 선언. 해당 전체 명제는 입증되지 않음.,config/model_revalidation_prereg.yaml invalidated_gates
+180행을 모두 독립 취급,NOT_CONFIRMED,검증설계,—,업종 군집 bootstrap·업종 leave-out이 이미 존재. 다만 기존 교란에는 시간/업종 결합구조가 없음.,src/model/resample.py; revision_by_period.csv; revision_leave_industry_out.csv
+등급과 점검순서 불일치,PARTIALLY_CONFIRMED,운영,중대,후속 질문·UNDETERMINED 라우팅은 기존에 존재. 실제 담당자·용량·동률 처리 승인과 현장 효용 검증은 없음.,src/model/stage_actions.py; action_latest.csv
+설명비용/공모전 감점,CANNOT_VERIFY,외적평가,—,실제 심사위원 이해도나 감점은 저장소에서 검증할 수 없음. 연구용 부록과 운영 출력 분리는 가능.,REPORT.md 최종 구조
+고용 게이트 효과,NOT_CONFIRMED,인과 설명,중대,6000×180 배정에서 gate 제거 변화 0. 고정 관찰의 원인을 게이트로 단독 귀속할 수 없음.,summary.json gate_changes
+g2·g3 단위 오류,PARTIALLY_CONFIRMED,문서,경미,산식·config 표시 단위는 %로 맞음. prereg 일부 rationale과 전달 문구에 %p 혼용. 등록 원문은 보존하고 해석 정정.,src/model/config.py; config/model_revalidation_prereg.yaml
