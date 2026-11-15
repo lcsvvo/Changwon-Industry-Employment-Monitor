@@ -6,7 +6,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) ![pandas](https://img.shields.io/badge/pandas-150458?style=flat&logo=pandas&logoColor=white) ![NumPy](https://img.shields.io/badge/NumPy-013243?style=flat&logo=numpy&logoColor=white) ![SciPy](https://img.shields.io/badge/SciPy-8CAAE6?style=flat&logo=scipy&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white) ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=flat) ![Gemini](https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white)
 
-[앱 열기](https://changwon-industry-employment-monitor-cyfkaj7ycpbpdxofbxcjkt.streamlit.app/)
+[앱 열기](https://changwon-industry-employment-monitor-public.streamlit.app/)
 
 <p align="center">
   <img src="assets/streamlit-industry-diagnosis-2026Q2-final.png" alt="업종별 점검 대기열과 진단카드, 행정 AI 비서" width="1000">

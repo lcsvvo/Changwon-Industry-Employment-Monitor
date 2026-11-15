@@ -21,7 +21,7 @@ jobs:
 
       - name: Visit app and wake if sleeping
         env:
-          APP_URL: https://changwon-industry-employment-monitor-cyfkaj7ycpbpdxofbxcjkt.streamlit.app/?page=%EC%97%85%EC%A2%85+%EC%A7%84%EB%8B%A8
+          APP_URL: https://changwon-industry-employment-monitor-public.streamlit.app/?page=%EC%97%85%EC%A2%85+%EC%A7%84%EB%8B%A8
         run: |
           python - <<'PY'
           import os
