@@ -1406,8 +1406,8 @@ def center_card(ind: str, q: str, rec: dict, latest_quarter: str, jobs: dict, fi
 
 @st.cache_data(ttl=300, max_entries=64, show_spinner=False)
 def diagnosis_base(snapshot_key: tuple[str, str], quarter: str, industry: str,
-                   work24_enabled: bool, _service: DecisionSupportService) -> dict:
-    """세션 입력 없는 진단 payload. 키: 분석본(분기·버전)·분기·업종.
+                   *, work24_enabled: bool, _service: DecisionSupportService) -> dict:
+    """세션 입력 없는 진단 payload. 키: 분석본(분기·버전)·분기·업종·Work24 사용 여부.
 
     앱 계층은 원천 파일을 직접 보지 않으므로(Snapshot·backend만 사용) Work24 layer 갱신은 TTL(5분) 안에
     반영된다. 정책 색인 재구축 시 page_policy가 비운다. 현장 입력은 with_session_context()로 매번 얹는다.
@@ -1424,7 +1424,8 @@ def page_diagnosis():
     rec = snap.get(ind, q)
     # 세션과 무관한 backend payload(분석본·업종·분기·Work24 layer 판본 기준)는 캐시하고,
     # 현장 입력(세션)은 매 실행 새로 얹는다 — 체크 직후 진단서·Copilot이 이전 값을 쓰지 않게.
-    base = (diagnosis_base((snap.quarter, snap.version), q, ind, LOCAL_WORK24_ENABLED, decision_support)
+    base = (diagnosis_base((snap.quarter, snap.version), q, ind,
+                           work24_enabled=LOCAL_WORK24_ENABLED, _service=decision_support)
             if rec else None)
     jobs = base["recruitment_snapshot"] if base else None
     field_questions_all = base["field_checks"]["questions"] if base else []
@@ -2730,7 +2731,8 @@ def page_policy():
     if rec is None:
         st.warning("이 분석 버전에 해당 업종·분기 자료가 없습니다.")
         return
-    base = diagnosis_base((snap.quarter, snap.version), q, ind, decision_support)
+    base = diagnosis_base((snap.quarter, snap.version), q, ind,
+                          work24_enabled=LOCAL_WORK24_ENABLED, _service=decision_support)
     field_questions_all = base["field_checks"]["questions"]
     sync_field_store(ind, q, field_questions_all)
     field_ctx = field_context_for(ind, q, field_questions_all)
